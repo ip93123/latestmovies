@@ -204,13 +204,6 @@ section{padding:5rem 3rem}
 .modal-rent-pill{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .8rem;border-radius:6px;font-size:.75rem;font-weight:600;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--muted)}
 .no-stream{font-size:.82rem;color:var(--muted);font-style:italic}
 
-/* LOADER */
-#loader{position:fixed;inset:0;background:var(--dark);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem}
-.loader-logo{font-family:'Bebas Neue',sans-serif;font-size:4rem;letter-spacing:8px;background:linear-gradient(135deg,var(--gold),#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.loader-bar{width:200px;height:2px;background:var(--dark3);border-radius:1px;overflow:hidden}
-.loader-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--red));border-radius:1px;width:0%}
-.loader-text{font-size:.75rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted)}
-
 /* SEARCH */
 #searchOverlay{position:fixed;inset:0;background:rgba(7,9,15,.97);z-index:500;display:flex;flex-direction:column;align-items:center;padding-top:8rem;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(20px)}
 #searchOverlay.open{opacity:1;pointer-events:all}
@@ -234,12 +227,6 @@ footer strong{color:var(--gold);font-family:'Bebas Neue',sans-serif;font-size:1.
   .featured-banner{height:220px}.featured-title{font-size:2rem}
 }
 </style>
-
-<div id="loader">
-  <div class="loader-logo">Latest CineVault</div>
-  <div class="loader-bar"><div class="loader-fill" id="loaderFill"></div></div>
-  <div class="loader-text" id="loaderText">Fetching streaming data...</div>
-</div>
 
 <div id="searchOverlay">
   <button class="search-close" id="searchClose">✕</button>
@@ -274,7 +261,7 @@ footer strong{color:var(--gold);font-family:'Bebas Neue',sans-serif;font-size:1.
 </div>
 
 <nav id="mainNav">
-  <div class="nav-logo">CineVault</div>
+  <div class="nav-logo">Latest CineVault</div>
   <ul class="nav-links">
     <li><a href="#trending">Trending</a></li>
     <li><a href="#movies">Movies</a></li>
@@ -384,7 +371,7 @@ footer strong{color:var(--gold);font-family:'Bebas Neue',sans-serif;font-size:1.
 </section>
 
 <footer>
-  <strong>CineVault</strong>
+  <strong>Latest CineVault</strong>
   <p style="margin-top:.5rem">Powered by TMDB & OMDb · Streaming data by JustWatch via TMDB · Updates daily</p>
 </footer>
 
@@ -947,16 +934,10 @@ gsap.utils.toArray('section').forEach(sec=>{
 
 // INIT
 async function init(){
-  const fill=document.getElementById('loaderFill');
-  gsap.to(fill,{width:'50%',duration:1.5,ease:'power2.out'});
-
   const [nowPlaying]=await Promise.all([tmdb('/movie/now_playing?language=en-US&page=1')]);
-  document.getElementById('loaderText').textContent='Loading streaming platforms…';
-  gsap.to(fill,{width:'75%',duration:.8});
 
   const heroPool=(nowPlaying.results||[]).filter(m=>m.backdrop_path).slice(0,6);
   await loadHero(heroPool);
-  gsap.to(fill,{width:'85%',duration:.5});
 
   const [,,,topRated]=await Promise.all([
     loadTrending(),
@@ -964,7 +945,6 @@ async function init(){
     loadTV('on_the_air'),
     tmdb('/movie/top_rated?language=en-US&page=1')
   ]);
-  gsap.to(fill,{width:'95%',duration:.5});
 
   await loadTopRated();
   await loadFeatured((topRated.results||[]).filter(m=>m.backdrop_path));
@@ -975,9 +955,6 @@ async function init(){
     buildPlatformGrid(allCards);
   },1500);
 
-  gsap.to(fill,{width:'100%',duration:.3});
-  await new Promise(r=>setTimeout(r,300));
-  gsap.to('#loader',{opacity:0,duration:.7,onComplete:()=>document.getElementById('loader').style.display='none'});
   gsap.fromTo('#mainNav',{y:-60,opacity:0},{y:0,opacity:1,duration:.7,delay:.2,ease:'power3.out'});
 }
 
