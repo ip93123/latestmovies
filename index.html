@@ -935,11 +935,12 @@
     background: var(--card);
     border: 1px solid var(--border);
     cursor: pointer;
-    transition: transform .3s, border-color .3s
+    transform-style: preserve-3d;
+    transition: border-color .3s;
+    will-change: transform
   }
 
   .trending-card:hover {
-    transform: translateY(-6px);
     border-color: rgba(232, 201, 122, 0.3)
   }
 
