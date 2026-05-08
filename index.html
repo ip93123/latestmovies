@@ -296,6 +296,7 @@ footer strong{color:var(--gold);font-family:'Bebas Neue',sans-serif;font-size:1.
       <span class="hero-streaming-label">Watch on</span>
     </div>
     <div class="hero-btns">
+      <button class="btn-primary" id="heroPlay" style="display:none;background:var(--green);color:#fff;border:none">▶ Play Free</button>
       <button class="btn-primary" id="heroWatch">▶ Watch Trailer</button>
       <button class="btn-secondary" id="heroMore">More Info</button>
     </div>
@@ -641,6 +642,20 @@ async function setHero(idx, initial=false){
   }
 
   document.getElementById('heroMore').onclick=()=>openModal(m.id,type);
+  document.getElementById('heroWatch').onclick=async()=>{
+    const prevText = document.getElementById('heroWatch').innerHTML;
+    document.getElementById('heroWatch').textContent = 'Loading...';
+    try{
+      const d=await tmdb(`/${type}/${m.id}/videos`);
+      const t=(d.results||[]).find(v=>v.type==='Trailer'&&v.site==='YouTube');
+      if(t) window.open(`https://www.youtube.com/watch?v=${t.key}`,'_blank');
+      else alert('Trailer not available for this title.');
+    }catch{
+      alert('Failed to load trailer');
+    }finally{
+      document.getElementById('heroWatch').innerHTML = prevText;
+    }
+  };
 
   // GSAP hero animations
   const tl=gsap.timeline();
@@ -652,9 +667,15 @@ async function setHero(idx, initial=false){
     .fromTo('.hero-btns',{opacity:0,y:12},{opacity:1,y:0,duration:.4,ease:'power3.out'},'-=.1');
 
   // OMDb
+  const heroPlayBtn = document.getElementById('heroPlay');
+  if(heroPlayBtn) heroPlayBtn.style.display = 'none';
   try{
     const imdbId=await getImdbId(m.id,type);
     if(imdbId){
+      if(heroPlayBtn) {
+        heroPlayBtn.style.display = 'inline-flex';
+        heroPlayBtn.onclick = () => window.open(`https://www.playimdb.com/title/${imdbId}`, '_blank');
+      }
       const od=await getOMDb(imdbId);
       if(od&&od.Response==='True'){
         const rt=rtVal(od.Ratings);
@@ -810,6 +831,13 @@ async function openModal(id, type='movie'){
     try{
       const imdbId=details.imdb_id||await getImdbId(id,type);
       if(imdbId){
+        const ms = document.getElementById('modalStreams');
+        const playBtnHtml = `<a class="modal-stream-pill" style="background:var(--green);color:#fff;border:none;margin-right:0.5rem" href="https://www.playimdb.com/title/${imdbId}" target="_blank">▶ Play Free</a>`;
+        if(ms.innerHTML.includes('no-stream')) {
+          ms.innerHTML = playBtnHtml;
+        } else {
+          ms.innerHTML = playBtnHtml + ms.innerHTML;
+        }
         const od=await getOMDb(imdbId);
         if(od&&od.Response==='True'){
           const rt=rtVal(od.Ratings);
