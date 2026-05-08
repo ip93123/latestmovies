@@ -138,6 +138,28 @@
     z-index: 0
   }
 
+  .hero-video-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100vw;
+    height: 56.25vw;
+    min-height: 100vh;
+    min-width: 177.77vh;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .hero-video-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
   .hero-bg img {
     width: 100%;
     height: 100%;
@@ -1667,6 +1689,7 @@
 
 <section id="hero" style="padding:0;height:100vh">
   <div class="hero-bg" id="heroBg">
+    <div class="hero-video-container" id="heroVideoContainer" style="opacity:0; transition:opacity 1.5s"></div>
     <img id="heroImg" src="" alt="">
     <div class="hero-gradient"></div>
   </div>
@@ -1789,10 +1812,7 @@
 <script>
   gsap.registerPlugin(ScrollTrigger);
 
-  const TMDB_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MzJkN2JmN2M0YWQxMjg3NmIwOWRiMjIxNTVjMDY4ZCIsIm5iZiI6MTc3NzkxNzU4Mi4xNzEsInN1YiI6IjY5ZjhkZThlMzE4OGJhMDYwODgxYWM4NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.1d-ue3pyAdeUr_DFUYxvyYbUaozyPrUPtNZgq0EQx3g';
-  const OMDB_KEY = '2a9140d5';
   const IMG = 'https://image.tmdb.org/t/p/';
-  const HDR = { Authorization: `Bearer ${TMDB_TOKEN}`, 'Content-Type': 'application/json' };
   const COUNTRY = 'US';
 
   // Provider config
@@ -1814,7 +1834,7 @@
   let currentMovies = [], currentTV = [], activeMovieFilter = 'all', activeTVFilter = 'all';
 
   async function tmdb(path) {
-    const r = await fetch(`https://api.themoviedb.org/3${path}`, { headers: HDR });
+    const r = await fetch(`/api/tmdb?target=${encodeURIComponent(path)}`);
     return r.json();
   }
   async function getWatch(id, type = 'movie') {
@@ -1831,7 +1851,7 @@
   async function getOMDb(imdbId) {
     if (!imdbId) return null;
     if (omdbCache[imdbId]) return omdbCache[imdbId];
-    try { const r = await fetch(`https://www.omdbapi.com/?i=${imdbId}&apikey=${OMDB_KEY}`); const d = await r.json(); omdbCache[imdbId] = d; return d; } catch { return null }
+    try { const r = await fetch(`/api/omdb?id=${imdbId}`); const d = await r.json(); omdbCache[imdbId] = d; return d; } catch { return null }
   }
   async function getImdbId(id, type = 'movie') {
     try { const d = await tmdb(`/${type}/${id}/external_ids`); return d.imdb_id || null; } catch { return null }
@@ -2008,9 +2028,9 @@
     heroMovies = movies.slice(0, 6);
     const dotsEl = document.getElementById('heroDots');
     dotsEl.innerHTML = heroMovies.map((_, i) => `<div class="hero-dot ${i === 0 ? 'active' : ''}" data-i="${i}"></div>`).join('');
-    dotsEl.querySelectorAll('.hero-dot').forEach(d => d.addEventListener('click', () => { clearInterval(heroTimer); setHero(+d.dataset.i); heroTimer = setInterval(() => setHero((heroIdx + 1) % heroMovies.length), 8000); }));
+    dotsEl.querySelectorAll('.hero-dot').forEach(d => d.addEventListener('click', () => { clearInterval(heroTimer); setHero(+d.dataset.i); heroTimer = setInterval(() => setHero((heroIdx + 1) % heroMovies.length), 15000); }));
     setHero(0, true);
-    heroTimer = setInterval(() => setHero((heroIdx + 1) % heroMovies.length), 8000);
+    heroTimer = setInterval(() => setHero((heroIdx + 1) % heroMovies.length), 15000);
   }
 
   async function setHero(idx, initial = false) {
@@ -2018,9 +2038,29 @@
     document.querySelectorAll('.hero-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
     const m = heroMovies[idx];
     const type = m.title ? 'movie' : 'tv';
+    
     const heroImg = document.getElementById('heroImg');
+    const heroVideo = document.getElementById('heroVideoContainer');
+    
     heroImg.classList.remove('loaded');
-    if (m.backdrop_path) { heroImg.src = `${IMG}original${m.backdrop_path}`; heroImg.onload = () => heroImg.classList.add('loaded'); }
+    heroVideo.style.opacity = '0';
+    heroVideo.innerHTML = '';
+
+    if (m.backdrop_path) { 
+      heroImg.src = `${IMG}original${m.backdrop_path}`; 
+      heroImg.onload = () => heroImg.classList.add('loaded'); 
+    }
+
+    // Try to load video background
+    tmdb(`/${type}/${m.id}/videos`).then(vidData => {
+      const trailer = (vidData.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube');
+      if (trailer) {
+        setTimeout(() => {
+          heroVideo.innerHTML = `<iframe src="https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&loop=1&playlist=${trailer.key}&modestbranding=1&playsinline=1" allow="autoplay; encrypted-media"></iframe>`;
+          setTimeout(() => { heroVideo.style.opacity = '0.65'; }, 1500);
+        }, 500);
+      }
+    }).catch(() => {});
 
     const title = (m.title || m.name || '').toUpperCase();
     const words = title.split(' ');
