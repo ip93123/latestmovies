@@ -6,7 +6,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'SERVER CONFIG ERROR: OMDB_KEY environment variable is missing on Vercel!' });
   }
 
-  const url = `https://www.omdbapi.com/?i=${id}&apikey=${process.env.OMDB_KEY}`;
+  const url = `https://www.omdbapi.com/?i=${id}&apikey=${process.env.OMDB_KEY.trim()}`;
 
   try {
     const fetchRes = await fetch(url);
