@@ -605,6 +605,12 @@
     scroll-behavior: smooth;
   }
 
+  .cards-grid.expanded {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    justify-content: center;
+  }
+
   .cards-grid::-webkit-scrollbar {
     display: none;
   }
@@ -910,6 +916,12 @@
     padding-bottom: 1rem;
     scrollbar-width: none;
     scroll-behavior: smooth;
+  }
+
+  .trending-row.expanded {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    justify-content: center;
   }
 
   .trending-row::-webkit-scrollbar {
@@ -1688,7 +1700,7 @@
 <section id="trending" style="background:var(--dark2)">
   <div class="section-header">
     <h2 class="section-title">🔥 <span>Trending</span> This Week</h2>
-    <span class="see-all">View all →</span>
+    <span class="see-all" onclick="toggleExpand('trendingRow', this)">View all →</span>
   </div>
   <div class="scroll-wrapper">
     <button class="scroll-btn scroll-left" onclick="scrollRow('trendingRow', -1)">❮</button>
@@ -1700,7 +1712,7 @@
 <section id="movies">
   <div class="section-header">
     <h2 class="section-title">🎬 Latest <span>Movies</span></h2>
-    <span class="see-all">View all →</span>
+    <span class="see-all" onclick="toggleExpand('moviesGrid', this)">View all →</span>
   </div>
   <div class="tabs" id="movieTabs">
     <div class="tab active" data-type="now_playing">Now Playing</div>
@@ -1718,7 +1730,7 @@
 <section id="tvshows" style="background:var(--dark2)">
   <div class="section-header">
     <h2 class="section-title">📺 Latest <span>TV Shows</span></h2>
-    <span class="see-all">View all →</span>
+    <span class="see-all" onclick="toggleExpand('tvGrid', this)">View all →</span>
   </div>
   <div class="tabs" id="tvTabs">
     <div class="tab active" data-type="on_the_air">On The Air</div>
@@ -1737,7 +1749,6 @@
 <section id="wheretowatch">
   <div class="section-header">
     <h2 class="section-title">📡 Where to <span>Watch</span></h2>
-    <span class="see-all">All platforms →</span>
   </div>
   <div class="platform-grid" id="platformGrid"></div>
 </section>
@@ -1758,7 +1769,7 @@
 <section id="toprated">
   <div class="section-header">
     <h2 class="section-title">⭐ <span>Top Rated</span> All Time</h2>
-    <span class="see-all">View all →</span>
+    <span class="see-all" onclick="toggleExpand('topRatedGrid', this)">View all →</span>
   </div>
   <div class="scroll-wrapper">
     <button class="scroll-btn scroll-left" onclick="scrollRow('topRatedGrid', -1)">❮</button>
@@ -1985,7 +1996,10 @@
       <div class="platform-count">${count} title${count !== 1 ? 's' : ''} available</div>
     </div>`;
     }).join('');
-    gsap.fromTo(grid.children, { opacity: 0, y: 30, scale: .95 }, { opacity: 1, y: 0, scale: 1, duration: .5, stagger: .07, ease: 'power3.out', scrollTrigger: { trigger: grid, start: 'top 85%' } });
+    gsap.fromTo(grid.children, 
+      { opacity: 0, y: 40, rotationX: 20, scale: .9, transformPerspective: 1000, transformOrigin: 'top center' }, 
+      { opacity: 1, y: 0, rotationX: 0, scale: 1, duration: .6, stagger: .07, ease: 'back.out(1.2)', scrollTrigger: { trigger: grid, start: 'top 85%' } }
+    );
   }
 
   // HERO
@@ -2091,7 +2105,10 @@
     const all = [...(md.results || []).slice(0, 10).map(x => ({ ...x, _type: 'movie' })), ...(tvd.results || []).slice(0, 10).map(x => ({ ...x, _type: 'tv' }))].slice(0, 20);
     const watchDatas = await Promise.all(all.map(item => getWatch(item.id, item._type)));
     row.innerHTML = all.map((item, i) => buildTrendingCard(item, i + 1, item._type, watchDatas[i])).join('');
-    gsap.fromTo(row.children, { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: .5, stagger: .06, ease: 'power3.out' });
+    gsap.fromTo(row.children, 
+      { opacity: 0, x: 50, rotationY: -15, scale: .9, transformPerspective: 1000 }, 
+      { opacity: 1, x: 0, rotationY: 0, scale: 1, duration: .6, stagger: .07, ease: 'back.out(1.2)', scrollTrigger: { trigger: row, start: 'top 85%' } }
+    );
     addCardListeners(row, '.trending-card');
     return all;
   }
@@ -2153,7 +2170,23 @@
       fs.innerHTML = wd.flatrate.slice(0, 4).map(p => { const info = getProviderInfo(p.provider_id); return `<span class="stream-pill stream-${info.cls}"><span class="stream-dot"></span>${info.name}</span>`; }).join('');
     }
     const banner = document.getElementById('featuredBanner');
-    gsap.fromTo(banner, { opacity: 0, scale: .97 }, { opacity: 1, scale: 1, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: banner, start: 'top 85%' } });
+    gsap.fromTo(banner, 
+      { opacity: 0, rotationX: 15, y: 60, scale: 0.95, transformPerspective: 1200 }, 
+      { opacity: 1, rotationX: 0, y: 0, scale: 1, duration: 1.2, ease: 'power4.out', scrollTrigger: { trigger: banner, start: 'top 85%' } }
+    );
+    
+    // 3D hover on banner
+    banner.addEventListener('mousemove', e => {
+      const rect = banner.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      gsap.to(banner, { rotationY: x * 6, rotationX: -y * 6, transformPerspective: 1200, duration: 0.4, ease: 'power2.out' });
+      gsap.to(banner.querySelector('.featured-content'), { x: x * 20, y: y * 20, duration: 0.4, ease: 'power2.out' });
+    });
+    banner.addEventListener('mouseleave', () => {
+      gsap.to(banner, { rotationY: 0, rotationX: 0, duration: 0.8, ease: 'elastic.out(1,0.7)' });
+      gsap.to(banner.querySelector('.featured-content'), { x: 0, y: 0, duration: 0.8, ease: 'elastic.out(1,0.7)' });
+    });
   }
 
   async function loadOMDbRating(tmdbId, type = 'movie') {
@@ -2258,7 +2291,10 @@
   });
 
   function animateGrid(grid) {
-    gsap.fromTo(grid.children, { opacity: 0, y: 40, scale: .95 }, { opacity: 1, y: 0, scale: 1, duration: .55, stagger: .07, ease: 'power3.out', scrollTrigger: { trigger: grid, start: 'top 88%' } });
+    gsap.fromTo(grid.children, 
+      { opacity: 0, y: 50, rotationX: 25, scale: .9, transformPerspective: 1000, transformOrigin: 'top center' }, 
+      { opacity: 1, y: 0, rotationX: 0, scale: 1, duration: .65, stagger: .08, ease: 'back.out(1.2)', scrollTrigger: { trigger: grid, start: 'top 85%' } }
+    );
   }
 
   function addCardListeners(container, selector) {
@@ -2364,6 +2400,24 @@
     el.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
   }
 
+  // EXPAND GRID FUNCTION
+  function toggleExpand(containerId, btn) {
+    const container = document.getElementById(containerId);
+    const wrapper = container.parentElement;
+    
+    if (container.classList.contains('expanded')) {
+      container.classList.remove('expanded');
+      btn.textContent = 'View all →';
+      wrapper.querySelectorAll('.scroll-btn').forEach(b => b.style.display = 'flex');
+      // Scroll back to start
+      container.scrollTo({ left: 0, behavior: 'smooth' });
+    } else {
+      container.classList.add('expanded');
+      btn.textContent = 'Collapse ↑';
+      wrapper.querySelectorAll('.scroll-btn').forEach(b => b.style.display = 'none');
+    }
+  }
+
   // INIT
   async function init() {
     const [nowPlaying] = await Promise.all([tmdb('/movie/now_playing?language=en-US&page=1')]);
@@ -2388,6 +2442,18 @@
     }, 1500);
 
     gsap.fromTo('#mainNav', { y: -60, opacity: 0 }, { y: 0, opacity: 1, duration: .7, delay: .2, ease: 'power3.out' });
+
+    // Hero Background Parallax
+    gsap.to('#heroBg img', {
+      yPercent: 30,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '#hero',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true
+      }
+    });
   }
 
   init().catch(console.error);
