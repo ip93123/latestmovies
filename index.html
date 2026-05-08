@@ -994,15 +994,23 @@
     transform: scale(1.1)
   }
 
-  .trending-num {
-    position: absolute;
-    bottom: -8px;
-    left: 8px;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 4rem;
-    color: var(--dark2);
-    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.08);
-    line-height: 1
+  .trending-title-row {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    margin-bottom: .25rem;
+  }
+
+  .trending-rank-box {
+    background: rgba(232, 201, 122, 0.15);
+    color: var(--gold);
+    border: 1px solid rgba(232, 201, 122, 0.3);
+    font-size: .65rem;
+    font-weight: 800;
+    padding: .15rem .35rem;
+    border-radius: 4px;
+    line-height: 1;
+    flex-shrink: 0;
   }
 
   .trending-stream-row {
@@ -1030,7 +1038,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-bottom: .2rem
   }
 
   .trending-year {
@@ -1973,11 +1980,13 @@
     return `<div class="trending-card" data-id="${item.id}" data-type="${type}">
     <div class="trending-poster">
       ${poster ? `<img src="${poster}" alt="${title}" loading="lazy">` : ''}
-      <div class="trending-num">${rank}</div>
     </div>
     ${streamTags ? `<div class="trending-stream-row">${streamTags}</div>` : '<div style="height:8px"></div>'}
     <div class="trending-info">
-      <div class="trending-title">${title}</div>
+      <div class="trending-title-row">
+        <div class="trending-rank-box">#${rank}</div>
+        <div class="trending-title">${title}</div>
+      </div>
       <div class="trending-year">${year}</div>
     </div>
   </div>`;
