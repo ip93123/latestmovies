@@ -1960,8 +1960,8 @@
       <div class="card-sub">${year || '—'} · ${vote}/10</div>
       <div class="card-stream-pills">${streamPills}</div>
       <div class="card-ratings">
-        <div class="mini-rating mini-imdb" id="imdb-${item.id}">⭐ ${vote}</div>
-        <div class="mini-rating mini-rt" id="rt-${item.id}">🍅 —</div>
+        <div class="mini-rating mini-imdb imdb-${item.id}">⭐ ${vote}</div>
+        <div class="mini-rating mini-rt rt-${item.id}">🍅 —</div>
       </div>
     </div>
   </div>`;
@@ -2263,9 +2263,15 @@
       const od = await getOMDb(imdbId);
       if (!od || od.Response !== 'True') return;
       const rt = rtVal(od.Ratings);
-      const rtEl = document.getElementById(`rt-${tmdbId}`);
-      if (rtEl) { rtEl.textContent = rt ? `🍅 ${rt}` : '🍅 —'; rtEl.style.color = rt ? rtColor(rt) : 'var(--muted)'; }
-      if (od.imdbRating && od.imdbRating !== 'N/A') { const el = document.getElementById(`imdb-${tmdbId}`); if (el) el.textContent = `⭐ ${od.imdbRating}`; }
+      document.querySelectorAll(`.rt-${tmdbId}`).forEach(el => {
+        el.textContent = rt ? `🍅 ${rt}` : '🍅 —';
+        el.style.color = rt ? rtColor(rt) : 'var(--muted)';
+      });
+      if (od.imdbRating && od.imdbRating !== 'N/A') { 
+        document.querySelectorAll(`.imdb-${tmdbId}`).forEach(el => {
+          el.textContent = `⭐ ${od.imdbRating}`;
+        });
+      }
     } catch { }
   }
 
