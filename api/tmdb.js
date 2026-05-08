@@ -1,6 +1,21 @@
 export default async function handler(req, res) {
   const target = req.query.target;
-  if (!target) return res.status(400).json({ error: 'Missing target' });
+  if (!target || typeof target !== 'string') {
+    return res.status(400).json({ error: 'Missing or invalid target' });
+  }
+
+  // Security: Prevent path traversal
+  if (target.includes('..')) {
+    return res.status(403).json({ error: 'Forbidden path traversal' });
+  }
+
+  // Security: Restrict access to read-only endpoints (prevent account manipulation)
+  const allowedPaths = ['/movie', '/tv', '/search', '/trending', '/discover'];
+  const isAllowed = allowedPaths.some(p => target.startsWith(p));
+  
+  if (!isAllowed) {
+    return res.status(403).json({ error: 'Endpoint not permitted' });
+  }
 
   const url = `https://api.themoviedb.org/3${target}`;
 
