@@ -2,6 +2,10 @@ export default async function handler(req, res) {
   const id = req.query.id;
   if (!id) return res.status(400).json({ error: 'Missing id' });
 
+  if (!process.env.OMDB_KEY) {
+    return res.status(500).json({ error: 'SERVER CONFIG ERROR: OMDB_KEY environment variable is missing on Vercel!' });
+  }
+
   const url = `https://www.omdbapi.com/?i=${id}&apikey=${process.env.OMDB_KEY}`;
 
   try {
