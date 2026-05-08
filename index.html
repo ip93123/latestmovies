@@ -2112,7 +2112,7 @@
     const tl = gsap.timeline();
     tl.fromTo('.hero-badge', { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: .4, ease: 'power3.out' })
       .fromTo([document.getElementById('heroLine1'), document.getElementById('heroLine2')], { y: '110%' }, { y: '0%', duration: .65, ease: 'power4.out', stagger: .1 }, '-=.1')
-      .fromTo('#heroMeta', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: .4, ease: 'power3.out' }, '-=.2')
+      .fromTo('.hero-meta', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: .4, ease: 'power3.out' }, '-=.2')
       .fromTo('#heroPlot', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: .4, ease: 'power3.out' }, '-=.15')
       .fromTo('#heroStreaming', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: .4, ease: 'power3.out' }, '-=.15')
       .fromTo('.hero-btns', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: .4, ease: 'power3.out' }, '-=.1');
@@ -2406,14 +2406,25 @@
   }
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSearch(); });
   let searchTimer2;
+  let searchRequestId = 0;
   document.getElementById('searchInput').addEventListener('input', e => {
     clearTimeout(searchTimer2);
     const q = e.target.value.trim();
     if (q.length < 2) { document.getElementById('searchResults').innerHTML = ''; return; }
     searchTimer2 = setTimeout(async () => {
+      const currentReq = ++searchRequestId;
       const data = await tmdb(`/search/multi?query=${encodeURIComponent(q)}&language=en-US&page=1`);
+      if (currentReq !== searchRequestId) return; // Prevent old search results from overwriting new ones
+      
       const results = (data.results || []).filter(r => r.media_type !== 'person').slice(0, 8);
       const watchDatas = await Promise.all(results.map(r => getWatch(r.id, r.media_type)));
+      if (currentReq !== searchRequestId) return; 
+
+      if (results.length === 0) {
+        document.getElementById('searchResults').innerHTML = '<div style="color:var(--muted);text-align:center;grid-column:1/-1;padding:2rem">No results found</div>';
+        return;
+      }
+      
       document.getElementById('searchResults').innerHTML = results.map((r, i) => buildCard(r, null, r.media_type, watchDatas[i])).join('');
       gsap.fromTo('#searchResults .movie-card', { opacity: 0, y: 20 }, { opacity: 1, y: 0, stagger: .05, duration: .3, ease: 'power3.out' });
       addCardListeners(document.getElementById('searchResults'), '.movie-card');
