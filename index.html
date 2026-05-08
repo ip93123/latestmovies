@@ -597,10 +597,52 @@
   }
 
   .cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1.5rem
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
   }
+
+  .cards-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cards-grid .movie-card {
+    flex: 0 0 200px;
+  }
+
+  /* SCROLL BUTTONS */
+  .scroll-wrapper {
+    position: relative;
+  }
+  .scroll-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(7, 9, 15, 0.8);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s;
+    backdrop-filter: blur(8px);
+  }
+  .scroll-btn:hover {
+    background: var(--gold);
+    color: #07090F;
+    border-color: var(--gold);
+  }
+  .scroll-left { left: -22px; }
+  .scroll-right { right: -22px; }
 
   /* CARD */
   .movie-card {
@@ -866,7 +908,8 @@
     gap: 1.2rem;
     overflow-x: auto;
     padding-bottom: 1rem;
-    scrollbar-width: none
+    scrollbar-width: none;
+    scroll-behavior: smooth;
   }
 
   .trending-row::-webkit-scrollbar {
@@ -1463,8 +1506,10 @@
     }
 
     .cards-grid {
-      grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
       gap: 1rem
+    }
+    .cards-grid .movie-card {
+      flex: 0 0 135px;
     }
 
     .platform-grid {
@@ -1537,8 +1582,10 @@
     }
 
     .cards-grid {
-      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
       gap: .8rem
+    }
+    .cards-grid .movie-card {
+      flex: 0 0 110px;
     }
 
     .platform-grid {
@@ -1643,7 +1690,11 @@
     <h2 class="section-title">🔥 <span>Trending</span> This Week</h2>
     <span class="see-all">View all →</span>
   </div>
-  <div class="trending-row" id="trendingRow"></div>
+  <div class="scroll-wrapper">
+    <button class="scroll-btn scroll-left" onclick="scrollRow('trendingRow', -1)">❮</button>
+    <div class="trending-row" id="trendingRow"></div>
+    <button class="scroll-btn scroll-right" onclick="scrollRow('trendingRow', 1)">❯</button>
+  </div>
 </section>
 
 <section id="movies">
@@ -1657,7 +1708,11 @@
     <div class="tab" data-type="upcoming">Upcoming</div>
   </div>
   <div class="stream-filter-bar" id="movieFilterBar"></div>
-  <div class="cards-grid" id="moviesGrid"></div>
+  <div class="scroll-wrapper">
+    <button class="scroll-btn scroll-left" onclick="scrollRow('moviesGrid', -1)">❮</button>
+    <div class="cards-grid" id="moviesGrid"></div>
+    <button class="scroll-btn scroll-right" onclick="scrollRow('moviesGrid', 1)">❯</button>
+  </div>
 </section>
 
 <section id="tvshows" style="background:var(--dark2)">
@@ -1671,7 +1726,11 @@
     <div class="tab" data-type="top_rated">Top Rated</div>
   </div>
   <div class="stream-filter-bar" id="tvFilterBar"></div>
-  <div class="cards-grid" id="tvGrid"></div>
+  <div class="scroll-wrapper">
+    <button class="scroll-btn scroll-left" onclick="scrollRow('tvGrid', -1)">❮</button>
+    <div class="cards-grid" id="tvGrid"></div>
+    <button class="scroll-btn scroll-right" onclick="scrollRow('tvGrid', 1)">❯</button>
+  </div>
 </section>
 
 <!-- WHERE TO WATCH -->
@@ -1701,7 +1760,11 @@
     <h2 class="section-title">⭐ <span>Top Rated</span> All Time</h2>
     <span class="see-all">View all →</span>
   </div>
-  <div class="cards-grid" id="topRatedGrid"></div>
+  <div class="scroll-wrapper">
+    <button class="scroll-btn scroll-left" onclick="scrollRow('topRatedGrid', -1)">❮</button>
+    <div class="cards-grid" id="topRatedGrid"></div>
+    <button class="scroll-btn scroll-right" onclick="scrollRow('topRatedGrid', 1)">❯</button>
+  </div>
 </section>
 
 <footer>
@@ -2023,9 +2086,9 @@
   // TRENDING
   async function loadTrending() {
     const row = document.getElementById('trendingRow');
-    row.innerHTML = Array.from({ length: 10 }, () => `<div class="trending-card" style="flex:0 0 160px"><div style="aspect-ratio:2/3;background:var(--dark3)" class="sk"></div><div style="padding:.75rem"><div style="height:12px;margin-bottom:6px" class="sk"></div></div></div>`).join('');
+    row.innerHTML = Array.from({ length: 15 }, () => `<div class="trending-card" style="flex:0 0 160px"><div style="aspect-ratio:2/3;background:var(--dark3)" class="sk"></div><div style="padding:.75rem"><div style="height:12px;margin-bottom:6px" class="sk"></div></div></div>`).join('');
     const [md, tvd] = await Promise.all([tmdb('/trending/movie/week?language=en-US'), tmdb('/trending/tv/week?language=en-US')]);
-    const all = [...(md.results || []).slice(0, 5).map(x => ({ ...x, _type: 'movie' })), ...(tvd.results || []).slice(0, 5).map(x => ({ ...x, _type: 'tv' }))].slice(0, 10);
+    const all = [...(md.results || []).slice(0, 10).map(x => ({ ...x, _type: 'movie' })), ...(tvd.results || []).slice(0, 10).map(x => ({ ...x, _type: 'tv' }))].slice(0, 20);
     const watchDatas = await Promise.all(all.map(item => getWatch(item.id, item._type)));
     row.innerHTML = all.map((item, i) => buildTrendingCard(item, i + 1, item._type, watchDatas[i])).join('');
     gsap.fromTo(row.children, { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: .5, stagger: .06, ease: 'power3.out' });
@@ -2035,9 +2098,9 @@
 
   async function loadMovies(type = 'now_playing') {
     const grid = document.getElementById('moviesGrid');
-    grid.innerHTML = Array.from({ length: 8 }, () => `<div class="movie-card"><div class="card-poster sk" style="aspect-ratio:2/3"></div><div class="card-info"><div class="sk" style="height:14px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:60%"></div></div></div>`).join('');
+    grid.innerHTML = Array.from({ length: 15 }, () => `<div class="movie-card"><div class="card-poster sk" style="aspect-ratio:2/3"></div><div class="card-info"><div class="sk" style="height:14px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:60%"></div></div></div>`).join('');
     const data = await tmdb(`/movie/${type}?language=en-US&page=1`);
-    const movies = (data.results || []).slice(0, 8);
+    const movies = (data.results || []).slice(0, 20);
     const watchDatas = await Promise.all(movies.map(m => getWatch(m.id, 'movie')));
     currentMovies = movies;
     grid.innerHTML = movies.map((m, i) => buildCard(m, null, 'movie', watchDatas[i])).join('');
@@ -2051,9 +2114,9 @@
 
   async function loadTV(type = 'on_the_air') {
     const grid = document.getElementById('tvGrid');
-    grid.innerHTML = Array.from({ length: 8 }, () => `<div class="movie-card"><div class="card-poster sk" style="aspect-ratio:2/3"></div><div class="card-info"><div class="sk" style="height:14px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:60%"></div></div></div>`).join('');
+    grid.innerHTML = Array.from({ length: 15 }, () => `<div class="movie-card"><div class="card-poster sk" style="aspect-ratio:2/3"></div><div class="card-info"><div class="sk" style="height:14px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:60%"></div></div></div>`).join('');
     const data = await tmdb(`/tv/${type}?language=en-US&page=1`);
-    const shows = (data.results || []).slice(0, 8);
+    const shows = (data.results || []).slice(0, 20);
     const watchDatas = await Promise.all(shows.map(s => getWatch(s.id, 'tv')));
     currentTV = shows;
     grid.innerHTML = shows.map(s => buildCard(s, null, 'tv', watchDatas[shows.indexOf(s)])).join('');
@@ -2066,9 +2129,9 @@
 
   async function loadTopRated() {
     const grid = document.getElementById('topRatedGrid');
-    grid.innerHTML = Array.from({ length: 8 }, () => `<div class="movie-card"><div class="card-poster sk" style="aspect-ratio:2/3"></div><div class="card-info"><div class="sk" style="height:14px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:60%"></div></div></div>`).join('');
+    grid.innerHTML = Array.from({ length: 15 }, () => `<div class="movie-card"><div class="card-poster sk" style="aspect-ratio:2/3"></div><div class="card-info"><div class="sk" style="height:14px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:60%"></div></div></div>`).join('');
     const data = await tmdb('/movie/top_rated?language=en-US&page=1');
-    const movies = (data.results || []).slice(0, 8);
+    const movies = (data.results || []).slice(0, 20);
     const watchDatas = await Promise.all(movies.map(m => getWatch(m.id, 'movie')));
     grid.innerHTML = movies.map((m, i) => buildCard(m, i + 1, 'movie', watchDatas[i])).join('');
     animateGrid(grid);
@@ -2292,6 +2355,14 @@
     const hdr = sec.querySelector('.section-header');
     if (hdr) gsap.fromTo(hdr, { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: .7, ease: 'power3.out', scrollTrigger: { trigger: sec, start: 'top 82%' } });
   });
+
+  // HORIZONTAL SCROLL FUNCTION
+  function scrollRow(id, dir) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const scrollAmount = window.innerWidth < 768 ? window.innerWidth * 0.8 : 600;
+    el.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
+  }
 
   // INIT
   async function init() {
