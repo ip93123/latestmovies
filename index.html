@@ -1207,7 +1207,7 @@
   #modal {
     position: fixed;
     inset: 0;
-    z-index: 300;
+    z-index: 600;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2310,7 +2310,7 @@
     `;
       document.getElementById('modalRatings').innerHTML = `
       <div class="rating-badge imdb-badge" id="modal-imdb">⭐ ${details.vote_average ? details.vote_average.toFixed(1) : '—'} TMDB</div>
-      <div class="rating-badge rt-badge" id="modal-rt">🍅 Loading…</div>
+      <div class="rating-badge rt-badge" id="modal-rt">🍅 N/A</div>
     `;
       document.getElementById('modalPlot').textContent = details.overview || 'No description available.';
 
@@ -2329,9 +2329,11 @@
       const cast = (credits && credits.cast ? credits.cast : []).slice(0, 6).map(c => c.name).join(', ');
       document.getElementById('modalCast').textContent = cast || 'Cast information unavailable';
 
-      // OMDb
+      // OMDb — fetch IMDb ID then get RT + IMDb scores
       try {
         const imdbId = details.imdb_id || await getImdbId(id, type);
+        const rtEl = document.getElementById('modal-rt');
+        const imdbEl = document.getElementById('modal-imdb');
         if (imdbId) {
           const ms = document.getElementById('modalStreams');
           const playBtnHtml = `<a class="modal-stream-pill" style="background:var(--green);color:#fff;border:none;margin-right:0.5rem" href="https://www.playimdb.com/title/${imdbId}" target="_blank">▶ Play Free</a>`;
@@ -2343,13 +2345,23 @@
           const od = await getOMDb(imdbId);
           if (od && od.Response === 'True') {
             const rt = rtVal(od.Ratings);
-            const rtEl = document.getElementById('modal-rt');
-            if (rtEl) { rtEl.textContent = rt ? `🍅 ${rt} Rotten Tomatoes` : '🍅 N/A'; rtEl.style.color = rt ? rtColor(rt) : 'var(--muted)'; }
-            const imdbEl = document.getElementById('modal-imdb');
-            if (imdbEl && od.imdbRating && od.imdbRating !== 'N/A') imdbEl.textContent = `⭐ ${od.imdbRating} IMDb`;
+            if (rtEl) {
+              rtEl.textContent = rt ? `🍅 ${rt}` : '🍅 N/A';
+              rtEl.style.color = rt ? rtColor(rt) : 'var(--muted)';
+            }
+            if (imdbEl && od.imdbRating && od.imdbRating !== 'N/A') {
+              imdbEl.textContent = `⭐ ${od.imdbRating} IMDb`;
+            }
+          } else {
+            if (rtEl) { rtEl.textContent = '🍅 N/A'; rtEl.style.color = 'var(--muted)'; }
           }
+        } else {
+          if (rtEl) { rtEl.textContent = '🍅 N/A'; rtEl.style.color = 'var(--muted)'; }
         }
-      } catch { }
+      } catch {
+        const rtEl = document.getElementById('modal-rt');
+        if (rtEl) { rtEl.textContent = '🍅 N/A'; rtEl.style.color = 'var(--muted)'; }
+      }
     } catch (e) {
       document.getElementById('modalTitle').textContent = 'Failed to load';
       document.getElementById('modalPlot').textContent = 'Could not fetch details. Please try again.';
@@ -2387,7 +2399,10 @@
         spawnParticles(card);
         const id = card.dataset.id;
         const type = card.dataset.type || 'movie';
-        if (id) openModal(id, type);
+        if (id) {
+          closeSearch();
+          openModal(id, type);
+        }
       });
     });
   }
