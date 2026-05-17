@@ -2769,8 +2769,16 @@
       ${details.vote_average ? `<span>· ★ ${details.vote_average.toFixed(1)}</span>` : ''}
       ${(details.genres || []).slice(0, 2).map(g => `<span style="background:rgba(232,201,122,0.1);color:var(--gold);padding:.15rem .5rem;border-radius:4px;font-size:.72rem">${g.name}</span>`).join('')}
     `;
+        let trailerKey = null;
+        if (videoData && videoData.results) {
+          const trailer = videoData.results.find(v => v.site === 'YouTube' && v.type === 'Trailer') || videoData.results.find(v => v.site === 'YouTube');
+          if (trailer) trailerKey = trailer.key;
+        }
+        const trailerBtn = trailerKey ? `<button class="rating-badge" style="background:#E50914;color:#fff;border:none;cursor:pointer;margin-left:0.5rem" onclick="playStream('https://www.youtube.com/embed/${trailerKey}?autoplay=1')">🎬 Watch Trailer</button>` : '';
+
         document.getElementById('modalRatings').innerHTML = `
       <div class="rating-badge imdb-badge" id="modal-imdb">⭐ ${details.vote_average ? details.vote_average.toFixed(1) : '—'} TMDB</div>
+      ${trailerBtn}
     `;
         document.getElementById('modalPlot').textContent = details.overview || 'No description available.';
 
@@ -2806,16 +2814,7 @@
           const urlsJson = allUrls.map(u => `&quot;${u}&quot;`).join(',');
           const labelsJson = allLabels.map(l => `&quot;${l}&quot;`).join(',');
 
-          let trailerKey = null;
-          if (videoData && videoData.results) {
-            const trailer = videoData.results.find(v => v.site === 'YouTube' && v.type === 'Trailer') || videoData.results.find(v => v.site === 'YouTube');
-            if (trailer) trailerKey = trailer.key;
-          }
-
-          if (trailerKey) {
-            const tUrl = `https://www.youtube.com/embed/${trailerKey}?autoplay=1`;
-            playBtnsHtml += `<button class="modal-stream-pill" style="background:#E50914;color:#fff;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${tUrl}')">🎬 Watch Trailer</button>`;
-          }
+          // Trailer button is now located in modalRatings next to the TMDB badge
 
           playBtnsHtml += `<button class="modal-stream-pill" style="background:var(--green);color:#fff;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${s1Url}',[${urlsJson}],[${labelsJson}])">▶ Server 1</button>`;
           playBtnsHtml += `<button class="modal-stream-pill" style="background:#3B82F6;color:#fff;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${s2Url}',[${urlsJson}],[${labelsJson}])">▶ Server 2</button>`;
