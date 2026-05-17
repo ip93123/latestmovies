@@ -2682,6 +2682,24 @@
     // Major platforms always shown in filter bar (in display order)
     const PINNED_PROVIDERS = [8, 1796, 119, 337, 1899, 15, 350, 386, 531];
 
+    // All variant IDs for each pinned provider (so filter works regardless of sub-variant)
+    const PROVIDER_GROUPS = {
+      8:    [8],                                           // Netflix
+      1796: [1796],                                        // Netflix with Ads
+      119:  [9, 10, 119, 613, 2100, 1898],                // Prime Video (all variants)
+      337:  [337, 122, 508],                               // Disney+
+      1899: [1899, 1825, 2472, 2284],                     // Max / HBO
+      15:   [15],                                         // Hulu
+      350:  [2, 350, 2243],                               // Apple TV+
+      386:  [386, 387],                                   // Peacock
+      531:  [531, 582, 633, 187, 1853, 2303, 2580, 2616], // Paramount+
+    };
+
+    // Returns Set of all IDs for a given pinned group representative
+    function getGroupIds(pinnedId) {
+      return new Set((PROVIDER_GROUPS[pinnedId] || [pinnedId]).map(Number));
+    }
+
     function buildFilterBtn(id, info, activeFilter) {
       const logoPath = providerLogos[id] || providerLogos[+id];
       const logoHtml = logoPath
@@ -2703,24 +2721,45 @@
         (item.dataset?.providers || '').split(',').filter(Boolean).forEach(id => cardProviderIds.add(+id));
       });
 
-      // Start with pinned providers that appear in the cards
-      const shownIds = new Set();
+      // Show a pinned provider button if ANY of its variant IDs appears in cards
+      const shownGroupIds = new Set();
       let html = `<button class="stream-filter-btn sfb-all ${activeFilter === 'all' ? 'active' : ''}" data-id="all">🎬 All</button>`;
 
       PINNED_PROVIDERS.forEach(id => {
-        if (!cardProviderIds.has(id)) return;
+        const groupIds = getGroupIds(id);
+        const hasAny = [...groupIds].some(gid => cardProviderIds.has(gid));
+        if (!hasAny) return;
         const info = getProviderInfo(id);
-        html += buildFilterBtn(id, info, activeFilter);
-        shownIds.add(id);
+        // Use the first matching logo from any group variant
+        const logoId = [...groupIds].find(gid => providerLogos[gid]) || id;
+        const logoPath = providerLogos[logoId];
+        const logoHtml = logoPath
+          ? `<img src="${IMG}w45${logoPath}" style="width:16px;height:16px;border-radius:3px;object-fit:cover;flex-shrink:0" alt="">`
+          : `<span style="font-size:.72rem;font-weight:900">${info.short}</span>`;
+        const isActive = activeFilter === String(id);
+        html += `<button class="stream-filter-btn sfb-${info.cls} ${isActive ? 'active' : ''}" data-id="${id}"
+          style="${isActive ? `background:${info.color};color:#07090F;border-color:transparent` : ''};display:inline-flex;align-items:center;gap:.35rem">
+          ${logoHtml}<span>${info.name}</span>
+        </button>`;
+        // Mark all variant IDs as handled so they don't appear as extras
+        groupIds.forEach(gid => shownGroupIds.add(gid));
       });
 
-      // Append any extra providers from cards not already shown (up to 4 extras)
+      // Append any extra providers from cards not covered by a group (up to 4)
       let extras = 0;
       cardProviderIds.forEach(id => {
-        if (shownIds.has(id) || extras >= 4) return;
+        if (shownGroupIds.has(id) || extras >= 4) return;
         const info = getProviderInfo(id);
-        html += buildFilterBtn(id, info, activeFilter);
-        shownIds.add(id);
+        const logoPath = providerLogos[id];
+        const logoHtml = logoPath
+          ? `<img src="${IMG}w45${logoPath}" style="width:16px;height:16px;border-radius:3px;object-fit:cover;flex-shrink:0" alt="">`
+          : `<span style="font-size:.72rem;font-weight:900">${info.short}</span>`;
+        const isActive = activeFilter === String(id);
+        html += `<button class="stream-filter-btn sfb-${info.cls} ${isActive ? 'active' : ''}" data-id="${id}"
+          style="${isActive ? `background:${info.color};color:#07090F;border-color:transparent` : ''};display:inline-flex;align-items:center;gap:.35rem">
+          ${logoHtml}<span>${info.name}</span>
+        </button>`;
+        shownGroupIds.add(id);
         extras++;
       });
 
@@ -2748,9 +2787,11 @@
 
     function filterCards(gridId, filterId) {
       const cards = document.querySelectorAll(`#${gridId} .movie-card`);
+      // Get all variant IDs for the selected group (or just the one ID if not pinned)
+      const groupIds = filterId === 'all' ? null : getGroupIds(+filterId);
       cards.forEach(card => {
-        const providers = card.dataset.providers || '';
-        const show = filterId === 'all' || providers.split(',').includes(filterId);
+        const cardIds = new Set((card.dataset.providers || '').split(',').filter(Boolean).map(Number));
+        const show = filterId === 'all' || (groupIds && [...groupIds].some(gid => cardIds.has(gid)));
         gsap.to(card, { opacity: show ? 1 : .15, scale: show ? 1 : .95, duration: .3, ease: 'power2.out' });
       });
     }
