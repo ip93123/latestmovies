@@ -1872,10 +1872,16 @@
       return res;
     } catch { return null }
   }
+  const OMDB_KEY = '2a9140d5';
   async function getOMDb(imdbId) {
     if (!imdbId) return null;
     if (omdbCache[imdbId]) return omdbCache[imdbId];
-    try { const r = await fetch(`/api/omdb?id=${imdbId}`); const d = await r.json(); omdbCache[imdbId] = d; return d; } catch { return null }
+    try {
+      const r = await fetch(`https://www.omdbapi.com/?i=${imdbId}&apikey=${OMDB_KEY}`);
+      const d = await r.json();
+      omdbCache[imdbId] = d;
+      return d;
+    } catch { return null }
   }
   async function getImdbId(id, type = 'movie') {
     try { const d = await tmdb(`/${type}/${id}/external_ids`); return d.imdb_id || null; } catch { return null }
@@ -2334,14 +2340,25 @@
         const imdbId = details.imdb_id || await getImdbId(id, type);
         const rtEl = document.getElementById('modal-rt');
         const imdbEl = document.getElementById('modal-imdb');
+        const ms = document.getElementById('modalStreams');
+        let playBtnsHtml = '';
         if (imdbId) {
-          const ms = document.getElementById('modalStreams');
-          const playBtnHtml = `<a class="modal-stream-pill" style="background:var(--green);color:#fff;border:none;margin-right:0.5rem" href="https://www.playimdb.com/title/${imdbId}" target="_blank">▶ Play Free</a>`;
-          if (ms.innerHTML.includes('no-stream')) {
-            ms.innerHTML = playBtnHtml;
-          } else {
-            ms.innerHTML = playBtnHtml + ms.innerHTML;
-          }
+          playBtnsHtml += `<a class="modal-stream-pill" style="background:var(--green);color:#fff;border:none;margin-right:0.5rem" href="https://www.playimdb.com/title/${imdbId}" target="_blank">▶ Server 1</a>`;
+        }
+        
+        const s2Url = type === 'tv' ? `https://vidfast.pro/tv/${id}/1/1` : `https://vidfast.pro/movie/${id}`;
+        const s3Url = type === 'tv' ? `https://player.videasy.net/tv/${id}/1/1` : `https://player.videasy.net/movie/${id}`;
+        
+        playBtnsHtml += `<a class="modal-stream-pill" style="background:#3B82F6;color:#fff;border:none;margin-right:0.5rem" href="${s2Url}" target="_blank">▶ Server 2</a>`;
+        playBtnsHtml += `<a class="modal-stream-pill" style="background:#8B5CF6;color:#fff;border:none;margin-right:0.5rem" href="${s3Url}" target="_blank">▶ Server 3</a>`;
+
+        if (ms.innerHTML.includes('no-stream')) {
+          ms.innerHTML = playBtnsHtml;
+        } else {
+          ms.innerHTML = playBtnsHtml + ms.innerHTML;
+        }
+
+        if (imdbId) {
           const od = await getOMDb(imdbId);
           if (od && od.Response === 'True') {
             const rt = rtVal(od.Ratings);
