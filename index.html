@@ -1386,6 +1386,52 @@
     font-style: italic
   }
 
+  /* PLAYER OVERLAY */
+  #playerOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    background: rgba(7, 9, 15, .95);
+    backdrop-filter: blur(10px);
+    transition: opacity .3s;
+  }
+  #playerOverlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .player-close {
+    position: absolute;
+    top: 1.5rem;
+    right: 2rem;
+    font-size: 2rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: var(--text);
+    line-height: 1;
+    z-index: 710;
+  }
+  .player-container {
+    width: 90vw;
+    height: 80vh;
+    max-width: 1200px;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    position: relative;
+  }
+  #playerFrame {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
   /* SEARCH */
   #searchOverlay {
     position: fixed;
@@ -1665,6 +1711,14 @@
     <input type="text" id="searchInput" placeholder="Search movies & shows...">
   </div>
   <div class="search-results" id="searchResults"></div>
+</div>
+
+<!-- PLAYER OVERLAY -->
+<div id="playerOverlay">
+  <button class="player-close" id="playerClose">✕</button>
+  <div class="player-container">
+    <iframe id="playerFrame" src="" allowfullscreen></iframe>
+  </div>
 </div>
 
 <!-- MODAL -->
@@ -2342,15 +2396,14 @@
         const imdbEl = document.getElementById('modal-imdb');
         const ms = document.getElementById('modalStreams');
         let playBtnsHtml = '';
-        if (imdbId) {
-          playBtnsHtml += `<a class="modal-stream-pill" style="background:var(--green);color:#fff;border:none;margin-right:0.5rem" href="https://www.playimdb.com/title/${imdbId}" target="_blank">▶ Server 1</a>`;
-        }
         
-        const s2Url = type === 'tv' ? `https://vidfast.pro/tv/${id}/1/1` : `https://vidfast.pro/movie/${id}`;
-        const s3Url = type === 'tv' ? `https://player.videasy.net/tv/${id}/1/1` : `https://player.videasy.net/movie/${id}`;
+        const s1Url = type === 'tv' ? `https://player.videasy.net/tv/${id}/1/1` : `https://player.videasy.net/movie/${id}`;
+        const s2Url = imdbId ? `https://streamimdb.ru/title/${imdbId}` : (type === 'tv' ? `https://streamimdb.ru/tv/${id}/1/1` : `https://streamimdb.ru/movie/${id}`);
+        const s3Url = type === 'tv' ? `https://vidfast.pro/tv/${id}/1/1` : `https://vidfast.pro/movie/${id}`;
         
-        playBtnsHtml += `<a class="modal-stream-pill" style="background:#3B82F6;color:#fff;border:none;margin-right:0.5rem" href="${s2Url}" target="_blank">▶ Server 2</a>`;
-        playBtnsHtml += `<a class="modal-stream-pill" style="background:#8B5CF6;color:#fff;border:none;margin-right:0.5rem" href="${s3Url}" target="_blank">▶ Server 3</a>`;
+        playBtnsHtml += `<button class="modal-stream-pill" style="background:var(--green);color:#fff;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${s1Url}')">▶ Server 1</button>`;
+        playBtnsHtml += `<button class="modal-stream-pill" style="background:#3B82F6;color:#fff;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${s2Url}')">▶ Server 2</button>`;
+        playBtnsHtml += `<button class="modal-stream-pill" style="background:#8B5CF6;color:#fff;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${s3Url}')">▶ Server 3</button>`;
 
         if (ms.innerHTML.includes('no-stream')) {
           ms.innerHTML = playBtnsHtml;
@@ -2390,6 +2443,24 @@
   });
   document.getElementById('modal').addEventListener('click', e => {
     if (e.target === document.getElementById('modal')) document.getElementById('modalClose').click();
+  });
+
+  function playStream(url) {
+    const overlay = document.getElementById('playerOverlay');
+    const frame = document.getElementById('playerFrame');
+    frame.src = url;
+    overlay.classList.add('open');
+    gsap.fromTo('.player-container', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'power3.out' });
+  }
+
+  document.getElementById('playerClose').addEventListener('click', () => {
+    gsap.to('.player-container', { scale: 0.9, opacity: 0, duration: 0.3, ease: 'power3.in', onComplete: () => {
+      document.getElementById('playerOverlay').classList.remove('open');
+      document.getElementById('playerFrame').src = '';
+    }});
+  });
+  document.getElementById('playerOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('playerOverlay')) document.getElementById('playerClose').click();
   });
 
   function animateGrid(grid) {
