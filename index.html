@@ -2803,11 +2803,12 @@
           const allUrls = [s1Url, s2Url, s3Url, s4Url];
           const allLabels = ['▶ Server 1', '▶ Server 2', '▶ Server 3', '▶ Server 4'];
           const urlsJson = allUrls.map(u => `&quot;${u}&quot;`).join(',');
+          const labelsJson = allLabels.map(l => `&quot;${l}&quot;`).join(',');
 
-          playBtnsHtml += `<button class="modal-stream-pill" style="background:var(--green);color:#fff;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${s1Url}',[${urlsJson}],${JSON.stringify(allLabels)})">▶ Server 1</button>`;
-          playBtnsHtml += `<button class="modal-stream-pill" style="background:#3B82F6;color:#fff;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${s2Url}',[${urlsJson}],${JSON.stringify(allLabels)})">▶ Server 2</button>`;
-          playBtnsHtml += `<button class="modal-stream-pill" style="background:#8B5CF6;color:#fff;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${s3Url}',[${urlsJson}],${JSON.stringify(allLabels)})">▶ Server 3</button>`;
-          playBtnsHtml += `<button class="modal-stream-pill" style="background:#F59E0B;color:#07090F;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${s4Url}',[${urlsJson}],${JSON.stringify(allLabels)})">▶ Server 4</button>`;
+          playBtnsHtml += `<button class="modal-stream-pill" style="background:var(--green);color:#fff;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${s1Url}',[${urlsJson}],[${labelsJson}])">▶ Server 1</button>`;
+          playBtnsHtml += `<button class="modal-stream-pill" style="background:#3B82F6;color:#fff;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${s2Url}',[${urlsJson}],[${labelsJson}])">▶ Server 2</button>`;
+          playBtnsHtml += `<button class="modal-stream-pill" style="background:#8B5CF6;color:#fff;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${s3Url}',[${urlsJson}],[${labelsJson}])">▶ Server 3</button>`;
+          playBtnsHtml += `<button class="modal-stream-pill" style="background:#F59E0B;color:#07090F;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${s4Url}',[${urlsJson}],[${labelsJson}])">▶ Server 4</button>`;
 
           if (ms.innerHTML.includes('no-stream')) {
             ms.innerHTML = playBtnsHtml;
