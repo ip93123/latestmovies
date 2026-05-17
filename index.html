@@ -2138,6 +2138,33 @@
     async function getImdbId(id, type = 'movie') {
       try { const d = await tmdb(`/${type}/${id}/external_ids`); return d.imdb_id || null; } catch { return null }
     }
+
+    // Throttled RT queue: fires 1 RapidAPI call per 250ms so we never 429
+    const _rtQueue = [];
+    let _rtRunning = false;
+    async function _drainRTQueue() {
+      if (_rtRunning) return;
+      _rtRunning = true;
+      while (_rtQueue.length) {
+        const { title, year, tmdbId } = _rtQueue.shift();
+        try {
+          const rt = await getRTScore(title, year);
+          if (rt) {
+            document.querySelectorAll(`.rt-${tmdbId}`).forEach(el => {
+              el.textContent = `🍅 ${rt}`;
+              el.style.color = rtColor(rt);
+            });
+          }
+        } catch { }
+        await new Promise(r => setTimeout(r, 250));
+      }
+      _rtRunning = false;
+    }
+    function queueRT(title, year, tmdbId) {
+      if (!title) return;
+      _rtQueue.push({ title, year, tmdbId });
+      _drainRTQueue();
+    }
     async function getCredits(id, type = 'movie') {
       try { const d = await tmdb(`/${type}/${id}/credits`); return d; } catch { return null }
     }
@@ -2539,19 +2566,26 @@
         const od = await getOMDb(imdbId);
         if (!od || od.Response !== 'True') return;
 
-        // IMDb score from OMDb
+        // IMDb score
         if (od.imdbRating && od.imdbRating !== 'N/A') {
           document.querySelectorAll(`.imdb-${tmdbId}`).forEach(el => {
             el.textContent = `⭐ ${od.imdbRating}`;
           });
         }
 
-        // RT score from OMDb only (no RapidAPI here to avoid mass 429s)
+        // Try OMDb's embedded RT first (free, instant)
         const rt = rtVal(od.Ratings);
-        document.querySelectorAll(`.rt-${tmdbId}`).forEach(el => {
-          el.textContent = rt ? `🍅 ${rt}` : '🍅 —';
-          el.style.color = rt ? rtColor(rt) : 'var(--muted)';
-        });
+        if (rt) {
+          document.querySelectorAll(`.rt-${tmdbId}`).forEach(el => {
+            el.textContent = `🍅 ${rt}`;
+            el.style.color = rtColor(rt);
+          });
+        } else {
+          // Queue a RapidAPI lookup (throttled to 1 per 250ms)
+          const title = od.Title || '';
+          const year = od.Year ? od.Year.slice(0, 4) : '';
+          queueRT(title, year, tmdbId);
+        }
       } catch { }
     }
 
