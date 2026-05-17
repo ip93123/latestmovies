@@ -25,11 +25,24 @@
     --card: #0F1520;
     --border: rgba(255, 255, 255, 0.07);
     --green: #27AE60;
-    --tomato: #FA320A
+    --tomato: #FA320A;
+    /* Dynamic ambient colors extracted from posters */
+    --accent1: 232, 201, 122;
+    --accent2: 100, 60, 180;
+    --accent3: 20, 100, 200;
+    --glow-intensity: 0.18;
+    --neon-spread: 60px;
   }
 
   html {
     scroll-behavior: smooth
+  }
+
+  /* Ambient animated gradient background */
+  @keyframes ambientShift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
   }
 
   body {
@@ -37,7 +50,44 @@
     color: var(--text);
     font-family: 'Inter', sans-serif;
     overflow-x: hidden;
-    min-height: 100vh
+    min-height: 100vh;
+    transition: --accent1 1.5s, --accent2 1.5s;
+  }
+
+  /* Ambient glow orbs */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -30vh;
+    left: -20vw;
+    width: 80vw;
+    height: 80vh;
+    background: radial-gradient(ellipse, rgba(var(--accent1), 0.07) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    animation: orb1 20s ease-in-out infinite alternate;
+    transition: background 2s ease;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -20vh;
+    right: -20vw;
+    width: 70vw;
+    height: 70vh;
+    background: radial-gradient(ellipse, rgba(var(--accent2), 0.07) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    animation: orb2 25s ease-in-out infinite alternate;
+    transition: background 2s ease;
+  }
+  @keyframes orb1 {
+    0%   { transform: translate(0,0) scale(1); }
+    100% { transform: translate(10vw, 8vh) scale(1.2); }
+  }
+  @keyframes orb2 {
+    0%   { transform: translate(0,0) scale(1); }
+    100% { transform: translate(-10vw, -8vh) scale(1.15); }
   }
 
   ::-webkit-scrollbar {
@@ -687,16 +737,22 @@
     position: relative;
     border-radius: 12px;
     overflow: hidden;
-    background: var(--card);
-    border: 1px solid var(--border);
+    background: rgba(15, 21, 32, 0.55);
+    backdrop-filter: blur(14px) saturate(1.4);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    border: 1px solid rgba(255, 255, 255, 0.09);
     cursor: pointer;
     transform-style: preserve-3d;
-    transition: border-color .3s;
-    will-change: transform
+    transition: border-color .35s, box-shadow .35s;
+    will-change: transform;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.35);
   }
 
   .movie-card:hover {
-    border-color: rgba(232, 201, 122, 0.3)
+    border-color: rgba(var(--accent1), 0.45);
+    box-shadow: 0 0 0 1px rgba(var(--accent1), 0.2),
+                0 8px 40px rgba(0,0,0,0.5),
+                0 0 var(--neon-spread) rgba(var(--accent1), 0.12);
   }
 
   .card-poster {
@@ -735,18 +791,19 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(0);
-    width: 48px;
-    height: 48px;
-    background: rgba(232, 201, 122, 0.9);
+    width: 56px;
+    height: 56px;
+    background: rgba(var(--accent1), 0.92);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform .3s cubic-bezier(.34, 1.56, .64, 1)
+    transition: transform .3s cubic-bezier(.34, 1.56, .64, 1), box-shadow .3s;
+    box-shadow: 0 0 30px rgba(var(--accent1), 0.6), 0 0 60px rgba(var(--accent1), 0.2);
   }
 
   .movie-card:hover .card-play {
-    transform: translate(-50%, -50%) scale(1)
+    transform: translate(-50%, -50%) scale(1);
   }
 
   .card-play svg {
@@ -1213,8 +1270,8 @@
     justify-content: center;
     opacity: 0;
     pointer-events: none;
-    background: rgba(7, 9, 15, .85);
-    backdrop-filter: blur(16px)
+    background: rgba(7, 9, 15, .75);
+    backdrop-filter: blur(20px)
   }
 
   #modal.open {
@@ -1223,10 +1280,15 @@
   }
 
   .modal-box {
-    background: var(--dark2);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    width: min(820px, 94vw);
+    background: rgba(13, 17, 23, 0.75);
+    backdrop-filter: blur(24px) saturate(1.5);
+    -webkit-backdrop-filter: blur(24px) saturate(1.5);
+    border: 1px solid rgba(var(--accent1), 0.2);
+    border-radius: 20px;
+    box-shadow: 0 0 0 1px rgba(var(--accent1), 0.08),
+                0 32px 80px rgba(0,0,0,0.6),
+                0 0 120px rgba(var(--accent1), 0.08);
+    width: min(860px, 94vw);
     max-height: 92vh;
     overflow-y: auto;
     position: relative;
@@ -1392,17 +1454,42 @@
     inset: 0;
     z-index: 700;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 1rem;
     opacity: 0;
     pointer-events: none;
-    background: rgba(7, 9, 15, .95);
-    backdrop-filter: blur(10px);
+    background: rgba(4, 6, 12, .97);
+    backdrop-filter: blur(20px);
     transition: opacity .3s;
   }
   #playerOverlay.open {
     opacity: 1;
     pointer-events: all;
+  }
+  .player-server-bar {
+    display: flex;
+    gap: .6rem;
+    z-index: 720;
+  }
+  .player-server-btn {
+    padding: .35rem .9rem;
+    border-radius: 50px;
+    font-size: .78rem;
+    font-weight: 700;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.07);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .player-server-btn.active,
+  .player-server-btn:hover {
+    background: rgba(var(--accent1), 0.85);
+    color: #07090F;
+    border-color: transparent;
   }
   .player-close {
     position: absolute;
@@ -1715,9 +1802,10 @@
 
 <!-- PLAYER OVERLAY -->
 <div id="playerOverlay">
-  <button class="player-close" id="playerClose">✕</button>
+  <div class="player-server-bar" id="playerServerBar"></div>
   <div class="player-container">
-    <iframe id="playerFrame" src="" allowfullscreen></iframe>
+    <button class="player-close" id="playerClose">&#10005;</button>
+    <iframe id="playerFrame" src="" allowfullscreen allow="autoplay; fullscreen"></iframe>
   </div>
 </div>
 
@@ -2134,7 +2222,11 @@
 
     if (m.backdrop_path) { 
       heroImg.src = `${IMG}original${m.backdrop_path}`; 
-      heroImg.onload = () => heroImg.classList.add('loaded'); 
+      heroImg.onload = () => {
+        heroImg.classList.add('loaded');
+        // Extract dominant color from backdrop for ambient glow
+        applyDynamicColors(heroImg.src);
+      };
     }
 
     // Try to load video background
@@ -2208,11 +2300,12 @@
     if (heroPlayBtn) heroPlayBtn.style.display = 'none';
     try {
       const imdbId = await getImdbId(m.id, type);
+      if (heroPlayBtn) {
+        heroPlayBtn.style.display = 'inline-flex';
+        const url = imdbId ? `https://streamimdb.ru/title/${imdbId}` : (type === 'tv' ? `https://streamimdb.ru/tv/${m.id}/1/1` : `https://streamimdb.ru/movie/${m.id}`);
+        heroPlayBtn.onclick = () => playStream(url);
+      }
       if (imdbId) {
-        if (heroPlayBtn) {
-          heroPlayBtn.style.display = 'inline-flex';
-          heroPlayBtn.onclick = () => window.open(`https://www.playimdb.com/title/${imdbId}`, '_blank');
-        }
         const od = await getOMDb(imdbId);
         if (od && od.Response === 'True') {
           const rt = rtVal(od.Ratings);
@@ -2401,9 +2494,9 @@
         const s2Url = imdbId ? `https://streamimdb.ru/title/${imdbId}` : (type === 'tv' ? `https://streamimdb.ru/tv/${id}/1/1` : `https://streamimdb.ru/movie/${id}`);
         const s3Url = type === 'tv' ? `https://vidfast.pro/tv/${id}/1/1` : `https://vidfast.pro/movie/${id}`;
         
-        playBtnsHtml += `<button class="modal-stream-pill" style="background:var(--green);color:#fff;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${s1Url}')">▶ Server 1</button>`;
-        playBtnsHtml += `<button class="modal-stream-pill" style="background:#3B82F6;color:#fff;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${s2Url}')">▶ Server 2</button>`;
-        playBtnsHtml += `<button class="modal-stream-pill" style="background:#8B5CF6;color:#fff;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${s3Url}')">▶ Server 3</button>`;
+        playBtnsHtml += `<button class="modal-stream-pill" style="background:var(--green);color:#fff;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${s1Url}',[&quot;${s1Url}&quot;,&quot;${s2Url}&quot;,&quot;${s3Url}&quot;],['▶ Server 1','▶ Server 2','▶ Server 3'])">▶ Server 1</button>`;
+        playBtnsHtml += `<button class="modal-stream-pill" style="background:#3B82F6;color:#fff;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${s2Url}',[&quot;${s1Url}&quot;,&quot;${s2Url}&quot;,&quot;${s3Url}&quot;],['▶ Server 1','▶ Server 2','▶ Server 3'])">▶ Server 2</button>`;
+        playBtnsHtml += `<button class="modal-stream-pill" style="background:#8B5CF6;color:#fff;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${s3Url}',[&quot;${s1Url}&quot;,&quot;${s2Url}&quot;,&quot;${s3Url}&quot;],['▶ Server 1','▶ Server 2','▶ Server 3'])">▶ Server 3</button>`;
 
         if (ms.innerHTML.includes('no-stream')) {
           ms.innerHTML = playBtnsHtml;
@@ -2445,12 +2538,34 @@
     if (e.target === document.getElementById('modal')) document.getElementById('modalClose').click();
   });
 
-  function playStream(url) {
+  function playStream(url, allUrls, labels) {
     const overlay = document.getElementById('playerOverlay');
     const frame = document.getElementById('playerFrame');
+    const bar = document.getElementById('playerServerBar');
     frame.src = url;
+    // Build server switcher
+    if (allUrls && allUrls.length) {
+      bar.innerHTML = allUrls.map((u, i) => {
+        const lbl = labels ? labels[i] : `Server ${i+1}`;
+        return `<button class="player-server-btn${u === url ? ' active' : ''}" onclick="switchServer('${u}', this)">${lbl}</button>`;
+      }).join('');
+    } else {
+      bar.innerHTML = '';
+    }
     overlay.classList.add('open');
     gsap.fromTo('.player-container', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'power3.out' });
+    
+    if (frame.requestFullscreen) {
+      frame.requestFullscreen().catch(e => console.log('Fullscreen error:', e));
+    } else if (frame.webkitRequestFullscreen) {
+      frame.webkitRequestFullscreen();
+    }
+  }
+
+  function switchServer(url, btn) {
+    document.querySelectorAll('.player-server-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('playerFrame').src = url;
   }
 
   document.getElementById('playerClose').addEventListener('click', () => {
@@ -2476,11 +2591,12 @@
         const rect = card.getBoundingClientRect();
         const x = (e.clientX - rect.left) / rect.width - .5;
         const y = (e.clientY - rect.top) / rect.height - .5;
+        const a1 = getComputedStyle(document.documentElement).getPropertyValue('--accent1').trim();
         gsap.to(card, { rotationY: x * 14, rotationX: -y * 14, transformPerspective: 900, transformOrigin: 'center', duration: .3, ease: 'power2.out' });
-        gsap.to(card, { boxShadow: `${-x * 25}px ${-y * 25}px 50px rgba(232,201,122,0.07)`, duration: .3 });
+        gsap.to(card, { boxShadow: `${-x * 25}px ${-y * 25}px 50px rgba(${a1},0.12), 0 0 40px rgba(${a1},0.06)`, duration: .3 });
       });
       card.addEventListener('mouseleave', () => {
-        gsap.to(card, { rotationY: 0, rotationX: 0, boxShadow: 'none', duration: .6, ease: 'elastic.out(1,.75)' });
+        gsap.to(card, { rotationY: 0, rotationX: 0, boxShadow: '0 4px 24px rgba(0,0,0,0.35)', duration: .6, ease: 'elastic.out(1,.75)' });
       });
       card.addEventListener('click', () => {
         gsap.to(card, { scale: .95, duration: .1, yoyo: true, repeat: 1 });
@@ -2498,14 +2614,59 @@
   function spawnParticles(el) {
     const rect = el.getBoundingClientRect();
     const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+    const a1 = getComputedStyle(document.documentElement).getPropertyValue('--accent1').trim() || '232,201,122';
     for (let i = 0; i < 10; i++) {
       const p = document.createElement('div');
       p.className = 'particle';
       const sz = 3 + Math.random() * 7;
-      p.style.cssText = `width:${sz}px;height:${sz}px;left:${cx}px;top:${cy}px;opacity:0;pointer-events:none`;
+      p.style.cssText = `width:${sz}px;height:${sz}px;left:${cx}px;top:${cy}px;opacity:0;pointer-events:none;background:rgb(${a1})`;
       document.body.appendChild(p);
       gsap.to(p, { x: (Math.random() - .5) * 130, y: (Math.random() - .5) * 130 - 50, opacity: .9, duration: .12, onComplete: () => gsap.to(p, { opacity: 0, duration: .7, onComplete: () => p.remove() }) });
     }
+  }
+
+  // ─── DOMINANT COLOR EXTRACTION ───────────────────────────────────────────
+  function extractColors(imgEl) {
+    return new Promise(resolve => {
+      const canvas = document.createElement('canvas');
+      const SIZE = 40;
+      canvas.width = SIZE; canvas.height = SIZE;
+      const ctx = canvas.getContext('2d');
+      try {
+        ctx.drawImage(imgEl, 0, 0, SIZE, SIZE);
+        const data = ctx.getImageData(0, 0, SIZE, SIZE).data;
+        // Sample pixels and bucket by hue to find dominant vivid color
+        let bestSat = 0, bestR = 232, bestG = 201, bestB = 122;
+        let secBestSat = 0, secR = 100, secG = 60, secB = 180;
+        for (let i = 0; i < data.length; i += 16) {
+          const r = data[i], g = data[i+1], b = data[i+2];
+          const max = Math.max(r,g,b), min = Math.min(r,g,b);
+          const sat = max === 0 ? 0 : (max - min) / max;
+          const brightness = (r + g + b) / 3;
+          if (sat > 0.25 && brightness > 30 && brightness < 230) {
+            if (sat > bestSat) {
+              secBestSat = bestSat; secR = bestR; secG = bestG; secB = bestB;
+              bestSat = sat; bestR = r; bestG = g; bestB = b;
+            } else if (sat > secBestSat) {
+              secBestSat = sat; secR = r; secG = g; secB = b;
+            }
+          }
+        }
+        resolve({ c1: [bestR, bestG, bestB], c2: [secR, secG, secB] });
+      } catch { resolve({ c1: [232, 201, 122], c2: [100, 60, 180] }); }
+    });
+  }
+
+  async function applyDynamicColors(imgSrc) {
+    if (!imgSrc) return;
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = imgSrc;
+    await new Promise(r => { img.onload = r; img.onerror = r; });
+    const { c1, c2 } = await extractColors(img);
+    const root = document.documentElement.style;
+    root.setProperty('--accent1', `${c1[0]}, ${c1[1]}, ${c1[2]}`);
+    root.setProperty('--accent2', `${c2[0]}, ${c2[1]}, ${c2[2]}`);
   }
 
   // TABS
@@ -2639,6 +2800,18 @@
         start: 'top top',
         end: 'bottom top',
         scrub: true
+      }
+    });
+
+    // Hero content parallax depth
+    gsap.to('#heroContent', {
+      yPercent: 18,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '#hero',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: 1.5
       }
     });
   }
