@@ -1590,7 +1590,7 @@
 
     /* SEASON / EPISODE CHOOSER */
     .ep-chooser {
-      margin-top: 1.2rem;
+      margin-bottom: .75rem;
       padding: 1rem;
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -2100,13 +2100,6 @@
         <div class="modal-ratings" id="modalRatings"></div>
         <p class="modal-plot" id="modalPlot"></p>
         <div class="modal-section-label">WHERE TO WATCH</div>
-        <div class="modal-streams" id="modalStreams">
-          <div class="no-stream">Checking platforms…</div>
-        </div>
-        <div id="modalRentSection" style="display:none">
-          <div class="modal-section-label" style="margin-top:1rem">RENT / BUY</div>
-          <div class="modal-rent" id="modalRent"></div>
-        </div>
         <!-- SEASON / EPISODE CHOOSER (TV only) -->
         <div id="modalEpChooser" class="ep-chooser" style="display:none">
           <div class="ep-chooser-label">Choose Season &amp; Episode</div>
@@ -2119,6 +2112,13 @@
             </select>
           </div>
           <div class="ep-hint" id="epHint"></div>
+        </div>
+        <div class="modal-streams" id="modalStreams">
+          <div class="no-stream">Checking platforms…</div>
+        </div>
+        <div id="modalRentSection" style="display:none">
+          <div class="modal-section-label" style="margin-top:1rem">RENT / BUY</div>
+          <div class="modal-rent" id="modalRent"></div>
         </div>
         <div class="modal-section-label" style="margin-top:1rem">CAST</div>
         <div class="modal-cast" id="modalCast"></div>
