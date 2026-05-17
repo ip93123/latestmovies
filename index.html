@@ -1588,6 +1588,84 @@
       font-style: italic
     }
 
+    /* SEASON / EPISODE CHOOSER */
+    .ep-chooser {
+      margin-top: 1.2rem;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+    }
+
+    .ep-chooser-label {
+      font-size: .72rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: .75rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .ep-chooser-label::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: var(--gold);
+      border-radius: 2px;
+    }
+
+    .ep-selects {
+      display: flex;
+      gap: .6rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .ep-select {
+      flex: 1;
+      min-width: 120px;
+      background: rgba(7, 9, 15, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: .82rem;
+      padding: .55rem .8rem;
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='%236B7A94'%3E%3Cpath d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right .75rem center;
+      padding-right: 2rem;
+      transition: border-color .2s;
+    }
+
+    .ep-select:focus, .ep-select:hover {
+      border-color: rgba(232, 201, 122, 0.5);
+    }
+
+    .ep-select option {
+      background: #0D1117;
+      color: var(--text);
+    }
+
+    .ep-select:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .ep-hint {
+      font-size: .72rem;
+      color: var(--muted);
+      margin-top: .5rem;
+    }
+
     /* PLAYER OVERLAY */
     #playerOverlay {
       position: fixed;
@@ -2029,6 +2107,19 @@
           <div class="modal-section-label" style="margin-top:1rem">RENT / BUY</div>
           <div class="modal-rent" id="modalRent"></div>
         </div>
+        <!-- SEASON / EPISODE CHOOSER (TV only) -->
+        <div id="modalEpChooser" class="ep-chooser" style="display:none">
+          <div class="ep-chooser-label">Choose Season &amp; Episode</div>
+          <div class="ep-selects">
+            <select id="epSeasonSelect" class="ep-select">
+              <option value="">Season…</option>
+            </select>
+            <select id="epEpisodeSelect" class="ep-select" disabled>
+              <option value="">Episode…</option>
+            </select>
+          </div>
+          <div class="ep-hint" id="epHint"></div>
+        </div>
         <div class="modal-section-label" style="margin-top:1rem">CAST</div>
         <div class="modal-cast" id="modalCast"></div>
       </div>
@@ -2313,6 +2404,11 @@
     const omdbCache = {}, watchCache = {}, providerLogos = {};
     let heroMovies = [], heroIdx = 0, heroTimer = null;
     let currentMovies = [], currentTV = [], activeMovieFilter = 'all', activeTVFilter = 'all';
+
+    // Season / Episode chooser state
+    let _currentModalId = null, _currentModalType = 'movie';
+    let _selectedSeason = 1, _selectedEpisode = 1;
+    let _seasonEpCache = {}; // { tvId: { season: episodes[] } }
 
     // TMDB genre ID map for trending cards
     const GENRE_MAP = {
@@ -2812,6 +2908,112 @@
       } catch { }
     }
 
+    // ── Season/Episode chooser helpers ─────────────────────────────────────
+    async function loadSeasonEpisodes(tvId, season) {
+      const cacheKey = `${tvId}-s${season}`;
+      if (_seasonEpCache[cacheKey]) return _seasonEpCache[cacheKey];
+      try {
+        const d = await tmdb(`/tv/${tvId}/season/${season}`);
+        const eps = (d.episodes || []).map(e => ({ number: e.episode_number, name: e.name }));
+        _seasonEpCache[cacheKey] = eps;
+        return eps;
+      } catch { return []; }
+    }
+
+    function buildEpisodeUrl(server, id, season, episode) {
+      switch (server) {
+        case 1: return `https://player.videasy.net/tv/${id}/${season}/${episode}`;
+        case 2: return `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`;
+        case 3: return `https://vidfast.pro/tv/${id}/${season}/${episode}`;
+        case 4: return `https://embed.su/embed/tv/${id}/${season}/${episode}`;
+        default: return `https://player.videasy.net/tv/${id}/${season}/${episode}`;
+      }
+    }
+
+    function getModalServerUrls(id, type, season, episode) {
+      if (type === 'tv') {
+        return [
+          buildEpisodeUrl(1, id, season, episode),
+          buildEpisodeUrl(2, id, season, episode),
+          buildEpisodeUrl(3, id, season, episode),
+          buildEpisodeUrl(4, id, season, episode),
+        ];
+      }
+      return [
+        `https://player.videasy.net/movie/${id}`,
+        `https://vidsrc.me/embed/movie?tmdb=${id}`,
+        `https://vidfast.pro/movie/${id}`,
+        `https://embed.su/embed/movie/${id}`,
+      ];
+    }
+
+    function refreshModalPlayButtons() {
+      const id = _currentModalId;
+      const type = _currentModalType;
+      if (!id) return;
+      const s = _selectedSeason, e = _selectedEpisode;
+      const allUrls = getModalServerUrls(id, type, s, e);
+      const allLabels = ['▶ Server 1', '▶ Server 2', '▶ Server 3', '▶ Server 4'];
+      const colors = ['var(--green)', '#3B82F6', '#8B5CF6', '#F59E0B'];
+      const textColors = ['#fff', '#fff', '#fff', '#07090F'];
+      const btns = document.querySelectorAll('.modal-play-btn');
+      btns.forEach((btn, i) => {
+        btn.onclick = () => playStream(allUrls[i], allUrls, allLabels);
+      });
+    }
+
+    async function setupEpChooser(tvId, numSeasons) {
+      const chooser = document.getElementById('modalEpChooser');
+      const seasonSel = document.getElementById('epSeasonSelect');
+      const episodeSel = document.getElementById('epEpisodeSelect');
+      const hint = document.getElementById('epHint');
+
+      chooser.style.display = 'block';
+      seasonSel.innerHTML = '<option value="">Season…</option>';
+      for (let s = 1; s <= numSeasons; s++) {
+        seasonSel.innerHTML += `<option value="${s}">Season ${s}</option>`;
+      }
+
+      // Default to season 1
+      seasonSel.value = '1';
+      _selectedSeason = 1;
+      _selectedEpisode = 1;
+
+      async function populateEpisodes(season) {
+        episodeSel.disabled = true;
+        episodeSel.innerHTML = '<option value="">Loading…</option>';
+        hint.textContent = '';
+        const eps = await loadSeasonEpisodes(tvId, season);
+        episodeSel.innerHTML = '<option value="">Episode…</option>';
+        eps.forEach(ep => {
+          episodeSel.innerHTML += `<option value="${ep.number}">Ep ${ep.number}${ep.name ? ' — ' + ep.name : ''}</option>`;
+        });
+        if (eps.length) {
+          episodeSel.value = '1';
+          _selectedEpisode = 1;
+          hint.textContent = `${eps.length} episode${eps.length !== 1 ? 's' : ''} in this season`;
+        }
+        episodeSel.disabled = false;
+        refreshModalPlayButtons();
+      }
+
+      await populateEpisodes(1);
+
+      seasonSel.onchange = async () => {
+        const s = parseInt(seasonSel.value);
+        if (!s) return;
+        _selectedSeason = s;
+        await populateEpisodes(s);
+      };
+
+      episodeSel.onchange = () => {
+        const ep = parseInt(episodeSel.value);
+        if (!ep) return;
+        _selectedEpisode = ep;
+        refreshModalPlayButtons();
+      };
+    }
+
     // MODAL
     async function openModal(id, type = 'movie') {
       const heroVideo = document.getElementById('heroVideoContainer');
@@ -2883,28 +3085,41 @@
           const rtEl = document.getElementById('modal-rt');
           const imdbEl = document.getElementById('modal-imdb');
           const ms = document.getElementById('modalStreams');
-          let playBtnsHtml = '';
 
-          const s1Url = type === 'tv' ? `https://player.videasy.net/tv/${id}/1/1` : `https://player.videasy.net/movie/${id}`;
-          const s2Url = type === 'tv' ? `https://vidsrc.me/embed/tv?tmdb=${id}&season=1&episode=1` : `https://vidsrc.me/embed/movie?tmdb=${id}`;
-          const s3Url = type === 'tv' ? `https://vidfast.pro/tv/${id}/1/1` : `https://vidfast.pro/movie/${id}`;
-          const s4Url = type === 'tv' ? `https://embed.su/embed/tv/${id}/1/1` : `https://embed.su/embed/movie/${id}`;
-          const allUrls = [s1Url, s2Url, s3Url, s4Url];
+          // Set modal state
+          _currentModalId = id;
+          _currentModalType = type;
+          _selectedSeason = 1;
+          _selectedEpisode = 1;
+
+          const allUrls = getModalServerUrls(id, type, 1, 1);
           const allLabels = ['▶ Server 1', '▶ Server 2', '▶ Server 3', '▶ Server 4'];
-          const urlsJson = allUrls.map(u => `&quot;${u}&quot;`).join(',');
-          const labelsJson = allLabels.map(l => `&quot;${l}&quot;`).join(',');
+          const colors = ['var(--green)', '#3B82F6', '#8B5CF6', '#F59E0B'];
+          const textColors = ['#fff', '#fff', '#fff', '#07090F'];
 
-          // Trailer button is now located in modalRatings next to the TMDB badge
-
-          playBtnsHtml += `<button class="modal-stream-pill" style="background:var(--green);color:#fff;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${s1Url}',[${urlsJson}],[${labelsJson}])">▶ Server 1</button>`;
-          playBtnsHtml += `<button class="modal-stream-pill" style="background:#3B82F6;color:#fff;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${s2Url}',[${urlsJson}],[${labelsJson}])">▶ Server 2</button>`;
-          playBtnsHtml += `<button class="modal-stream-pill" style="background:#8B5CF6;color:#fff;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${s3Url}',[${urlsJson}],[${labelsJson}])">▶ Server 3</button>`;
-          playBtnsHtml += `<button class="modal-stream-pill" style="background:#F59E0B;color:#07090F;border:none;margin-right:0.5rem;cursor:pointer" onclick="playStream('${s4Url}',[${urlsJson}],[${labelsJson}])">▶ Server 4</button>`;
+          let playBtnsHtml = allUrls.map((u, i) =>
+            `<button class="modal-stream-pill modal-play-btn" data-server="${i}" style="background:${colors[i]};color:${textColors[i]};border:none;margin-right:0.5rem;margin-bottom:0.3rem;cursor:pointer">${allLabels[i]}</button>`
+          ).join('');
 
           if (ms.innerHTML.includes('no-stream')) {
             ms.innerHTML = playBtnsHtml;
           } else {
             ms.innerHTML = playBtnsHtml + ms.innerHTML;
+          }
+
+          // Wire up play buttons
+          ms.querySelectorAll('.modal-play-btn').forEach((btn, i) => {
+            btn.onclick = () => {
+              const urls = getModalServerUrls(_currentModalId, _currentModalType, _selectedSeason, _selectedEpisode);
+              playStream(urls[i], urls, allLabels);
+            };
+          });
+
+          // Setup season/episode chooser for TV shows
+          const epChooser = document.getElementById('modalEpChooser');
+          epChooser.style.display = 'none';
+          if (type === 'tv' && details.number_of_seasons) {
+            await setupEpChooser(id, details.number_of_seasons);
           }
 
           if (imdbId) {
@@ -2924,7 +3139,12 @@
     }
 
     document.getElementById('modalClose').addEventListener('click', () => {
-      gsap.to('#modalBox', { scale: .93, opacity: 0, y: 20, duration: .3, ease: 'power3.in', onComplete: () => document.getElementById('modal').classList.remove('open') });
+      gsap.to('#modalBox', { scale: .93, opacity: 0, y: 20, duration: .3, ease: 'power3.in', onComplete: () => {
+        document.getElementById('modal').classList.remove('open');
+        // Reset chooser
+        _currentModalId = null;
+        document.getElementById('modalEpChooser').style.display = 'none';
+      }});
     });
     document.getElementById('modal').addEventListener('click', e => {
       if (e.target === document.getElementById('modal')) document.getElementById('modalClose').click();
