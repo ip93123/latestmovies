@@ -1057,19 +1057,19 @@
 
     /* mini variant: small poster-corner badge */
     .rating-ring-wrap.mini {
-      width: 28px;
-      height: 28px;
+      width: 38px;
+      height: 38px;
       position: absolute;
       bottom: 8px;
       right: 8px;
       z-index: 4;
       background: rgba(7,9,15,0.82);
-      border: 1px solid rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.12);
     }
     .rating-ring-wrap.mini .rating-ring-bg,
-    .rating-ring-wrap.mini .rating-ring-fg { stroke-width: 2.5; }
-    .rating-ring-wrap.mini .rating-ring-score { font-size: .5rem; }
-    .rating-ring-wrap.mini .rating-ring-denom { font-size: .35rem; }
+    .rating-ring-wrap.mini .rating-ring-fg { stroke-width: 3; }
+    .rating-ring-wrap.mini .rating-ring-score { font-size: .62rem; }
+    .rating-ring-wrap.mini .rating-ring-denom { font-size: .4rem; }
 
     /* color tiers */
     .ring-high .rating-ring-fg { stroke: #27AE60; }
@@ -2122,22 +2122,37 @@
       // Netflix
       8:   { name: 'Netflix',        short: 'NF',  cls: 'netflix',   color: '#E50914', bg: 'rgba(229,9,20,0.15)',      border: 'rgba(229,9,20,0.4)' },
       // Amazon
-      9:   { name: 'Prime Video',    short: 'PV',  cls: 'prime',     color: '#00A8E1', bg: 'rgba(0,168,225,0.15)',    border: 'rgba(0,168,225,0.4)' },
+      9:   { name: 'Prime Video Alt',short: 'PV',  cls: 'prime',     color: '#00A8E1', bg: 'rgba(0,168,225,0.15)',    border: 'rgba(0,168,225,0.4)' },
       119: { name: 'Prime Video',    short: 'PV',  cls: 'prime',     color: '#00A8E1', bg: 'rgba(0,168,225,0.15)',    border: 'rgba(0,168,225,0.4)' },
       10:  { name: 'Amazon Video',   short: 'AV',  cls: 'prime',     color: '#00A8E1', bg: 'rgba(0,168,225,0.15)',    border: 'rgba(0,168,225,0.4)' },
+      533: { name: 'Arthaus',        short: 'ART', cls: 'prime',     color: '#00A8E1', bg: 'rgba(0,168,225,0.15)',    border: 'rgba(0,168,225,0.4)' },
+      613: { name: 'Prime Free Ads', short: 'PVF', cls: 'prime',     color: '#00A8E1', bg: 'rgba(0,168,225,0.15)',    border: 'rgba(0,168,225,0.4)' },
+      2100:{ name: 'Prime with Ads', short: 'PVA', cls: 'prime',     color: '#00A8E1', bg: 'rgba(0,168,225,0.15)',    border: 'rgba(0,168,225,0.4)' },
+      1898:{ name: 'Amazon MX Player',short: 'MX', cls: 'prime',     color: '#00A8E1', bg: 'rgba(0,168,225,0.15)',    border: 'rgba(0,168,225,0.4)' },
       // Disney
       337: { name: 'Disney+',        short: 'D+',  cls: 'disney',    color: '#6B9FFF', bg: 'rgba(17,60,166,0.15)',    border: 'rgba(17,60,166,0.5)' },
+      122: { name: 'Disney+ Alt',    short: 'D+',  cls: 'disney',    color: '#6B9FFF', bg: 'rgba(17,60,166,0.15)',    border: 'rgba(17,60,166,0.5)' },
+      508: { name: 'DisneyNow',      short: 'DN',  cls: 'disney',    color: '#6B9FFF', bg: 'rgba(17,60,166,0.15)',    border: 'rgba(17,60,166,0.5)' },
       // HBO / Max
-      384: { name: 'Max',            short: 'MAX', cls: 'hbo',       color: '#C87FFF', bg: 'rgba(160,32,240,0.15)',   border: 'rgba(160,32,240,0.4)' },
       1899:{ name: 'Max',            short: 'MAX', cls: 'hbo',       color: '#C87FFF', bg: 'rgba(160,32,240,0.15)',   border: 'rgba(160,32,240,0.4)' },
+      1825:{ name: 'Max Amazon',     short: 'MAX', cls: 'hbo',       color: '#C87FFF', bg: 'rgba(160,32,240,0.15)',   border: 'rgba(160,32,240,0.4)' },
+      2472:{ name: 'Max Amazon Alt', short: 'MAX', cls: 'hbo',       color: '#C87FFF', bg: 'rgba(160,32,240,0.15)',   border: 'rgba(160,32,240,0.4)' },
+      2284:{ name: 'Max U-NEXT',     short: 'MAX', cls: 'hbo',       color: '#C87FFF', bg: 'rgba(160,32,240,0.15)',   border: 'rgba(160,32,240,0.4)' },
       // Hulu
       15:  { name: 'Hulu',           short: 'HU',  cls: 'hulu',      color: '#1CE783', bg: 'rgba(28,231,131,0.15)',   border: 'rgba(28,231,131,0.4)' },
       // Apple
-      2:   { name: 'Apple TV+',      short: 'ATV', cls: 'apple',     color: '#fff',    bg: 'rgba(255,255,255,0.08)',  border: 'rgba(255,255,255,0.2)' },
+      2:   { name: 'Apple TV Store', short: 'ATV', cls: 'apple',     color: '#fff',    bg: 'rgba(255,255,255,0.08)',  border: 'rgba(255,255,255,0.2)' },
       350: { name: 'Apple TV+',      short: 'ATV', cls: 'apple',     color: '#fff',    bg: 'rgba(255,255,255,0.08)',  border: 'rgba(255,255,255,0.2)' },
+      2243:{ name: 'Apple TV Amazon',short: 'ATV', cls: 'apple',     color: '#fff',    bg: 'rgba(255,255,255,0.08)',  border: 'rgba(255,255,255,0.2)' },
       // Paramount
+      187: { name: 'Paramount Pics', short: 'PAR', cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)',   border: 'rgba(0,134,206,0.4)' },
       531: { name: 'Paramount+',     short: 'P+',  cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)',   border: 'rgba(0,134,206,0.4)' },
-      582: { name: 'Paramount+',     short: 'P+',  cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)',   border: 'rgba(0,134,206,0.4)' },
+      582: { name: 'Paramount+ Amazon',short:'P+', cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)',   border: 'rgba(0,134,206,0.4)' },
+      633: { name: 'Paramount+ Roku',short: 'P+',  cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)',   border: 'rgba(0,134,206,0.4)' },
+      1853:{ name: 'Paramount+ Apple',short:'P+',  cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)',   border: 'rgba(0,134,206,0.4)' },
+      2303:{ name: 'Paramount+ Premium',short:'P+',cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)',   border: 'rgba(0,134,206,0.4)' },
+      2580:{ name: 'Paramount+ Ads', short: 'P+',  cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)',   border: 'rgba(0,134,206,0.4)' },
+      2616:{ name: 'Paramount+ Essntl',short:'P+', cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)',   border: 'rgba(0,134,206,0.4)' },
       // Peacock
       386: { name: 'Peacock',        short: 'PCK', cls: 'peacock',   color: '#E86803', bg: 'rgba(232,104,3,0.15)',   border: 'rgba(232,104,3,0.4)' },
       387: { name: 'Peacock Free',   short: 'PCK', cls: 'peacock',   color: '#E86803', bg: 'rgba(232,104,3,0.15)',   border: 'rgba(232,104,3,0.4)' },
@@ -2148,57 +2163,86 @@
       // Showtime
       37:  { name: 'Showtime',       short: 'SHO', cls: 'default',   color: '#C41230', bg: 'rgba(196,18,48,0.15)',   border: 'rgba(196,18,48,0.4)' },
       // Discovery+
-      584: { name: 'Discovery+',     short: 'DIS', cls: 'default',   color: '#0B6FC2', bg: 'rgba(11,111,194,0.15)',  border: 'rgba(11,111,194,0.4)' },
+      524: { name: 'Discovery+',     short: 'DIS', cls: 'default',   color: '#0B6FC2', bg: 'rgba(11,111,194,0.15)',  border: 'rgba(11,111,194,0.4)' },
+      510: { name: 'Discovery+ Alt', short: 'DIS', cls: 'default',   color: '#0B6FC2', bg: 'rgba(11,111,194,0.15)',  border: 'rgba(11,111,194,0.4)' },
+      520: { name: 'Discovery+ Alt2',short: 'DIS', cls: 'default',   color: '#0B6FC2', bg: 'rgba(11,111,194,0.15)',  border: 'rgba(11,111,194,0.4)' },
+      584: { name: 'Discovery+ Amazon',short:'DIS',cls: 'default',   color: '#0B6FC2', bg: 'rgba(11,111,194,0.15)',  border: 'rgba(11,111,194,0.4)' },
       // AMC
       526: { name: 'AMC+',           short: 'AMC', cls: 'default',   color: '#EF3F2F', bg: 'rgba(239,63,47,0.15)',   border: 'rgba(239,63,47,0.4)' },
+      528: { name: 'AMC+ Amazon',    short: 'AMC', cls: 'default',   color: '#EF3F2F', bg: 'rgba(239,63,47,0.15)',   border: 'rgba(239,63,47,0.4)' },
+      1854:{ name: 'AMC+ Apple TV',  short: 'AMC', cls: 'default',   color: '#EF3F2F', bg: 'rgba(239,63,47,0.15)',   border: 'rgba(239,63,47,0.4)' },
+      635: { name: 'AMC+ Roku',      short: 'AMC', cls: 'default',   color: '#EF3F2F', bg: 'rgba(239,63,47,0.15)',   border: 'rgba(239,63,47,0.4)' },
+      2561:{ name: 'AMC+ Channels',  short: 'AMC', cls: 'default',   color: '#EF3F2F', bg: 'rgba(239,63,47,0.15)',   border: 'rgba(239,63,47,0.4)' },
       // Starz
       43:  { name: 'Starz',          short: 'STZ', cls: 'default',   color: '#0067B0', bg: 'rgba(0,103,176,0.15)',   border: 'rgba(0,103,176,0.4)' },
-      1794:{ name: 'Starz',          short: 'STZ', cls: 'default',   color: '#0067B0', bg: 'rgba(0,103,176,0.15)',   border: 'rgba(0,103,176,0.4)' },
+      630: { name: 'StarzPlay',      short: 'STZ', cls: 'default',   color: '#0067B0', bg: 'rgba(0,103,176,0.15)',   border: 'rgba(0,103,176,0.4)' },
+      634: { name: 'Starz Roku',     short: 'STZ', cls: 'default',   color: '#0067B0', bg: 'rgba(0,103,176,0.15)',   border: 'rgba(0,103,176,0.4)' },
+      1794:{ name: 'Starz Amazon',   short: 'STZ', cls: 'default',   color: '#0067B0', bg: 'rgba(0,103,176,0.15)',   border: 'rgba(0,103,176,0.4)' },
+      1855:{ name: 'Starz Apple TV', short: 'STZ', cls: 'default',   color: '#0067B0', bg: 'rgba(0,103,176,0.15)',   border: 'rgba(0,103,176,0.4)' },
       // Mubi
       11:  { name: 'MUBI',           short: 'MU',  cls: 'default',   color: '#48C4C4', bg: 'rgba(72,196,196,0.15)',  border: 'rgba(72,196,196,0.4)' },
       // Tubi
       73:  { name: 'Tubi TV',        short: 'TUB', cls: 'default',   color: '#FF5500', bg: 'rgba(255,85,0,0.15)',    border: 'rgba(255,85,0,0.4)' },
-      // YouTube
+      // YouTube / Google
+      3:   { name: 'Google Play',    short: 'GP',  cls: 'default',   color: '#FF0000', bg: 'rgba(255,0,0,0.12)',     border: 'rgba(255,0,0,0.35)' },
+      192: { name: 'YouTube',        short: 'YT',  cls: 'default',   color: '#FF0000', bg: 'rgba(255,0,0,0.12)',     border: 'rgba(255,0,0,0.35)' },
       188: { name: 'YouTube Premium',short: 'YT',  cls: 'default',   color: '#FF0000', bg: 'rgba(255,0,0,0.12)',     border: 'rgba(255,0,0,0.35)' },
+      235: { name: 'YouTube Free',   short: 'YT',  cls: 'default',   color: '#FF0000', bg: 'rgba(255,0,0,0.12)',     border: 'rgba(255,0,0,0.35)' },
+      2528:{ name: 'YouTube TV',     short: 'YTTV',cls: 'default',   color: '#FF0000', bg: 'rgba(255,0,0,0.12)',     border: 'rgba(255,0,0,0.35)' },
       // Plex
       538: { name: 'Plex',           short: 'PLX', cls: 'default',   color: '#E5A00D', bg: 'rgba(229,160,13,0.15)',  border: 'rgba(229,160,13,0.4)' },
-      // Vudu
+      // Vudu / Fandango
       7:   { name: 'Vudu',           short: 'VDU', cls: 'default',   color: '#4DA3E0', bg: 'rgba(77,163,224,0.15)',  border: 'rgba(77,163,224,0.4)' },
+      332: { name: 'Fandango Free',  short: 'FDG', cls: 'default',   color: '#4DA3E0', bg: 'rgba(77,163,224,0.15)',  border: 'rgba(77,163,224,0.4)' },
       // MGM
       1757:{ name: 'MGM+',           short: 'MGM', cls: 'default',   color: '#0F7A3A', bg: 'rgba(15,122,58,0.15)',   border: 'rgba(15,122,58,0.4)' },
+      583: { name: 'MGM+ Amazon',    short: 'MGM', cls: 'default',   color: '#0F7A3A', bg: 'rgba(15,122,58,0.15)',   border: 'rgba(15,122,58,0.4)' },
+      636: { name: 'MGM+ Roku',      short: 'MGM', cls: 'default',   color: '#0F7A3A', bg: 'rgba(15,122,58,0.15)',   border: 'rgba(15,122,58,0.4)' },
+      2141:{ name: 'MGM+ Amazon Alt',short: 'MGM', cls: 'default',   color: '#0F7A3A', bg: 'rgba(15,122,58,0.15)',   border: 'rgba(15,122,58,0.4)' },
+      2142:{ name: 'MGM+ Apple TV',  short: 'MGM', cls: 'default',   color: '#0F7A3A', bg: 'rgba(15,122,58,0.15)',   border: 'rgba(15,122,58,0.4)' },
       // BritBox
       151: { name: 'BritBox',        short: 'BB',  cls: 'default',   color: '#1380A1', bg: 'rgba(19,128,161,0.15)',  border: 'rgba(19,128,161,0.4)' },
       // Curiosity
       390: { name: 'Curiosity Stream',short:'CS',  cls: 'default',   color: '#F5A623', bg: 'rgba(245,166,35,0.15)',  border: 'rgba(245,166,35,0.4)' },
+      2060:{ name: 'Curiosity Apple',short: 'CS',  cls: 'default',   color: '#F5A623', bg: 'rgba(245,166,35,0.15)',  border: 'rgba(245,166,35,0.4)' },
       // Pluto
       300: { name: 'Pluto TV',       short: 'PLT', cls: 'default',   color: '#FFEA00', bg: 'rgba(255,234,0,0.12)',   border: 'rgba(255,234,0,0.35)' },
+      1965:{ name: 'Pluto TV Live',  short: 'PLT', cls: 'default',   color: '#FFEA00', bg: 'rgba(255,234,0,0.12)',   border: 'rgba(255,234,0,0.35)' },
       // Shudder
       99:  { name: 'Shudder',        short: 'SHD', cls: 'default',   color: '#AF0025', bg: 'rgba(175,0,37,0.15)',    border: 'rgba(175,0,37,0.4)' },
       // Acorn TV
       87:  { name: 'Acorn TV',       short: 'ACN', cls: 'default',   color: '#5C4033', bg: 'rgba(92,64,51,0.15)',    border: 'rgba(92,64,51,0.4)' },
-      // Hotstar/JioCinema (India)
-      122: { name: 'Hotstar',         short: 'HS',  cls: 'default',   color: '#1F80E0', bg: 'rgba(31,128,224,0.15)',  border: 'rgba(31,128,224,0.4)' },
-      2303:{ name: 'JioCinema',      short: 'JIO', cls: 'default',   color: '#5D0FC0', bg: 'rgba(93,15,192,0.15)',   border: 'rgba(93,15,192,0.4)' },
-      // SonyLiv (India)
+      2034:{ name: 'Acorn TV Apple', short: 'ACN', cls: 'default',   color: '#5C4033', bg: 'rgba(92,64,51,0.15)',    border: 'rgba(92,64,51,0.4)' },
+      2048:{ name: 'Sundance Now Apple',short:'SUN',cls:'default',   color: '#5C4033', bg: 'rgba(92,64,51,0.15)',    border: 'rgba(92,64,51,0.4)' },
+      // Sky
+      29:  { name: 'Sky Go',         short: 'SKY', cls: 'default',   color: '#0000FF', bg: 'rgba(0,0,255,0.15)',     border: 'rgba(0,0,255,0.4)' },
+      210: { name: 'Sky Standard',   short: 'SKY', cls: 'default',   color: '#0000FF', bg: 'rgba(0,0,255,0.15)',     border: 'rgba(0,0,255,0.4)' },
+      30:  { name: 'WOW',            short: 'WOW', cls: 'default',   color: '#0000FF', bg: 'rgba(0,0,255,0.15)',     border: 'rgba(0,0,255,0.4)' },
+      39:  { name: 'Now TV',         short: 'NOW', cls: 'default',   color: '#0000FF', bg: 'rgba(0,0,255,0.15)',     border: 'rgba(0,0,255,0.4)' },
+      130: { name: 'Sky Store',      short: 'SKY', cls: 'default',   color: '#0000FF', bg: 'rgba(0,0,255,0.15)',     border: 'rgba(0,0,255,0.4)' },
+      321: { name: 'Sky X',          short: 'SKY', cls: 'default',   color: '#0000FF', bg: 'rgba(0,0,255,0.15)',     border: 'rgba(0,0,255,0.4)' },
+      591: { name: 'Now TV Cinema',  short: 'NOW', cls: 'default',   color: '#0000FF', bg: 'rgba(0,0,255,0.15)',     border: 'rgba(0,0,255,0.4)' },
+      1773:{ name: 'SkyShowtime',    short: 'SKY', cls: 'default',   color: '#0000FF', bg: 'rgba(0,0,255,0.15)',     border: 'rgba(0,0,255,0.4)' },
+      2624:{ name: 'TV2 SkyShowtime',short: 'SKY', cls: 'default',   color: '#0000FF', bg: 'rgba(0,0,255,0.15)',     border: 'rgba(0,0,255,0.4)' },
+      // Other
+      258: { name: 'Criterion',      short: 'CRI', cls: 'default',   color: '#888',    bg: 'rgba(136,136,136,0.15)', border: 'rgba(136,136,136,0.4)' },
+      207: { name: 'The Roku Channel',short:'ROK', cls: 'default',   color: '#5C4033', bg: 'rgba(92,64,51,0.15)',    border: 'rgba(92,64,51,0.4)' },
+      38:  { name: 'BBC iPlayer',    short: 'BBC', cls: 'default',   color: '#FF0055', bg: 'rgba(255,0,85,0.15)',    border: 'rgba(255,0,85,0.4)' },
+      2311:{ name: 'Channel 4 Plus', short: 'C4',  cls: 'default',   color: '#00FF00', bg: 'rgba(0,255,0,0.15)',     border: 'rgba(0,255,0,0.4)' },
+      2101:{ name: 'Canal+',         short: 'C+',  cls: 'default',   color: '#000',    bg: 'rgba(40,40,40,0.5)',     border: 'rgba(100,100,100,0.4)' },
+      345: { name: 'Canal+ Séries',  short: 'C+',  cls: 'default',   color: '#000',    bg: 'rgba(40,40,40,0.5)',     border: 'rgba(100,100,100,0.4)' },
+      381: { name: 'Canal+ Alt',     short: 'C+',  cls: 'default',   color: '#000',    bg: 'rgba(40,40,40,0.5)',     border: 'rgba(100,100,100,0.4)' },
+      1929:{ name: 'Filmtastic',     short: 'FIL', cls: 'default',   color: '#000',    bg: 'rgba(40,40,40,0.5)',     border: 'rgba(100,100,100,0.4)' },
+      2102:{ name: 'Premiery Canal+',short: 'C+',  cls: 'default',   color: '#000',    bg: 'rgba(40,40,40,0.5)',     border: 'rgba(100,100,100,0.4)' },
+      298: { name: 'RTL+',           short: 'RTL', cls: 'default',   color: '#FF0000', bg: 'rgba(255,0,0,0.15)',     border: 'rgba(255,0,0,0.4)' },
+      2578:{ name: 'RTL+ Max Amazon',short: 'RTL', cls: 'default',   color: '#FF0000', bg: 'rgba(255,0,0,0.15)',     border: 'rgba(255,0,0,0.4)' },
+      344: { name: 'Rakuten Viki',   short: 'RAK', cls: 'default',   color: '#BF0000', bg: 'rgba(191,0,0,0.15)',     border: 'rgba(191,0,0,0.4)' },
+      55:  { name: 'Showmax',        short: 'SHW', cls: 'default',   color: '#00BFFF', bg: 'rgba(0,191,255,0.15)',   border: 'rgba(0,191,255,0.4)' },
+      84:  { name: 'U-NEXT',         short: 'UNX', cls: 'default',   color: '#0000FF', bg: 'rgba(0,0,255,0.15)',     border: 'rgba(0,0,255,0.4)' },
       237: { name: 'SonyLIV',        short: 'SLV', cls: 'default',   color: '#111',    bg: 'rgba(30,30,30,0.4)',     border: 'rgba(80,80,80,0.5)' },
-      // ZEE5 (India)
-      232: { name: 'ZEE5',           short: 'Z5',  cls: 'default',   color: '#6B25B5', bg: 'rgba(107,37,181,0.15)',  border: 'rgba(107,37,181,0.4)' },
-      // Sun NXT (India)
-      633: { name: 'Sun NXT',        short: 'SUN', cls: 'default',   color: '#FF6B00', bg: 'rgba(255,107,0,0.15)',   border: 'rgba(255,107,0,0.4)' },
-      // Aha (India - Telugu/Tamil)
-      1853:{ name: 'Aha',            short: 'AHA', cls: 'default',   color: '#FFCC00', bg: 'rgba(255,204,0,0.12)',   border: 'rgba(255,204,0,0.4)' },
-      // Lionsgate Play (India)
-      2616:{ name: 'Lionsgate Play', short: 'LGP', cls: 'default',   color: '#D1001F', bg: 'rgba(209,0,31,0.15)',    border: 'rgba(209,0,31,0.4)' },
-      // Voot / Colors (India)
-      2528:{ name: 'Voot',           short: 'VOT', cls: 'default',   color: '#F26522', bg: 'rgba(242,101,34,0.15)',  border: 'rgba(242,101,34,0.4)' },
-      // Lionsgate+
-      1854:{ name: 'Lionsgate+',     short: 'LG',  cls: 'default',   color: '#D1001F', bg: 'rgba(209,0,31,0.15)',    border: 'rgba(209,0,31,0.4)' },
-      // Channel 4 / ITVX (UK)
-      103: { name: 'ITVX',           short: 'ITV', cls: 'default',   color: '#F2B705', bg: 'rgba(242,183,5,0.15)',   border: 'rgba(242,183,5,0.4)' },
-      // Canal+
-      381: { name: 'Canal+',         short: 'C+',  cls: 'default',   color: '#000',    bg: 'rgba(40,40,40,0.5)',     border: 'rgba(100,100,100,0.4)' },
-      // Rakuten
-      35:  { name: 'Rakuten TV',     short: 'RAK', cls: 'default',   color: '#BF0000', bg: 'rgba(191,0,0,0.15)',     border: 'rgba(191,0,0,0.4)' },
+      307: { name: 'Globoplay',      short: 'GLO', cls: 'default',   color: '#00FF00', bg: 'rgba(0,255,0,0.15)',     border: 'rgba(0,255,0,0.4)' },
+      457: { name: 'ViX',            short: 'VIX', cls: 'default',   color: '#FF0000', bg: 'rgba(255,0,0,0.15)',     border: 'rgba(255,0,0,0.4)' },
+      581: { name: 'iQIYI',          short: 'IQI', cls: 'default',   color: '#00FF00', bg: 'rgba(0,255,0,0.15)',     border: 'rgba(0,255,0,0.4)' },
     };
 
     const omdbCache = {}, watchCache = {}, providerLogos = {};
