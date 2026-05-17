@@ -2679,25 +2679,67 @@
     </div>`;
     }
 
+    // Major platforms always shown in filter bar (in display order)
+    const PINNED_PROVIDERS = [8, 1796, 119, 337, 1899, 15, 350, 386, 531];
+
+    function buildFilterBtn(id, info, activeFilter) {
+      const logoPath = providerLogos[id] || providerLogos[+id];
+      const logoHtml = logoPath
+        ? `<img src="${IMG}w45${logoPath}" style="width:16px;height:16px;border-radius:3px;object-fit:cover;flex-shrink:0" alt="">`
+        : `<span style="font-size:.72rem;font-weight:900">${info.short}</span>`;
+      const isActive = activeFilter === String(id);
+      return `<button class="stream-filter-btn sfb-${info.cls} ${isActive ? 'active' : ''}" data-id="${id}"
+        style="${isActive ? `background:${info.color};color:#07090F;border-color:transparent` : ''};display:inline-flex;align-items:center;gap:.35rem">
+        ${logoHtml}<span>${info.name}</span>
+      </button>`;
+    }
+
     function buildFilterBar(containerId, items, activeFilter, onFilter) {
       const bar = document.getElementById(containerId);
-      // Collect all providers from items
-      const providerSet = {};
+
+      // Collect all provider IDs present in displayed cards
+      const cardProviderIds = new Set();
       items.forEach(item => {
-        const ids = (item.dataset && item.dataset.providers ? item.dataset.providers : '').split(',').filter(Boolean);
-        ids.forEach(id => {
-          if (!providerSet[id]) { const info = getProviderInfo(+id); providerSet[id] = info; }
-        });
+        (item.dataset?.providers || '').split(',').filter(Boolean).forEach(id => cardProviderIds.add(+id));
       });
-      const providerEntries = Object.entries(providerSet).slice(0, 7);
-      bar.innerHTML = `<button class="stream-filter-btn sfb-all ${activeFilter === 'all' ? 'active' : ''}" data-id="all">🎬 All</button>` +
-        providerEntries.map(([id, info]) => `<button class="stream-filter-btn sfb-${info.cls} ${activeFilter === id ? 'active' : ''}" data-id="${id}" style="${activeFilter === id ? `background:${info.color};color:#07090F;border-color:transparent` : ''}">${info.short} ${info.name}</button>`).join('');
+
+      // Start with pinned providers that appear in the cards
+      const shownIds = new Set();
+      let html = `<button class="stream-filter-btn sfb-all ${activeFilter === 'all' ? 'active' : ''}" data-id="all">🎬 All</button>`;
+
+      PINNED_PROVIDERS.forEach(id => {
+        if (!cardProviderIds.has(id)) return;
+        const info = getProviderInfo(id);
+        html += buildFilterBtn(id, info, activeFilter);
+        shownIds.add(id);
+      });
+
+      // Append any extra providers from cards not already shown (up to 4 extras)
+      let extras = 0;
+      cardProviderIds.forEach(id => {
+        if (shownIds.has(id) || extras >= 4) return;
+        const info = getProviderInfo(id);
+        html += buildFilterBtn(id, info, activeFilter);
+        shownIds.add(id);
+        extras++;
+      });
+
+      bar.innerHTML = html;
+
       bar.querySelectorAll('.stream-filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          bar.querySelectorAll('.stream-filter-btn').forEach(b => { b.classList.remove('active'); b.style.background = ''; b.style.color = ''; b.style.borderColor = ''; });
+          bar.querySelectorAll('.stream-filter-btn').forEach(b => {
+            b.classList.remove('active');
+            b.style.background = ''; b.style.color = ''; b.style.borderColor = '';
+          });
           btn.classList.add('active');
           const id = btn.dataset.id;
-          if (id !== 'all') { const info = getProviderInfo(+id); btn.style.background = info.color; btn.style.color = '#07090F'; btn.style.borderColor = 'transparent'; }
+          if (id !== 'all') {
+            const info = getProviderInfo(+id);
+            btn.style.background = info.color;
+            btn.style.color = '#07090F';
+            btn.style.borderColor = 'transparent';
+          }
           gsap.fromTo(btn, { scale: .92 }, { scale: 1, duration: .25, ease: 'back.out(2)' });
           onFilter(id);
         });
