@@ -2279,6 +2279,70 @@
     const IMG = 'https://image.tmdb.org/t/p/';
     const COUNTRY = 'US';
 
+    // Platform direct URLs
+    const PLATFORM_URLS = {
+      8:   'https://www.netflix.com',
+      9:   'https://www.amazon.com/prime-video',
+      119: 'https://www.amazon.com/prime-video',
+      10:  'https://www.amazon.com/video',
+      337: 'https://www.disneyplus.com',
+      122: 'https://www.disneyplus.com',
+      508: 'https://disneynow.com',
+      1899:'https://www.max.com',
+      1825:'https://www.max.com',
+      2472:'https://www.max.com',
+      15:  'https://www.hulu.com',
+      2:   'https://tv.apple.com',
+      350: 'https://tv.apple.com',
+      2243:'https://tv.apple.com',
+      531: 'https://www.paramountplus.com',
+      582: 'https://www.paramountplus.com',
+      633: 'https://www.paramountplus.com',
+      187: 'https://www.paramountplus.com',
+      386: 'https://www.peacocktv.com',
+      387: 'https://www.peacocktv.com',
+      283: 'https://www.crunchyroll.com',
+      257: 'https://www.fubo.tv',
+      37:  'https://www.showtime.com',
+      524: 'https://www.discoveryplus.com',
+      510: 'https://www.discoveryplus.com',
+      526: 'https://www.amcplus.com',
+      528: 'https://www.amcplus.com',
+      43:  'https://www.starz.com',
+      630: 'https://www.starz.com',
+      11:  'https://mubi.com',
+      73:  'https://tubitv.com',
+      3:   'https://play.google.com/store/movies',
+      192: 'https://www.youtube.com/movies',
+      188: 'https://www.youtube.com/premium',
+      235: 'https://www.youtube.com/movies',
+      2528:'https://tv.youtube.com',
+      538: 'https://www.plex.tv',
+      7:   'https://www.vudu.com',
+      332: 'https://www.fandangonow.com',
+      1757:'https://www.mgmplus.com',
+      583: 'https://www.mgmplus.com',
+      34:  'https://www.mgmplus.com',
+      636: 'https://www.mgmplus.com',
+      151: 'https://www.britbox.com',
+      390: 'https://www.curiositystream.com',
+      300: 'https://pluto.tv',
+      99:  'https://www.shudder.com',
+      87:  'https://acorn.tv',
+      207: 'https://therokuchannel.roku.com',
+      38:  'https://www.bbc.co.uk/iplayer',
+      29:  'https://www.skygo.co.uk',
+      39:  'https://www.nowtv.com',
+      1773:'https://www.skyshowtime.com',
+      486: 'https://www.spectrum.net/services/tv/streaming',
+      2383:'https://www.philo.com',
+      55:  'https://www.showmax.com',
+      344: 'https://www.viki.com',
+      84:  'https://video.unext.jp',
+      237: 'https://www.sonyliv.com',
+      457: 'https://www.vix.com',
+    };
+
     // Provider config
     const PROVIDERS = {
       // Netflix
@@ -2405,6 +2469,12 @@
       307: { name: 'Globoplay',      short: 'GLO', cls: 'default',   color: '#00FF00', bg: 'rgba(0,255,0,0.15)',     border: 'rgba(0,255,0,0.4)' },
       457: { name: 'ViX',            short: 'VIX', cls: 'default',   color: '#FF0000', bg: 'rgba(255,0,0,0.15)',     border: 'rgba(255,0,0,0.4)' },
       581: { name: 'iQIYI',          short: 'IQI', cls: 'default',   color: '#00FF00', bg: 'rgba(0,255,0,0.15)',     border: 'rgba(0,255,0,0.4)' },
+      // Spectrum
+      486: { name: 'Spectrum TV',    short: 'SPC', cls: 'default',   color: '#0070CC', bg: 'rgba(0,112,204,0.15)',   border: 'rgba(0,112,204,0.4)' },
+      // Philo
+      2383:{ name: 'Philo',          short: 'PHI', cls: 'default',   color: '#54B848', bg: 'rgba(84,184,72,0.15)',   border: 'rgba(84,184,72,0.4)' },
+      // MGM+ (id 34)
+      34:  { name: 'MGM+',           short: 'MGM', cls: 'default',   color: '#0F7A3A', bg: 'rgba(15,122,58,0.15)',   border: 'rgba(15,122,58,0.4)' },
     };
 
     const omdbCache = {}, watchCache = {}, providerLogos = {};
@@ -2527,7 +2597,8 @@
         flatrate.forEach(p => {
           const info = getProviderInfo(p.provider_id);
           const logo = p.logo_path ? `<img src="${IMG}w45${p.logo_path}" style="width:18px;height:18px;border-radius:4px;object-fit:cover" alt="">` : '';
-          html += `<a class="modal-stream-pill" style="background:${info.bg};border-color:${info.border};color:${info.color}" href="https://www.themoviedb.org/" target="_blank">${logo} ${info.name}</a>`;
+          const url = PLATFORM_URLS[p.provider_id] || `https://www.google.com/search?q=watch+on+${encodeURIComponent(info.name)}`;
+          html += `<a class="modal-stream-pill" style="background:${info.bg};border-color:${info.border};color:${info.color}" href="${url}" target="_blank" rel="noopener">${logo} ${info.name}</a>`;
         });
       }
       return html || '<div class="no-stream">Not available for streaming in your region</div>';
@@ -2650,9 +2721,11 @@
       const grid = document.getElementById('platformGrid');
       grid.innerHTML = sorted.map(([id, count]) => {
         const info = getProviderInfo(+id);
-        const logoHtml = providerLogos[id] ? `<img src="${IMG}w154${providerLogos[id]}" style="width:100%;height:100%;object-fit:cover;border-radius:11px" alt="${info.name}">` : info.short;
-        return `<div class="platform-card" data-pid="${id}" style="border-color:${info.border}">
-      <div class="platform-icon" style="background:${info.bg};color:${info.color};border:1px solid ${info.border};font-size:.95rem;font-weight:900;overflow:hidden">${logoHtml}</div>
+        const logoPath = providerLogos[id] || providerLogos[+id];
+        const logoHtml = logoPath ? `<img src="${IMG}w154${logoPath}" style="width:100%;height:100%;object-fit:cover;border-radius:11px" alt="${info.name}">` : `<span style="font-size:.85rem;font-weight:900;letter-spacing:-.5px">${info.short}</span>`;
+        const url = PLATFORM_URLS[+id] || `https://www.google.com/search?q=watch+on+${encodeURIComponent(info.name)}`;
+        return `<div class="platform-card" data-pid="${id}" style="border-color:${info.border};cursor:pointer" onclick="window.open('${url}','_blank')">
+      <div class="platform-icon" style="background:${info.bg};color:${info.color};border:1px solid ${info.border};font-size:.95rem;font-weight:900;overflow:hidden;display:flex;align-items:center;justify-content:center">${logoHtml}</div>
       <div class="platform-name">${info.name}</div>
       <div class="platform-count">${count} title${count !== 1 ? 's' : ''} available</div>
     </div>`;
