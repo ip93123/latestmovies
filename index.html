@@ -1941,7 +1941,7 @@
     <div class="player-server-bar" id="playerServerBar"></div>
     <div class="player-container">
       <button class="player-close" id="playerClose">&#10005;</button>
-      <iframe id="playerFrame" src="" allowfullscreen allow="autoplay; fullscreen"></iframe>
+      <iframe id="playerFrame" src="about:blank" allow="autoplay; fullscreen"></iframe>
     </div>
   </div>
 
@@ -2260,8 +2260,14 @@
     };
 
     async function tmdb(path) {
-      const r = await fetch(`/api/tmdb?target=${encodeURIComponent(path)}`);
-      return r.json();
+      try {
+        const r = await fetch(`/api/tmdb?target=${encodeURIComponent(path)}`);
+        if (!r.ok) return {};
+        const text = await r.text();
+        return text ? JSON.parse(text) : {};
+      } catch (e) {
+        return {};
+      }
     }
     async function getWatch(id, type = 'movie') {
       const key = `${type}-${id}`;
