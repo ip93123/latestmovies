@@ -2515,6 +2515,13 @@
     }
 
     async function setHero(idx, initial = false) {
+      if (!initial) {
+        const mOpen = document.getElementById('modal')?.classList.contains('open');
+        const pOpen = document.getElementById('playerOverlay')?.classList.contains('open');
+        const sOpen = document.getElementById('searchOverlay')?.classList.contains('open');
+        if (mOpen || pOpen || sOpen) return;
+      }
+
       heroIdx = idx;
       document.querySelectorAll('.hero-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
       const m = heroMovies[idx];
@@ -2750,6 +2757,9 @@
 
     // MODAL
     async function openModal(id, type = 'movie') {
+      const heroVideo = document.getElementById('heroVideoContainer');
+      if (heroVideo) heroVideo.innerHTML = '';
+
       const modal = document.getElementById('modal');
       modal.classList.add('open');
       document.getElementById('modalTitle').textContent = 'Loading…';
