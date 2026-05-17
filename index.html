@@ -1016,6 +1016,9 @@
       width: 42px;
       height: 42px;
       flex-shrink: 0;
+      background: rgba(7,9,15,0.75);
+      border-radius: 50%;
+      backdrop-filter: blur(6px);
     }
     .rating-ring-wrap svg {
       transform: rotate(-90deg);
@@ -1038,8 +1041,6 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: .6rem;
-      font-weight: 800;
       line-height: 1;
       pointer-events: none;
     }
@@ -1053,15 +1054,22 @@
       color: var(--muted);
       font-weight: 600;
     }
-    /* mini variant for card bottom */
+
+    /* mini variant: small poster-corner badge */
     .rating-ring-wrap.mini {
-      width: 36px;
-      height: 36px;
+      width: 28px;
+      height: 28px;
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      z-index: 4;
+      background: rgba(7,9,15,0.82);
+      border: 1px solid rgba(255,255,255,0.1);
     }
     .rating-ring-wrap.mini .rating-ring-bg,
-    .rating-ring-wrap.mini .rating-ring-fg { stroke-width: 3; }
-    .rating-ring-wrap.mini .rating-ring-score { font-size: .65rem; }
-    .rating-ring-wrap.mini .rating-ring-denom { font-size: .42rem; }
+    .rating-ring-wrap.mini .rating-ring-fg { stroke-width: 2.5; }
+    .rating-ring-wrap.mini .rating-ring-score { font-size: .5rem; }
+    .rating-ring-wrap.mini .rating-ring-denom { font-size: .35rem; }
 
     /* color tiers */
     .ring-high .rating-ring-fg { stroke: #27AE60; }
@@ -1073,8 +1081,14 @@
     .ring-na   .rating-ring-fg { stroke: rgba(255,255,255,0.15); }
     .ring-na   .rating-ring-score { color: var(--muted); }
 
+    /* card-ratings now just holds position context (ring is absolute) */
+    .card-ratings {
+      height: 0;
+      overflow: visible;
+    }
+
     .mini-rating {
-      display: none; /* replaced by ring */
+      display: none;
     }
 
     /* TRENDING - horizontal list style */
@@ -2169,6 +2183,14 @@
       237: { name: 'SonyLIV',        short: 'SLV', cls: 'default',   color: '#111',    bg: 'rgba(30,30,30,0.4)',     border: 'rgba(80,80,80,0.5)' },
       // ZEE5 (India)
       232: { name: 'ZEE5',           short: 'Z5',  cls: 'default',   color: '#6B25B5', bg: 'rgba(107,37,181,0.15)',  border: 'rgba(107,37,181,0.4)' },
+      // Sun NXT (India)
+      633: { name: 'Sun NXT',        short: 'SUN', cls: 'default',   color: '#FF6B00', bg: 'rgba(255,107,0,0.15)',   border: 'rgba(255,107,0,0.4)' },
+      // Aha (India - Telugu/Tamil)
+      1853:{ name: 'Aha',            short: 'AHA', cls: 'default',   color: '#FFCC00', bg: 'rgba(255,204,0,0.12)',   border: 'rgba(255,204,0,0.4)' },
+      // Lionsgate Play (India)
+      2616:{ name: 'Lionsgate Play', short: 'LGP', cls: 'default',   color: '#D1001F', bg: 'rgba(209,0,31,0.15)',    border: 'rgba(209,0,31,0.4)' },
+      // Voot / Colors (India)
+      2528:{ name: 'Voot',           short: 'VOT', cls: 'default',   color: '#F26522', bg: 'rgba(242,101,34,0.15)',  border: 'rgba(242,101,34,0.4)' },
       // Lionsgate+
       1854:{ name: 'Lionsgate+',     short: 'LG',  cls: 'default',   color: '#D1001F', bg: 'rgba(209,0,31,0.15)',    border: 'rgba(209,0,31,0.4)' },
       // Channel 4 / ITVX (UK)
@@ -2322,15 +2344,13 @@
       <div class="card-play"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>
       ${rank ? `<div class="card-rank">${String(rank).padStart(2, '0')}</div>` : ''}
       ${!rank ? `<div class="type-badge ${typeClass}">${typeLabel}</div>` : ''}
+      ${buildRatingRing(vote, `${item.id}-card`, true)}
       <div class="card-stream-logos">${streamLogos}</div>
     </div>
     <div class="card-info">
       <div class="card-title">${title}</div>
       <div class="card-sub">${year || '—'}</div>
       <div class="card-stream-pills">${streamPills}</div>
-      <div class="card-ratings">
-        ${buildRatingRing(vote, `${item.id}-card`, true)}
-      </div>
     </div>
   </div>`;
     }
