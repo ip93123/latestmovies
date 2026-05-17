@@ -2539,19 +2539,15 @@
         const od = await getOMDb(imdbId);
         if (!od || od.Response !== 'True') return;
 
-        // IMDb score
+        // IMDb score from OMDb
         if (od.imdbRating && od.imdbRating !== 'N/A') {
           document.querySelectorAll(`.imdb-${tmdbId}`).forEach(el => {
             el.textContent = `⭐ ${od.imdbRating}`;
           });
         }
 
-        // RT: try RapidAPI first, fall back to OMDb embedded score
-        const title = od.Title || '';
-        const year = od.Year ? od.Year.slice(0, 4) : '';
-        let rt = await getRTScore(title, year);
-        if (!rt) rt = rtVal(od.Ratings);
-
+        // RT score from OMDb only (no RapidAPI here to avoid mass 429s)
+        const rt = rtVal(od.Ratings);
         document.querySelectorAll(`.rt-${tmdbId}`).forEach(el => {
           el.textContent = rt ? `🍅 ${rt}` : '🍅 —';
           el.style.color = rt ? rtColor(rt) : 'var(--muted)';
@@ -2643,7 +2639,9 @@
           if (imdbId) {
             const od = await getOMDb(imdbId);
             if (od && od.Response === 'True') {
-              const rt = rtVal(od.Ratings);
+              // Try RapidAPI RT for modal (single on-demand call = safe)
+              let rt = await getRTScore(od.Title || title, od.Year ? od.Year.slice(0, 4) : year);
+              if (!rt) rt = rtVal(od.Ratings);
               if (rtEl) {
                 rtEl.textContent = rt ? `🍅 ${rt}` : '🍅 N/A';
                 rtEl.style.color = rt ? rtColor(rt) : 'var(--muted)';
