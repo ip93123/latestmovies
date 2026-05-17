@@ -1595,6 +1595,7 @@
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 12px;
+      overflow: hidden;
     }
 
     .ep-chooser-label {
@@ -1623,11 +1624,13 @@
       gap: .6rem;
       flex-wrap: wrap;
       align-items: center;
+      overflow: hidden;
     }
 
     .ep-select {
       flex: 1;
-      min-width: 120px;
+      min-width: 0;
+      width: 0;
       background: rgba(7, 9, 15, 0.8);
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 8px;
@@ -1644,6 +1647,9 @@
       background-position: right .75rem center;
       padding-right: 2rem;
       transition: border-color .2s;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
     }
 
     .ep-select:focus, .ep-select:hover {
