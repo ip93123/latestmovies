@@ -3017,8 +3017,9 @@
           const s2Url = type === 'tv' ? `https://vidsrc.me/embed/tv?tmdb=${m.id}&season=1&episode=1` : `https://vidsrc.me/embed/movie?tmdb=${m.id}`;
           const s3Url = type === 'tv' ? `https://vidfast.pro/tv/${m.id}/1/1` : `https://vidfast.pro/movie/${m.id}`;
           const s4Url = type === 'tv' ? `https://vidsrc.xyz/embed/tv?tmdb=${m.id}&season=1&episode=1` : `https://vidsrc.xyz/embed/movie?tmdb=${m.id}`;
-          const allUrls = [s1Url, s2Url, s3Url, s4Url];
-          const allLabels = ['Server 1', 'Server 2', 'Server 3', 'Server 4'];
+          const s5Url = type === 'tv' ? `https://vidcore.net/tv/${m.id}/1/1` : `https://vidcore.net/movie/${m.id}`;
+          const allUrls = [s1Url, s2Url, s3Url, s4Url, s5Url];
+          const allLabels = ['Server 1', 'Server 2', 'Server 3', 'Server 4', 'Server 5'];
           heroPlayBtn.onclick = () => playStream(s1Url, allUrls, allLabels);
         }
         if (imdbId) {
@@ -3171,6 +3172,7 @@
         case 2: return `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`;
         case 3: return `https://vidfast.pro/tv/${id}/${season}/${episode}`;
         case 4: return `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`;
+        case 5: return `https://vidcore.net/tv/${id}/${season}/${episode}`;
         default: return `https://player.videasy.net/tv/${id}/${season}/${episode}`;
       }
     }
@@ -3182,6 +3184,7 @@
           buildEpisodeUrl(2, id, season, episode),
           buildEpisodeUrl(3, id, season, episode),
           buildEpisodeUrl(4, id, season, episode),
+          buildEpisodeUrl(5, id, season, episode),
         ];
       }
       return [
@@ -3189,6 +3192,7 @@
         `https://vidsrc.me/embed/movie?tmdb=${id}`,
         `https://vidfast.pro/movie/${id}`,
         `https://vidsrc.xyz/embed/movie?tmdb=${id}`,
+        `https://vidcore.net/movie/${id}`,
       ];
     }
 
@@ -3198,9 +3202,9 @@
       if (!id) return;
       const s = _selectedSeason, e = _selectedEpisode;
       const allUrls = getModalServerUrls(id, type, s, e);
-      const allLabels = ['▶ Server 1', '▶ Server 2', '▶ Server 3', '▶ Server 4'];
-      const colors = ['var(--green)', '#3B82F6', '#8B5CF6', '#F59E0B'];
-      const textColors = ['#fff', '#fff', '#fff', '#07090F'];
+      const allLabels = ['▶ Server 1', '▶ Server 2', '▶ Server 3', '▶ Server 4', '▶ Server 5'];
+      const colors = ['var(--green)', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444'];
+      const textColors = ['#fff', '#fff', '#fff', '#07090F', '#fff'];
       const btns = document.querySelectorAll('.modal-play-btn');
       btns.forEach((btn, i) => {
         btn.onclick = () => playStream(allUrls[i], allUrls, allLabels);
@@ -3338,9 +3342,9 @@
           _selectedEpisode = 1;
 
           const allUrls = getModalServerUrls(id, type, 1, 1);
-          const allLabels = ['▶ Server 1', '▶ Server 2', '▶ Server 3', '▶ Server 4'];
-          const colors = ['var(--green)', '#3B82F6', '#8B5CF6', '#F59E0B'];
-          const textColors = ['#fff', '#fff', '#fff', '#07090F'];
+          const allLabels = ['▶ Server 1', '▶ Server 2', '▶ Server 3', '▶ Server 4', '▶ Server 5'];
+          const colors = ['var(--green)', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444'];
+          const textColors = ['#fff', '#fff', '#fff', '#07090F', '#fff'];
 
           let playBtnsHtml = allUrls.map((u, i) =>
             `<button class="modal-stream-pill modal-play-btn" data-server="${i}" style="background:${colors[i]};color:${textColors[i]};border:none;margin-right:0.5rem;margin-bottom:0.3rem;cursor:pointer">${allLabels[i]}</button>`
