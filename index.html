@@ -3016,7 +3016,7 @@
           const s1Url = type === 'tv' ? `https://player.videasy.net/tv/${m.id}/1/1` : `https://player.videasy.net/movie/${m.id}`;
           const s2Url = type === 'tv' ? `https://vidsrc.me/embed/tv?tmdb=${m.id}&season=1&episode=1` : `https://vidsrc.me/embed/movie?tmdb=${m.id}`;
           const s3Url = type === 'tv' ? `https://vidfast.pro/tv/${m.id}/1/1` : `https://vidfast.pro/movie/${m.id}`;
-          const s4Url = type === 'tv' ? `https://2embed.cc/embed/tv?tmdb=${m.id}&s=1&e=1` : `https://2embed.cc/embed/movie?tmdb=${m.id}`;
+          const s4Url = type === 'tv' ? `https://www.2embed.cc/embedtv/${m.id}&s=1&e=1` : `https://www.2embed.cc/embed/${m.id}`;
           const allUrls = [s1Url, s2Url, s3Url, s4Url];
           const allLabels = ['Server 1', 'Server 2', 'Server 3', 'Server 4'];
           heroPlayBtn.onclick = () => playStream(s1Url, allUrls, allLabels);
@@ -3170,7 +3170,7 @@
         case 1: return `https://player.videasy.net/tv/${id}/${season}/${episode}`;
         case 2: return `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`;
         case 3: return `https://vidfast.pro/tv/${id}/${season}/${episode}`;
-        case 4: return `https://2embed.cc/embed/tv?tmdb=${id}&s=${season}&e=${episode}`;
+        case 4: return `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`;
         default: return `https://player.videasy.net/tv/${id}/${season}/${episode}`;
       }
     }
@@ -3188,7 +3188,7 @@
         `https://player.videasy.net/movie/${id}`,
         `https://vidsrc.me/embed/movie?tmdb=${id}`,
         `https://vidfast.pro/movie/${id}`,
-        `https://2embed.cc/embed/movie?tmdb=${id}`,
+        `https://www.2embed.cc/embed/${id}`,
       ];
     }
 
