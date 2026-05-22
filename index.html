@@ -3570,9 +3570,8 @@
     }
 
     // MODAL
-    async    function openModal(id, type = 'movie') {
+    async function openModal(id, type = 'movie') {
       // Auto-focus close button when in TV mode so remote navigation works immediately
-      const _origOpen = arguments.callee;
       setTimeout(() => {
         if (_tvMode) {
           const firstBtn = document.querySelector('#modal.open #modalClose');
