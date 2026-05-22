@@ -3613,7 +3613,14 @@
       }
       overlay.classList.add('open');
       gsap.fromTo('.player-container', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'power3.out' });
-      if (isTvPlay) updateEpNavButtons();
+      if (isTvPlay) {
+        updateEpNavButtons();
+        // Start runtime-based auto-play timer as soon as the iframe loads
+        frame.addEventListener('load', function onLoad() {
+          frame.removeEventListener('load', onLoad);
+          scheduleEpisodeAutoPlay(_currentModalId, _selectedSeason, _selectedEpisode);
+        }, { once: true });
+      }
 
       if (frame.requestFullscreen) {
         frame.requestFullscreen().catch(e => console.log('Fullscreen error:', e));
@@ -3672,7 +3679,12 @@
       _autoPlayEnabled = !_autoPlayEnabled;
       localStorage.setItem('autoplay', _autoPlayEnabled);
       updateAutoPlayToggleBtn();
-      if (!_autoPlayEnabled) cancelAutoPlayCountdown();
+      if (!_autoPlayEnabled) {
+        cancelAutoPlayCountdown();
+      } else if (_currentModalType === 'tv' && _currentModalId) {
+        // Re-schedule timer for current episode if player is open
+        scheduleEpisodeAutoPlay(_currentModalId, _selectedSeason, _selectedEpisode);
+      }
     });
     updateAutoPlayToggleBtn();
 
@@ -3786,7 +3798,7 @@
       if (prevBtn) prevBtn.style.opacity = prevInfo ? '1' : '0.3';
     }
 
-    function startAutoPlayCountdown() {
+    function startAutoPlayCountdown(seconds) {
       if (!_autoPlayEnabled || _currentModalType !== 'tv') return;
       const next = getNextEpInfo();
       if (!next) return;
@@ -3798,21 +3810,24 @@
 
       if (!box) return;
       titleEl.textContent = next.label;
-      _autoPlaySeconds = 10;
+      _autoPlaySeconds = seconds;
       timerEl.textContent = _autoPlaySeconds;
+      barEl.style.transition = 'none';
       barEl.style.transform = 'scaleX(1)';
       box.classList.add('show');
 
-      // Animate bar
+      // Animate progress bar over the full countdown duration
       requestAnimationFrame(() => {
-        barEl.style.transform = `scaleX(0)`;
-        barEl.style.transition = `transform ${_autoPlaySeconds}s linear`;
+        requestAnimationFrame(() => {
+          barEl.style.transition = `transform ${_autoPlaySeconds}s linear`;
+          barEl.style.transform = 'scaleX(0)';
+        });
       });
 
       clearInterval(_autoPlayTimer);
       _autoPlayTimer = setInterval(() => {
         _autoPlaySeconds--;
-        timerEl.textContent = _autoPlaySeconds;
+        timerEl.textContent = Math.max(0, _autoPlaySeconds);
         if (_autoPlaySeconds <= 0) {
           cancelAutoPlayCountdown();
           playNextEpisode();
@@ -3823,24 +3838,64 @@
     function cancelAutoPlayCountdown() {
       clearInterval(_autoPlayTimer);
       _autoPlayTimer = null;
+      clearTimeout(_episodePreloadTimer);
+      clearTimeout(_episodeAutoPlayTimer);
+      _episodePreloadTimer = null;
+      _episodeAutoPlayTimer = null;
       const box = document.getElementById('autoplayCountdown');
       if (box) box.classList.remove('show');
     }
 
-    // Detect iframe message events from supported embeds (e.g. videasy sends postMessage on ended)
-    window.addEventListener('message', (event) => {
+    // ── RUNTIME-BASED EPISODE TIMER ──────────────────────────────────────────
+    let _episodePreloadTimer = null;   // fires 30s before end → show countdown
+    let _episodeAutoPlayTimer = null;  // fires 5s before end  → auto-play
+
+    async function fetchEpisodeRuntime(tvId, season, episode) {
       try {
-        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-        if (!data) return;
-        // videasy / vidsrc style ended events
-        const isEnded = data.event === 'ended' || data.type === 'ended' ||
-          data.event === 'VIDEO_ENDED' || data.name === 'ended' ||
-          data.action === 'ended' || data.status === 'ended';
-        if (isEnded && _currentModalType === 'tv') {
-          startAutoPlayCountdown();
-        }
-      } catch { }
-    });
+        const data = await tmdb(`/tv/${tvId}/season/${season}/episode/${episode}`);
+        return (data && data.runtime) ? data.runtime : null;
+      } catch { return null; }
+    }
+
+    async function scheduleEpisodeAutoPlay(tvId, season, episode) {
+      // Clear any previous timers
+      clearTimeout(_episodePreloadTimer);
+      clearTimeout(_episodeAutoPlayTimer);
+      cancelAutoPlayCountdown();
+
+      if (!_autoPlayEnabled) return;
+      if (!getNextEpInfo()) return; // no next ep to play
+
+      const runtime = await fetchEpisodeRuntime(tvId, season, episode);
+      if (!runtime || runtime <= 0) return; // no runtime data available
+
+      const totalMs = runtime * 60 * 1000;
+      const showCardMs  = Math.max(0, totalMs - 30000); // 30s before end
+      const autoPlayMs  = Math.max(0, totalMs - 5000);  // 5s before end
+
+      // Show "Up Next" card 30s before end (30-second visible countdown)
+      if (showCardMs > 0) {
+        _episodePreloadTimer = setTimeout(() => {
+          // Only show if auto-play still enabled and this is still the same episode
+          if (_autoPlayEnabled && _currentModalType === 'tv') {
+            startAutoPlayCountdown(30);
+          }
+        }, showCardMs);
+      } else {
+        // Episode runtime is very short (< 30s), show countdown immediately
+        startAutoPlayCountdown(Math.max(5, Math.round(totalMs / 1000)));
+      }
+
+      // Hard auto-play at 5s before end (safety net in case card was cancelled)
+      if (autoPlayMs > 0 && autoPlayMs > showCardMs) {
+        _episodeAutoPlayTimer = setTimeout(() => {
+          if (_autoPlayEnabled && _currentModalType === 'tv') {
+            cancelAutoPlayCountdown();
+            playNextEpisode();
+          }
+        }, autoPlayMs);
+      }
+    }
 
     function animateGrid(grid) {
       gsap.fromTo(grid.children,
