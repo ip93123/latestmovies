@@ -3765,11 +3765,11 @@
       }
       if (isTvPlay) {
         updateEpNavButtons();
-        // Start runtime-based auto-play timer as soon as the iframe loads
-        frame.addEventListener('load', function onLoad() {
-          frame.removeEventListener('load', onLoad);
+        // Schedule auto-play directly — don't rely on iframe load event
+        // (load event fires before listener attaches on cached sources)
+        setTimeout(() => {
           scheduleEpisodeAutoPlay(_currentModalId, _selectedSeason, _selectedEpisode);
-        }, { once: true });
+        }, 800);
       }
     }
 
@@ -3997,48 +3997,49 @@
     async function fetchEpisodeRuntime(tvId, season, episode) {
       try {
         const data = await tmdb(`/tv/${tvId}/season/${season}/episode/${episode}`);
-        return (data && data.runtime) ? data.runtime : null;
+        return (data && data.runtime && data.runtime > 0) ? data.runtime : null;
       } catch { return null; }
     }
 
     async function scheduleEpisodeAutoPlay(tvId, season, episode) {
-      // Clear any previous timers
+      // Clear any previous timers first
       clearTimeout(_episodePreloadTimer);
       clearTimeout(_episodeAutoPlayTimer);
       cancelAutoPlayCountdown();
 
       if (!_autoPlayEnabled) return;
-      if (!getNextEpInfo()) return; // no next ep to play
 
-      const runtime = await fetchEpisodeRuntime(tvId, season, episode);
-      if (!runtime || runtime <= 0) return; // no runtime data available
+      // Fetch runtime — fall back to 45 min (typical TV episode) if TMDB has none
+      let runtime = await fetchEpisodeRuntime(tvId, season, episode);
+      if (!runtime || runtime <= 0) runtime = 45; // safe default
 
-      const totalMs = runtime * 60 * 1000;
-      const showCardMs  = Math.max(0, totalMs - 30000); // 30s before end
-      const autoPlayMs  = Math.max(0, totalMs - 5000);  // 5s before end
+      const totalMs    = runtime * 60 * 1000;
+      const showCardMs = Math.max(0, totalMs - 30000); // show "Up Next" 30s before end
+      const autoPlayMs = Math.max(0, totalMs - 5000);  // hard play  5s  before end
 
-      // Show "Up Next" card 30s before end (30-second visible countdown)
-      if (showCardMs > 0) {
-        _episodePreloadTimer = setTimeout(() => {
-          // Only show if auto-play still enabled and this is still the same episode
-          if (_autoPlayEnabled && _currentModalType === 'tv') {
-            startAutoPlayCountdown(30);
-          }
-        }, showCardMs);
-      } else {
-        // Episode runtime is very short (< 30s), show countdown immediately
-        startAutoPlayCountdown(Math.max(5, Math.round(totalMs / 1000)));
-      }
+      // Snapshot which episode we're scheduling for — cancel if episode changes
+      const snapId     = tvId;
+      const snapSeason = season;
+      const snapEp     = episode;
 
-      // Hard auto-play at 5s before end (safety net in case card was cancelled)
-      if (autoPlayMs > 0 && autoPlayMs > showCardMs) {
-        _episodeAutoPlayTimer = setTimeout(() => {
-          if (_autoPlayEnabled && _currentModalType === 'tv') {
-            cancelAutoPlayCountdown();
-            playNextEpisode();
-          }
-        }, autoPlayMs);
-      }
+      // Show countdown card 30s before end
+      _episodePreloadTimer = setTimeout(() => {
+        if (!_autoPlayEnabled) return;
+        if (_currentModalId !== snapId || _selectedSeason !== snapSeason || _selectedEpisode !== snapEp) return;
+        const next = getNextEpInfo();
+        if (!next) return; // no next episode exists
+        startAutoPlayCountdown(30);
+      }, showCardMs);
+
+      // Hard auto-play 5s before end (fires even if countdown was dismissed)
+      _episodeAutoPlayTimer = setTimeout(() => {
+        if (!_autoPlayEnabled) return;
+        if (_currentModalId !== snapId || _selectedSeason !== snapSeason || _selectedEpisode !== snapEp) return;
+        const next = getNextEpInfo();
+        if (!next) return;
+        cancelAutoPlayCountdown();
+        playNextEpisode();
+      }, autoPlayMs);
     }
 
     function animateGrid(grid) {
