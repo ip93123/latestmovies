@@ -1864,96 +1864,7 @@
       color: #fff;
       border-color: transparent;
     }
-    .player-ep-btn.autoplay-on:hover {
-      background: #1e9e50;
-    }
-    .autoplay-countdown {
-      position: absolute;
-      bottom: 1.5rem;
-      right: 1.5rem;
-      background: rgba(7, 9, 15, 0.92);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(var(--accent1), 0.4);
-      border-radius: 14px;
-      padding: 1rem 1.4rem;
-      display: flex;
-      flex-direction: column;
-      gap: .6rem;
-      z-index: 30;
-      min-width: 220px;
-      transform: translateY(10px);
-      opacity: 0;
-      transition: opacity .3s, transform .3s;
-      pointer-events: none;
-    }
-    .autoplay-countdown.show {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: all;
-    }
-    .autoplay-countdown-label {
-      font-size: .75rem;
-      color: var(--muted);
-      letter-spacing: .5px;
-      text-transform: uppercase;
-    }
-    .autoplay-countdown-title {
-      font-size: .95rem;
-      font-weight: 700;
-      color: var(--text);
-    }
-    .autoplay-countdown-timer {
-      font-size: 2rem;
-      font-weight: 900;
-      font-family: 'Bebas Neue', sans-serif;
-      color: var(--gold);
-      line-height: 1;
-    }
-    .autoplay-countdown-progress {
-      width: 100%;
-      height: 3px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-    .autoplay-countdown-bar {
-      height: 100%;
-      background: var(--gold);
-      width: 100%;
-      transform-origin: left;
-      transition: transform 1s linear;
-    }
-    .autoplay-countdown-actions {
-      display: flex;
-      gap: .5rem;
-    }
-    .autoplay-play-now {
-      flex: 1;
-      padding: .4rem .6rem;
-      border-radius: 8px;
-      border: none;
-      background: var(--green);
-      color: #fff;
-      font-size: .78rem;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      transition: background .2s;
-    }
-    .autoplay-play-now:hover { background: #1e9e50; }
-    .autoplay-cancel {
-      padding: .4rem .6rem;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.15);
-      background: transparent;
-      color: var(--muted);
-      font-size: .78rem;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      transition: all .2s;
-    }
-    .autoplay-cancel:hover { color: var(--text); border-color: rgba(255,255,255,0.4); }
+
 
     /* SEARCH */
     #searchOverlay {
@@ -2030,11 +1941,6 @@
         height: 82vh;
         max-width: 1600px;
       }
-      .autoplay-countdown {
-        min-width: 280px;
-        padding: 1.4rem 1.8rem;
-      }
-      .autoplay-countdown-timer { font-size: 2.8rem; }
       .player-ep-bar { gap: 1rem; }
       .player-ep-btn { font-size: .9rem; padding: .5rem 1.2rem; }
       .player-server-btn { font-size: .9rem; padding: .45rem 1.2rem; }
@@ -2256,29 +2162,6 @@
         padding: .28rem .6rem;
       }
 
-      /* Countdown card — full-width at bottom on mobile */
-      .autoplay-countdown {
-        bottom: 0;
-        right: 0;
-        left: 0;
-        border-radius: 14px 14px 0 0;
-        min-width: unset;
-        width: 100%;
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: .4rem;
-        padding: .8rem 1rem;
-      }
-      .autoplay-countdown-label { font-size: .65rem; width: 100%; margin-bottom: -.2rem; }
-      .autoplay-countdown-title { font-size: .85rem; flex: 1; }
-      .autoplay-countdown-timer { font-size: 1.5rem; }
-      .autoplay-countdown-progress { width: 100%; order: 10; }
-      .autoplay-countdown-actions { gap: .4rem; }
-      .autoplay-play-now, .autoplay-cancel {
-        font-size: .72rem;
-        padding: .35rem .6rem;
-      }
 
       /* Footer links — smaller, more compact */
       footer { padding: 2rem 1rem; }
@@ -2445,7 +2328,7 @@
     <div class="player-ep-bar" id="playerEpBar">
       <button class="player-ep-btn" id="playerPrevEp" title="Previous Episode">⏮ Prev Ep</button>
       <button class="player-ep-btn" id="playerNextEp" title="Next Episode">Next Ep ⏭</button>
-      <button class="player-ep-btn" id="playerAutoplayToggle" title="Auto-play next episode">⏩ Auto-Play: OFF</button>
+
     </div>
     <div class="player-container">
       <button class="player-close" id="playerClose">&#10005;</button>
@@ -2455,18 +2338,8 @@
           style="width:40px;height:40px;border:4px solid rgba(255,255,255,0.1);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;">
         </div>
       </div>
-      <iframe id="playerFrame" src="about:blank" allow="autoplay; fullscreen"></iframe>
-      <!-- Auto-play countdown overlay -->
-      <div class="autoplay-countdown" id="autoplayCountdown">
-        <div class="autoplay-countdown-label">Up Next</div>
-        <div class="autoplay-countdown-title" id="autoplayCountdownTitle">Next Episode</div>
-        <div class="autoplay-countdown-timer" id="autoplayCountdownTimer">10</div>
-        <div class="autoplay-countdown-progress"><div class="autoplay-countdown-bar" id="autoplayCountdownBar"></div></div>
-        <div class="autoplay-countdown-actions">
-          <button class="autoplay-play-now" id="autoplayPlayNow">▶ Play Now</button>
-          <button class="autoplay-cancel" id="autoplayCancelBtn">Cancel</button>
-        </div>
-      </div>
+      <iframe id="playerFrame" src="about:blank" allow="autoplay; fullscreen; encrypted-media" allowfullscreen></iframe>
+
     </div>
   </div>
 
@@ -3765,11 +3638,6 @@
       }
       if (isTvPlay) {
         updateEpNavButtons();
-        // Schedule auto-play directly — don't rely on iframe load event
-        // (load event fires before listener attaches on cached sources)
-        setTimeout(() => {
-          scheduleEpisodeAutoPlay(_currentModalId, _selectedSeason, _selectedEpisode);
-        }, 800);
       }
     }
 
@@ -3786,7 +3654,6 @@
     }
 
     document.getElementById('playerClose').addEventListener('click', () => {
-      cancelAutoPlayCountdown();
       gsap.to('.player-container', {
         scale: 0.9, opacity: 0, duration: 0.3, ease: 'power3.in', onComplete: () => {
           document.getElementById('playerOverlay').classList.remove('open');
@@ -3799,53 +3666,15 @@
       if (e.target === document.getElementById('playerOverlay')) document.getElementById('playerClose').click();
     });
 
-    // ─── AUTO-PLAY NEXT EPISODE ───────────────────────────────────────────────
-    let _autoPlayEnabled = localStorage.getItem('autoplay') !== 'false';
     let _activeServerIndex = 0;      // which server the user last picked
-    let _autoPlayTimer = null;       // setInterval countdown
-    let _autoPlaySeconds = 10;
     let _totalEpisodesInSeason = 0;
     let _totalSeasons = 0;
 
-    function updateAutoPlayToggleBtn() {
-      const btn = document.getElementById('playerAutoplayToggle');
-      if (!btn) return;
-      if (_autoPlayEnabled) {
-        btn.textContent = '⏩ Auto-Play: ON';
-        btn.classList.add('autoplay-on');
-      } else {
-        btn.textContent = '⏩ Auto-Play: OFF';
-        btn.classList.remove('autoplay-on');
-      }
-    }
-
-    document.getElementById('playerAutoplayToggle').addEventListener('click', () => {
-      _autoPlayEnabled = !_autoPlayEnabled;
-      localStorage.setItem('autoplay', _autoPlayEnabled);
-      updateAutoPlayToggleBtn();
-      if (!_autoPlayEnabled) {
-        cancelAutoPlayCountdown();
-      } else if (_currentModalType === 'tv' && _currentModalId) {
-        // Re-schedule timer for current episode if player is open
-        scheduleEpisodeAutoPlay(_currentModalId, _selectedSeason, _selectedEpisode);
-      }
-    });
-    updateAutoPlayToggleBtn();
-
     document.getElementById('playerNextEp').addEventListener('click', () => {
-      cancelAutoPlayCountdown();
       playNextEpisode();
     });
     document.getElementById('playerPrevEp').addEventListener('click', () => {
-      cancelAutoPlayCountdown();
       playPrevEpisode();
-    });
-    document.getElementById('autoplayPlayNow').addEventListener('click', () => {
-      cancelAutoPlayCountdown();
-      playNextEpisode();
-    });
-    document.getElementById('autoplayCancelBtn').addEventListener('click', () => {
-      cancelAutoPlayCountdown();
     });
 
     function getNextEpInfo() {
@@ -3942,105 +3771,7 @@
       if (prevBtn) prevBtn.style.opacity = prevInfo ? '1' : '0.3';
     }
 
-    function startAutoPlayCountdown(seconds) {
-      if (!_autoPlayEnabled || _currentModalType !== 'tv') return;
-      const next = getNextEpInfo();
-      if (!next) return;
 
-      const box = document.getElementById('autoplayCountdown');
-      const titleEl = document.getElementById('autoplayCountdownTitle');
-      const timerEl = document.getElementById('autoplayCountdownTimer');
-      const barEl = document.getElementById('autoplayCountdownBar');
-
-      if (!box) return;
-      titleEl.textContent = next.label;
-      _autoPlaySeconds = seconds;
-      timerEl.textContent = _autoPlaySeconds;
-      barEl.style.transition = 'none';
-      barEl.style.transform = 'scaleX(1)';
-      box.classList.add('show');
-
-      // Animate progress bar over the full countdown duration
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          barEl.style.transition = `transform ${_autoPlaySeconds}s linear`;
-          barEl.style.transform = 'scaleX(0)';
-        });
-      });
-
-      clearInterval(_autoPlayTimer);
-      _autoPlayTimer = setInterval(() => {
-        _autoPlaySeconds--;
-        timerEl.textContent = Math.max(0, _autoPlaySeconds);
-        if (_autoPlaySeconds <= 0) {
-          cancelAutoPlayCountdown();
-          playNextEpisode();
-        }
-      }, 1000);
-    }
-
-    function cancelAutoPlayCountdown() {
-      clearInterval(_autoPlayTimer);
-      _autoPlayTimer = null;
-      clearTimeout(_episodePreloadTimer);
-      clearTimeout(_episodeAutoPlayTimer);
-      _episodePreloadTimer = null;
-      _episodeAutoPlayTimer = null;
-      const box = document.getElementById('autoplayCountdown');
-      if (box) box.classList.remove('show');
-    }
-
-    // ── RUNTIME-BASED EPISODE TIMER ──────────────────────────────────────────
-    let _episodePreloadTimer = null;   // fires 30s before end → show countdown
-    let _episodeAutoPlayTimer = null;  // fires 5s before end  → auto-play
-
-    async function fetchEpisodeRuntime(tvId, season, episode) {
-      try {
-        const data = await tmdb(`/tv/${tvId}/season/${season}/episode/${episode}`);
-        return (data && data.runtime && data.runtime > 0) ? data.runtime : null;
-      } catch { return null; }
-    }
-
-    async function scheduleEpisodeAutoPlay(tvId, season, episode) {
-      // Clear any previous timers first
-      clearTimeout(_episodePreloadTimer);
-      clearTimeout(_episodeAutoPlayTimer);
-      cancelAutoPlayCountdown();
-
-      if (!_autoPlayEnabled) return;
-
-      // Fetch runtime — fall back to 45 min (typical TV episode) if TMDB has none
-      let runtime = await fetchEpisodeRuntime(tvId, season, episode);
-      if (!runtime || runtime <= 0) runtime = 45; // safe default
-
-      const totalMs    = runtime * 60 * 1000;
-      const showCardMs = Math.max(0, totalMs - 30000); // show "Up Next" 30s before end
-      const autoPlayMs = Math.max(0, totalMs - 5000);  // hard play  5s  before end
-
-      // Snapshot which episode we're scheduling for — cancel if episode changes
-      const snapId     = tvId;
-      const snapSeason = season;
-      const snapEp     = episode;
-
-      // Show countdown card 30s before end
-      _episodePreloadTimer = setTimeout(() => {
-        if (!_autoPlayEnabled) return;
-        if (_currentModalId !== snapId || _selectedSeason !== snapSeason || _selectedEpisode !== snapEp) return;
-        const next = getNextEpInfo();
-        if (!next) return; // no next episode exists
-        startAutoPlayCountdown(30);
-      }, showCardMs);
-
-      // Hard auto-play 5s before end (fires even if countdown was dismissed)
-      _episodeAutoPlayTimer = setTimeout(() => {
-        if (!_autoPlayEnabled) return;
-        if (_currentModalId !== snapId || _selectedSeason !== snapSeason || _selectedEpisode !== snapEp) return;
-        const next = getNextEpInfo();
-        if (!next) return;
-        cancelAutoPlayCountdown();
-        playNextEpisode();
-      }, autoPlayMs);
-    }
 
     function animateGrid(grid) {
       gsap.fromTo(grid.children,
