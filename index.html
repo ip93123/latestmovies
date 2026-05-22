@@ -1829,6 +1829,132 @@
       transition: opacity 0.3s;
     }
 
+    /* AUTO-PLAY NEXT EPISODE */
+    .player-ep-bar {
+      display: none;
+      align-items: center;
+      gap: .6rem;
+      z-index: 720;
+    }
+    .player-ep-bar.visible {
+      display: flex;
+    }
+    .player-ep-btn {
+      padding: .35rem .9rem;
+      border-radius: 50px;
+      font-size: .78rem;
+      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.07);
+      color: var(--text);
+      cursor: pointer;
+      transition: all .2s;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+    }
+    .player-ep-btn:hover {
+      background: rgba(var(--accent1), 0.85);
+      color: #07090F;
+      border-color: transparent;
+    }
+    .player-ep-btn.autoplay-on {
+      background: var(--green);
+      color: #fff;
+      border-color: transparent;
+    }
+    .player-ep-btn.autoplay-on:hover {
+      background: #1e9e50;
+    }
+    .autoplay-countdown {
+      position: absolute;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: rgba(7, 9, 15, 0.92);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(var(--accent1), 0.4);
+      border-radius: 14px;
+      padding: 1rem 1.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: .6rem;
+      z-index: 30;
+      min-width: 220px;
+      transform: translateY(10px);
+      opacity: 0;
+      transition: opacity .3s, transform .3s;
+      pointer-events: none;
+    }
+    .autoplay-countdown.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+    .autoplay-countdown-label {
+      font-size: .75rem;
+      color: var(--muted);
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+    .autoplay-countdown-title {
+      font-size: .95rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .autoplay-countdown-timer {
+      font-size: 2rem;
+      font-weight: 900;
+      font-family: 'Bebas Neue', sans-serif;
+      color: var(--gold);
+      line-height: 1;
+    }
+    .autoplay-countdown-progress {
+      width: 100%;
+      height: 3px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .autoplay-countdown-bar {
+      height: 100%;
+      background: var(--gold);
+      width: 100%;
+      transform-origin: left;
+      transition: transform 1s linear;
+    }
+    .autoplay-countdown-actions {
+      display: flex;
+      gap: .5rem;
+    }
+    .autoplay-play-now {
+      flex: 1;
+      padding: .4rem .6rem;
+      border-radius: 8px;
+      border: none;
+      background: var(--green);
+      color: #fff;
+      font-size: .78rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background .2s;
+    }
+    .autoplay-play-now:hover { background: #1e9e50; }
+    .autoplay-cancel {
+      padding: .4rem .6rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: transparent;
+      color: var(--muted);
+      font-size: .78rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all .2s;
+    }
+    .autoplay-cancel:hover { color: var(--text); border-color: rgba(255,255,255,0.4); }
+
     /* SEARCH */
     #searchOverlay {
       position: fixed;
@@ -2182,6 +2308,11 @@
   <!-- PLAYER OVERLAY -->
   <div id="playerOverlay">
     <div class="player-server-bar" id="playerServerBar"></div>
+    <div class="player-ep-bar" id="playerEpBar">
+      <button class="player-ep-btn" id="playerPrevEp" title="Previous Episode">⏮ Prev Ep</button>
+      <button class="player-ep-btn" id="playerNextEp" title="Next Episode">Next Ep ⏭</button>
+      <button class="player-ep-btn" id="playerAutoplayToggle" title="Auto-play next episode">⏩ Auto-Play: OFF</button>
+    </div>
     <div class="player-container">
       <button class="player-close" id="playerClose">&#10005;</button>
       <div id="playerLoading"
@@ -2191,6 +2322,17 @@
         </div>
       </div>
       <iframe id="playerFrame" src="about:blank" allow="autoplay; fullscreen"></iframe>
+      <!-- Auto-play countdown overlay -->
+      <div class="autoplay-countdown" id="autoplayCountdown">
+        <div class="autoplay-countdown-label">Up Next</div>
+        <div class="autoplay-countdown-title" id="autoplayCountdownTitle">Next Episode</div>
+        <div class="autoplay-countdown-timer" id="autoplayCountdownTimer">10</div>
+        <div class="autoplay-countdown-progress"><div class="autoplay-countdown-bar" id="autoplayCountdownBar"></div></div>
+        <div class="autoplay-countdown-actions">
+          <button class="autoplay-play-now" id="autoplayPlayNow">▶ Play Now</button>
+          <button class="autoplay-cancel" id="autoplayCancelBtn">Cancel</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -3370,6 +3512,7 @@
           _currentModalType = type;
           _selectedSeason = 1;
           _selectedEpisode = 1;
+          _totalSeasons = (type === 'tv' && details.number_of_seasons) ? details.number_of_seasons : 0;
 
           const allUrls = getModalServerUrls(id, type, 1, 1);
           const allLabels = ['▶ Server 1', '▶ Server 2', '▶ Server 3', '▶ Server 4', '▶ Server 5'];
@@ -3439,7 +3582,13 @@
       const overlay = document.getElementById('playerOverlay');
       const frame = document.getElementById('playerFrame');
       const bar = document.getElementById('playerServerBar');
+      const epBar = document.getElementById('playerEpBar');
       const loader = document.getElementById('playerLoading');
+      const isTvPlay = _currentModalType === 'tv';
+      if (epBar) {
+        if (isTvPlay) { epBar.classList.add('visible'); }
+        else { epBar.classList.remove('visible'); }
+      }
 
       if (loader) loader.style.opacity = '1';
       if (frame) {
@@ -3454,13 +3603,17 @@
       if (allUrls && allUrls.length) {
         bar.innerHTML = allUrls.map((u, i) => {
           const lbl = labels ? labels[i] : `Server ${i + 1}`;
-          return `<button class="player-server-btn${u === url ? ' active' : ''}" onclick="switchServer('${u}', this)">${lbl}</button>`;
+          return `<button class="player-server-btn${u === url ? ' active' : ''}" onclick="_activeServerIndex=${i}; switchServer('${u}', this)">${lbl}</button>`;
         }).join('');
+        // Track which server is currently active
+        _activeServerIndex = allUrls.indexOf(url);
+        if (_activeServerIndex < 0) _activeServerIndex = 0;
       } else {
         bar.innerHTML = '';
       }
       overlay.classList.add('open');
       gsap.fromTo('.player-container', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'power3.out' });
+      if (isTvPlay) updateEpNavButtons();
 
       if (frame.requestFullscreen) {
         frame.requestFullscreen().catch(e => console.log('Fullscreen error:', e));
@@ -3482,15 +3635,211 @@
     }
 
     document.getElementById('playerClose').addEventListener('click', () => {
+      cancelAutoPlayCountdown();
       gsap.to('.player-container', {
         scale: 0.9, opacity: 0, duration: 0.3, ease: 'power3.in', onComplete: () => {
           document.getElementById('playerOverlay').classList.remove('open');
           document.getElementById('playerFrame').src = '';
+          document.getElementById('playerEpBar').classList.remove('visible');
         }
       });
     });
     document.getElementById('playerOverlay').addEventListener('click', e => {
       if (e.target === document.getElementById('playerOverlay')) document.getElementById('playerClose').click();
+    });
+
+    // ─── AUTO-PLAY NEXT EPISODE ───────────────────────────────────────────────
+    let _autoPlayEnabled = localStorage.getItem('autoplay') !== 'false';
+    let _activeServerIndex = 0;      // which server the user last picked
+    let _autoPlayTimer = null;       // setInterval countdown
+    let _autoPlaySeconds = 10;
+    let _totalEpisodesInSeason = 0;
+    let _totalSeasons = 0;
+
+    function updateAutoPlayToggleBtn() {
+      const btn = document.getElementById('playerAutoplayToggle');
+      if (!btn) return;
+      if (_autoPlayEnabled) {
+        btn.textContent = '⏩ Auto-Play: ON';
+        btn.classList.add('autoplay-on');
+      } else {
+        btn.textContent = '⏩ Auto-Play: OFF';
+        btn.classList.remove('autoplay-on');
+      }
+    }
+
+    document.getElementById('playerAutoplayToggle').addEventListener('click', () => {
+      _autoPlayEnabled = !_autoPlayEnabled;
+      localStorage.setItem('autoplay', _autoPlayEnabled);
+      updateAutoPlayToggleBtn();
+      if (!_autoPlayEnabled) cancelAutoPlayCountdown();
+    });
+    updateAutoPlayToggleBtn();
+
+    document.getElementById('playerNextEp').addEventListener('click', () => {
+      cancelAutoPlayCountdown();
+      playNextEpisode();
+    });
+    document.getElementById('playerPrevEp').addEventListener('click', () => {
+      cancelAutoPlayCountdown();
+      playPrevEpisode();
+    });
+    document.getElementById('autoplayPlayNow').addEventListener('click', () => {
+      cancelAutoPlayCountdown();
+      playNextEpisode();
+    });
+    document.getElementById('autoplayCancelBtn').addEventListener('click', () => {
+      cancelAutoPlayCountdown();
+    });
+
+    function getNextEpInfo() {
+      const episodeSel = document.getElementById('epEpisodeSelect');
+      const seasonSel = document.getElementById('epSeasonSelect');
+      const totalEps = episodeSel ? episodeSel.options.length - 1 : 0; // -1 for placeholder
+      const nextEp = _selectedEpisode + 1;
+      const nextSeason = _selectedSeason + 1;
+      if (nextEp <= totalEps) {
+        return { season: _selectedSeason, episode: nextEp, label: `S${_selectedSeason} E${nextEp}` };
+      } else if (nextSeason <= _totalSeasons) {
+        return { season: nextSeason, episode: 1, label: `S${nextSeason} E1`, newSeason: true };
+      }
+      return null; // no next episode
+    }
+
+    function getPrevEpInfo() {
+      const prevEp = _selectedEpisode - 1;
+      const prevSeason = _selectedSeason - 1;
+      if (prevEp >= 1) {
+        return { season: _selectedSeason, episode: prevEp };
+      } else if (prevSeason >= 1) {
+        return { season: prevSeason, episode: null }; // null = last ep of that season
+      }
+      return null;
+    }
+
+    async function playNextEpisode() {
+      const next = getNextEpInfo();
+      if (!next) return;
+
+      if (next.newSeason) {
+        // Need to reload the season dropdown first
+        const seasonSel = document.getElementById('epSeasonSelect');
+        const episodeSel = document.getElementById('epEpisodeSelect');
+        if (seasonSel) {
+          seasonSel.value = String(next.season);
+          seasonSel.dispatchEvent(new Event('change'));
+          // Wait for episodes to load then play ep 1
+          await new Promise(resolve => setTimeout(resolve, 800));
+        }
+        _selectedSeason = next.season;
+        _selectedEpisode = 1;
+      } else {
+        _selectedSeason = next.season;
+        _selectedEpisode = next.episode;
+        // Update select UI
+        const episodeSel = document.getElementById('epEpisodeSelect');
+        if (episodeSel) episodeSel.value = String(next.episode);
+      }
+
+      const urls = getModalServerUrls(_currentModalId, _currentModalType, _selectedSeason, _selectedEpisode);
+      const allLabels = ['▶ Server 1', '▶ Server 2', '▶ Server 3', '▶ Server 4', '▶ Server 5'];
+      playStream(urls[_activeServerIndex], urls, allLabels);
+      updateEpNavButtons();
+    }
+
+    async function playPrevEpisode() {
+      const prev = getPrevEpInfo();
+      if (!prev) return;
+
+      if (prev.episode === null) {
+        // Go to last ep of previous season
+        const seasonSel = document.getElementById('epSeasonSelect');
+        if (seasonSel) {
+          seasonSel.value = String(prev.season);
+          seasonSel.dispatchEvent(new Event('change'));
+          await new Promise(resolve => setTimeout(resolve, 800));
+        }
+        const episodeSel = document.getElementById('epEpisodeSelect');
+        const totalEps = episodeSel ? episodeSel.options.length - 1 : 1;
+        _selectedSeason = prev.season;
+        _selectedEpisode = totalEps;
+        if (episodeSel) episodeSel.value = String(totalEps);
+      } else {
+        _selectedSeason = prev.season;
+        _selectedEpisode = prev.episode;
+        const episodeSel = document.getElementById('epEpisodeSelect');
+        if (episodeSel) episodeSel.value = String(prev.episode);
+      }
+
+      const urls = getModalServerUrls(_currentModalId, _currentModalType, _selectedSeason, _selectedEpisode);
+      const allLabels = ['▶ Server 1', '▶ Server 2', '▶ Server 3', '▶ Server 4', '▶ Server 5'];
+      playStream(urls[_activeServerIndex], urls, allLabels);
+      updateEpNavButtons();
+    }
+
+    function updateEpNavButtons() {
+      const nextInfo = getNextEpInfo();
+      const prevInfo = getPrevEpInfo();
+      const nextBtn = document.getElementById('playerNextEp');
+      const prevBtn = document.getElementById('playerPrevEp');
+      if (nextBtn) nextBtn.style.opacity = nextInfo ? '1' : '0.3';
+      if (prevBtn) prevBtn.style.opacity = prevInfo ? '1' : '0.3';
+    }
+
+    function startAutoPlayCountdown() {
+      if (!_autoPlayEnabled || _currentModalType !== 'tv') return;
+      const next = getNextEpInfo();
+      if (!next) return;
+
+      const box = document.getElementById('autoplayCountdown');
+      const titleEl = document.getElementById('autoplayCountdownTitle');
+      const timerEl = document.getElementById('autoplayCountdownTimer');
+      const barEl = document.getElementById('autoplayCountdownBar');
+
+      if (!box) return;
+      titleEl.textContent = next.label;
+      _autoPlaySeconds = 10;
+      timerEl.textContent = _autoPlaySeconds;
+      barEl.style.transform = 'scaleX(1)';
+      box.classList.add('show');
+
+      // Animate bar
+      requestAnimationFrame(() => {
+        barEl.style.transform = `scaleX(0)`;
+        barEl.style.transition = `transform ${_autoPlaySeconds}s linear`;
+      });
+
+      clearInterval(_autoPlayTimer);
+      _autoPlayTimer = setInterval(() => {
+        _autoPlaySeconds--;
+        timerEl.textContent = _autoPlaySeconds;
+        if (_autoPlaySeconds <= 0) {
+          cancelAutoPlayCountdown();
+          playNextEpisode();
+        }
+      }, 1000);
+    }
+
+    function cancelAutoPlayCountdown() {
+      clearInterval(_autoPlayTimer);
+      _autoPlayTimer = null;
+      const box = document.getElementById('autoplayCountdown');
+      if (box) box.classList.remove('show');
+    }
+
+    // Detect iframe message events from supported embeds (e.g. videasy sends postMessage on ended)
+    window.addEventListener('message', (event) => {
+      try {
+        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        if (!data) return;
+        // videasy / vidsrc style ended events
+        const isEnded = data.event === 'ended' || data.type === 'ended' ||
+          data.event === 'VIDEO_ENDED' || data.name === 'ended' ||
+          data.action === 'ended' || data.status === 'ended';
+        if (isEnded && _currentModalType === 'tv') {
+          startAutoPlayCountdown();
+        }
+      } catch { }
     });
 
     function animateGrid(grid) {
