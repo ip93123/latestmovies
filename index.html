@@ -1920,6 +1920,25 @@
       letter-spacing: 3px
     }
 
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .footer-links a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--gold);
+    }
+
     .sk {
       background: linear-gradient(90deg, var(--dark3) 25%, var(--dark2) 50%, var(--dark3) 75%);
       background-size: 200% 100%;
@@ -2350,6 +2369,17 @@
   <footer>
     <strong>Hacky Max</strong>
     <p style="margin-top:.5rem">Powered by TMDB & OMDb · Streaming data by JustWatch via TMDB · Updates daily</p>
+    <div class="footer-links">
+      <a href="legal/terms.html">Terms of Service</a>
+      <a href="legal/dmca.html">DMCA/Copyright</a>
+      <a href="legal/privacy.html">Privacy Policy</a>
+      <a href="legal/contact.html">Contact Us</a>
+      <a href="legal/disclaimer.html">Content Disclaimer</a>
+      <a href="legal/attribution.html">Source Attribution</a>
+      <a href="legal/age-rating.html">Age Ratings</a>
+      <a href="legal/report.html">Report Content</a>
+      <a href="legal/cookie-policy.html">Cookie Policy</a>
+    </div>
   </footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
