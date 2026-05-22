@@ -1532,6 +1532,29 @@
       padding: 2rem
     }
 
+    .popup-home {
+      position: absolute;
+      padding: 0.4rem 0.8rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--text);
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 710;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .popup-home:hover {
+      background: rgba(232, 201, 122, 0.2);
+      border-color: var(--gold);
+    }
+    #searchHome { position: fixed; top: 1.8rem; right: 4.5rem; }
+    #playerHome { top: 1.8rem; right: 4.5rem; }
+    #modalHome { top: 1rem; right: 4rem; z-index: 5; }
+
     .modal-close {
       position: absolute;
       top: 1rem;
@@ -2205,6 +2228,10 @@
         padding: 1.5rem 1rem;
       }
 
+      #searchHome { top: 1.3rem; right: 4rem; }
+      #playerHome { top: 1.3rem; right: 3.5rem; }
+      #modalHome { top: 0.5rem; right: 3.5rem; padding: 0.3rem 0.6rem; font-size: 0.8rem; }
+
       .modal-close {
         top: 0.5rem;
         right: 0.5rem;
@@ -2310,6 +2337,7 @@
   <div class="tv-focus-hint" id="tvFocusHint">▶ TV Remote Mode — ←↑→↓ Navigate &nbsp;•&nbsp; OK to Select &nbsp;•&nbsp; Back to Close</div>
 
   <div id="searchOverlay">
+    <button class="popup-home" id="searchHome" onclick="document.getElementById('searchClose').click()">🏠 Home</button>
     <button class="search-close" id="searchClose">✕</button>
     <div class="search-input-wrap">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#E8C97A" stroke-width="2"
@@ -2331,6 +2359,7 @@
 
     </div>
     <div class="player-container">
+      <button class="popup-home" id="playerHome" onclick="document.getElementById('playerClose').click()">🏠 Home</button>
       <button class="player-close" id="playerClose">&#10005;</button>
       <div id="playerLoading"
         style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#000;z-index:10;pointer-events:none;transition:opacity 0.3s;opacity:0;">
@@ -2348,6 +2377,7 @@
     <div class="modal-box" id="modalBox">
       <div class="modal-poster"><img id="modalPoster" src="" alt=""></div>
       <div class="modal-body">
+        <button class="popup-home" id="modalHome" onclick="document.getElementById('modalClose').click()">🏠 Home</button>
         <button class="modal-close" id="modalClose">✕</button>
         <div class="modal-tag" id="modalType">Movie</div>
         <div class="modal-title" id="modalTitle"></div>
@@ -2423,7 +2453,7 @@
       </div>
       <div class="hero-btns">
         <button class="btn-primary" id="heroPlay" style="display:none;background:var(--green);color:#fff;border:none">▶
-          Play Free</button>
+          Play</button>
         <button class="btn-primary" id="heroWatch">▶ Watch Trailer</button>
         <button class="btn-secondary" id="heroMore">More Info</button>
       </div>
@@ -2431,6 +2461,17 @@
     <div class="hero-dots" id="heroDots"></div>
     <div class="hero-scroll-hint"><span>Scroll</span>
       <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <section id="recent" style="display:none; background:var(--dark1)">
+    <div class="section-header">
+      <h2 class="section-title">⏱️ <span>Continue</span> Watching</h2>
+    </div>
+    <div class="scroll-wrapper">
+      <button class="scroll-btn scroll-left" onclick="scrollRow('recentRow', -1)">❮</button>
+      <div class="cards-grid" id="recentRow" style="display:flex;overflow-x:auto;scrollbar-width:none;gap:1rem;"></div>
+      <button class="scroll-btn scroll-right" onclick="scrollRow('recentRow', 1)">❯</button>
     </div>
   </section>
 
@@ -2744,7 +2785,7 @@
     let currentMovies = [], currentTV = [], activeMovieFilter = 'all', activeTVFilter = 'all';
 
     // Season / Episode chooser state
-    let _currentModalId = null, _currentModalType = 'movie';
+    let _currentModalId = null, _currentModalType = 'movie', _currentModalItem = null;
     let _selectedSeason = 1, _selectedEpisode = 1;
     let _seasonEpCache = {}; // { tvId: { season: episodes[] } }
 
@@ -3199,7 +3240,11 @@
           const s5Url = type === 'tv' ? `https://vidcore.net/tv/${m.id}/1/1` : `https://vidcore.net/movie/${m.id}`;
           const allUrls = [s1Url, s2Url, s3Url, s4Url, s5Url];
           const allLabels = ['Server 1', 'Server 2', 'Server 3', 'Server 4', 'Server 5'];
-          heroPlayBtn.onclick = () => playStream(s1Url, allUrls, allLabels);
+          heroPlayBtn.onclick = () => {
+            _currentModalItem = m;
+            _currentModalType = type;
+            playStream(s1Url, allUrls, allLabels);
+          };
         }
         if (imdbId) {
           const od = await getOMDb(imdbId);
@@ -3473,6 +3518,7 @@
           getCredits(id, type),
           tmdb(`/${type}/${id}/videos?language=en-US`)
         ]);
+        _currentModalItem = details;
         const title = details.title || details.name || '';
         const year = (details.release_date || details.first_air_date || '').slice(0, 4);
         const poster = details.poster_path ? `${IMG}w500${details.poster_path}` : '';
@@ -3589,6 +3635,7 @@
     });
 
     function playStream(url, allUrls, labels) {
+      if (_currentModalItem) saveRecentWatch(_currentModalItem, _currentModalType);
       // Stop background video
       const heroVideo = document.getElementById('heroVideoContainer');
       if (heroVideo) heroVideo.innerHTML = '';
@@ -3920,9 +3967,8 @@
             el.closest('#modal:not(.open)') ||
             el.closest('#playerOverlay:not(.open)')) return false;
         const r = el.getBoundingClientRect();
-        return r.width > 0 && r.height > 0 &&
-               r.top < window.innerHeight && r.bottom > 0 &&
-               r.left < window.innerWidth && r.right > 0;
+        // Element must have dimensions to be focusable (visible in DOM)
+        return r.width > 0 && r.height > 0;
       });
     }
 
@@ -3931,8 +3977,16 @@
       const cur = document.activeElement;
       const all = getVisibleFocusables();
       if (!all.length) return;
+      
+      // If no valid active element, focus the hero button by default
       if (!cur || cur === document.body || !all.includes(cur)) {
-        (all[0]).focus(); return;
+        const defaultTarget = document.getElementById('heroWatch');
+        if (defaultTarget && all.includes(defaultTarget)) {
+          defaultTarget.focus();
+        } else {
+          all[0].focus();
+        }
+        return;
       }
       const cr = cur.getBoundingClientRect();
       const cx = cr.left + cr.width  / 2;
@@ -4084,12 +4138,56 @@
       }
     }
 
+    // RECENTLY WATCHED
+    function saveRecentWatch(item, type) {
+      try {
+        if (!item || !item.id) return;
+        const recent = JSON.parse(localStorage.getItem('recentWatch') || '[]');
+        const toSave = {
+          id: item.id,
+          type: type,
+          title: item.title || item.name || '',
+          poster_path: item.poster_path,
+          release_date: item.release_date || item.first_air_date,
+          vote_average: item.vote_average
+        };
+        const filtered = recent.filter(r => String(r.id) !== String(item.id));
+        filtered.unshift(toSave);
+        localStorage.setItem('recentWatch', JSON.stringify(filtered.slice(0, 10)));
+        loadRecentWatch();
+      } catch (e) { console.error('Error saving recent', e); }
+    }
+
+    async function loadRecentWatch() {
+      try {
+        const recent = JSON.parse(localStorage.getItem('recentWatch') || '[]');
+        const section = document.getElementById('recent');
+        const row = document.getElementById('recentRow');
+        if (!recent || recent.length === 0) {
+          if (section) section.style.display = 'none';
+          return;
+        }
+        if (section) section.style.display = 'block';
+        
+        // Show up to 5 items
+        const toShow = recent.slice(0, 5);
+        const watchDatas = await Promise.all(toShow.map(r => getWatch(r.id, r.type)));
+        if (row) {
+          row.innerHTML = toShow.map((item, i) => buildCard(item, null, item.type, watchDatas[i])).join('');
+          animateGrid(row);
+        }
+      } catch (e) {
+        console.error('Error loading recent', e);
+      }
+    }
+
     // INIT
     async function init() {
       const [nowPlaying] = await Promise.all([tmdb('/movie/now_playing?language=en-US&page=1')]);
 
       const heroPool = (nowPlaying.results || []).filter(m => m.backdrop_path).slice(0, 6);
       await loadHero(heroPool);
+      await loadRecentWatch();
 
       const [, , , topRated] = await Promise.all([
         loadTrending(),
