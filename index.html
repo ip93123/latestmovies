@@ -2019,7 +2019,31 @@
       gap: 1rem;
       width: min(700px, 90vw);
       max-height: 60vh;
-      overflow-y: auto
+      overflow-y: auto;
+      padding-right: 4px; /* space for scrollbar */
+    }
+
+    /* TV / large screen (≥1400px) */
+    @media(min-width:1400px) {
+      .player-container {
+        width: 85vw;
+        height: 82vh;
+        max-width: 1600px;
+      }
+      .autoplay-countdown {
+        min-width: 280px;
+        padding: 1.4rem 1.8rem;
+      }
+      .autoplay-countdown-timer { font-size: 2.8rem; }
+      .player-ep-bar { gap: 1rem; }
+      .player-ep-btn { font-size: .9rem; padding: .5rem 1.2rem; }
+      .player-server-btn { font-size: .9rem; padding: .45rem 1.2rem; }
+      .footer-links { gap: 1.6rem; font-size: .9rem; }
+      footer { padding: 4rem; }
+      .search-results {
+        width: min(900px, 90vw);
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      }
     }
 
     .particle {
@@ -2081,6 +2105,45 @@
         background-position: -200% 0
       }
     }
+
+    /* ─── TV REMOTE FOCUS RING ─────────────────────────────────────── */
+    .tv-mode *:focus { outline: none; }
+    .tv-mode .movie-card:focus,
+    .tv-mode .trending-card:focus {
+      outline: 3px solid var(--gold);
+      outline-offset: 3px;
+      transform: scale(1.06) !important;
+      z-index: 20;
+      box-shadow: 0 0 24px rgba(232,201,122,0.45);
+    }
+    .tv-mode button:focus,
+    .tv-mode a:focus,
+    .tv-mode select:focus {
+      outline: 3px solid var(--gold);
+      outline-offset: 3px;
+      box-shadow: 0 0 16px rgba(232,201,122,0.35);
+      border-color: var(--gold) !important;
+    }
+    /* TV focus indicator dot in corner */
+    .tv-focus-hint {
+      position: fixed;
+      top: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(232,201,122,0.15);
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      font-size: .72rem;
+      font-weight: 700;
+      padding: .3rem .8rem;
+      border-radius: 50px;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .4s;
+      letter-spacing: .5px;
+    }
+    .tv-mode .tv-focus-hint { opacity: 1; }
 
     @media(max-width:768px) {
       nav {
@@ -2178,6 +2241,57 @@
         height: 100vh;
         max-width: none;
         border-radius: 0;
+      }
+
+      /* Episode bar — stack vertically on small screens */
+      .player-ep-bar {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: .4rem;
+        padding: 0 .5rem;
+        max-width: 100vw;
+      }
+      .player-ep-btn {
+        font-size: 0.68rem;
+        padding: .28rem .6rem;
+      }
+
+      /* Countdown card — full-width at bottom on mobile */
+      .autoplay-countdown {
+        bottom: 0;
+        right: 0;
+        left: 0;
+        border-radius: 14px 14px 0 0;
+        min-width: unset;
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: .4rem;
+        padding: .8rem 1rem;
+      }
+      .autoplay-countdown-label { font-size: .65rem; width: 100%; margin-bottom: -.2rem; }
+      .autoplay-countdown-title { font-size: .85rem; flex: 1; }
+      .autoplay-countdown-timer { font-size: 1.5rem; }
+      .autoplay-countdown-progress { width: 100%; order: 10; }
+      .autoplay-countdown-actions { gap: .4rem; }
+      .autoplay-play-now, .autoplay-cancel {
+        font-size: .72rem;
+        padding: .35rem .6rem;
+      }
+
+      /* Footer links — smaller, more compact */
+      footer { padding: 2rem 1rem; }
+      .footer-links {
+        gap: .7rem;
+        font-size: .75rem;
+      }
+
+      /* Search — full width on mobile */
+      .search-results {
+        width: 95vw;
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        max-height: 70vh;
       }
 
       .player-server-bar {
@@ -2286,11 +2400,31 @@
         grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
         gap: .8rem
       }
+
+      /* Extra-compact ep bar on very small phones */
+      .player-ep-btn {
+        font-size: 0.6rem;
+        padding: .22rem .45rem;
+      }
+      .player-ep-bar { gap: .3rem; }
+
+      /* Footer links wrap to 2 cols on tiny screens */
+      .footer-links {
+        gap: .5rem;
+        font-size: .7rem;
+      }
+
+      /* Search results 2-col grid */
+      .search-results {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
   </style>
 </head>
 
 <body>
+  <!-- TV remote mode indicator -->
+  <div class="tv-focus-hint" id="tvFocusHint">▶ TV Remote Mode — ←↑→↓ Navigate &nbsp;•&nbsp; OK to Select &nbsp;•&nbsp; Back to Close</div>
 
   <div id="searchOverlay">
     <button class="search-close" id="searchClose">✕</button>
@@ -2879,7 +3013,7 @@
       const streamLogos = buildStreamLogoHTML(flat, 3);
       const providerIds = flat.map(p => p.provider_id);
 
-      return `<div class="movie-card" data-id="${item.id}" data-type="${type}" data-providers="${providerIds.join(',')}" style="opacity:1">
+      return `<div class="movie-card" tabindex="0" role="button" aria-label="${title}" data-id="${item.id}" data-type="${type}" data-providers="${providerIds.join(',')}" style="opacity:1">
     <div class="card-poster">
       ${poster ? `<img src="${poster}" alt="${title}" loading="lazy" onerror="this.src=''">` :
           `<div style="width:100%;height:100%;background:var(--dark3);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.75rem">No Poster</div>`}
@@ -2916,7 +3050,7 @@
 
       const metaParts = [runtime, year].filter(Boolean).join(' · ');
 
-      return `<div class="trending-card" data-id="${item.id}" data-type="${type}">
+      return `<div class="trending-card" tabindex="0" role="button" aria-label="${title}" data-id="${item.id}" data-type="${type}">
       <div class="trending-poster">
         ${poster ? `<img src="${poster}" alt="${title}" loading="lazy">` : ''}
       </div>
@@ -3436,7 +3570,15 @@
     }
 
     // MODAL
-    async function openModal(id, type = 'movie') {
+    async    function openModal(id, type = 'movie') {
+      // Auto-focus close button when in TV mode so remote navigation works immediately
+      const _origOpen = arguments.callee;
+      setTimeout(() => {
+        if (_tvMode) {
+          const firstBtn = document.querySelector('#modal.open #modalClose');
+          if (firstBtn) firstBtn.focus();
+        }
+      }, 500);
       const heroVideo = document.getElementById('heroVideoContainer');
       if (heroVideo) heroVideo.innerHTML = '';
 
@@ -3613,6 +3755,15 @@
       }
       overlay.classList.add('open');
       gsap.fromTo('.player-container', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'power3.out' });
+      // TV remote: auto-focus close/nav buttons so user can immediately navigate
+      if (_tvMode) {
+        setTimeout(() => {
+          const focusTarget = document.getElementById('playerPrevEp')?.offsetParent
+            ? document.getElementById('playerPrevEp')
+            : document.getElementById('playerClose');
+          if (focusTarget) focusTarget.focus();
+        }, 450);
+      }
       if (isTvPlay) {
         updateEpNavButtons();
         // Start runtime-based auto-play timer as soon as the iframe loads
@@ -3620,12 +3771,6 @@
           frame.removeEventListener('load', onLoad);
           scheduleEpisodeAutoPlay(_currentModalId, _selectedSeason, _selectedEpisode);
         }, { once: true });
-      }
-
-      if (frame.requestFullscreen) {
-        frame.requestFullscreen().catch(e => console.log('Fullscreen error:', e));
-      } else if (frame.webkitRequestFullscreen) {
-        frame.webkitRequestFullscreen();
       }
     }
 
@@ -4021,7 +4166,128 @@
     function closeSearch() {
       gsap.to(searchOverlay, { opacity: 0, duration: .2, onComplete: () => { searchOverlay.classList.remove('open'); searchOverlay.style.opacity = ''; } });
     }
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSearch(); });
+    // ─── TV REMOTE / KEYBOARD NAVIGATION ────────────────────────────────────
+    // Key codes for various TV platforms:
+    //   Back:  27=Escape, 8=Backspace, 10009=Samsung Tizen, 461=LG webOS, 166=Browser Back
+    //   OK:    13=Enter,  32=Space
+    //   Play:  415=MediaPlay, 179=MediaPlayPause, 250=Play
+    const TV_BACK  = new Set([27, 8, 10009, 461, 166]);
+    const TV_OK    = new Set([13, 32]);
+    const TV_PLAY  = new Set([415, 179, 250]);
+    const FOCUSABLE_SEL = 'button:not([disabled]), a[href], select, input, [tabindex="0"]';
+
+    let _tvMode = false;
+    function enableTvMode() {
+      if (_tvMode) return;
+      _tvMode = true;
+      document.body.classList.add('tv-mode');
+    }
+
+    function getVisibleFocusables() {
+      return [...document.querySelectorAll(FOCUSABLE_SEL)].filter(el => {
+        if (el.closest('#searchOverlay:not(.open)') ||
+            el.closest('#modal:not(.open)') ||
+            el.closest('#playerOverlay:not(.open)')) return false;
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && r.height > 0 &&
+               r.top < window.innerHeight && r.bottom > 0 &&
+               r.left < window.innerWidth && r.right > 0;
+      });
+    }
+
+    function spatialNavigate(dir) {
+      enableTvMode();
+      const cur = document.activeElement;
+      const all = getVisibleFocusables();
+      if (!all.length) return;
+      if (!cur || cur === document.body || !all.includes(cur)) {
+        (all[0]).focus(); return;
+      }
+      const cr = cur.getBoundingClientRect();
+      const cx = cr.left + cr.width  / 2;
+      const cy = cr.top  + cr.height / 2;
+      let best = null, bestScore = Infinity;
+      for (const el of all) {
+        if (el === cur) continue;
+        const r  = el.getBoundingClientRect();
+        const ex = r.left + r.width  / 2;
+        const ey = r.top  + r.height / 2;
+        const dx = ex - cx, dy = ey - cy;
+        let primary, secondary, inDir;
+        if (dir === 'right') { inDir = dx > 2;  primary = dx;  secondary = Math.abs(dy); }
+        if (dir === 'left')  { inDir = dx < -2; primary = -dx; secondary = Math.abs(dy); }
+        if (dir === 'down')  { inDir = dy > 2;  primary = dy;  secondary = Math.abs(dx); }
+        if (dir === 'up')    { inDir = dy < -2; primary = -dy; secondary = Math.abs(dx); }
+        if (!inDir) continue;
+        const score = primary + secondary * 1.8;
+        if (score < bestScore) { bestScore = score; best = el; }
+      }
+      if (best) {
+        best.focus();
+        best.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+      }
+    }
+
+    document.addEventListener('keydown', e => {
+      const key = e.keyCode || e.which;
+
+      // Arrow keys → spatial navigation
+      if (key === 37) { e.preventDefault(); spatialNavigate('left');  return; }
+      if (key === 38) { e.preventDefault(); spatialNavigate('up');    return; }
+      if (key === 39) { e.preventDefault(); spatialNavigate('right'); return; }
+      if (key === 40) { e.preventDefault(); spatialNavigate('down');  return; }
+
+      // OK / Enter / Space → click focused element
+      if (TV_OK.has(key)) {
+        const el = document.activeElement;
+        // Don't intercept for native input/select/textarea
+        if (el && !['INPUT','SELECT','TEXTAREA'].includes(el.tagName)) {
+          e.preventDefault();
+          el.click();
+        }
+        return;
+      }
+
+      // Media Play keys → play focused card, or first available play button
+      if (TV_PLAY.has(key)) {
+        e.preventDefault();
+        const el = document.activeElement;
+        if (el && (el.classList.contains('movie-card') || el.classList.contains('trending-card'))) {
+          el.click();
+        } else {
+          const btn = document.querySelector('#playerOverlay.open .modal-play-btn') ||
+                      document.querySelector('#modal.open .modal-play-btn') ||
+                      document.querySelector('#heroPlay[style*="flex"]') ||
+                      document.querySelector('#heroWatch');
+          if (btn) btn.click();
+        }
+        return;
+      }
+
+      // Back button → dismiss overlays in order: player → modal → search
+      if (TV_BACK.has(key)) {
+        // Don't intercept Escape/Backspace inside text inputs
+        if (document.activeElement && ['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+        e.preventDefault();
+        const playerOverlay = document.getElementById('playerOverlay');
+        if (playerOverlay && playerOverlay.classList.contains('open')) {
+          document.getElementById('playerClose').click(); return;
+        }
+        const modal = document.getElementById('modal');
+        if (modal && modal.classList.contains('open')) {
+          document.getElementById('modalClose').click(); return;
+        }
+        const searchOverlay2 = document.getElementById('searchOverlay');
+        if (searchOverlay2 && searchOverlay2.classList.contains('open')) {
+          document.getElementById('searchClose').click(); return;
+        }
+      }
+    });
+
+    // Show TV mode hint on first arrow key
+    document.addEventListener('keydown', e => {
+      if ([37,38,39,40].includes(e.keyCode) && !_tvMode) enableTvMode();
+    }, { once: false });
     let searchTimer2;
     let searchRequestId = 0;
     document.getElementById('searchInput').addEventListener('input', e => {
