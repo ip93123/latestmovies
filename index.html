@@ -4174,6 +4174,7 @@
         if (row) {
           row.innerHTML = toShow.map((item, i) => buildCard(item, null, item.type, watchDatas[i])).join('');
           animateGrid(row);
+          addCardListeners(row, '.movie-card');
         }
       } catch (e) {
         console.error('Error loading recent', e);
