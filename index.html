@@ -3677,6 +3677,9 @@
         bar.innerHTML = '';
       }
       overlay.classList.add('open');
+      // Push history recovery state — if an ad redirects the page, pressing Back
+      // will trigger popstate and auto-reopen this video.
+      if (typeof window._adblock_pushRecovery === 'function') window._adblock_pushRecovery(url);
       gsap.fromTo('.player-container', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'power3.out' });
       // TV remote: auto-focus close/nav buttons so user can immediately navigate
       if (_tvMode) {
@@ -3701,6 +3704,7 @@
       if (frame) {
         frame.style.opacity = '0';
         frame.src = url;
+        if (typeof window._adblock_pushRecovery === 'function') window._adblock_pushRecovery(url);
       }
     }
 
@@ -3717,50 +3721,113 @@
       if (e.target === document.getElementById('playerOverlay')) document.getElementById('playerClose').click();
     });
 
-    // ─── AD / REDIRECT BLOCKER ────────────────────────────────────────────────
-    // Many free embed servers fire popups or try to navigate the top frame.
-    // Strategy 1: sandbox attr on the iframe already blocks allow-top-navigation
-    //             and allow-popups, so most redirects are stopped at the source.
-    // Strategy 2: window blur guard — if the page loses focus while the player
-    //             is open it almost certainly means a popup ad was spawned.
-    //             We immediately refocus the page so the user stays here.
-    (function() {
-      let _blurTimeout = null;
-      window.addEventListener('blur', () => {
-        const overlayOpen = document.getElementById('playerOverlay')?.classList.contains('open');
-        if (!overlayOpen) return;
-        // Give 80 ms grace for legit focus shifts (e.g. fullscreen API)
-        _blurTimeout = setTimeout(() => {
-          window.focus();
-        }, 80);
-      });
-      window.addEventListener('focus', () => {
-        if (_blurTimeout) { clearTimeout(_blurTimeout); _blurTimeout = null; }
-      });
+    // ─── AD / REDIRECT BLOCKER (multi-layer) ─────────────────────────────────
+    (function () {
+      'use strict';
 
-      // Strategy 3: intercept any attempt by scripts to open a new window/tab
+      function isPlayerOpen() {
+        return !!document.getElementById('playerOverlay')?.classList.contains('open');
+      }
+
+      // ── Layer 1: window.open override ────────────────────────────────────────
+      // Blocks popup/new-tab ads spawned by the iframe while the player is open.
       const _origOpen = window.open.bind(window);
-      window.open = function(url, target, features) {
-        // Allow YouTube trailer opens (triggered by the Watch Trailer button)
+      window.open = function (url, target, features) {
         if (url && (url.includes('youtube.com') || url.includes('youtu.be'))) {
-          return _origOpen(url, target, features);
+          return _origOpen(url, target, features);   // allow trailer links
         }
-        // Block everything else while the player is active
-        if (document.getElementById('playerOverlay')?.classList.contains('open')) {
-          console.warn('[AdBlock] Blocked popup from embed:', url);
+        if (isPlayerOpen()) {
+          console.warn('[AdBlock] Blocked popup:', url);
           return null;
         }
         return _origOpen(url, target, features);
       };
 
-      // Strategy 4: Reload the iframe src when it tries to navigate away
-      //             (catches the rare case where the iframe itself redirects its src)
+      // ── Layer 2: location.assign / location.replace intercept ────────────────
+      // Catches iframes calling window.top.location.assign("adUrl")
+      try {
+        const _origAssign  = window.location.assign.bind(window.location);
+        const _origReplace = window.location.replace.bind(window.location);
+        window.location.assign = function (url) {
+          if (isPlayerOpen()) { console.warn('[AdBlock] Blocked assign:', url); return; }
+          _origAssign(url);
+        };
+        window.location.replace = function (url) {
+          if (isPlayerOpen()) { console.warn('[AdBlock] Blocked replace:', url); return; }
+          _origReplace(url);
+        };
+      } catch (e) { /* security error in some browsers — safe to ignore */ }
+
+      // ── Layer 3: beforeunload guard ───────────────────────────────────────────
+      // Desktop: shows "Leave page?" dialog so user can cancel the redirect.
+      // Mobile: many browsers honour preventDefault() and cancel navigation.
+      window.addEventListener('beforeunload', function (e) {
+        if (isPlayerOpen()) {
+          e.preventDefault();
+          e.returnValue = '';   // Chrome requires this
+        }
+      });
+
+      // ── Layer 4: blur → refocus (desktop + some mobile browsers) ─────────────
+      let _blurTimer = null;
+      window.addEventListener('blur', function () {
+        if (!isPlayerOpen()) return;
+        _blurTimer = setTimeout(function () { try { window.focus(); } catch (e) {} }, 80);
+      });
+      window.addEventListener('focus', function () {
+        clearTimeout(_blurTimer);
+      });
+
+      // ── Layer 5: visibilitychange (mobile-specific) ────────────────────────────
+      // On mobile, when a new tab opens the page goes hidden. Detect this and try
+      // to pull focus back. If the browser already navigated away, the history
+      // recovery state (layer 6) brings them back.
+      let _visTimer = null;
+      document.addEventListener('visibilitychange', function () {
+        if (!isPlayerOpen()) return;
+        if (document.hidden) {
+          _visTimer = setTimeout(function () {
+            try { window.focus(); } catch (e) {}
+          }, 150);
+        } else {
+          clearTimeout(_visTimer);
+        }
+      });
+
+      // ── Layer 6: history recovery state ───────────────────────────────────────
+      // Push a tagged state so that if a redirect DOES succeed, pressing Back
+      // lands the user right back here with the player ready to re-open.
+      window._adblock_pushRecovery = function (iframeSrc) {
+        try {
+          history.pushState({ _hackyMaxPlayer: true, _src: iframeSrc }, '', location.href);
+        } catch (e) {}
+      };
+
+      window.addEventListener('popstate', function (e) {
+        if (e.state && e.state._hackyMaxPlayer) {
+          // User pressed Back after an ad redirect — restore the player
+          history.pushState(e.state, '', location.href); // keep recovery state live
+          const overlay = document.getElementById('playerOverlay');
+          const frame   = document.getElementById('playerFrame');
+          if (overlay && frame && e.state._src && e.state._src !== 'about:blank') {
+            frame.src = e.state._src;
+            overlay.classList.add('open');
+            try { gsap.fromTo('.player-container', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'power3.out' }); } catch (ex) {}
+          }
+        }
+      });
+
+      // ── Layer 7: MutationObserver on iframe src ────────────────────────────────
+      // Last resort: if the iframe's src attribute itself gets swapped to an ad URL,
+      // restore the real video URL.
       const _frame = document.getElementById('playerFrame');
-      let _lastSrc = '';
+      let _validSrc = '';
       if (_frame) {
-        const _obs = new MutationObserver(() => {
-          if (_frame.src && _frame.src !== 'about:blank' && _frame.src !== _lastSrc) {
-            _lastSrc = _frame.src;
+        const _obs = new MutationObserver(function () {
+          const cur = _frame.getAttribute('src') || '';
+          if (cur && cur !== 'about:blank' && cur !== _validSrc) {
+            // A new legit URL was set — record it
+            _validSrc = cur;
           }
         });
         _obs.observe(_frame, { attributes: true, attributeFilter: ['src'] });
