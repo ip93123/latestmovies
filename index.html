@@ -3855,9 +3855,9 @@
       const shield = document.getElementById('adShield');
       if (shield) shield.style.display = 'flex';
 
-      // Auto fullscreen if possible (helpful for mobile)
+      // Auto fullscreen if possible (helpful for all devices)
       const pContainer = document.getElementById('playerContainer');
-      if (pContainer && window.innerWidth <= 768) {
+      if (pContainer) {
         try {
           if (pContainer.requestFullscreen) pContainer.requestFullscreen().catch(() => {});
           else if (pContainer.webkitRequestFullscreen) pContainer.webkitRequestFullscreen();
