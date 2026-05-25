@@ -2380,9 +2380,6 @@
       <button class="player-ep-btn" id="playerPrevEp" title="Previous Episode">⏮ Prev Ep</button>
       <button class="player-ep-btn" id="playerNextEp" title="Next Episode">Next Ep ⏭</button>
     </div>
-    <button class="player-newtab-btn" id="playerNewTab" title="Open in new tab — ads only affect that tab">
-      ↗ Open in Tab
-    </button>
     <div class="player-container">
       <button class="popup-home" id="playerHome" onclick="document.getElementById('playerClose').click()">Home</button>
       <button class="player-close" id="playerClose">&#10005;</button>
@@ -2391,11 +2388,15 @@
         <div
           style="width:40px;height:40px;border:4px solid rgba(255,255,255,0.1);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;">
         </div>
+      <div id="adShield" style="position:absolute;inset:0;z-index:20;background:rgba(0,0,0,0.65);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(8px);display:none;">
+        <div style="width:72px;height:72px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.2rem;color:#000;margin-bottom:1rem;padding-left:6px;box-shadow:0 0 30px rgba(232,201,122,0.4);">▶</div>
+        <div style="color:#fff;font-weight:700;font-size:1rem;letter-spacing:0.5px;">Tap to unlock player</div>
+        <div style="color:var(--muted);font-size:0.75rem;margin-top:0.5rem;">(Bypasses initial popup ads)</div>
       </div>
       <iframe id="playerFrame" src="about:blank"
         allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
         allowfullscreen></iframe>
-
     </div>
   </div>
 
@@ -3196,15 +3197,27 @@
         }
       }, { passive: true });
 
-      // Mouse wheel / trackpad: scroll right or down → next, up or left → prev
-      heroEl.addEventListener('wheel', e => {
-        if (_wheelLock) return;
-        const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-        if (Math.abs(delta) < 30) return; // ignore tiny trackpad nudges
-        _wheelLock = true;
-        heroNav(delta > 0 ? 1 : -1);
-        setTimeout(() => { _wheelLock = false; }, 900); // cooldown
-      }, { passive: true });
+      // Mouse drag for PC: drag left/right to navigate
+      let _isDragging = false;
+      heroEl.addEventListener('mousedown', e => {
+        _isDragging = true;
+        _touchStartX = e.clientX;
+        _touchStartY = e.clientY;
+        _touchStartT = Date.now();
+        heroEl.style.cursor = 'grabbing';
+      });
+
+      window.addEventListener('mouseup', e => {
+        if (!_isDragging) return;
+        _isDragging = false;
+        heroEl.style.cursor = '';
+        const dx = e.clientX - _touchStartX;
+        const dy = e.clientY - _touchStartY;
+        const dt = Date.now() - _touchStartT;
+        if (dt < 400 && Math.abs(dx) > Math.abs(dy) * 1.3 && Math.abs(dx) > 45) {
+          heroNav(dx < 0 ? 1 : -1);
+        }
+      });
     }
 
     async function setHero(idx, initial = false) {
@@ -3276,7 +3289,10 @@
         streamWrap.appendChild(na);
       }
 
-      document.getElementById('heroMore').onclick = () => openModal(m.id, type);
+      document.getElementById('heroMore').onclick = () => {
+        const shortCode = type === 'tv' ? 'tv' : 'm';
+        window.open(`?${shortCode}=${m.id}`, '_blank');
+      };
       document.getElementById('heroWatch').onclick = async () => {
         const prevText = document.getElementById('heroWatch').innerHTML;
         document.getElementById('heroWatch').textContent = 'Loading...';
@@ -3709,6 +3725,19 @@
       if (e.target === document.getElementById('modal')) document.getElementById('modalClose').click();
     });
 
+    const _adShield = document.getElementById('adShield');
+    if (_adShield) {
+      _adShield.addEventListener('click', function (e) {
+        this.style.display = 'none';
+        e.stopPropagation();
+      });
+      _adShield.addEventListener('touchstart', function (e) {
+        this.style.display = 'none';
+        e.preventDefault(); // Prevents the touch from passing through to the iframe
+        e.stopPropagation();
+      }, { passive: false });
+    }
+
     function playStream(url, allUrls, labels) {
       if (_currentModalItem) saveRecentWatch(_currentModalItem, _currentModalType);
       // Stop background video
@@ -3751,16 +3780,11 @@
       // Push history recovery state — if an ad redirects the page, pressing Back
       // will trigger popstate and auto-reopen this video.
       if (typeof window._adblock_pushRecovery === 'function') window._adblock_pushRecovery(url);
+      
+      const shield = document.getElementById('adShield');
+      if (shield) shield.style.display = 'flex';
+
       gsap.fromTo('.player-container', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'power3.out' });
-      // Wire up Open-in-Tab button
-      const newTabBtn = document.getElementById('playerNewTab');
-      if (newTabBtn) {
-        newTabBtn.onclick = () => {
-          const src = document.getElementById('playerFrame')?.src;
-          if (src && src !== 'about:blank') window.open(src, '_blank', 'noopener');
-          document.getElementById('playerClose').click();
-        };
-      }
       // TV remote: auto-focus close/nav buttons so user can immediately navigate
       if (_tvMode) {
         setTimeout(() => {
@@ -3812,6 +3836,7 @@
       // ── Layer 1: window.open override ────────────────────────────────────────
       // Blocks popup/new-tab ads spawned by the iframe while the player is open.
       const _origOpen = window.open.bind(window);
+      window._safeOpen = _origOpen;
       window.open = function (url, target, features) {
         if (url && (url.includes('youtube.com') || url.includes('youtu.be'))) {
           return _origOpen(url, target, features);   // allow trailer links
@@ -4048,7 +4073,8 @@
           const type = card.dataset.type || 'movie';
           if (id) {
             closeSearch();
-            openModal(id, type);
+            const shortCode = type === 'tv' ? 'tv' : 'm';
+            window.open(`?${shortCode}=${id}`, '_blank');
           }
         });
       });
@@ -4385,6 +4411,14 @@
 
     // INIT
     async function init() {
+      // ── Handle Shareable Links ──
+      const params = new URLSearchParams(window.location.search);
+      const mId = params.get('m');
+      const tvId = params.get('tv');
+      if (mId || tvId) {
+        setTimeout(() => openModal(mId || tvId, tvId ? 'tv' : 'movie'), 300);
+      }
+
       const [nowPlaying] = await Promise.all([tmdb('/movie/now_playing?language=en-US&page=1')]);
 
       const heroPool = (nowPlaying.results || []).filter(m => m.backdrop_path).slice(0, 6);
