@@ -1834,6 +1834,27 @@
       z-index: 710;
     }
 
+    .player-newtab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      padding: .35rem .9rem;
+      border-radius: 50px;
+      font-size: .78rem;
+      font-weight: 700;
+      border: 1px solid rgba(232, 201, 122, 0.4);
+      background: rgba(232, 201, 122, 0.08);
+      color: var(--gold);
+      cursor: pointer;
+      transition: all .2s;
+      font-family: 'Inter', sans-serif;
+    }
+    .player-newtab-btn:hover {
+      background: var(--gold);
+      color: #07090F;
+      border-color: transparent;
+    }
+
     .player-container {
       width: 90vw;
       height: 80vh;
@@ -2358,8 +2379,10 @@
     <div class="player-ep-bar" id="playerEpBar">
       <button class="player-ep-btn" id="playerPrevEp" title="Previous Episode">⏮ Prev Ep</button>
       <button class="player-ep-btn" id="playerNextEp" title="Next Episode">Next Ep ⏭</button>
-
     </div>
+    <button class="player-newtab-btn" id="playerNewTab" title="Open in new tab — ads only affect that tab">
+      ↗ Open in Tab
+    </button>
     <div class="player-container">
       <button class="popup-home" id="playerHome" onclick="document.getElementById('playerClose').click()">Home</button>
       <button class="player-close" id="playerClose">&#10005;</button>
@@ -3134,6 +3157,54 @@
       dotsEl.querySelectorAll('.hero-dot').forEach(d => d.addEventListener('click', () => { clearInterval(heroTimer); setHero(+d.dataset.i); heroTimer = setInterval(() => setHero((heroIdx + 1) % heroMovies.length), 15000); }));
       setHero(0, true);
       heroTimer = setInterval(() => setHero((heroIdx + 1) % heroMovies.length), 15000);
+
+      // ── Touch swipe & scroll-wheel navigation on hero ──────────────────────
+      const heroEl = document.getElementById('hero');
+      let _touchStartX = 0, _touchStartY = 0, _touchStartT = 0;
+      let _wheelLock = false;
+
+      function heroNav(dir) {
+        // dir: +1 = next, -1 = prev
+        clearInterval(heroTimer);
+        const next = ((heroIdx + dir) + heroMovies.length) % heroMovies.length;
+        // Animate content slide direction
+        const slideX = dir > 0 ? -40 : 40;
+        gsap.fromTo('#heroContent', { x: 0, opacity: 1 }, {
+          x: slideX, opacity: 0, duration: 0.22, ease: 'power2.in',
+          onComplete: () => {
+            setHero(next);
+            gsap.fromTo('#heroContent', { x: -slideX, opacity: 0 }, { x: 0, opacity: 1, duration: 0.35, ease: 'power3.out' });
+          }
+        });
+        heroTimer = setInterval(() => setHero((heroIdx + 1) % heroMovies.length), 15000);
+      }
+
+      // Touch: swipe left → next, swipe right → prev
+      heroEl.addEventListener('touchstart', e => {
+        _touchStartX = e.touches[0].clientX;
+        _touchStartY = e.touches[0].clientY;
+        _touchStartT = Date.now();
+      }, { passive: true });
+
+      heroEl.addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].clientX - _touchStartX;
+        const dy = e.changedTouches[0].clientY - _touchStartY;
+        const dt = Date.now() - _touchStartT;
+        // Must be faster than 400ms, more horizontal than vertical, > 45px
+        if (dt < 400 && Math.abs(dx) > Math.abs(dy) * 1.3 && Math.abs(dx) > 45) {
+          heroNav(dx < 0 ? 1 : -1);
+        }
+      }, { passive: true });
+
+      // Mouse wheel / trackpad: scroll right or down → next, up or left → prev
+      heroEl.addEventListener('wheel', e => {
+        if (_wheelLock) return;
+        const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+        if (Math.abs(delta) < 30) return; // ignore tiny trackpad nudges
+        _wheelLock = true;
+        heroNav(delta > 0 ? 1 : -1);
+        setTimeout(() => { _wheelLock = false; }, 900); // cooldown
+      }, { passive: true });
     }
 
     async function setHero(idx, initial = false) {
@@ -3681,6 +3752,15 @@
       // will trigger popstate and auto-reopen this video.
       if (typeof window._adblock_pushRecovery === 'function') window._adblock_pushRecovery(url);
       gsap.fromTo('.player-container', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'power3.out' });
+      // Wire up Open-in-Tab button
+      const newTabBtn = document.getElementById('playerNewTab');
+      if (newTabBtn) {
+        newTabBtn.onclick = () => {
+          const src = document.getElementById('playerFrame')?.src;
+          if (src && src !== 'about:blank') window.open(src, '_blank', 'noopener');
+          document.getElementById('playerClose').click();
+        };
+      }
       // TV remote: auto-focus close/nav buttons so user can immediately navigate
       if (_tvMode) {
         setTimeout(() => {
