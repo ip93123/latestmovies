@@ -2661,6 +2661,15 @@
     const IMG = 'https://image.tmdb.org/t/p/';
     const COUNTRY = 'US';
 
+    function slugify(text) {
+      return (text || '').toString().toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w\-]+/g, '')
+        .replace(/\-\-+/g, '-')
+        .replace(/^-+/, '')
+        .replace(/-+$/, '');
+    }
+
     // Platform direct URLs
     const PLATFORM_URLS = {
       8: 'https://www.netflix.com',
@@ -3344,7 +3353,10 @@
 
       document.getElementById('heroMore').onclick = () => {
         const shortCode = type === 'tv' ? 'tv' : 'm';
-        window.open(`?${shortCode}=${m.id}`, '_blank');
+        const titleText = m.title || m.name || '';
+        const slug = slugify(titleText);
+        const fullId = slug ? `${m.id}-${slug}` : m.id;
+        window.open(`?${shortCode}=${fullId}`, '_blank');
       };
       document.getElementById('heroWatch').onclick = async () => {
         const prevText = document.getElementById('heroWatch').innerHTML;
@@ -4127,7 +4139,10 @@
           if (id) {
             closeSearch();
             const shortCode = type === 'tv' ? 'tv' : 'm';
-            window.open(`?${shortCode}=${id}`, '_blank');
+            const titleText = card.getAttribute('aria-label') || '';
+            const slug = slugify(titleText);
+            const fullId = slug ? `${id}-${slug}` : id;
+            window.open(`?${shortCode}=${fullId}`, '_blank');
           }
         });
       });
@@ -4466,9 +4481,10 @@
     async function init() {
       // ── Handle Shareable Links ──
       const params = new URLSearchParams(window.location.search);
-      const mId = params.get('m');
-      const tvId = params.get('tv');
-      if (mId || tvId) {
+      const mParam = params.get('m');
+      const tvParam = params.get('tv');
+      const paramVal = mParam || tvParam;
+      if (paramVal) {
         document.body.classList.add('standalone');
         // Make close/home buttons redirect to the root (home page)
         const goHome = (e) => { e.stopPropagation(); window.location.href = window.location.pathname; };
@@ -4476,7 +4492,9 @@
         document.getElementById('modalHome').onclick = goHome;
         document.getElementById('playerHome').onclick = goHome;
         
-        setTimeout(() => openModal(mId || tvId, tvId ? 'tv' : 'movie'), 100);
+        // Extract just the numeric ID (e.g., from "123-spider-man")
+        const id = parseInt(paramVal, 10);
+        setTimeout(() => openModal(id, tvParam ? 'tv' : 'movie'), 100);
         return; // Skip loading the rest of the site to save bandwidth and make the page feel standalone
       }
 
