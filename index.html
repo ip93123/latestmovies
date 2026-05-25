@@ -1551,6 +1551,20 @@
       background: rgba(232, 201, 122, 0.2);
       border-color: var(--gold);
     }
+    
+    .modal-top-actions {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 10;
+    }
+    .modal-top-actions > * {
+      position: static !important;
+      margin: 0 !important;
+    }
     #searchHome { position: fixed; top: 1.8rem; right: 4.5rem; }
     #playerHome { top: 1.8rem; right: 4.5rem; }
     #modalHome { top: 1rem; right: 4rem; z-index: 5; }
@@ -2254,11 +2268,15 @@
 
       #searchHome { top: 1.3rem; right: 4rem; }
       #playerHome { top: 1.3rem; right: 3.5rem; }
-      #modalHome { top: 0.5rem; right: 3.5rem; padding: 0.3rem 0.6rem; font-size: 0.8rem; }
-
-      .modal-close {
+      
+      .modal-top-actions {
         top: 0.5rem;
         right: 0.5rem;
+      }
+      
+      #modalHome { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
+
+      .modal-close {
         background: rgba(255, 255, 255, 0.2);
       }
 
@@ -2355,29 +2373,26 @@
     }
 
     /* SHARE BUTTON */
-    .modal-share-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: rgba(232, 201, 122, 0.1);
-      border: 1px solid rgba(232, 201, 122, 0.3);
-      color: var(--gold);
-      padding: 0.4rem 0.9rem;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 600;
+    .modal-share-icon-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: var(--text);
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
       cursor: pointer;
-      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: all 0.2s;
     }
-    .modal-share-btn:hover {
-      background: var(--gold);
-      color: #000;
+    .modal-share-icon-btn:hover {
+      background: rgba(232, 201, 122, 0.2);
+      color: var(--gold);
     }
-    .modal-share-btn.copied {
+    .modal-share-icon-btn.copied {
       background: var(--green);
       color: #fff;
-      border-color: transparent;
     }
   </style>
 </head>
@@ -2431,12 +2446,16 @@
     <div class="modal-box" id="modalBox">
       <div class="modal-poster"><img id="modalPoster" src="" alt=""></div>
       <div class="modal-body">
-        <button class="popup-home" id="modalHome" onclick="document.getElementById('modalClose').click()">Home</button>
-        <button class="modal-close" id="modalClose">✕</button>
+        <div class="modal-top-actions">
+          <button class="popup-home" id="modalHome" onclick="document.getElementById('modalClose').click()">Home</button>
+          <button class="modal-share-icon-btn" id="modalShare" title="Share Link">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+          </button>
+          <button class="modal-close" id="modalClose">✕</button>
+        </div>
         <div class="modal-tag" id="modalType">Movie</div>
         <div class="modal-title" id="modalTitle"></div>
         <div class="modal-meta" id="modalMeta"></div>
-        <button id="modalShare" class="modal-share-btn">🔗 Share Link</button>
         <div class="modal-ratings" id="modalRatings"></div>
         <p class="modal-plot" id="modalPlot"></p>
         <div class="modal-section-label">WHERE TO WATCH</div>
@@ -3659,18 +3678,15 @@
         
         const shareBtn = document.getElementById('modalShare');
         if (shareBtn) {
-          shareBtn.textContent = '🔗 Share Link';
-          shareBtn.className = 'modal-share-btn';
+          shareBtn.className = 'modal-share-icon-btn';
           shareBtn.onclick = () => {
             const shortCode = type === 'tv' ? 'tv' : 'm';
             const slug = slugify(title);
             const fullId = slug ? `${id}-${slug}` : id;
             const shareUrl = `${window.location.origin}${window.location.pathname}?${shortCode}=${fullId}`;
             navigator.clipboard.writeText(shareUrl).then(() => {
-              shareBtn.textContent = '✓ Copied!';
               shareBtn.classList.add('copied');
               setTimeout(() => {
-                shareBtn.textContent = '🔗 Share Link';
                 shareBtn.classList.remove('copied');
               }, 2000);
             }).catch(err => {
