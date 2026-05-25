@@ -2354,56 +2354,30 @@
       }
     }
 
-    /* STANDALONE MODE (for direct short links) */
-    body.standalone > :not(#modal):not(#playerOverlay):not(#searchOverlay):not(script) {
-      display: none !important;
-    }
-    body.standalone {
-      overflow-y: auto;
-      background: #07090F;
-    }
-    body.standalone #modal {
-      position: static;
-      background: #07090F;
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      padding: 0;
-      min-height: 100vh;
-      display: block;
-      opacity: 1;
-    }
-    body.standalone #modalBox {
-      max-height: none;
-      width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-      border: none;
-      box-shadow: none;
-      background: transparent;
-      padding: 2rem 5%;
-      border-radius: 0;
-    }
-    body.standalone #modalClose {
-      display: none !important; /* Hide the X mark */
-    }
-    body.standalone #modalHome {
-      position: relative;
-      top: 0;
-      right: 0;
+    /* SHARE BUTTON */
+    .modal-share-btn {
       display: inline-flex;
-      margin-bottom: 1.5rem;
+      align-items: center;
+      gap: 0.5rem;
       background: rgba(232, 201, 122, 0.1);
+      border: 1px solid rgba(232, 201, 122, 0.3);
       color: var(--gold);
-      border-color: rgba(232, 201, 122, 0.2);
-      font-size: 0.95rem;
-      padding: 0.5rem 1rem;
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 1.2rem;
+      transition: all 0.2s;
     }
-    body.standalone #modalHome::before {
-      content: '←';
-      margin-right: 0.3rem;
+    .modal-share-btn:hover {
+      background: var(--gold);
+      color: #000;
     }
-    body.standalone .modal-poster img {
-      border-radius: 12px;
+    .modal-share-btn.copied {
+      background: var(--green);
+      color: #fff;
+      border-color: transparent;
     }
   </style>
 </head>
@@ -2432,7 +2406,7 @@
       <button class="player-ep-btn" id="playerPrevEp" title="Previous Episode">⏮ Prev Ep</button>
       <button class="player-ep-btn" id="playerNextEp" title="Next Episode">Next Ep ⏭</button>
     </div>
-    <div class="player-container">
+    <div class="player-container" id="playerContainer">
       <button class="popup-home" id="playerHome" onclick="document.getElementById('playerClose').click()">Home</button>
       <button class="player-close" id="playerClose">&#10005;</button>
       <div id="playerLoading"
@@ -2462,6 +2436,7 @@
         <div class="modal-tag" id="modalType">Movie</div>
         <div class="modal-title" id="modalTitle"></div>
         <div class="modal-meta" id="modalMeta"></div>
+        <button id="modalShare" class="modal-share-btn">🔗 Share Link</button>
         <div class="modal-ratings" id="modalRatings"></div>
         <p class="modal-plot" id="modalPlot"></p>
         <div class="modal-section-label">WHERE TO WATCH</div>
@@ -3350,13 +3325,7 @@
         streamWrap.appendChild(na);
       }
 
-      document.getElementById('heroMore').onclick = () => {
-        const shortCode = type === 'tv' ? 'tv' : 'm';
-        const titleText = m.title || m.name || '';
-        const slug = slugify(titleText);
-        const fullId = slug ? `${m.id}-${slug}` : m.id;
-        window.open(`?${shortCode}=${fullId}`, '_blank');
-      };
+      document.getElementById('heroMore').onclick = () => openModal(m.id, type);
       document.getElementById('heroWatch').onclick = async () => {
         const prevText = document.getElementById('heroWatch').innerHTML;
         document.getElementById('heroWatch').textContent = 'Loading...';
@@ -3687,6 +3656,28 @@
       ${details.vote_average ? `<span>· ★ ${details.vote_average.toFixed(1)}</span>` : ''}
       ${(details.genres || []).slice(0, 2).map(g => `<span style="background:rgba(232,201,122,0.1);color:var(--gold);padding:.15rem .5rem;border-radius:4px;font-size:.72rem">${g.name}</span>`).join('')}
     `;
+        
+        const shareBtn = document.getElementById('modalShare');
+        if (shareBtn) {
+          shareBtn.textContent = '🔗 Share Link';
+          shareBtn.className = 'modal-share-btn';
+          shareBtn.onclick = () => {
+            const shortCode = type === 'tv' ? 'tv' : 'm';
+            const slug = slugify(title);
+            const fullId = slug ? `${id}-${slug}` : id;
+            const shareUrl = `${window.location.origin}${window.location.pathname}?${shortCode}=${fullId}`;
+            navigator.clipboard.writeText(shareUrl).then(() => {
+              shareBtn.textContent = '✓ Copied!';
+              shareBtn.classList.add('copied');
+              setTimeout(() => {
+                shareBtn.textContent = '🔗 Share Link';
+                shareBtn.classList.remove('copied');
+              }, 2000);
+            }).catch(err => {
+              console.error('Failed to copy', err);
+            });
+          };
+        }
         let trailerKey = null;
         if (videoData && videoData.results) {
           const trailer = videoData.results.find(v => v.site === 'YouTube' && v.type === 'Trailer') || videoData.results.find(v => v.site === 'YouTube');
@@ -3847,6 +3838,15 @@
       
       const shield = document.getElementById('adShield');
       if (shield) shield.style.display = 'flex';
+
+      // Auto fullscreen if possible (helpful for mobile)
+      const pContainer = document.getElementById('playerContainer');
+      if (pContainer && window.innerWidth <= 768) {
+        try {
+          if (pContainer.requestFullscreen) pContainer.requestFullscreen().catch(() => {});
+          else if (pContainer.webkitRequestFullscreen) pContainer.webkitRequestFullscreen();
+        } catch (e) {}
+      }
 
       gsap.fromTo('.player-container', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'power3.out' });
       // TV remote: auto-focus close/nav buttons so user can immediately navigate
@@ -4137,11 +4137,7 @@
           const type = card.dataset.type || 'movie';
           if (id) {
             closeSearch();
-            const shortCode = type === 'tv' ? 'tv' : 'm';
-            const titleText = card.getAttribute('aria-label') || '';
-            const slug = slugify(titleText);
-            const fullId = slug ? `${id}-${slug}` : id;
-            window.open(`?${shortCode}=${fullId}`, '_blank');
+            openModal(id, type);
           }
         });
       });
@@ -4484,17 +4480,8 @@
       const tvParam = params.get('tv');
       const paramVal = mParam || tvParam;
       if (paramVal) {
-        document.body.classList.add('standalone');
-        // Make close/home buttons redirect to the root (home page)
-        const goHome = (e) => { e.stopPropagation(); window.location.href = window.location.pathname; };
-        document.getElementById('modalClose').onclick = goHome;
-        document.getElementById('modalHome').onclick = goHome;
-        document.getElementById('playerHome').onclick = goHome;
-        
-        // Extract just the numeric ID (e.g., from "123-spider-man")
         const id = parseInt(paramVal, 10);
-        setTimeout(() => openModal(id, tvParam ? 'tv' : 'movie'), 100);
-        return; // Skip loading the rest of the site to save bandwidth and make the page feel standalone
+        setTimeout(() => openModal(id, tvParam ? 'tv' : 'movie'), 600);
       }
 
       const [nowPlaying] = await Promise.all([tmdb('/movie/now_playing?language=en-US&page=1')]);
