@@ -2353,6 +2353,29 @@
         grid-template-columns: repeat(2, 1fr);
       }
     }
+
+    /* STANDALONE MODE (for direct short links) */
+    body.standalone > :not(#modal):not(#playerOverlay):not(#searchOverlay):not(script) {
+      display: none !important;
+    }
+    body.standalone #modal {
+      background: #07090F; /* solid background */
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      position: absolute;
+    }
+    body.standalone #modalBox {
+      max-height: none; /* allow scrolling */
+      margin: 0 auto;
+      border: none;
+      box-shadow: none;
+      background: transparent;
+      padding-top: 2rem;
+      padding-bottom: 4rem;
+    }
+    body.standalone {
+      overflow-y: auto;
+    }
   </style>
 </head>
 
@@ -4417,7 +4440,15 @@
       const mId = params.get('m');
       const tvId = params.get('tv');
       if (mId || tvId) {
-        setTimeout(() => openModal(mId || tvId, tvId ? 'tv' : 'movie'), 300);
+        document.body.classList.add('standalone');
+        // Make close/home buttons redirect to the root (home page)
+        const goHome = (e) => { e.stopPropagation(); window.location.href = window.location.pathname; };
+        document.getElementById('modalClose').onclick = goHome;
+        document.getElementById('modalHome').onclick = goHome;
+        document.getElementById('playerHome').onclick = goHome;
+        
+        setTimeout(() => openModal(mId || tvId, tvId ? 'tv' : 'movie'), 100);
+        return; // Skip loading the rest of the site to save bandwidth and make the page feel standalone
       }
 
       const [nowPlaying] = await Promise.all([tmdb('/movie/now_playing?language=en-US&page=1')]);
