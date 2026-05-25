@@ -2394,6 +2394,14 @@
       background: var(--green);
       color: #fff;
     }
+
+    /* Hide custom close/home buttons when player is fullscreen */
+    #playerContainer:fullscreen #playerHome,
+    #playerContainer:fullscreen #playerClose,
+    #playerContainer:-webkit-full-screen #playerHome,
+    #playerContainer:-webkit-full-screen #playerClose {
+      display: none !important;
+    }
   </style>
 </head>
 
