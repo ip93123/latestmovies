@@ -2895,7 +2895,7 @@
       34: { name: 'MGM+', short: 'MGM', cls: 'default', color: '#0F7A3A', bg: 'rgba(15,122,58,0.15)', border: 'rgba(15,122,58,0.4)' },
     };
 
-    const omdbCache = {}, watchCache = {}, providerLogos = {};
+    const watchCache = {}, providerLogos = {};
     let heroMovies = [], heroIdx = 0, heroTimer = null;
     let currentMovies = [], currentTV = [], activeMovieFilter = 'all', activeTVFilter = 'all';
 
@@ -2935,18 +2935,7 @@
         return res;
       } catch { return null }
     }
-    const OMDB_KEY = '2a9140d5';
 
-    async function getOMDb(imdbId) {
-      if (!imdbId) return null;
-      if (omdbCache[imdbId]) return omdbCache[imdbId];
-      try {
-        const r = await fetch(`https://www.omdbapi.com/?i=${imdbId}&apikey=${OMDB_KEY}`);
-        const d = await r.json();
-        omdbCache[imdbId] = d;
-        return d;
-      } catch { return null }
-    }
 
     async function getImdbId(id, type = 'movie') {
       try { const d = await tmdb(`/${type}/${id}/external_ids`); return d.imdb_id || null; } catch { return null }
@@ -3401,11 +3390,9 @@
         .fromTo('#heroStreaming', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: .4, ease: 'power3.out' }, '-=.15')
         .fromTo('.hero-btns', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: .4, ease: 'power3.out' }, '-=.1');
 
-      // OMDb
       const heroPlayBtn = document.getElementById('heroPlay');
       if (heroPlayBtn) heroPlayBtn.style.display = 'none';
       try {
-        const imdbId = await getImdbId(m.id, type);
         if (heroPlayBtn) {
           heroPlayBtn.style.display = 'inline-flex';
           const s1Url = type === 'tv' ? `https://player.videasy.net/tv/${m.id}/1/1` : `https://player.videasy.net/movie/${m.id}`;
@@ -3420,14 +3407,6 @@
             _currentModalType = type;
             playStream(s1Url, allUrls, allLabels);
           };
-        }
-        if (imdbId) {
-          const od = await getOMDb(imdbId);
-          if (od && od.Response === 'True') {
-            if (od.Genre) document.getElementById('heroYear').textContent += ` · ${od.Genre.split(',')[0]}`;
-            if (od.Runtime && od.Runtime !== 'N/A') document.getElementById('heroYear').textContent += ` · ${od.Runtime}`;
-            if (od.imdbRating && od.imdbRating !== 'N/A') document.getElementById('heroImdb').textContent = `⭐ ${od.imdbRating}`;
-          }
         }
       } catch { }
     }
@@ -3460,7 +3439,7 @@
       addCardListeners(grid, '.movie-card');
       const cards = grid.querySelectorAll('.movie-card');
       buildFilterBar('movieFilterBar', cards, 'all', (id) => { activeMovieFilter = id; filterCards('moviesGrid', id); });
-      movies.forEach(m => loadOMDbRating(m.id, 'movie'));
+
       return movies;
     }
 
@@ -3476,7 +3455,7 @@
       addCardListeners(grid, '.movie-card');
       const cards = grid.querySelectorAll('.movie-card');
       buildFilterBar('tvFilterBar', cards, 'all', (id) => { activeTVFilter = id; filterCards('tvGrid', id); });
-      shows.forEach(s => loadOMDbRating(s.id, 'tv'));
+
     }
 
     async function loadTopRated() {
@@ -3488,7 +3467,7 @@
       grid.innerHTML = movies.map((m, i) => buildCard(m, i + 1, 'movie', watchDatas[i])).join('');
       animateGrid(grid);
       addCardListeners(grid, '.movie-card');
-      movies.forEach(m => loadOMDbRating(m.id, 'movie'));
+
     }
 
     async function loadFeatured(movies) {
@@ -3539,19 +3518,7 @@
       ring.classList.add(isNaN(v) || v === 0 ? 'ring-na' : v >= 7.5 ? 'ring-high' : v >= 6 ? 'ring-mid' : 'ring-low');
     }
 
-    async function loadOMDbRating(tmdbId, type = 'movie') {
-      try {
-        const imdbId = await getImdbId(tmdbId, type);
-        if (!imdbId) return;
-        const od = await getOMDb(imdbId);
-        if (!od || od.Response !== 'True') return;
-        if (od.imdbRating && od.imdbRating !== 'N/A') {
-          const score = od.imdbRating;
-          document.querySelectorAll(`.imdb-${tmdbId}`).forEach(el => { el.textContent = `⭐ ${score}`; });
-          updateRing(`${tmdbId}-card`, score);
-        }
-      } catch { }
-    }
+
 
     // ── Season/Episode chooser helpers ─────────────────────────────────────
     async function loadSeasonEpisodes(tvId, season) {
@@ -3754,11 +3721,9 @@
         const cast = (credits && credits.cast ? credits.cast : []).slice(0, 6).map(c => c.name).join(', ');
         document.getElementById('modalCast').textContent = cast || 'Cast information unavailable';
 
-        // OMDb — fetch IMDb ID then get RT + IMDb scores
+        // Setup modal state and play buttons
         try {
           const imdbId = details.imdb_id || await getImdbId(id, type);
-          const rtEl = document.getElementById('modal-rt');
-          const imdbEl = document.getElementById('modal-imdb');
           const ms = document.getElementById('modalStreams');
 
           // Set modal state
@@ -3796,16 +3761,6 @@
           epChooser.style.display = 'none';
           if (type === 'tv' && details.number_of_seasons) {
             await setupEpChooser(id, details.number_of_seasons);
-          }
-
-          if (imdbId) {
-            const od = await getOMDb(imdbId);
-            if (od && od.Response === 'True') {
-              const imdbEl = document.getElementById('modal-imdb');
-              if (imdbEl && od.imdbRating && od.imdbRating !== 'N/A') {
-                imdbEl.textContent = `⭐ ${od.imdbRating} IMDb`;
-              }
-            }
           }
         } catch { }
       } catch (e) {
