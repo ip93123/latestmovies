@@ -2205,7 +2205,7 @@
 
       .player-container {
         width: 100vw;
-        height: 100vh;
+        height: 100dvh;
         max-width: none;
         border-radius: 0;
       }
@@ -2231,11 +2231,14 @@
         font-size: .75rem;
       }
 
-      /* Search — full width on mobile */
       .search-results {
         width: 95vw;
         grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-        max-height: 70vh;
+        max-height: calc(100dvh - 160px);
+        padding-bottom: 2rem;
+      }
+      #searchOverlay {
+        padding-top: 4rem;
       }
 
       .player-server-bar {
@@ -2256,20 +2259,26 @@
 
       .modal-box {
         width: 100vw;
-        height: 100vh;
-        max-height: 100vh;
+        height: 100dvh;
+        max-height: 100dvh;
         border-radius: 0;
         grid-template-columns: 1fr;
       }
 
+      .modal-title {
+        font-size: 1.8rem;
+        white-space: normal;
+      }
+
       .modal-body {
-        padding: 1.5rem 1rem;
+        padding: 4rem 1rem 2rem 1rem;
       }
 
       #searchHome { top: 1.3rem; right: 4rem; }
       #playerHome { top: 1.3rem; right: 3.5rem; }
       
       .modal-top-actions {
+        position: fixed;
         top: 0.5rem;
         right: 0.5rem;
       }
