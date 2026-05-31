@@ -3216,17 +3216,17 @@
       const streamLogos = buildStreamLogoHTML(flat, 3);
       const providerIds = flat.map(p => p.provider_id);
 
-      // New episode badge: show only if last_episode_to_air aired within the past 6 days
-      // (Allowing a 2-day future buffer to account for global timezone differences)
-      const lastEp = type === 'tv' ? (item.last_episode_to_air || null) : null;
+      // New episode badge: check both last and next episode (TMDB caching/timezone flex)
       let hasNewEp = false;
-      if (lastEp && lastEp.air_date) {
-        // Append T00:00:00Z so it strictly evaluates as UTC start-of-day
-        const airTime = new Date(lastEp.air_date + 'T00:00:00Z').getTime();
-        const sixDaysMs = 6 * 24 * 60 * 60 * 1000;
-        const diff = Date.now() - airTime;
-        // Must be within the last 6 days, or up to 2 days in the future (timezone flex)
-        hasNewEp = diff <= sixDaysMs && diff >= -(2 * 24 * 60 * 60 * 1000);
+      if (type === 'tv') {
+        const checkEp = (ep) => {
+          if (!ep || !ep.air_date) return false;
+          const airTime = new Date(ep.air_date + 'T00:00:00Z').getTime();
+          const diff = Date.now() - airTime;
+          // Must be within the last 6 days, or up to 2 days in the future
+          return diff <= (6 * 24 * 60 * 60 * 1000) && diff >= -(2 * 24 * 60 * 60 * 1000);
+        };
+        hasNewEp = checkEp(item.last_episode_to_air) || checkEp(item.next_episode_to_air);
       }
       const newEpBadgeHtml = hasNewEp ? `
         <div class="card-new-ep-badge">
@@ -3272,13 +3272,15 @@
       const metaParts = [runtime, year].filter(Boolean).join(' · ');
 
       // New episode badge for trending TV shows
-      const lastEp = type === 'tv' ? (item.last_episode_to_air || null) : null;
       let hasNewEpTr = false;
-      if (lastEp && lastEp.air_date) {
-        const airTime = new Date(lastEp.air_date + 'T00:00:00Z').getTime();
-        const sixDaysMs = 6 * 24 * 60 * 60 * 1000;
-        const diff = Date.now() - airTime;
-        hasNewEpTr = diff <= sixDaysMs && diff >= -(2 * 24 * 60 * 60 * 1000);
+      if (type === 'tv') {
+        const checkEp = (ep) => {
+          if (!ep || !ep.air_date) return false;
+          const airTime = new Date(ep.air_date + 'T00:00:00Z').getTime();
+          const diff = Date.now() - airTime;
+          return diff <= (6 * 24 * 60 * 60 * 1000) && diff >= -(2 * 24 * 60 * 60 * 1000);
+        };
+        hasNewEpTr = checkEp(item.last_episode_to_air) || checkEp(item.next_episode_to_air);
       }
 
       return `<div class="trending-card" tabindex="0" role="button" aria-label="${title}" data-id="${item.id}" data-type="${type}">
@@ -3645,7 +3647,11 @@
       const tvDetailMap = {};
       tvItems.forEach((s, i) => { if (tvDetails[i]) tvDetailMap[s.id] = tvDetails[i]; });
       const all = allRaw.map(x => x._type === 'tv' && tvDetailMap[x.id]
-        ? { ...x, last_episode_to_air: tvDetailMap[x.id].last_episode_to_air }
+        ? { 
+            ...x, 
+            last_episode_to_air: tvDetailMap[x.id].last_episode_to_air,
+            next_episode_to_air: tvDetailMap[x.id].next_episode_to_air
+          }
         : x
       );
 
@@ -3687,7 +3693,11 @@
         shows.map(s => tmdb(`/tv/${s.id}?language=en-US`).catch(() => null))
       );
       const showDetails = shows.map((s, i) => details[i]
-        ? { ...s, last_episode_to_air: details[i].last_episode_to_air }
+        ? { 
+            ...s, 
+            last_episode_to_air: details[i].last_episode_to_air,
+            next_episode_to_air: details[i].next_episode_to_air
+          }
         : s
       );
 
