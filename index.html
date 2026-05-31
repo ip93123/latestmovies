@@ -3286,7 +3286,7 @@
       return `<div class="trending-card" tabindex="0" role="button" aria-label="${title}" data-id="${item.id}" data-type="${type}">
       <div class="trending-poster" style="position:relative">
         ${poster ? `<img src="${poster}" alt="${title}" loading="lazy">` : ''}
-        ${hasNewEpTr ? `<div style="position:absolute;bottom:5px;right:5px;z-index:4"><div class="badge-new-episode mini">✦ New Ep</div></div>` : ''}
+        ${hasNewEpTr ? `<div style="position:absolute;top:5px;left:5px;z-index:4"><div class="badge-new-episode mini">EP+</div></div>` : ''}
       </div>
       <div class="trending-info">
         ${metaParts ? `<div class="trending-meta">${metaParts}</div>` : ''}
