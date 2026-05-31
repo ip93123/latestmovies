@@ -940,6 +940,51 @@
       color: #A78BFA
     }
 
+    /* NEW EPISODE BADGE */
+    .card-new-ep-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      z-index: 5;
+    }
+
+    .badge-new {
+      background: linear-gradient(135deg, #FF4136, #FF6B35);
+      color: #fff;
+      font-size: .6rem;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: .22rem .55rem;
+      border-radius: 4px;
+      box-shadow: 0 0 10px rgba(255, 65, 54, 0.6), 0 2px 8px rgba(0,0,0,0.3);
+      animation: newEpPulse 2s ease-in-out infinite;
+      line-height: 1;
+    }
+
+    @keyframes newEpPulse {
+      0%, 100% { box-shadow: 0 0 10px rgba(255, 65, 54, 0.6), 0 2px 8px rgba(0,0,0,0.3); }
+      50% { box-shadow: 0 0 18px rgba(255, 65, 54, 0.9), 0 2px 12px rgba(0,0,0,0.4); }
+    }
+
+    .badge-ep-num {
+      background: rgba(7, 9, 15, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: var(--gold);
+      font-size: .58rem;
+      font-weight: 800;
+      letter-spacing: .5px;
+      padding: .18rem .48rem;
+      border-radius: 4px;
+      backdrop-filter: blur(8px);
+      line-height: 1;
+      white-space: nowrap;
+    }
+
     /* STREAMING LOGOS ON CARD */
     .card-stream-logos {
       position: absolute;
@@ -3093,6 +3138,24 @@
       const streamLogos = buildStreamLogoHTML(flat, 3);
       const providerIds = flat.map(p => p.provider_id);
 
+      // New episode badge logic for TV shows
+      // Show "NEW" + episode number only if the episode aired within the last 6 days
+      // or is scheduled to air within the next 6 days — then auto-vanishes.
+      const nextEp = type === 'tv' ? (item.next_episode_to_air || null) : null;
+      let hasNewEp = false;
+      if (nextEp && nextEp.air_date) {
+        const airTime = new Date(nextEp.air_date).getTime();
+        const now = Date.now();
+        const sixDaysMs = 6 * 24 * 60 * 60 * 1000;
+        // Show if aired ≤ 6 days ago OR airing in the future (upcoming)
+        hasNewEp = (now - airTime) <= sixDaysMs;
+      }
+      const newEpBadgeHtml = hasNewEp ? `
+        <div class="card-new-ep-badge">
+          <div class="badge-new">NEW</div>
+          <div class="badge-ep-num">Ep ${nextEp.episode_number}</div>
+        </div>` : '';
+
       return `<div class="movie-card" tabindex="0" role="button" aria-label="${title}" data-id="${item.id}" data-type="${type}" data-providers="${providerIds.join(',')}" style="opacity:1">
     <div class="card-poster">
       ${poster ? `<img src="${poster}" alt="${title}" loading="lazy" onerror="this.src=''">` :
@@ -3100,7 +3163,8 @@
       <div class="card-overlay"></div>
       <div class="card-play"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>
       ${rank ? `<div class="card-rank">${String(rank).padStart(2, '0')}</div>` : ''}
-      ${!rank ? `<div class="type-badge ${typeClass}">${typeLabel}</div>` : ''}
+      ${!rank && !hasNewEp ? `<div class="type-badge ${typeClass}">${typeLabel}</div>` : ''}
+      ${newEpBadgeHtml}
       ${buildRatingRing(vote, `${item.id}-card`, true)}
       <div class="card-stream-logos">${streamLogos}</div>
     </div>
