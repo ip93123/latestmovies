@@ -3375,7 +3375,7 @@
         if (trailer && isYtApiReady) {
           setTimeout(() => {
             heroVideo.innerHTML = `<div id="heroYtPlayer"></div>`;
-            const isMuted = localStorage.getItem('hackyMax_trailerMuted') !== 'false';
+            const isMuted = localStorage.getItem('hackyMax_trailerMuted') === 'true';
             const muteBtn = document.getElementById('heroMuteBtn');
             if (muteBtn) {
               muteBtn.style.display = 'flex';
