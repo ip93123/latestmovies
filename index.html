@@ -2781,13 +2781,20 @@
       document.head.appendChild(ytTag);
     }
     // Defer until after the browser has finished painting the page
-    window.addEventListener('load', () => setTimeout(loadYouTubeAPI, 1500), { once: true });
+    window.addEventListener('load', () => setTimeout(loadYouTubeAPI, 800), { once: true });
 
     let ytPlayer = null;
     let isYtApiReady = false;
+    // Stores a pending trailer key if setHero ran before the API was ready
+    let _pendingTrailerKey = null;
 
     window.onYouTubeIframeAPIReady = function() {
       isYtApiReady = true;
+      // If hero already found a trailer but the API wasn't ready yet, create player now
+      if (_pendingTrailerKey) {
+        _createHeroPlayer(_pendingTrailerKey);
+        _pendingTrailerKey = null;
+      }
     };
 
     const IMG = 'https://image.tmdb.org/t/p/';
@@ -3459,67 +3466,74 @@
       // Try to load video background
       tmdb(`/${type}/${m.id}/videos`).then(vidData => {
         const trailer = (vidData.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube');
-        if (trailer && isYtApiReady) {
-          setTimeout(() => {
-            heroVideo.innerHTML = `<div id="heroYtPlayer"></div>`;
-            const isMuted = localStorage.getItem('hackyMax_trailerMuted') === 'true';
-            const muteBtn = document.getElementById('heroMuteBtn');
-            if (muteBtn) {
-              muteBtn.style.display = 'flex';
-              muteBtn.innerHTML = isMuted ? `🔇` : `🔊`;
-              muteBtn.onclick = () => {
-                if (ytPlayer && ytPlayer.isMuted) {
-                  if (ytPlayer.isMuted()) {
-                    ytPlayer.unMute();
-                    ytPlayer.setVolume(50);
-                    localStorage.setItem('hackyMax_trailerMuted', 'false');
-                    muteBtn.innerHTML = `🔊`;
-                  } else {
-                    ytPlayer.mute();
-                    localStorage.setItem('hackyMax_trailerMuted', 'true');
-                    muteBtn.innerHTML = `🔇`;
-                  }
-                }
-              };
-            }
-
-            let autoPlayAttempted = false;
-            ytPlayer = new YT.Player('heroYtPlayer', {
-              videoId: trailer.key,
-              playerVars: {
-                autoplay: 1,
-                controls: 0,
-                showinfo: 0,
-                rel: 0,
-                loop: 1,
-                playlist: trailer.key,
-                modestbranding: 1,
-                playsinline: 1,
-                mute: 1
-              },
-              events: {
-                onReady: (e) => {
-                  e.target.setVolume(50);
-                  if (!isMuted) {
-                    autoPlayAttempted = true;
-                    e.target.unMute();
-                    setTimeout(() => { autoPlayAttempted = false; }, 2000);
-                  }
-                  setTimeout(() => { heroVideo.style.opacity = '0.65'; }, 1500);
-                },
-                onStateChange: (e) => {
-                  if (e.data === YT.PlayerState.PAUSED && autoPlayAttempted) {
-                    e.target.mute();
-                    e.target.playVideo();
-                    localStorage.setItem('hackyMax_trailerMuted', 'true');
-                    if (muteBtn) muteBtn.innerHTML = `🔇`;
-                  }
-                }
-              }
-            });
-          }, 500);
+        if (!trailer) return;
+        if (isYtApiReady) {
+          _createHeroPlayer(trailer.key);
+        } else {
+          // API not ready yet — store key so onYouTubeIframeAPIReady picks it up
+          _pendingTrailerKey = trailer.key;
         }
       }).catch(() => { });
+
+      // Extracted helper — creates the YT player from a trailer key
+      function _createHeroPlayer(trailerKey) {
+        const heroVideo = document.getElementById('heroVideoContainer');
+        if (!heroVideo) return;
+        // Destroy any existing player first
+        if (ytPlayer && typeof ytPlayer.destroy === 'function') {
+          ytPlayer.destroy();
+          ytPlayer = null;
+        }
+        heroVideo.innerHTML = `<div id="heroYtPlayer"></div>`;
+        const isMuted = localStorage.getItem('hackyMax_trailerMuted') === 'true';
+        const muteBtn = document.getElementById('heroMuteBtn');
+        if (muteBtn) {
+          muteBtn.style.display = 'flex';
+          muteBtn.innerHTML = isMuted ? `🔇` : `🔊`;
+          muteBtn.onclick = () => {
+            if (ytPlayer && ytPlayer.isMuted) {
+              if (ytPlayer.isMuted()) {
+                ytPlayer.unMute();
+                ytPlayer.setVolume(50);
+                localStorage.setItem('hackyMax_trailerMuted', 'false');
+                muteBtn.innerHTML = `🔊`;
+              } else {
+                ytPlayer.mute();
+                localStorage.setItem('hackyMax_trailerMuted', 'true');
+                muteBtn.innerHTML = `🔇`;
+              }
+            }
+          };
+        }
+        let autoPlayAttempted = false;
+        ytPlayer = new YT.Player('heroYtPlayer', {
+          videoId: trailerKey,
+          playerVars: {
+            autoplay: 1, controls: 0, showinfo: 0, rel: 0,
+            loop: 1, playlist: trailerKey, modestbranding: 1,
+            playsinline: 1, mute: 1
+          },
+          events: {
+            onReady: (e) => {
+              e.target.setVolume(50);
+              if (!isMuted) {
+                autoPlayAttempted = true;
+                e.target.unMute();
+                setTimeout(() => { autoPlayAttempted = false; }, 2000);
+              }
+              setTimeout(() => { heroVideo.style.opacity = '0.65'; }, 1500);
+            },
+            onStateChange: (e) => {
+              if (e.data === YT.PlayerState.PAUSED && autoPlayAttempted) {
+                e.target.mute();
+                e.target.playVideo();
+                localStorage.setItem('hackyMax_trailerMuted', 'true');
+                if (muteBtn) muteBtn.innerHTML = `🔇`;
+              }
+            }
+          }
+        });
+      }
 
       const title = (m.title || m.name || '').toUpperCase();
       const words = title.split(' ');
@@ -3633,10 +3647,20 @@
       grid.innerHTML = Array.from({ length: 15 }, () => `<div class="movie-card"><div class="card-poster sk" style="aspect-ratio:2/3"></div><div class="card-info"><div class="sk" style="height:14px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:60%"></div></div></div>`).join('');
       const data = await tmdb(`/tv/${type}?language=en-US&page=1`);
       const shows = (data.results || []).slice(0, 20);
+
+      // For on_the_air: fetch full show details in parallel to get next_episode_to_air
+      // (list endpoints don't include this field — only the /tv/{id} detail endpoint does)
+      let showDetails = shows;
+      if (type === 'on_the_air') {
+        const details = await Promise.all(
+          shows.map(s => tmdb(`/tv/${s.id}?language=en-US`).catch(() => null))
+        );
+        showDetails = shows.map((s, i) => details[i] ? { ...s, next_episode_to_air: details[i].next_episode_to_air } : s);
+      }
+
       const watchDatas = await Promise.all(shows.map(s => getWatch(s.id, 'tv')));
-      currentTV = shows;
-      // Fixed O(n²) bug: use index parameter instead of shows.indexOf(s) inside map
-      grid.innerHTML = shows.map((s, i) => buildCard(s, null, 'tv', watchDatas[i])).join('');
+      currentTV = showDetails;
+      grid.innerHTML = showDetails.map((s, i) => buildCard(s, null, 'tv', watchDatas[i])).join('');
       animateGrid(grid);
       addCardListeners(grid, '.movie-card');
       const cards = grid.querySelectorAll('.movie-card');
