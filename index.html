@@ -543,6 +543,32 @@
       border-radius: 3px
     }
 
+    .mute-btn {
+      position: absolute;
+      bottom: 2rem;
+      right: 7rem;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(7, 9, 15, 0.6);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 20;
+      transition: all 0.3s;
+      backdrop-filter: blur(8px);
+    }
+
+    .mute-btn:hover {
+      background: var(--gold);
+      color: #07090F;
+      border-color: var(--gold);
+    }
+
     .hero-scroll-hint {
       position: absolute;
       bottom: 2rem;
@@ -2565,6 +2591,7 @@
       </div>
     </div>
     <div class="hero-dots" id="heroDots"></div>
+    <button id="heroMuteBtn" class="mute-btn" aria-label="Toggle Mute" style="display: none;">🔇</button>
     <div class="hero-scroll-hint"><span>Scroll</span>
       <div class="scroll-line"></div>
     </div>
@@ -2682,6 +2709,19 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script>
     gsap.registerPlugin(ScrollTrigger);
+
+    // Load YouTube Iframe API
+    const ytTag = document.createElement('script');
+    ytTag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(ytTag, firstScriptTag);
+
+    let ytPlayer = null;
+    let isYtApiReady = false;
+
+    window.onYouTubeIframeAPIReady = function() {
+      isYtApiReady = true;
+    };
 
     const IMG = 'https://image.tmdb.org/t/p/';
     const COUNTRY = 'US';
@@ -3314,6 +3354,10 @@
 
       heroImg.classList.remove('loaded');
       heroVideo.style.opacity = '0';
+      if (ytPlayer && typeof ytPlayer.destroy === 'function') {
+        ytPlayer.destroy();
+        ytPlayer = null;
+      }
       heroVideo.innerHTML = '';
 
       if (m.backdrop_path) {
@@ -3328,10 +3372,52 @@
       // Try to load video background
       tmdb(`/${type}/${m.id}/videos`).then(vidData => {
         const trailer = (vidData.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube');
-        if (trailer) {
+        if (trailer && isYtApiReady) {
           setTimeout(() => {
-            heroVideo.innerHTML = `<iframe src="https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&loop=1&playlist=${trailer.key}&modestbranding=1&playsinline=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>`;
-            setTimeout(() => { heroVideo.style.opacity = '0.65'; }, 1500);
+            heroVideo.innerHTML = `<div id="heroYtPlayer"></div>`;
+            const isMuted = localStorage.getItem('hackyMax_trailerMuted') !== 'false';
+            const muteBtn = document.getElementById('heroMuteBtn');
+            if (muteBtn) {
+              muteBtn.style.display = 'flex';
+              muteBtn.innerHTML = isMuted ? `🔇` : `🔊`;
+              muteBtn.onclick = () => {
+                if (ytPlayer && ytPlayer.isMuted) {
+                  if (ytPlayer.isMuted()) {
+                    ytPlayer.unMute();
+                    ytPlayer.setVolume(50);
+                    localStorage.setItem('hackyMax_trailerMuted', 'false');
+                    muteBtn.innerHTML = `🔊`;
+                  } else {
+                    ytPlayer.mute();
+                    localStorage.setItem('hackyMax_trailerMuted', 'true');
+                    muteBtn.innerHTML = `🔇`;
+                  }
+                }
+              };
+            }
+
+            ytPlayer = new YT.Player('heroYtPlayer', {
+              videoId: trailer.key,
+              playerVars: {
+                autoplay: 1,
+                controls: 0,
+                showinfo: 0,
+                rel: 0,
+                loop: 1,
+                playlist: trailer.key,
+                modestbranding: 1,
+                playsinline: 1,
+                mute: isMuted ? 1 : 0
+              },
+              events: {
+                onReady: (e) => {
+                  e.target.setVolume(50);
+                  if (isMuted) e.target.mute();
+                  else e.target.unMute();
+                  setTimeout(() => { heroVideo.style.opacity = '0.65'; }, 1500);
+                }
+              }
+            });
           }, 500);
         }
       }).catch(() => { });
