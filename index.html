@@ -113,6 +113,19 @@
       }
     }
 
+    /* ── Respect user preference for reduced motion (battery + accessibility) ── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.1ms !important;
+      }
+      body::before, body::after { animation: none !important; }
+      .scroll-line { animation: none !important; }
+      .hero-badge span { animation: none !important; }
+      .sk { animation: none !important; background: var(--dark3) !important; }
+    }
+
     ::-webkit-scrollbar {
       width: 4px
     }
@@ -2710,11 +2723,20 @@
   <script>
     gsap.registerPlugin(ScrollTrigger);
 
-    // Load YouTube Iframe API
-    const ytTag = document.createElement('script');
-    ytTag.src = "https://www.youtube.com/iframe_api";
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(ytTag, firstScriptTag);
+    // Load YouTube Iframe API lazily — after initial paint, not blocking critical path.
+    // Also skipped on Save-Data / slow connections to preserve bandwidth.
+    function loadYouTubeAPI() {
+      if (isYtApiReady) return;
+      const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      if (conn && (conn.saveData || conn.effectiveType === 'slow-2g' || conn.effectiveType === '2g')) {
+        return; // Skip autoplay trailer on slow/metered connections
+      }
+      const ytTag = document.createElement('script');
+      ytTag.src = 'https://www.youtube.com/iframe_api';
+      document.head.appendChild(ytTag);
+    }
+    // Defer until after the browser has finished painting the page
+    window.addEventListener('load', () => setTimeout(loadYouTubeAPI, 1500), { once: true });
 
     let ytPlayer = null;
     let isYtApiReady = false;
@@ -3361,11 +3383,12 @@
       heroVideo.innerHTML = '';
 
       if (m.backdrop_path) {
-        heroImg.src = `${IMG}original${m.backdrop_path}`;
+        // Use w1280 instead of original — saves ~60–80 % bandwidth with no visible quality loss
+      heroImg.src = `${IMG}w1280${m.backdrop_path}`;
         heroImg.onload = () => {
           heroImg.classList.add('loaded');
-          // Extract dominant color from backdrop for ambient glow
-          applyDynamicColors(heroImg.src);
+          // Pass the already-loaded element — avoids a second network request
+          applyDynamicColors(heroImg);
         };
       }
 
@@ -3548,7 +3571,8 @@
       const shows = (data.results || []).slice(0, 20);
       const watchDatas = await Promise.all(shows.map(s => getWatch(s.id, 'tv')));
       currentTV = shows;
-      grid.innerHTML = shows.map(s => buildCard(s, null, 'tv', watchDatas[shows.indexOf(s)])).join('');
+      // Fixed O(n²) bug: use index parameter instead of shows.indexOf(s) inside map
+      grid.innerHTML = shows.map((s, i) => buildCard(s, null, 'tv', watchDatas[i])).join('');
       animateGrid(grid);
       addCardListeners(grid, '.movie-card');
       const cards = grid.querySelectorAll('.movie-card');
@@ -4104,6 +4128,30 @@
       }
     })();
 
+    // ── Hero & YT trailer: pause/resume when the tab is hidden ────────────────
+    // This prevents the hero rotation timer and YouTube background video from
+    // draining battery and data while the user is on a different tab.
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) {
+        // Tab hidden — stop hero rotation and pause YT playback
+        clearInterval(heroTimer);
+        if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+          try { ytPlayer.pauseVideo(); } catch (e) {}
+        }
+      } else {
+        // Tab visible again — resume only if no overlay is open
+        const mOpen = document.getElementById('modal')?.classList.contains('open');
+        const pOpen = document.getElementById('playerOverlay')?.classList.contains('open');
+        const sOpen = document.getElementById('searchOverlay')?.classList.contains('open');
+        if (!mOpen && !pOpen && !sOpen && heroMovies.length) {
+          heroTimer = setInterval(() => setHero((heroIdx + 1) % heroMovies.length), 15000);
+          if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
+            try { ytPlayer.playVideo(); } catch (e) {}
+          }
+        }
+      }
+    });
+
     let _activeServerIndex = 0;      // which server the user last picked
     let _totalEpisodesInSeason = 0;
     let _totalSeasons = 0;
@@ -4219,16 +4267,30 @@
     }
 
     function addCardListeners(container, selector) {
+      // Read accent color once per batch — avoids getComputedStyle on every mousemove
+      let _cachedAccent1 = getComputedStyle(document.documentElement).getPropertyValue('--accent1').trim() || '232,201,122';
+      // Refresh cache when hero changes accent (fired from applyDynamicColors)
+      const _accentObserver = new MutationObserver(() => {
+        _cachedAccent1 = getComputedStyle(document.documentElement).getPropertyValue('--accent1').trim() || '232,201,122';
+      });
+      _accentObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
+
       container.querySelectorAll(selector).forEach(card => {
+        // RAF throttle: at most one tilt update per animation frame per card
+        let _cardRaf = null;
         card.addEventListener('mousemove', e => {
-          const rect = card.getBoundingClientRect();
-          const x = (e.clientX - rect.left) / rect.width - .5;
-          const y = (e.clientY - rect.top) / rect.height - .5;
-          const a1 = getComputedStyle(document.documentElement).getPropertyValue('--accent1').trim();
-          gsap.to(card, { rotationY: x * 14, rotationX: -y * 14, transformPerspective: 900, transformOrigin: 'center', duration: .3, ease: 'power2.out' });
-          gsap.to(card, { boxShadow: `${-x * 25}px ${-y * 25}px 50px rgba(${a1},0.12), 0 0 40px rgba(${a1},0.06)`, duration: .3 });
-        });
+          if (_cardRaf) return;
+          _cardRaf = requestAnimationFrame(() => {
+            _cardRaf = null;
+            const rect = card.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - .5;
+            const y = (e.clientY - rect.top) / rect.height - .5;
+            gsap.to(card, { rotationY: x * 14, rotationX: -y * 14, transformPerspective: 900, transformOrigin: 'center', duration: .3, ease: 'power2.out' });
+            gsap.to(card, { boxShadow: `${-x * 25}px ${-y * 25}px 50px rgba(${_cachedAccent1},0.12), 0 0 40px rgba(${_cachedAccent1},0.06)`, duration: .3 });
+          });
+        }, { passive: true });
         card.addEventListener('mouseleave', () => {
+          if (_cardRaf) { cancelAnimationFrame(_cardRaf); _cardRaf = null; }
           gsap.to(card, { rotationY: 0, rotationX: 0, boxShadow: '0 4px 24px rgba(0,0,0,0.35)', duration: .6, ease: 'elastic.out(1,.75)' });
         });
         card.addEventListener('click', () => {
@@ -4290,18 +4352,25 @@
       });
     }
 
-    async function applyDynamicColors(imgSrc) {
-      if (!imgSrc) return;
+    async function applyDynamicColors(imgElOrSrc) {
+      if (!imgElOrSrc) return;
       try {
-        const img = new Image();
-        // No crossOrigin here — TMDB images block CORS; canvas will fail silently
-        img.src = imgSrc;
-        await new Promise(r => { img.onload = r; img.onerror = r; });
+        let img;
+        if (typeof imgElOrSrc === 'string') {
+          // Fallback: create a new Image only when given a URL string
+          img = new Image();
+          // No crossOrigin — TMDB images block CORS; canvas will fail silently
+          img.src = imgElOrSrc;
+          await new Promise(r => { img.onload = r; img.onerror = r; });
+        } else {
+          // Preferred path: reuse the already-loaded <img> element — zero extra download
+          img = imgElOrSrc;
+        }
         const { c1, c2 } = await extractColors(img);
         const root = document.documentElement.style;
         root.setProperty('--accent1', `${c1[0]}, ${c1[1]}, ${c1[2]}`);
         root.setProperty('--accent2', `${c2[0]}, ${c2[1]}, ${c2[2]}`);
-      } catch { /* CORS blocked, keep existing accent colors */ }
+      } catch { /* CORS blocked — silently keep existing accent colors */ }
     }
 
     // TABS
@@ -4490,12 +4559,17 @@
       }, 400);
     });
 
-    // NAV SCROLL
+    // NAV SCROLL — RAF-throttled so it fires at most once per frame, not every pixel
+    let _scrollRaf = null;
     window.addEventListener('scroll', () => {
-      const nav = document.getElementById('mainNav');
-      nav.style.background = window.scrollY > 80 ? 'rgba(7,9,15,0.98)' : '';
-      nav.style.borderBottomColor = window.scrollY > 80 ? 'rgba(255,255,255,0.07)' : 'transparent';
-    });
+      if (_scrollRaf) return;
+      _scrollRaf = requestAnimationFrame(() => {
+        _scrollRaf = null;
+        const nav = document.getElementById('mainNav');
+        nav.style.background = window.scrollY > 80 ? 'rgba(7,9,15,0.98)' : '';
+        nav.style.borderBottomColor = window.scrollY > 80 ? 'rgba(255,255,255,0.07)' : 'transparent';
+      });
+    }, { passive: true });
 
     // SECTION SCROLL ANIMATIONS
     gsap.utils.toArray('section').forEach(sec => {
