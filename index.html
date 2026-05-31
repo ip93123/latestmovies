@@ -5,8 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hacky Max</title>
-  <link rel="icon"
-    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='25' fill='%2307090F'/><path d='M35 25 L75 50 L35 75 Z' fill='%23E8C97A'/></svg>">
+  <link rel="icon" href="logo.png">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -156,13 +155,27 @@
     }
 
     .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
       font-family: 'Bebas Neue', sans-serif;
       font-size: 2rem;
       letter-spacing: 4px;
+    }
+
+    .nav-logo span {
       background: linear-gradient(135deg, var(--gold), #fff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      background-clip: text
+      background-clip: text;
+      line-height: 1;
+    }
+
+    .nav-logo img {
+      width: 32px;
+      height: 32px;
+      object-fit: cover;
+      filter: drop-shadow(0 0 8px rgba(232, 201, 122, 0.4));
     }
 
     .nav-links {
@@ -2594,7 +2607,10 @@
   </div>
 
   <nav id="mainNav">
-    <div class="nav-logo">Hacky Max</div>
+    <div class="nav-logo">
+      <img src="logo.png" alt="Logo">
+      <span>Hacky Max</span>
+    </div>
     <ul class="nav-links">
       <li><a href="#trending">Trending</a></li>
       <li><a href="#movies">Movies</a></li>
@@ -3198,12 +3214,16 @@
       const providerIds = flat.map(p => p.provider_id);
 
       // New episode badge: show only if last_episode_to_air aired within the past 6 days
+      // (Allowing a 2-day future buffer to account for global timezone differences)
       const lastEp = type === 'tv' ? (item.last_episode_to_air || null) : null;
       let hasNewEp = false;
       if (lastEp && lastEp.air_date) {
-        const airTime = new Date(lastEp.air_date).getTime();
+        // Append T00:00:00Z so it strictly evaluates as UTC start-of-day
+        const airTime = new Date(lastEp.air_date + 'T00:00:00Z').getTime();
         const sixDaysMs = 6 * 24 * 60 * 60 * 1000;
-        hasNewEp = (Date.now() - airTime) <= sixDaysMs;
+        const diff = Date.now() - airTime;
+        // Must be within the last 6 days, or up to 2 days in the future (timezone flex)
+        hasNewEp = diff <= sixDaysMs && diff >= -(2 * 24 * 60 * 60 * 1000);
       }
       const newEpBadgeHtml = hasNewEp ? `
         <div class="card-new-ep-badge">
@@ -3252,8 +3272,10 @@
       const lastEp = type === 'tv' ? (item.last_episode_to_air || null) : null;
       let hasNewEpTr = false;
       if (lastEp && lastEp.air_date) {
+        const airTime = new Date(lastEp.air_date + 'T00:00:00Z').getTime();
         const sixDaysMs = 6 * 24 * 60 * 60 * 1000;
-        hasNewEpTr = (Date.now() - new Date(lastEp.air_date).getTime()) <= sixDaysMs;
+        const diff = Date.now() - airTime;
+        hasNewEpTr = diff <= sixDaysMs && diff >= -(2 * 24 * 60 * 60 * 1000);
       }
 
       return `<div class="trending-card" tabindex="0" role="button" aria-label="${title}" data-id="${item.id}" data-type="${type}">
@@ -3656,18 +3678,15 @@
       const data = await tmdb(`/tv/${type}?language=en-US&page=1`);
       const shows = (data.results || []).slice(0, 20);
 
-      // For on_the_air: fetch full show details in parallel to get last_episode_to_air
+      // Fetch full show details in parallel to get last_episode_to_air
       // (list endpoints don't include this field — only the /tv/{id} detail endpoint does)
-      let showDetails = shows;
-      if (type === 'on_the_air') {
-        const details = await Promise.all(
-          shows.map(s => tmdb(`/tv/${s.id}?language=en-US`).catch(() => null))
-        );
-        showDetails = shows.map((s, i) => details[i]
-          ? { ...s, last_episode_to_air: details[i].last_episode_to_air }
-          : s
-        );
-      }
+      const details = await Promise.all(
+        shows.map(s => tmdb(`/tv/${s.id}?language=en-US`).catch(() => null))
+      );
+      const showDetails = shows.map((s, i) => details[i]
+        ? { ...s, last_episode_to_air: details[i].last_episode_to_air }
+        : s
+      );
 
       const watchDatas = await Promise.all(shows.map(s => getWatch(s.id, 'tv')));
       currentTV = showDetails;
