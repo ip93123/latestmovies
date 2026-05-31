@@ -943,46 +943,36 @@
     /* NEW EPISODE BADGE */
     .card-new-ep-badge {
       position: absolute;
-      top: 10px;
-      left: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 4px;
+      top: 8px;
+      left: 8px;
       z-index: 5;
     }
 
-    .badge-new {
-      background: linear-gradient(135deg, #FF4136, #FF6B35);
-      color: #fff;
-      font-size: .6rem;
+    .badge-new-episode {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--gold), #d4a843);
+      color: #07090F;
+      font-size: .58rem;
       font-weight: 900;
-      letter-spacing: 1.5px;
+      letter-spacing: 1px;
       text-transform: uppercase;
-      padding: .22rem .55rem;
-      border-radius: 4px;
-      box-shadow: 0 0 10px rgba(255, 65, 54, 0.6), 0 2px 8px rgba(0,0,0,0.3);
-      animation: newEpPulse 2s ease-in-out infinite;
+      padding: .28rem .65rem;
+      border-radius: 50px;
+      box-shadow: 0 0 12px rgba(232, 201, 122, 0.55), 0 2px 8px rgba(0,0,0,0.4);
+      animation: newEpPulse 2.5s ease-in-out infinite;
       line-height: 1;
+      white-space: nowrap;
     }
 
     @keyframes newEpPulse {
-      0%, 100% { box-shadow: 0 0 10px rgba(255, 65, 54, 0.6), 0 2px 8px rgba(0,0,0,0.3); }
-      50% { box-shadow: 0 0 18px rgba(255, 65, 54, 0.9), 0 2px 12px rgba(0,0,0,0.4); }
+      0%, 100% { box-shadow: 0 0 12px rgba(232, 201, 122, 0.55), 0 2px 8px rgba(0,0,0,0.4); }
+      50% { box-shadow: 0 0 22px rgba(232, 201, 122, 0.85), 0 2px 14px rgba(0,0,0,0.4); }
     }
 
-    .badge-ep-num {
-      background: rgba(7, 9, 15, 0.82);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      color: var(--gold);
-      font-size: .58rem;
-      font-weight: 800;
-      letter-spacing: .5px;
-      padding: .18rem .48rem;
-      border-radius: 4px;
-      backdrop-filter: blur(8px);
-      line-height: 1;
-      white-space: nowrap;
+    .badge-new-episode.mini {
+      font-size: .48rem;
+      padding: .2rem .48rem;
+      letter-spacing: .8px;
     }
 
     /* STREAMING LOGOS ON CARD */
@@ -2574,6 +2564,8 @@
         <div class="modal-meta" id="modalMeta"></div>
         <div class="modal-ratings" id="modalRatings"></div>
         <p class="modal-plot" id="modalPlot"></p>
+        <!-- EPISODE INFO (TV only) -->
+        <div id="modalEpInfo" style="display:none;margin-bottom:1.2rem"></div>
         <div class="modal-section-label">WHERE TO WATCH</div>
         <!-- SEASON / EPISODE CHOOSER (TV only) -->
         <div id="modalEpChooser" class="ep-chooser" style="display:none">
@@ -2796,6 +2788,66 @@
         _pendingTrailerKey = null;
       }
     };
+
+    // Global helper — creates the YT hero background player from a trailer key
+    function _createHeroPlayer(trailerKey) {
+      const heroVideo = document.getElementById('heroVideoContainer');
+      if (!heroVideo) return;
+      // Destroy any existing player first
+      if (ytPlayer && typeof ytPlayer.destroy === 'function') {
+        ytPlayer.destroy();
+        ytPlayer = null;
+      }
+      heroVideo.innerHTML = `<div id="heroYtPlayer"></div>`;
+      const isMuted = localStorage.getItem('hackyMax_trailerMuted') === 'true';
+      const muteBtn = document.getElementById('heroMuteBtn');
+      if (muteBtn) {
+        muteBtn.style.display = 'flex';
+        muteBtn.innerHTML = isMuted ? `🔇` : `🔊`;
+        muteBtn.onclick = () => {
+          if (ytPlayer && ytPlayer.isMuted) {
+            if (ytPlayer.isMuted()) {
+              ytPlayer.unMute();
+              ytPlayer.setVolume(50);
+              localStorage.setItem('hackyMax_trailerMuted', 'false');
+              muteBtn.innerHTML = `🔊`;
+            } else {
+              ytPlayer.mute();
+              localStorage.setItem('hackyMax_trailerMuted', 'true');
+              muteBtn.innerHTML = `🔇`;
+            }
+          }
+        };
+      }
+      let autoPlayAttempted = false;
+      ytPlayer = new YT.Player('heroYtPlayer', {
+        videoId: trailerKey,
+        playerVars: {
+          autoplay: 1, controls: 0, showinfo: 0, rel: 0,
+          loop: 1, playlist: trailerKey, modestbranding: 1,
+          playsinline: 1, mute: 1
+        },
+        events: {
+          onReady: (e) => {
+            e.target.setVolume(50);
+            if (!isMuted) {
+              autoPlayAttempted = true;
+              e.target.unMute();
+              setTimeout(() => { autoPlayAttempted = false; }, 2000);
+            }
+            setTimeout(() => { heroVideo.style.opacity = '0.65'; }, 1500);
+          },
+          onStateChange: (e) => {
+            if (e.data === YT.PlayerState.PAUSED && autoPlayAttempted) {
+              e.target.mute();
+              e.target.playVideo();
+              localStorage.setItem('hackyMax_trailerMuted', 'true');
+              if (muteBtn) muteBtn.innerHTML = `🔇`;
+            }
+          }
+        }
+      });
+    }
 
     const IMG = 'https://image.tmdb.org/t/p/';
     const COUNTRY = 'US';
@@ -3145,22 +3197,17 @@
       const streamLogos = buildStreamLogoHTML(flat, 3);
       const providerIds = flat.map(p => p.provider_id);
 
-      // New episode badge logic for TV shows
-      // Show "NEW" + episode number only if the episode aired within the last 6 days
-      // or is scheduled to air within the next 6 days — then auto-vanishes.
-      const nextEp = type === 'tv' ? (item.next_episode_to_air || null) : null;
+      // New episode badge: show only if last_episode_to_air aired within the past 6 days
+      const lastEp = type === 'tv' ? (item.last_episode_to_air || null) : null;
       let hasNewEp = false;
-      if (nextEp && nextEp.air_date) {
-        const airTime = new Date(nextEp.air_date).getTime();
-        const now = Date.now();
+      if (lastEp && lastEp.air_date) {
+        const airTime = new Date(lastEp.air_date).getTime();
         const sixDaysMs = 6 * 24 * 60 * 60 * 1000;
-        // Show if aired ≤ 6 days ago OR airing in the future (upcoming)
-        hasNewEp = (now - airTime) <= sixDaysMs;
+        hasNewEp = (Date.now() - airTime) <= sixDaysMs;
       }
       const newEpBadgeHtml = hasNewEp ? `
         <div class="card-new-ep-badge">
-          <div class="badge-new">NEW</div>
-          <div class="badge-ep-num">Ep ${nextEp.episode_number}</div>
+          <div class="badge-new-episode">✦ New Episode</div>
         </div>` : '';
 
       return `<div class="movie-card" tabindex="0" role="button" aria-label="${title}" data-id="${item.id}" data-type="${type}" data-providers="${providerIds.join(',')}" style="opacity:1">
@@ -3201,9 +3248,18 @@
 
       const metaParts = [runtime, year].filter(Boolean).join(' · ');
 
+      // New episode badge for trending TV shows
+      const lastEp = type === 'tv' ? (item.last_episode_to_air || null) : null;
+      let hasNewEpTr = false;
+      if (lastEp && lastEp.air_date) {
+        const sixDaysMs = 6 * 24 * 60 * 60 * 1000;
+        hasNewEpTr = (Date.now() - new Date(lastEp.air_date).getTime()) <= sixDaysMs;
+      }
+
       return `<div class="trending-card" tabindex="0" role="button" aria-label="${title}" data-id="${item.id}" data-type="${type}">
-      <div class="trending-poster">
+      <div class="trending-poster" style="position:relative">
         ${poster ? `<img src="${poster}" alt="${title}" loading="lazy">` : ''}
+        ${hasNewEpTr ? `<div style="position:absolute;top:5px;right:5px;z-index:4"><div class="badge-new-episode mini">✦ New Ep</div></div>` : ''}
       </div>
       <div class="trending-info">
         ${metaParts ? `<div class="trending-meta">${metaParts}</div>` : ''}
@@ -3463,7 +3519,8 @@
         };
       }
 
-      // Try to load video background
+      // Try to load video background — clear any stale pending key first
+      _pendingTrailerKey = null;
       tmdb(`/${type}/${m.id}/videos`).then(vidData => {
         const trailer = (vidData.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube');
         if (!trailer) return;
@@ -3474,66 +3531,6 @@
           _pendingTrailerKey = trailer.key;
         }
       }).catch(() => { });
-
-      // Extracted helper — creates the YT player from a trailer key
-      function _createHeroPlayer(trailerKey) {
-        const heroVideo = document.getElementById('heroVideoContainer');
-        if (!heroVideo) return;
-        // Destroy any existing player first
-        if (ytPlayer && typeof ytPlayer.destroy === 'function') {
-          ytPlayer.destroy();
-          ytPlayer = null;
-        }
-        heroVideo.innerHTML = `<div id="heroYtPlayer"></div>`;
-        const isMuted = localStorage.getItem('hackyMax_trailerMuted') === 'true';
-        const muteBtn = document.getElementById('heroMuteBtn');
-        if (muteBtn) {
-          muteBtn.style.display = 'flex';
-          muteBtn.innerHTML = isMuted ? `🔇` : `🔊`;
-          muteBtn.onclick = () => {
-            if (ytPlayer && ytPlayer.isMuted) {
-              if (ytPlayer.isMuted()) {
-                ytPlayer.unMute();
-                ytPlayer.setVolume(50);
-                localStorage.setItem('hackyMax_trailerMuted', 'false');
-                muteBtn.innerHTML = `🔊`;
-              } else {
-                ytPlayer.mute();
-                localStorage.setItem('hackyMax_trailerMuted', 'true');
-                muteBtn.innerHTML = `🔇`;
-              }
-            }
-          };
-        }
-        let autoPlayAttempted = false;
-        ytPlayer = new YT.Player('heroYtPlayer', {
-          videoId: trailerKey,
-          playerVars: {
-            autoplay: 1, controls: 0, showinfo: 0, rel: 0,
-            loop: 1, playlist: trailerKey, modestbranding: 1,
-            playsinline: 1, mute: 1
-          },
-          events: {
-            onReady: (e) => {
-              e.target.setVolume(50);
-              if (!isMuted) {
-                autoPlayAttempted = true;
-                e.target.unMute();
-                setTimeout(() => { autoPlayAttempted = false; }, 2000);
-              }
-              setTimeout(() => { heroVideo.style.opacity = '0.65'; }, 1500);
-            },
-            onStateChange: (e) => {
-              if (e.data === YT.PlayerState.PAUSED && autoPlayAttempted) {
-                e.target.mute();
-                e.target.playVideo();
-                localStorage.setItem('hackyMax_trailerMuted', 'true');
-                if (muteBtn) muteBtn.innerHTML = `🔇`;
-              }
-            }
-          }
-        });
-      }
 
       const title = (m.title || m.name || '').toUpperCase();
       const words = title.split(' ');
@@ -3615,7 +3612,18 @@
       const row = document.getElementById('trendingRow');
       row.innerHTML = Array.from({ length: 15 }, () => `<div class="trending-card" style="flex:0 0 160px"><div style="aspect-ratio:2/3;background:var(--dark3)" class="sk"></div><div style="padding:.75rem"><div style="height:12px;margin-bottom:6px" class="sk"></div></div></div>`).join('');
       const [md, tvd] = await Promise.all([tmdb('/trending/movie/week?language=en-US'), tmdb('/trending/tv/week?language=en-US')]);
-      const all = [...(md.results || []).slice(0, 10).map(x => ({ ...x, _type: 'movie' })), ...(tvd.results || []).slice(0, 10).map(x => ({ ...x, _type: 'tv' }))].slice(0, 20);
+      const allRaw = [...(md.results || []).slice(0, 10).map(x => ({ ...x, _type: 'movie' })), ...(tvd.results || []).slice(0, 10).map(x => ({ ...x, _type: 'tv' }))].slice(0, 20);
+
+      // Fetch TV show details in parallel (only TV items) to get last_episode_to_air
+      const tvItems = allRaw.filter(x => x._type === 'tv');
+      const tvDetails = await Promise.all(tvItems.map(s => tmdb(`/tv/${s.id}?language=en-US`).catch(() => null)));
+      const tvDetailMap = {};
+      tvItems.forEach((s, i) => { if (tvDetails[i]) tvDetailMap[s.id] = tvDetails[i]; });
+      const all = allRaw.map(x => x._type === 'tv' && tvDetailMap[x.id]
+        ? { ...x, last_episode_to_air: tvDetailMap[x.id].last_episode_to_air }
+        : x
+      );
+
       const watchDatas = await Promise.all(all.map(item => getWatch(item.id, item._type)));
       row.innerHTML = all.map((item, i) => buildTrendingCard(item, i + 1, item._type, watchDatas[i])).join('');
       gsap.fromTo(row.children,
@@ -3648,14 +3656,17 @@
       const data = await tmdb(`/tv/${type}?language=en-US&page=1`);
       const shows = (data.results || []).slice(0, 20);
 
-      // For on_the_air: fetch full show details in parallel to get next_episode_to_air
+      // For on_the_air: fetch full show details in parallel to get last_episode_to_air
       // (list endpoints don't include this field — only the /tv/{id} detail endpoint does)
       let showDetails = shows;
       if (type === 'on_the_air') {
         const details = await Promise.all(
           shows.map(s => tmdb(`/tv/${s.id}?language=en-US`).catch(() => null))
         );
-        showDetails = shows.map((s, i) => details[i] ? { ...s, next_episode_to_air: details[i].next_episode_to_air } : s);
+        showDetails = shows.map((s, i) => details[i]
+          ? { ...s, last_episode_to_air: details[i].last_episode_to_air }
+          : s
+        );
       }
 
       const watchDatas = await Promise.all(shows.map(s => getWatch(s.id, 'tv')));
@@ -3861,6 +3872,8 @@
       document.getElementById('modalRatings').innerHTML = '';
       document.getElementById('modalMeta').innerHTML = '';
       document.getElementById('modalPoster').src = '';
+      const _epInfoReset = document.getElementById('modalEpInfo');
+      if (_epInfoReset) { _epInfoReset.style.display = 'none'; _epInfoReset.innerHTML = ''; }
       gsap.fromTo('#modalBox', { scale: .92, opacity: 0, y: 30 }, { scale: 1, opacity: 1, y: 0, duration: .45, ease: 'power3.out' });
 
       try {
@@ -3915,6 +3928,61 @@
       ${trailerBtn}
     `;
         document.getElementById('modalPlot').textContent = details.overview || 'No description available.';
+
+        // Episode info panel (TV shows only)
+        const epInfoEl = document.getElementById('modalEpInfo');
+        if (epInfoEl) {
+          if (type === 'tv') {
+            const lastEp  = details.last_episode_to_air  || null;
+            const nextEp  = details.next_episode_to_air  || null;
+
+            function fmtDate(d) {
+              if (!d) return null;
+              const dt = new Date(d);
+              return dt.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            }
+
+            let epHtml = `<div style="display:flex;flex-wrap:wrap;gap:.65rem;margin-bottom:.2rem">`;
+
+            if (lastEp) {
+              const aired = fmtDate(lastEp.air_date);
+              const sixDaysMs = 6 * 24 * 60 * 60 * 1000;
+              const isNew = lastEp.air_date && (Date.now() - new Date(lastEp.air_date).getTime()) <= sixDaysMs;
+              epHtml += `
+                <div style="flex:1;min-width:180px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:10px;padding:.75rem 1rem;position:relative;overflow:hidden">
+                  <div style="font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem">Last Episode</div>
+                  <div style="font-size:.85rem;font-weight:700;color:var(--text);margin-bottom:.2rem">
+                    S${lastEp.season_number} E${lastEp.episode_number}${lastEp.name ? ' — ' + lastEp.name : ''}
+                  </div>
+                  <div style="font-size:.72rem;color:var(--muted)">${aired || '—'}</div>
+                  ${isNew ? `<div style="position:absolute;top:8px;right:8px"><div class="badge-new-episode mini">✦ New Ep</div></div>` : ''}
+                </div>`;
+            }
+
+            if (nextEp) {
+              const airsOn = fmtDate(nextEp.air_date);
+              epHtml += `
+                <div style="flex:1;min-width:180px;background:rgba(39,174,96,0.06);border:1px solid rgba(39,174,96,0.2);border-radius:10px;padding:.75rem 1rem">
+                  <div style="font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;color:#27AE60;margin-bottom:.4rem">Next Episode</div>
+                  <div style="font-size:.85rem;font-weight:700;color:var(--text);margin-bottom:.2rem">
+                    S${nextEp.season_number} E${nextEp.episode_number}${nextEp.name ? ' — ' + nextEp.name : ''}
+                  </div>
+                  <div style="font-size:.72rem;color:#27AE60">🗓 Airs ${airsOn || 'TBA'}</div>
+                </div>`;
+            }
+
+            if (!lastEp && !nextEp) {
+              epHtml += `<div style="font-size:.8rem;color:var(--muted)">Episode schedule not available.</div>`;
+            }
+
+            epHtml += `</div>`;
+            epInfoEl.innerHTML = epHtml;
+            epInfoEl.style.display = 'block';
+          } else {
+            epInfoEl.style.display = 'none';
+            epInfoEl.innerHTML = '';
+          }
+        }
 
         // Streaming
         const flat = watchData && watchData.flatrate ? watchData.flatrate : [];
