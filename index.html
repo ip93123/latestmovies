@@ -3396,6 +3396,7 @@
               };
             }
 
+            let autoPlayAttempted = false;
             ytPlayer = new YT.Player('heroYtPlayer', {
               videoId: trailer.key,
               playerVars: {
@@ -3407,14 +3408,25 @@
                 playlist: trailer.key,
                 modestbranding: 1,
                 playsinline: 1,
-                mute: isMuted ? 1 : 0
+                mute: 1
               },
               events: {
                 onReady: (e) => {
                   e.target.setVolume(50);
-                  if (isMuted) e.target.mute();
-                  else e.target.unMute();
+                  if (!isMuted) {
+                    autoPlayAttempted = true;
+                    e.target.unMute();
+                    setTimeout(() => { autoPlayAttempted = false; }, 2000);
+                  }
                   setTimeout(() => { heroVideo.style.opacity = '0.65'; }, 1500);
+                },
+                onStateChange: (e) => {
+                  if (e.data === YT.PlayerState.PAUSED && autoPlayAttempted) {
+                    e.target.mute();
+                    e.target.playVideo();
+                    localStorage.setItem('hackyMax_trailerMuted', 'true');
+                    if (muteBtn) muteBtn.innerHTML = `🔇`;
+                  }
                 }
               }
             });
