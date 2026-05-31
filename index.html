@@ -3271,22 +3271,9 @@
 
       const metaParts = [runtime, year].filter(Boolean).join(' · ');
 
-      // New episode badge for trending TV shows
-      let hasNewEpTr = false;
-      if (type === 'tv') {
-        const checkEp = (ep) => {
-          if (!ep || !ep.air_date) return false;
-          const airTime = new Date(ep.air_date + 'T00:00:00Z').getTime();
-          const diff = Date.now() - airTime;
-          return diff <= (6 * 24 * 60 * 60 * 1000) && diff >= -(2 * 24 * 60 * 60 * 1000);
-        };
-        hasNewEpTr = checkEp(item.last_episode_to_air) || checkEp(item.next_episode_to_air);
-      }
-
       return `<div class="trending-card" tabindex="0" role="button" aria-label="${title}" data-id="${item.id}" data-type="${type}">
       <div class="trending-poster" style="position:relative">
         ${poster ? `<img src="${poster}" alt="${title}" loading="lazy">` : ''}
-        ${hasNewEpTr ? `<div style="position:absolute;top:5px;left:5px;z-index:4"><div class="badge-new-episode mini">EP+</div></div>` : ''}
       </div>
       <div class="trending-info">
         ${metaParts ? `<div class="trending-meta">${metaParts}</div>` : ''}
