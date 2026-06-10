@@ -2496,6 +2496,31 @@
       .search-results {
         grid-template-columns: repeat(2, 1fr);
       }
+
+      /* WishList Mobile Responsive */
+      .wishlist-grid {
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 0.8rem;
+        padding-bottom: 5rem;
+      }
+      .wishlist-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+      }
+      .wishlist-header h2 { font-size: 1.5rem; }
+      .wishlist-close {
+        top: 1rem;
+        right: 1rem;
+        font-size: 1.5rem;
+      }
+      .wl-toast {
+        font-size: 0.75rem;
+        padding: 0.5rem 1rem;
+        bottom: 1rem;
+      }
     }
 
     /* SHARE BUTTON */
@@ -2864,7 +2889,7 @@
       <li><a href="#tvshows">TV Shows</a></li>
       <li><a href="#wheretowatch">Streaming</a></li>
       <li><a href="#toprated">Top Rated</a></li>
-      <li><a href="javascript:void(0)" id="navWishlistLink" onclick="openWishlist()" title="WishList">WishList<span id="navWlBadge" style="display:none;background:var(--gold);color:#07090F;border-radius:50%;width:16px;height:16px;font-size:.6rem;font-weight:800;display:inline-flex;align-items:center;justify-content:center;margin-left:2px;vertical-align:top;margin-top:-4px"></span></a></li>
+      <li><a href="javascript:void(0)" id="navWishlistLink" onclick="openWishlist()" title="WishList">WishList</a></li>
     </ul>
     <div class="nav-search" id="navSearch">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -5291,12 +5316,6 @@
 
     function updateWishlistBadge() {
       const count = getWishlist().length;
-      // Nav badge
-      const navBadge = document.getElementById('navWlBadge');
-      if (navBadge) {
-        navBadge.textContent = count > 0 ? count : '';
-        navBadge.style.display = count > 0 ? 'inline-flex' : 'none';
-      }
       // Continue Watching section badge
       const hdrCount = document.getElementById('wishlistHeaderCount');
       if (hdrCount) {
