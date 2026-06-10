@@ -767,6 +767,10 @@
       gap: 1.5rem;
       overflow-x: auto;
       padding-bottom: 1rem;
+      padding-left: 12px;
+      padding-top: 12px;
+      margin-left: -12px;
+      margin-top: -12px;
       scrollbar-width: none;
       scroll-behavior: smooth;
     }
@@ -1240,6 +1244,10 @@
       gap: .75rem;
       overflow-x: auto;
       padding-bottom: 1rem;
+      padding-left: 12px;
+      padding-top: 12px;
+      margin-left: -12px;
+      margin-top: -12px;
       scrollbar-width: none;
     }
 
@@ -2516,6 +2524,225 @@
     #playerContainer:-webkit-full-screen #playerClose {
       display: none !important;
     }
+
+    /* ── WISHLIST BUTTON ON CARD ──────────────────────────────────────── */
+    .card-wishlist-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(7, 9, 15, 0.80);
+      border: 1px solid rgba(255,255,255,0.13);
+      color: var(--muted);
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 8;
+      transition: all 0.25s cubic-bezier(.34,1.56,.64,1);
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    .movie-card:hover .card-wishlist-btn {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .card-wishlist-btn:hover {
+      background: rgba(232,201,122,0.22);
+      border-color: var(--gold);
+      color: var(--gold);
+      transform: scale(1.12);
+    }
+    .card-wishlist-btn.wishlisted {
+      opacity: 1;
+      transform: scale(1);
+      color: var(--gold);
+      background: rgba(232,201,122,0.18);
+      border-color: rgba(232,201,122,0.5);
+      box-shadow: 0 0 12px rgba(232,201,122,0.35);
+    }
+    .card-wishlist-btn.wishlisted:hover {
+      background: rgba(231,76,60,0.22);
+      border-color: var(--red);
+      color: var(--red);
+      box-shadow: 0 0 12px rgba(231,76,60,0.3);
+    }
+
+    /* ── WISHLIST OVERLAY ──────────────────────────────────────────────── */
+    #wishlistOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(7,9,15,0.98);
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 4rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s;
+      backdrop-filter: blur(20px);
+      overflow-y: auto;
+    }
+    #wishlistOverlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .wishlist-header {
+      width: min(1000px, 90vw);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid var(--gold);
+      margin-bottom: 2.5rem;
+    }
+    .wishlist-header h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.5rem;
+      letter-spacing: 3px;
+      background: linear-gradient(135deg, var(--gold), #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .wishlist-count-badge {
+      background: rgba(232,201,122,0.15);
+      border: 1px solid rgba(232,201,122,0.4);
+      color: var(--gold);
+      padding: .35rem .9rem;
+      border-radius: 50px;
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    .wishlist-close {
+      position: fixed;
+      top: 1.5rem;
+      right: 2rem;
+      font-size: 2rem;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: var(--text);
+      line-height: 1;
+      z-index: 10;
+    }
+    .wishlist-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1.5rem;
+      width: min(1000px, 90vw);
+      padding-bottom: 4rem;
+    }
+    .wishlist-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      color: var(--muted);
+      font-size: 1rem;
+      padding: 4rem 0;
+      width: 100%;
+    }
+    .wishlist-empty-icon {
+      font-size: 4rem;
+      opacity: 0.4;
+    }
+    .wishlist-clear-btn {
+      padding: .5rem 1.4rem;
+      border-radius: 8px;
+      border: 1px solid rgba(231,76,60,0.4);
+      background: rgba(231,76,60,0.1);
+      color: var(--red);
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      font-family: 'Inter', sans-serif;
+    }
+    .wishlist-clear-btn:hover {
+      background: rgba(231,76,60,0.22);
+    }
+
+    /* ── CONTINUE WATCHING section-header right side ── */
+    .wishlist-nav-link {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      font-size: .78rem;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-bottom: 1px solid transparent;
+      transition: all .3s;
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      font-family: 'Inter', sans-serif;
+    }
+    .wishlist-nav-link:hover {
+      color: var(--gold);
+      border-bottom-color: var(--gold);
+    }
+    .wishlist-nav-link .wl-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: #07090F;
+      font-size: .65rem;
+      font-weight: 800;
+      line-height: 1;
+      display: none;
+    }
+    .wishlist-nav-link .wl-count.visible {
+      display: inline-flex;
+    }
+
+    /* toast */
+    .wl-toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(15,21,32,0.95);
+      border: 1px solid rgba(232,201,122,0.35);
+      color: var(--text);
+      padding: .65rem 1.4rem;
+      border-radius: 50px;
+      font-size: .82rem;
+      font-weight: 600;
+      letter-spacing: .5px;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s, transform .3s cubic-bezier(.34,1.56,.64,1);
+      backdrop-filter: blur(12px);
+      white-space: nowrap;
+    }
+    .wl-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media(max-width:768px) {
+      .wishlist-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 1rem;
+      }
+      .wishlist-header h2 { font-size: 1.8rem; }
+    }
   </style>
 </head>
 
@@ -2531,10 +2758,26 @@
         <circle cx="11" cy="11" r="8" />
         <line x1="21" y1="21" x2="16.65" y2="16.65" />
       </svg>
-      <input type="text" id="searchInput" placeholder="Search movies & shows...">
+      <input type="text" id="searchInput" placeholder="Search movies &amp; shows...">
     </div>
     <div class="search-results" id="searchResults"></div>
   </div>
+
+  <!-- WISHLIST OVERLAY -->
+  <div id="wishlistOverlay">
+    <button class="wishlist-close" id="wishlistClose">✕</button>
+    <div class="wishlist-header">
+      <div style="display:flex;align-items:center;gap:1rem">
+        <h2>🔖 WishList</h2>
+        <span class="wishlist-count-badge" id="wishlistCountBadge">0 titles</span>
+      </div>
+      <button class="wishlist-clear-btn" id="wishlistClearBtn" onclick="clearWishlist()" style="display:none">Clear All</button>
+    </div>
+    <div class="wishlist-grid" id="wishlistGrid"></div>
+  </div>
+
+  <!-- WISHLIST TOAST -->
+  <div class="wl-toast" id="wlToast"></div>
 
   <!-- PLAYER OVERLAY -->
   <div id="playerOverlay">
@@ -2552,11 +2795,7 @@
           style="width:40px;height:40px;border:4px solid rgba(255,255,255,0.1);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;">
         </div>
       </div>
-      <div id="adShield" style="position:absolute;inset:0;z-index:20;background:rgba(0,0,0,0.65);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(8px);display:none;">
-        <div style="width:72px;height:72px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.2rem;color:#000;margin-bottom:1rem;padding-left:6px;box-shadow:0 0 30px rgba(232,201,122,0.4);">▶</div>
-        <div style="color:#fff;font-weight:700;font-size:1rem;letter-spacing:0.5px;">Tap to unlock player</div>
-        <div style="color:var(--muted);font-size:0.75rem;margin-top:0.5rem;">(Bypasses initial popup ads)</div>
-      </div>
+
       <iframe id="playerFrame" src="about:blank"
         allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
         allowfullscreen></iframe>
@@ -2620,6 +2859,7 @@
       <li><a href="#tvshows">TV Shows</a></li>
       <li><a href="#wheretowatch">Streaming</a></li>
       <li><a href="#toprated">Top Rated</a></li>
+      <li><a href="javascript:void(0)" id="navWishlistLink" onclick="openWishlist()">🔖 WishList <span id="navWlBadge" style="display:none;background:var(--gold);color:#07090F;border-radius:50%;width:16px;height:16px;font-size:.6rem;font-weight:800;display:inline-flex;align-items:center;justify-content:center;margin-left:2px"></span></a></li>
     </ul>
     <div class="nav-search" id="navSearch">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -2669,6 +2909,10 @@
   <section id="recent" style="display:none; background:var(--dark1)">
     <div class="section-header">
       <h2 class="section-title">⏱️ <span>Continue</span> Watching</h2>
+      <button class="wishlist-nav-link" onclick="openWishlist()" id="wishlistHeaderBtn">
+        🔖 WishList
+        <span class="wl-count" id="wishlistHeaderCount"></span>
+      </button>
     </div>
     <div class="scroll-wrapper">
       <button class="scroll-btn scroll-left" onclick="scrollRow('recentRow', -1)">❮</button>
@@ -2863,6 +3107,13 @@
               localStorage.setItem('hackyMax_trailerMuted', 'true');
               if (muteBtn) muteBtn.innerHTML = `🔇`;
             }
+          },
+          onError: (e) => {
+            console.warn('YouTube Player Error:', e.data);
+            if (ytPlayer && typeof ytPlayer.destroy === 'function') {
+              ytPlayer.destroy();
+            }
+            document.getElementById('heroVideoContainer').style.opacity = '0';
           }
         }
       });
@@ -3244,6 +3495,7 @@
       ${newEpBadgeHtml}
       ${buildRatingRing(vote, `${item.id}-card`, true)}
       <div class="card-stream-logos">${streamLogos}</div>
+      <button class="card-wishlist-btn ${isInWishlist(item.id) ? 'wishlisted' : ''}" data-wl-id="${item.id}" data-wl-type="${type}" title="${isInWishlist(item.id) ? 'Remove from WishList' : 'Add to WishList'}" onclick="event.stopPropagation(); toggleWishlist(${item.id}, '${type}', ${JSON.stringify(item)}, this)">${isInWishlist(item.id) ? '🔖' : '🔖'}</button>
     </div>
     <div class="card-info">
       <div class="card-title">${title}</div>
@@ -3774,12 +4026,12 @@
 
     function buildEpisodeUrl(server, id, season, episode) {
       switch (server) {
-        case 1: return `https://player.videasy.net/tv/${id}/${season}/${episode}`;
-        case 2: return `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`;
-        case 3: return `https://vidfast.pro/tv/${id}/${season}/${episode}`;
-        case 4: return `https://embedmaster.link/tv/${id}/${season}/${episode}`;
-        case 5: return `https://vidcore.net/tv/${id}/${season}/${episode}`;
-        default: return `https://player.videasy.net/tv/${id}/${season}/${episode}`;
+        case 1: return `https://player.videasy.net/tv/${id}/${season}/${episode}?autoplay=1`;
+        case 2: return `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}&autoplay=1`;
+        case 3: return `https://vidfast.pro/tv/${id}/${season}/${episode}?autoplay=1`;
+        case 4: return `https://embedmaster.link/tv/${id}/${season}/${episode}?autoplay=1`;
+        case 5: return `https://vidcore.net/tv/${id}/${season}/${episode}?autoplay=1`;
+        default: return `https://player.videasy.net/tv/${id}/${season}/${episode}?autoplay=1`;
       }
     }
 
@@ -3794,11 +4046,11 @@
         ];
       }
       return [
-        `https://player.videasy.net/movie/${id}`,
-        `https://vidsrc.me/embed/movie?tmdb=${id}`,
-        `https://vidfast.pro/movie/${id}`,
-        `https://embedmaster.link/movie/${id}`,
-        `https://vidcore.net/movie/${id}`,
+        `https://player.videasy.net/movie/${id}?autoplay=1`,
+        `https://vidsrc.me/embed/movie?tmdb=${id}&autoplay=1`,
+        `https://vidfast.pro/movie/${id}?autoplay=1`,
+        `https://embedmaster.link/movie/${id}?autoplay=1`,
+        `https://vidcore.net/movie/${id}?autoplay=1`,
       ];
     }
 
@@ -3883,6 +4135,7 @@
 
       const modal = document.getElementById('modal');
       modal.classList.add('open');
+      history.pushState({ ui: 'modal', id: id, type: type }, '', location.href);
       document.getElementById('modalTitle').textContent = 'Loading…';
       document.getElementById('modalPlot').textContent = '';
       document.getElementById('modalStreams').innerHTML = '<div class="no-stream">Checking platforms…</div>';
@@ -4067,9 +4320,25 @@
     }
 
     document.getElementById('modalClose').addEventListener('click', () => {
+      if (history.state && history.state.ui === 'modal') {
+        history.back();
+      } else {
+        closeModalInternal();
+      }
+    });
+
+    function closeModalInternal() {
       gsap.to('#modalBox', {
-        scale: .93, opacity: 0, y: 20, duration: .3, ease: 'power3.in', onComplete: () => {
+        scale: 0.92, opacity: 0, y: 20, duration: 0.3, ease: 'power3.in', onComplete: () => {
           document.getElementById('modal').classList.remove('open');
+          document.getElementById('modalFrame')?.remove();
+          // Resume hero rotation and YT background if we are at the top
+          if (window.scrollY < 300) {
+            heroTimer = setInterval(() => setHero((heroIdx + 1) % heroMovies.length), 15000);
+            if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
+              try { ytPlayer.playVideo(); } catch (e) { }
+            }
+          }
           // Reset chooser
           _currentModalId = null;
           document.getElementById('modalEpChooser').style.display = 'none';
@@ -4080,18 +4349,7 @@
       if (e.target === document.getElementById('modal')) document.getElementById('modalClose').click();
     });
 
-    const _adShield = document.getElementById('adShield');
-    if (_adShield) {
-      _adShield.addEventListener('click', function (e) {
-        this.style.display = 'none';
-        e.stopPropagation();
-      });
-      _adShield.addEventListener('touchstart', function (e) {
-        this.style.display = 'none';
-        e.preventDefault(); // Prevents the touch from passing through to the iframe
-        e.stopPropagation();
-      }, { passive: false });
-    }
+
 
     function playStream(url, allUrls, labels) {
       if (_currentModalItem) saveRecentWatch(_currentModalItem, _currentModalType);
@@ -4136,8 +4394,7 @@
       // will trigger popstate and auto-reopen this video.
       if (typeof window._adblock_pushRecovery === 'function') window._adblock_pushRecovery(url);
       
-      const shield = document.getElementById('adShield');
-      if (shield) shield.style.display = 'flex';
+
 
       // Auto fullscreen if possible (helpful for all devices)
       const pContainer = document.getElementById('playerContainer');
@@ -4149,7 +4406,7 @@
       }
 
       gsap.fromTo('.player-container', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'power3.out' });
-      // TV remote: auto-focus close/nav buttons so user can immediately navigate
+      // TV remote: auto-focus the UI buttons so the user isn't trapped in the cross-origin iframe!
       if (_tvMode) {
         setTimeout(() => {
           const focusTarget = document.getElementById('playerPrevEp')?.offsetParent
@@ -4177,14 +4434,24 @@
     }
 
     document.getElementById('playerClose').addEventListener('click', () => {
+      if (history.state && (history.state.ui === 'player' || history.state._hackyMaxPlayer)) {
+        history.back();
+      } else {
+        closePlayerInternal();
+      }
+    });
+
+    function closePlayerInternal() {
       gsap.to('.player-container', {
         scale: 0.9, opacity: 0, duration: 0.3, ease: 'power3.in', onComplete: () => {
           document.getElementById('playerOverlay').classList.remove('open');
           document.getElementById('playerFrame').src = '';
-          document.getElementById('playerEpBar').classList.remove('visible');
+          const epBar = document.getElementById('playerEpBar');
+          if (epBar) epBar.classList.remove('visible');
         }
       });
-    });
+    }
+
     document.getElementById('playerOverlay').addEventListener('click', e => {
       if (e.target === document.getElementById('playerOverlay')) document.getElementById('playerClose').click();
     });
@@ -4268,21 +4535,46 @@
       // lands the user right back here with the player ready to re-open.
       window._adblock_pushRecovery = function (iframeSrc) {
         try {
-          history.pushState({ _hackyMaxPlayer: true, _src: iframeSrc }, '', location.href);
+          if (history.state && (history.state.ui === 'player' || history.state._hackyMaxPlayer)) {
+            history.replaceState({ ui: 'player', _hackyMaxPlayer: true, _src: iframeSrc }, '', location.href);
+          } else {
+            history.pushState({ ui: 'player', _hackyMaxPlayer: true, _src: iframeSrc }, '', location.href);
+          }
         } catch (e) {}
       };
 
       window.addEventListener('popstate', function (e) {
-        if (e.state && e.state._hackyMaxPlayer) {
-          // User pressed Back after an ad redirect — restore the player
-          history.pushState(e.state, '', location.href); // keep recovery state live
-          const overlay = document.getElementById('playerOverlay');
-          const frame   = document.getElementById('playerFrame');
-          if (overlay && frame && e.state._src && e.state._src !== 'about:blank') {
-            frame.src = e.state._src;
-            overlay.classList.add('open');
+        const state = e.state || {};
+        
+        // Handle Player
+        const playerOverlay = document.getElementById('playerOverlay');
+        const frame = document.getElementById('playerFrame');
+        if (state.ui === 'player' || state._hackyMaxPlayer) {
+          // User navigated forward back to the player, or an ad redirect popped
+          history.replaceState(state, '', location.href);
+          if (playerOverlay && frame && state._src && state._src !== 'about:blank') {
+            frame.src = state._src;
+            playerOverlay.classList.add('open');
             try { gsap.fromTo('.player-container', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'power3.out' }); } catch (ex) {}
           }
+        } else {
+          // Hardware back button pressed, close player if open
+          if (playerOverlay && playerOverlay.classList.contains('open')) {
+            closePlayerInternal();
+          }
+        }
+
+        // Handle Modal
+        const modal = document.getElementById('modal');
+        if (state.ui === 'modal') {
+           if (modal && !modal.classList.contains('open')) {
+              modal.classList.add('open');
+              try { gsap.fromTo('#modalBox', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3 }); } catch(ex){}
+           }
+        } else if (state.ui !== 'player') {
+           if (modal && modal.classList.contains('open')) {
+              closeModalInternal();
+           }
         }
       });
 
@@ -4660,8 +4952,13 @@
       // OK / Enter / Space → click focused element
       if (TV_OK.has(key)) {
         const el = document.activeElement;
-        // Don't intercept for native input/select/textarea
-        if (el && !['INPUT','SELECT','TEXTAREA'].includes(el.tagName)) {
+        // Don't intercept for native input/select/textarea/iframe
+        if (el && !['INPUT','SELECT','TEXTAREA','IFRAME'].includes(el.tagName)) {
+          const isPlayerOpen = document.getElementById('playerOverlay')?.classList.contains('open');
+          if (isPlayerOpen && el.tagName === 'BODY') {
+            // Do not focus the cross-origin iframe to prevent remote trapping
+            return;
+          }
           e.preventDefault();
           el.click();
         }
@@ -4670,6 +4967,12 @@
 
       // Media Play keys → play focused card, or first available play button
       if (TV_PLAY.has(key)) {
+        const isPlayerOpen = document.getElementById('playerOverlay')?.classList.contains('open');
+        if (isPlayerOpen) {
+          // Do not focus iframe to prevent remote trapping
+          return;
+        }
+
         e.preventDefault();
         const el = document.activeElement;
         if (el && (el.classList.contains('movie-card') || el.classList.contains('trending-card'))) {
@@ -4884,6 +5187,187 @@
     }
 
     init().catch(console.error);
+
+    // ─── WISHLIST FUNCTIONS ───────────────────────────────────────────────────
+    const WL_KEY = 'hackyMax_wishlist';
+
+    function getWishlist() {
+      try { return JSON.parse(localStorage.getItem(WL_KEY) || '[]'); }
+      catch { return []; }
+    }
+
+    function saveWishlistData(arr) {
+      try { localStorage.setItem(WL_KEY, JSON.stringify(arr)); } catch { }
+    }
+
+    function isInWishlist(id) {
+      return getWishlist().some(w => String(w.id) === String(id));
+    }
+
+    function toggleWishlist(id, type, item, btnEl) {
+      const wl = getWishlist();
+      const idx = wl.findIndex(w => String(w.id) === String(id));
+      if (idx !== -1) {
+        // Remove
+        wl.splice(idx, 1);
+        saveWishlistData(wl);
+        if (btnEl) {
+          btnEl.classList.remove('wishlisted');
+          btnEl.title = 'Add to WishList';
+          gsap.fromTo(btnEl, { scale: 1.3 }, { scale: 1, duration: 0.3, ease: 'back.out(2)' });
+        }
+        showWlToast('Removed from WishList');
+      } else {
+        // Add
+        const toSave = {
+          id: item.id,
+          type: type,
+          title: item.title || item.name || '',
+          poster_path: item.poster_path || null,
+          release_date: item.release_date || item.first_air_date || null,
+          vote_average: item.vote_average || 0
+        };
+        wl.unshift(toSave);
+        saveWishlistData(wl);
+        if (btnEl) {
+          btnEl.classList.add('wishlisted');
+          btnEl.title = 'Remove from WishList';
+          gsap.fromTo(btnEl, { scale: 0.6, rotate: -15 }, { scale: 1, rotate: 0, duration: 0.5, ease: 'back.out(2.5)' });
+        }
+        showWlToast('\uD83D\uDD16 Added to WishList!');
+      }
+      updateWishlistBadge();
+      // Re-render overlay if it's open
+      if (document.getElementById('wishlistOverlay')?.classList.contains('open')) {
+        renderWishlist();
+      }
+    }
+
+    let _wlToastTimer = null;
+    function showWlToast(msg) {
+      const toast = document.getElementById('wlToast');
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(_wlToastTimer);
+      _wlToastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    function updateWishlistBadge() {
+      const count = getWishlist().length;
+      // Nav badge
+      const navBadge = document.getElementById('navWlBadge');
+      if (navBadge) {
+        navBadge.textContent = count > 0 ? count : '';
+        navBadge.style.display = count > 0 ? 'inline-flex' : 'none';
+      }
+      // Continue Watching section badge
+      const hdrCount = document.getElementById('wishlistHeaderCount');
+      if (hdrCount) {
+        hdrCount.textContent = count;
+        hdrCount.classList.toggle('visible', count > 0);
+      }
+    }
+
+    function openWishlist() {
+      const overlay = document.getElementById('wishlistOverlay');
+      if (!overlay) return;
+      overlay.classList.add('open');
+      history.pushState({ ui: 'wishlist' }, '', location.href);
+      renderWishlist();
+      gsap.fromTo('.wishlist-header', { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out' });
+    }
+
+    function closeWishlist() {
+      const overlay = document.getElementById('wishlistOverlay');
+      if (!overlay) return;
+      gsap.to(overlay, { opacity: 0, duration: 0.25, ease: 'power2.in', onComplete: () => {
+        overlay.classList.remove('open');
+        overlay.style.opacity = '';
+      }});
+    }
+
+    async function renderWishlist() {
+      const wl = getWishlist();
+      const grid = document.getElementById('wishlistGrid');
+      const countBadge = document.getElementById('wishlistCountBadge');
+      const clearBtn = document.getElementById('wishlistClearBtn');
+      if (!grid) return;
+
+      if (countBadge) countBadge.textContent = `${wl.length} title${wl.length !== 1 ? 's' : ''}`;
+      if (clearBtn) clearBtn.style.display = wl.length > 0 ? 'inline-block' : 'none';
+
+      if (wl.length === 0) {
+        grid.innerHTML = `
+          <div class="wishlist-empty" style="grid-column:1/-1">
+            <div class="wishlist-empty-icon">\uD83D\uDD16</div>
+            <div>Your WishList is empty</div>
+            <div style="font-size:.8rem;color:var(--muted)">Hover over any movie card and click \uD83D\uDD16 to save it</div>
+          </div>`;
+        return;
+      }
+
+      // Build cards using existing buildCard (fetches watchData too)
+      grid.innerHTML = wl.map(item => {
+        const poster = item.poster_path
+          ? `<img src="https://image.tmdb.org/t/p/w342${item.poster_path}" alt="${item.title || item.name || ''}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block">`
+          : `<div style="width:100%;height:100%;background:var(--dark3);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.75rem">No Poster</div>`;
+        const year = (item.release_date || '').slice(0, 4);
+        return `
+          <div class="movie-card" tabindex="0" role="button" aria-label="${item.title || item.name || ''}" data-id="${item.id}" data-type="${item.type}" style="position:relative;cursor:pointer">
+            <div class="card-poster" style="aspect-ratio:2/3;overflow:hidden;background:var(--dark3);position:relative">
+              ${poster}
+              <div class="card-overlay"></div>
+              <div class="card-play"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>
+              <button class="card-wishlist-btn wishlisted" title="Remove from WishList"
+                onclick="event.stopPropagation(); toggleWishlist(${item.id}, '${item.type}', ${JSON.stringify(item)}, this)" style="opacity:1;transform:scale(1)">\uD83D\uDD16</button>
+            </div>
+            <div class="card-info">
+              <div class="card-title">${item.title || item.name || 'Unknown'}</div>
+              <div class="card-sub">${year || '—'}</div>
+            </div>
+          </div>`;
+      }).join('');
+
+      gsap.fromTo(grid.children,
+        { opacity: 0, y: 30, scale: 0.93 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.45, stagger: 0.06, ease: 'back.out(1.4)' }
+      );
+
+      // Wire up click to open modal
+      grid.querySelectorAll('.movie-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const id = card.dataset.id;
+          const type = card.dataset.type || 'movie';
+          if (id) { closeWishlist(); setTimeout(() => openModal(id, type), 300); }
+        });
+      });
+    }
+
+    function clearWishlist() {
+      if (!confirm('Clear all WishList items?')) return;
+      saveWishlistData([]);
+      updateWishlistBadge();
+      renderWishlist();
+      showWlToast('WishList cleared');
+    }
+
+    // Wire up close button & popstate
+    document.getElementById('wishlistClose')?.addEventListener('click', () => {
+      if (history.state && history.state.ui === 'wishlist') history.back();
+      else closeWishlist();
+    });
+
+    // Extend existing popstate handler to also close wishlist
+    window.addEventListener('popstate', e => {
+      if (!e.state || (e.state.ui !== 'wishlist' && e.state.ui !== 'modal' && e.state.ui !== 'player' && !e.state._hackyMaxPlayer)) {
+        const wlOv = document.getElementById('wishlistOverlay');
+        if (wlOv && wlOv.classList.contains('open')) closeWishlist();
+      }
+    });
+
+    // Init badge on page load
+    updateWishlistBadge();
   </script>
 </body>
 
