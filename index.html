@@ -2548,8 +2548,8 @@
       z-index: 8;
       transition: all 0.25s cubic-bezier(.34,1.56,.64,1);
       backdrop-filter: blur(8px);
-      opacity: 0;
-      transform: scale(0.8);
+      opacity: 0.6;
+      transform: scale(0.9);
     }
     .movie-card:hover .card-wishlist-btn {
       opacity: 1;
@@ -5139,19 +5139,38 @@
     async function loadRecentWatch() {
       try {
         const recent = JSON.parse(localStorage.getItem('recentWatch') || '[]');
+        const wl = getWishlist().slice(0, 5); // up to 5 wishlist items
+        
         const section = document.getElementById('recent');
         const row = document.getElementById('recentRow');
-        if (!recent || recent.length === 0) {
+        
+        if ((!recent || recent.length === 0) && wl.length === 0) {
           if (section) section.style.display = 'none';
           return;
         }
         if (section) section.style.display = 'block';
         
-        // Show up to 5 items
-        const toShow = recent.slice(0, 5);
-        const watchDatas = await Promise.all(toShow.map(r => getWatch(r.id, r.type)));
+        // Show up to 5 recent items
+        const toShowRecent = recent.slice(0, 5);
+        
+        // Fetch watch progress for both lists in parallel
+        const [recentWatchDatas, wlWatchDatas] = await Promise.all([
+          Promise.all(toShowRecent.map(r => getWatch(r.id, r.type))),
+          Promise.all(wl.map(w => getWatch(w.id, w.type)))
+        ]);
+        
         if (row) {
-          row.innerHTML = toShow.map((item, i) => buildCard(item, null, item.type, watchDatas[i])).join('');
+          let html = toShowRecent.map((item, i) => buildCard(item, null, item.type, recentWatchDatas[i])).join('');
+          
+          if (wl.length > 0) {
+            // Add a visual separator if there are recent items before it
+            if (toShowRecent.length > 0) {
+              html += `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 1.5rem;color:var(--muted);font-weight:700;white-space:nowrap;user-select:none;font-size:0.85rem;letter-spacing:1px;opacity:0.7"><span style="font-size:1.5rem;color:var(--gold);margin-bottom:0.3rem">🔖</span>WISHLIST</div>`;
+            }
+            html += wl.map((item, i) => buildCard(item, null, item.type, wlWatchDatas[i])).join('');
+          }
+          
+          row.innerHTML = html;
           animateGrid(row);
           addCardListeners(row, '.movie-card');
         }
@@ -5272,6 +5291,7 @@
         showWlToast('🔖 Added to WishList!');
       }
       updateWishlistBadge();
+      loadRecentWatch(); // Refresh the row to show the newly added/removed items
       // Re-render overlay if it's open
       if (document.getElementById('wishlistOverlay')?.classList.contains('open')) {
         renderWishlist();
@@ -5390,6 +5410,7 @@
       saveWishlistData([]);
       updateWishlistBadge();
       renderWishlist();
+      loadRecentWatch(); // Refresh row to remove cleared items
       showWlToast('WishList cleared');
     }
 
