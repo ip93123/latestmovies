@@ -3495,15 +3495,6 @@
       ${newEpBadgeHtml}
       ${buildRatingRing(vote, `${item.id}-card`, true)}
       <div class="card-stream-logos">${streamLogos}</div>
-      <button class="card-wishlist-btn ${isInWishlist(item.id) ? 'wishlisted' : ''}"
-        data-wl-id="${item.id}"
-        data-wl-type="${type}"
-        data-wl-title="${(item.title || item.name || '').replace(/"/g, '&amp;quot;')}"
-        data-wl-poster="${item.poster_path || ''}"
-        data-wl-date="${item.release_date || item.first_air_date || ''}"
-        data-wl-vote="${item.vote_average || 0}"
-        title="${isInWishlist(item.id) ? 'Remove from WishList' : 'Add to WishList'}"
-        onclick="event.stopPropagation(); toggleWishlistBtn(this)">🔖</button>
     </div>
     <div class="card-info">
       <div class="card-title">${title}</div>
@@ -4751,6 +4742,38 @@
       _accentObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
 
       container.querySelectorAll(selector).forEach(card => {
+        // ── Inject WishList button (safe DOM method — no template literal issues) ──
+        if (!card.querySelector('.card-wishlist-btn')) {
+          const cardId = card.dataset.id;
+          const cardType = card.dataset.type || 'movie';
+          const poster = card.querySelector('.card-poster');
+          if (cardId && poster) {
+            const wlBtn = document.createElement('button');
+            wlBtn.className = 'card-wishlist-btn' + (isInWishlist(cardId) ? ' wishlisted' : '');
+            wlBtn.title = isInWishlist(cardId) ? 'Remove from WishList' : 'Add to WishList';
+            wlBtn.textContent = '🔖';
+            wlBtn.setAttribute('data-wl-id', cardId);
+            wlBtn.setAttribute('data-wl-type', cardType);
+            wlBtn.addEventListener('click', e => {
+              e.stopPropagation();
+              const titleEl = card.querySelector('.card-title');
+              const subEl  = card.querySelector('.card-sub');
+              const imgEl  = card.querySelector('.card-poster img');
+              const posterPath = imgEl ? (imgEl.src || '').replace(/.*\/t\/p\/w\d+/, '') : null;
+              const item = {
+                id: cardId,
+                type: cardType,
+                title: titleEl ? titleEl.textContent.trim() : '',
+                poster_path: posterPath || null,
+                release_date: subEl ? subEl.textContent.trim() : null,
+                vote_average: 0
+              };
+              toggleWishlist(cardId, cardType, item, wlBtn);
+            });
+            poster.appendChild(wlBtn);
+          }
+        }
+
         // RAF throttle: at most one tilt update per animation frame per card
         let _cardRaf = null;
         card.addEventListener('mousemove', e => {
