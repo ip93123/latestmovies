@@ -2812,6 +2812,7 @@
       <div class="modal-poster"><img id="modalPoster" src="" alt=""></div>
       <div class="modal-body">
         <div class="modal-top-actions">
+          <button class="popup-home" id="modalWishlistBtn" title="Add to WishList">🔖</button>
           <button class="popup-home" id="modalHome" onclick="document.getElementById('modalClose').click()" title="Go Home"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></button>
           <button class="modal-share-icon-btn" id="modalShare" title="Share Link">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
@@ -2863,7 +2864,7 @@
       <li><a href="#tvshows">TV Shows</a></li>
       <li><a href="#wheretowatch">Streaming</a></li>
       <li><a href="#toprated">Top Rated</a></li>
-      <li><a href="javascript:void(0)" id="navWishlistLink" onclick="openWishlist()" title="WishList" style="font-size:1.15rem;letter-spacing:0;padding:0 2px">🔖<span id="navWlBadge" style="display:none;background:var(--gold);color:#07090F;border-radius:50%;width:16px;height:16px;font-size:.6rem;font-weight:800;display:inline-flex;align-items:center;justify-content:center;margin-left:2px;vertical-align:top;margin-top:-4px"></span></a></li>
+      <li><a href="javascript:void(0)" id="navWishlistLink" onclick="openWishlist()" title="WishList">WishList<span id="navWlBadge" style="display:none;background:var(--gold);color:#07090F;border-radius:50%;width:16px;height:16px;font-size:.6rem;font-weight:800;display:inline-flex;align-items:center;justify-content:center;margin-left:2px;vertical-align:top;margin-top:-4px"></span></a></li>
     </ul>
     <div class="nav-search" id="navSearch">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -4285,6 +4286,17 @@
           _selectedSeason = 1;
           _selectedEpisode = 1;
           _totalSeasons = (type === 'tv' && details.number_of_seasons) ? details.number_of_seasons : 0;
+          
+          // Set modal WishList button state
+          const wlBtn = document.getElementById('modalWishlistBtn');
+          if (isInWishlist(id)) {
+            wlBtn.classList.add('wishlisted');
+            wlBtn.title = 'Remove from WishList';
+          } else {
+            wlBtn.classList.remove('wishlisted');
+            wlBtn.title = 'Add to WishList';
+          }
+          wlBtn.onclick = () => toggleWishlist(id, type, details, wlBtn);
 
           const allUrls = getModalServerUrls(id, type, 1, 1);
           const allLabels = ['▶ Server 1', '▶ Server 2', '▶ Server 3', '▶ Server 4', '▶ Server 5'];
@@ -4746,38 +4758,6 @@
       _accentObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
 
       container.querySelectorAll(selector).forEach(card => {
-        // ── Inject WishList button (safe DOM method — no template literal issues) ──
-        if (!card.querySelector('.card-wishlist-btn')) {
-          const cardId = card.dataset.id;
-          const cardType = card.dataset.type || 'movie';
-          const poster = card.querySelector('.card-poster');
-          if (cardId && poster) {
-            const wlBtn = document.createElement('button');
-            wlBtn.className = 'card-wishlist-btn' + (isInWishlist(cardId) ? ' wishlisted' : '');
-            wlBtn.title = isInWishlist(cardId) ? 'Remove from WishList' : 'Add to WishList';
-            wlBtn.textContent = '🔖';
-            wlBtn.setAttribute('data-wl-id', cardId);
-            wlBtn.setAttribute('data-wl-type', cardType);
-            wlBtn.addEventListener('click', e => {
-              e.stopPropagation();
-              const titleEl = card.querySelector('.card-title');
-              const subEl  = card.querySelector('.card-sub');
-              const imgEl  = card.querySelector('.card-poster img');
-              const posterPath = imgEl ? (imgEl.src || '').replace(/.*\/t\/p\/w\d+/, '') : null;
-              const item = {
-                id: cardId,
-                type: cardType,
-                title: titleEl ? titleEl.textContent.trim() : '',
-                poster_path: posterPath || null,
-                release_date: subEl ? subEl.textContent.trim() : null,
-                vote_average: 0
-              };
-              toggleWishlist(cardId, cardType, item, wlBtn);
-            });
-            poster.appendChild(wlBtn);
-          }
-        }
-
         // RAF throttle: at most one tilt update per animation frame per card
         let _cardRaf = null;
         card.addEventListener('mousemove', e => {
@@ -5240,10 +5220,11 @@
       });
     }
 
+    const WL_KEY = 'hackyMax_wishlist';
+
     init().catch(console.error);
 
     // ─── WISHLIST FUNCTIONS ───────────────────────────────────────────────────
-    const WL_KEY = 'hackyMax_wishlist';
 
     function getWishlist() {
       try { return JSON.parse(localStorage.getItem(WL_KEY) || '[]'); }
