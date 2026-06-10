@@ -5265,7 +5265,7 @@
           btnEl.title = 'Remove from WishList';
           gsap.fromTo(btnEl, { scale: 0.6, rotate: -15 }, { scale: 1, rotate: 0, duration: 0.5, ease: 'back.out(2.5)' });
         }
-        showWlToast('\uD83D\uDD16 Added to WishList!');
+        showWlToast('🔖 Added to WishList!');
       }
       updateWishlistBadge();
       // Re-render overlay if it's open
@@ -5331,9 +5331,9 @@
       if (wl.length === 0) {
         grid.innerHTML = `
           <div class="wishlist-empty" style="grid-column:1/-1">
-            <div class="wishlist-empty-icon">\uD83D\uDD16</div>
+            <div class="wishlist-empty-icon">🔖</div>
             <div>Your WishList is empty</div>
-            <div style="font-size:.8rem;color:var(--muted)">Hover over any movie card and click \uD83D\uDD16 to save it</div>
+            <div style="font-size:.8rem;color:var(--muted)">Hover over any movie card and click 🔖 to save it</div>
           </div>`;
         return;
       }
