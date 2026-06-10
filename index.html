@@ -3495,7 +3495,15 @@
       ${newEpBadgeHtml}
       ${buildRatingRing(vote, `${item.id}-card`, true)}
       <div class="card-stream-logos">${streamLogos}</div>
-      <button class="card-wishlist-btn ${isInWishlist(item.id) ? 'wishlisted' : ''}" data-wl-id="${item.id}" data-wl-type="${type}" title="${isInWishlist(item.id) ? 'Remove from WishList' : 'Add to WishList'}" onclick="event.stopPropagation(); toggleWishlist(${item.id}, '${type}', ${JSON.stringify(item)}, this)">${isInWishlist(item.id) ? '🔖' : '🔖'}</button>
+      <button class="card-wishlist-btn ${isInWishlist(item.id) ? 'wishlisted' : ''}"
+        data-wl-id="${item.id}"
+        data-wl-type="${type}"
+        data-wl-title="${(item.title || item.name || '').replace(/"/g, '&amp;quot;')}"
+        data-wl-poster="${item.poster_path || ''}"
+        data-wl-date="${item.release_date || item.first_air_date || ''}"
+        data-wl-vote="${item.vote_average || 0}"
+        title="${isInWishlist(item.id) ? 'Remove from WishList' : 'Add to WishList'}"
+        onclick="event.stopPropagation(); toggleWishlistBtn(this)">🔖</button>
     </div>
     <div class="card-info">
       <div class="card-title">${title}</div>
@@ -5320,7 +5328,13 @@
               <div class="card-overlay"></div>
               <div class="card-play"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>
               <button class="card-wishlist-btn wishlisted" title="Remove from WishList"
-                onclick="event.stopPropagation(); toggleWishlist(${item.id}, '${item.type}', ${JSON.stringify(item)}, this)" style="opacity:1;transform:scale(1)">\uD83D\uDD16</button>
+                data-wl-id="${item.id}"
+                data-wl-type="${item.type}"
+                data-wl-title="${(item.title || item.name || '').replace(/"/g, '&quot;')}"
+                data-wl-poster="${item.poster_path || ''}"
+                data-wl-date="${item.release_date || ''}"
+                data-wl-vote="${item.vote_average || 0}"
+                onclick="event.stopPropagation(); toggleWishlistBtn(this)" style="opacity:1;transform:scale(1)">🔖</button>
             </div>
             <div class="card-info">
               <div class="card-title">${item.title || item.name || 'Unknown'}</div>
@@ -5368,6 +5382,19 @@
 
     // Init badge on page load
     updateWishlistBadge();
+
+    // Helper: called from card button onclick — reads item info from data-* attrs
+    function toggleWishlistBtn(btn) {
+      const item = {
+        id: btn.dataset.wlId,
+        type: btn.dataset.wlType,
+        title: (btn.dataset.wlTitle || '').replace(/&quot;/g, '"'),
+        poster_path: btn.dataset.wlPoster || null,
+        release_date: btn.dataset.wlDate || null,
+        vote_average: parseFloat(btn.dataset.wlVote) || 0
+      };
+      toggleWishlist(item.id, item.type, item, btn);
+    }
   </script>
 </body>
 
