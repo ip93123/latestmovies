@@ -2549,8 +2549,10 @@
     /* Hide custom close/home buttons when player is fullscreen */
     #playerContainer:fullscreen #playerHome,
     #playerContainer:fullscreen #playerClose,
+    #playerContainer:fullscreen #playerFullscreenBtn,
     #playerContainer:-webkit-full-screen #playerHome,
-    #playerContainer:-webkit-full-screen #playerClose {
+    #playerContainer:-webkit-full-screen #playerClose,
+    #playerContainer:-webkit-full-screen #playerFullscreenBtn {
       display: none !important;
     }
 
@@ -2935,6 +2937,8 @@
     <div class="hero-scroll-hint"><span>Scroll</span>
       <div class="scroll-line"></div>
     </div>
+    <button id="heroPrevBtn" class="scroll-btn" style="left: 2rem; z-index: 100;">❮</button>
+    <button id="heroNextBtn" class="scroll-btn" style="right: 2rem; z-index: 100;">❯</button>
   </section>
 
   <section id="recent" style="display:none; background:var(--dark1)">
@@ -3779,6 +3783,9 @@
           heroNav(dx < 0 ? 1 : -1);
         }
       });
+
+      document.getElementById('heroPrevBtn').onclick = () => heroNav(-1);
+      document.getElementById('heroNextBtn').onclick = () => heroNav(1);
     }
 
     async function setHero(idx, initial = false) {
