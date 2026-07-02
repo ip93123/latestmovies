@@ -5232,14 +5232,17 @@
       await loadHero(heroPool);
       await loadRecentWatch();
 
-      const [, , , topRated] = await Promise.all([
-        loadTrending(),
-        loadMovies('now_playing'),
-        loadTV('on_the_air'),
-        tmdb('/movie/top_rated?language=en-US&page=1')
-      ]);
-
+      // Stagger loading to prevent UI freezing on low-end TV hardware
+      await loadTrending();
+      await new Promise(r => setTimeout(r, 100));
+      await loadMovies('now_playing');
+      await new Promise(r => setTimeout(r, 100));
+      await loadTV('on_the_air');
+      await new Promise(r => setTimeout(r, 100));
+      
+      const topRated = await tmdb('/movie/top_rated?language=en-US&page=1');
       await loadTopRated();
+      await new Promise(r => setTimeout(r, 100));
       await loadFeatured((topRated.results || []).filter(m => m.backdrop_path));
 
       // Build platform overview from all loaded cards
