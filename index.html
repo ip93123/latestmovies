@@ -4212,7 +4212,7 @@
         if (shareBtn) {
           shareBtn.className = 'modal-share-icon-btn';
           shareBtn.onclick = () => {
-            const shortCode = type === 'tv' ? 'tv' : 'm';
+            const shortCode = type === 'tv' ? 's' : 'm';
             const slug = slugify(title);
             const fullId = slug ? `${id}-${slug}` : id;
             const shareUrl = `${window.location.origin}${window.location.pathname}?${shortCode}=${fullId}`;
@@ -5220,7 +5220,7 @@
       // ── Handle Shareable Links ──
       const params = new URLSearchParams(window.location.search);
       const mParam = params.get('m');
-      const tvParam = params.get('tv');
+      const tvParam = params.get('s');
       const paramVal = mParam || tvParam;
       if (paramVal) {
         const id = parseInt(paramVal, 10);
