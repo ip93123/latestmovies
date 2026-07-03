@@ -3943,18 +3943,19 @@
       try {
         if (heroPlayBtn) {
           heroPlayBtn.style.display = 'inline-flex';
-          const s1Url = type === 'tv' ? `https://vidfast.pro/tv/${m.id}/1/1` : `https://vidfast.pro/movie/${m.id}`;
+          const s1Url = type === 'tv' ? `https://peachify.top/embed/tv/${m.id}/1/1?autoNext=5` : `https://peachify.top/embed/movie/${m.id}`;
           const s2Url = type === 'tv' ? `https://vidsrc.me/embed/tv?tmdb=${m.id}&season=1&episode=1` : `https://vidsrc.me/embed/movie?tmdb=${m.id}`;
           const s3Url = type === 'tv' ? `https://player.videasy.net/tv/${m.id}/1/1` : `https://player.videasy.net/movie/${m.id}`;
           const s4Url = type === 'tv' ? `https://vidsrc.win/embed/tv?tmdb=${m.id}&season=1&episode=1` : `https://vidsrc.win/embed/movie?tmdb=${m.id}`;
-          const s5Url = type === 'tv' ? `https://vidcore.net/tv/${m.id}/1/1` : `https://vidcore.net/movie/${m.id}`;
+          const s5Url = type === 'tv' ? `https://vidcore.net/tv/${m.id}/1/1?autoplay=1&server=orbit` : `https://vidcore.net/movie/${m.id}?autoplay=1&server=orbit`;
           const imdbId6 = await getImdbId(m.id, type);
           const s6Url = imdbId6 ? (type === 'tv' ? `https://primesrc.me/embed/tv?imdb=${imdbId6}&season=1&episode=1` : `https://primesrc.me/embed/movie?imdb=${imdbId6}`) : null;
           const s7Url = type === 'tv' ? `https://vixsrc.to/tv/${m.id}/1/1` : `https://vixsrc.to/movie/${m.id}`;
           const s8Url = type === 'tv' ? `https://cinesrc.st/embed/tv/${m.id}?s=1&e=1` : `https://cinesrc.st/embed/movie/${m.id}`;
           const s9Url = type === 'tv' ? `https://anyembed.xyz/embed/tmdb-tv-${m.id}-1-1?logo=false` : `https://anyembed.xyz/embed/tmdb-movie-${m.id}?logo=false`;
-          const allUrls = [s1Url, s2Url, s3Url, s4Url, s5Url, ...(s6Url ? [s6Url] : []), s7Url, s8Url, s9Url];
-          const allLabels = ['Server 1', 'Server 2', 'Server 3', 'Server 4', 'Server 5', ...(s6Url ? ['Server 6'] : []), 'Server 7', 'Server 8', 'Server 9'];
+          const s10Url = type === 'tv' ? `https://vidfast.pro/tv/${m.id}/1/1` : `https://vidfast.pro/movie/${m.id}`;
+          const allUrls = [s1Url, s2Url, s3Url, s4Url, s5Url, ...(s6Url ? [s6Url] : []), s7Url, s8Url, s9Url, s10Url];
+          const allLabels = ['Server 1', 'Server 2', 'Server 3', 'Server 4', 'Server 5', ...(s6Url ? ['Server 6'] : []), 'Server 7', 'Server 8', 'Server 9', 'Server 10'];
           heroPlayBtn.onclick = () => {
             _currentModalItem = m;
             _currentModalType = type;
@@ -4129,16 +4130,17 @@
 
     function buildEpisodeUrl(server, id, season, episode, imdbId = null) {
       switch (server) {
-        case 1: return `https://vidfast.pro/tv/${id}/${season}/${episode}?autoplay=1`;
+        case 1: return `https://peachify.top/embed/tv/${id}/${season}/${episode}?autoNext=5`;
         case 2: return `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}&autoplay=1`;
         case 3: return `https://player.videasy.net/tv/${id}/${season}/${episode}?autoplay=1`;
         case 4: return `https://embedmaster.link/tv/${id}/${season}/${episode}?autoplay=1`;
-        case 5: return `https://vidcore.net/tv/${id}/${season}/${episode}?autoplay=1`;
+        case 5: return `https://vidcore.net/tv/${id}/${season}/${episode}?autoplay=1&server=orbit`;
         case 6: return imdbId ? `https://primesrc.me/embed/tv?imdb=${imdbId}&season=${season}&episode=${episode}` : null;
         case 7: return `https://vixsrc.to/tv/${id}/${season}/${episode}`;
         case 8: return `https://cinesrc.st/embed/tv/${id}?s=${season}&e=${episode}`;
         case 9: return `https://anyembed.xyz/embed/tmdb-tv-${id}-${season}-${episode}?logo=false`;
-        default: return `https://vidfast.pro/tv/${id}/${season}/${episode}?autoplay=1`;
+        case 10: return `https://vidfast.pro/tv/${id}/${season}/${episode}?autoplay=1`;
+        default: return `https://peachify.top/embed/tv/${id}/${season}/${episode}?autoNext=5`;
       }
     }
 
@@ -4157,19 +4159,21 @@
         urls.push(buildEpisodeUrl(7, id, season, episode));
         urls.push(buildEpisodeUrl(8, id, season, episode));
         urls.push(buildEpisodeUrl(9, id, season, episode));
+        urls.push(buildEpisodeUrl(10, id, season, episode));
         return urls;
       }
       const urls = [
-        `https://vidfast.pro/movie/${id}?autoplay=1`,
+        `https://peachify.top/embed/movie/${id}`,
         `https://vidsrc.me/embed/movie?tmdb=${id}&autoplay=1`,
         `https://player.videasy.net/movie/${id}?autoplay=1`,
         `https://embedmaster.link/movie/${id}?autoplay=1`,
-        `https://vidcore.net/movie/${id}?autoplay=1`,
+        `https://vidcore.net/movie/${id}?autoplay=1&server=orbit`,
       ];
       if (imdbId) urls.push(`https://primesrc.me/embed/movie?imdb=${imdbId}`);
       urls.push(`https://vixsrc.to/movie/${id}`);
       urls.push(`https://cinesrc.st/embed/movie/${id}`);
       urls.push(`https://anyembed.xyz/embed/tmdb-movie-${id}?logo=false`);
+      urls.push(`https://vidfast.pro/movie/${id}?autoplay=1`);
       return urls;
     }
 
@@ -4418,9 +4422,21 @@
           const colors = ['var(--green)', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899'];
           const textColors = ['#fff', '#fff', '#fff', '#07090F', '#fff', '#fff'];
 
-          let playBtnsHtml = allUrls.map((u, i) =>
+          let playBtnsHtml = '';
+          const maxVisible = 5;
+          const visibleUrls = allUrls.slice(0, maxVisible);
+          const hiddenUrls = allUrls.slice(maxVisible);
+
+          playBtnsHtml += visibleUrls.map((u, i) =>
             `<button class="modal-stream-pill modal-play-btn" data-server="${i}" style="background:${colors[i] || '#6B7280'};color:${textColors[i] || '#fff'};border:none;cursor:pointer">${allLabels[i]}</button>`
           ).join('');
+
+          if (hiddenUrls.length > 0) {
+            playBtnsHtml += `<button class="modal-stream-pill" id="showMoreServersBtn" style="background:var(--dark3);color:#fff;border:1px solid rgba(255,255,255,0.2);cursor:pointer">➕ ${hiddenUrls.length} More</button>`;
+            playBtnsHtml += hiddenUrls.map((u, i) =>
+              `<button class="modal-stream-pill modal-play-btn extra-server-btn" data-server="${i + maxVisible}" style="background:${colors[i + maxVisible] || '#6B7280'};color:${textColors[i + maxVisible] || '#fff'};border:none;cursor:pointer;display:none">${allLabels[i + maxVisible]}</button>`
+            ).join('');
+          }
 
           if (ms.innerHTML.includes('no-stream')) {
             ms.innerHTML = playBtnsHtml;
@@ -4429,12 +4445,24 @@
           }
 
           // Wire up play buttons
-          ms.querySelectorAll('.modal-play-btn').forEach((btn, i) => {
+          ms.querySelectorAll('.modal-play-btn').forEach((btn) => {
+            const serverIdx = parseInt(btn.dataset.server);
             btn.onclick = async () => {
               const urls = await getModalServerUrls(_currentModalId, _currentModalType, _selectedSeason, _selectedEpisode);
-              playStream(urls[i], urls, allLabels);
+              playStream(urls[serverIdx], urls, allLabels);
             };
           });
+
+          const showMoreBtn = ms.querySelector('#showMoreServersBtn');
+          if (showMoreBtn) {
+            showMoreBtn.onclick = () => {
+              showMoreBtn.style.display = 'none';
+              ms.querySelectorAll('.extra-server-btn').forEach(b => {
+                b.style.display = 'inline-flex';
+                b.offsetHeight; // force reflow for spatial nav
+              });
+            };
+          }
 
           // Setup season/episode chooser for TV shows
           const epChooser = document.getElementById('modalEpChooser');
