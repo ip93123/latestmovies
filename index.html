@@ -9,8 +9,12 @@
   <link rel="icon" type="image/png" sizes="192x192" href="logo.png">
   <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
   <link rel="icon" type="image/png" sizes="32x32" href="logo.png">
+  <link rel="dns-prefetch" href="https://image.tmdb.org">
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap');
 
     * {
       margin: 0;
@@ -767,6 +771,7 @@
       display: flex;
       gap: 1.5rem;
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       padding-bottom: 1rem;
       padding-left: 12px;
       padding-top: 12px;
@@ -1244,6 +1249,7 @@
       grid-auto-columns: minmax(320px, 1fr);
       gap: .75rem;
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       padding-bottom: 1rem;
       padding-left: 12px;
       padding-top: 12px;
@@ -1758,29 +1764,69 @@
     }
 
     .modal-streams {
-      display: flex;
-      gap: .5rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.5rem
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: .45rem;
+      margin-bottom: 1.5rem;
     }
 
     .modal-stream-pill {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: .4rem;
-      padding: .4rem .9rem;
+      padding: .45rem .6rem;
       border-radius: 8px;
-      font-size: .78rem;
+      font-size: .75rem;
       font-weight: 700;
       border: 1px solid transparent;
-      transition: transform .2s, opacity .2s;
+      transition: transform .2s, opacity .2s, box-shadow .2s;
       cursor: pointer;
-      text-decoration: none
+      text-decoration: none;
+      white-space: nowrap;
+      width: 100%;
+      text-align: center;
     }
 
     .modal-stream-pill:hover {
       transform: translateY(-2px);
-      opacity: .85
+      opacity: .85;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    /* Mobile: 2 columns */
+    @media (max-width: 480px) {
+      .modal-streams {
+        grid-template-columns: repeat(2, 1fr);
+        gap: .35rem;
+      }
+      .modal-stream-pill {
+        font-size: .72rem;
+        padding: .5rem .4rem;
+      }
+    }
+
+    /* Tablet: 3 columns */
+    @media (min-width: 481px) and (max-width: 768px) {
+      .modal-streams {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    /* TV mode: bigger tap targets */
+    .tv-mode .modal-streams {
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: .6rem;
+    }
+    .tv-mode .modal-stream-pill {
+      font-size: .85rem;
+      padding: .65rem .8rem;
+      border-radius: 10px;
+    }
+    .tv-mode .modal-stream-pill:focus {
+      outline: 3px solid var(--gold);
+      outline-offset: 2px;
+      box-shadow: 0 0 14px rgba(232,201,122,0.4);
     }
 
     .modal-cast {
@@ -3054,8 +3100,8 @@
     </div>
   </footer>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
   <script>
     gsap.registerPlugin(ScrollTrigger);
 
@@ -3522,7 +3568,7 @@
 
       return `<div class="movie-card" tabindex="0" role="button" aria-label="${title}" data-id="${item.id}" data-type="${type}" data-providers="${providerIds.join(',')}" style="opacity:1">
     <div class="card-poster">
-      ${poster ? `<img src="${poster}" alt="${title}" loading="lazy" onerror="this.src=''">` :
+      ${poster ? `<img src="${poster}" alt="${title}" loading="lazy" decoding="async" onerror="this.src=''">` :
           `<div style="width:100%;height:100%;background:var(--dark3);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.75rem">No Poster</div>`}
       <div class="card-overlay"></div>
       <div class="card-play"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>
@@ -3815,7 +3861,9 @@
 
       if (m.backdrop_path) {
         // Use w1280 instead of original — saves ~60–80 % bandwidth with no visible quality loss
-      heroImg.src = `${IMG}w1280${m.backdrop_path}`;
+        heroImg.src = `${IMG}w1280${m.backdrop_path}`;
+        heroImg.setAttribute('decoding', 'async');
+        heroImg.setAttribute('fetchpriority', 'high');
         heroImg.onload = () => {
           heroImg.classList.add('loaded');
           // Pass the already-loaded element — avoids a second network request
@@ -3898,10 +3946,15 @@
           const s1Url = type === 'tv' ? `https://vidfast.pro/tv/${m.id}/1/1` : `https://vidfast.pro/movie/${m.id}`;
           const s2Url = type === 'tv' ? `https://vidsrc.me/embed/tv?tmdb=${m.id}&season=1&episode=1` : `https://vidsrc.me/embed/movie?tmdb=${m.id}`;
           const s3Url = type === 'tv' ? `https://player.videasy.net/tv/${m.id}/1/1` : `https://player.videasy.net/movie/${m.id}`;
-          const s4Url = type === 'tv' ? `https://vidsrc.xyz/embed/tv?tmdb=${m.id}&season=1&episode=1` : `https://vidsrc.xyz/embed/movie?tmdb=${m.id}`;
+          const s4Url = type === 'tv' ? `https://vidsrc.win/embed/tv?tmdb=${m.id}&season=1&episode=1` : `https://vidsrc.win/embed/movie?tmdb=${m.id}`;
           const s5Url = type === 'tv' ? `https://vidcore.net/tv/${m.id}/1/1` : `https://vidcore.net/movie/${m.id}`;
-          const allUrls = [s1Url, s2Url, s3Url, s4Url, s5Url];
-          const allLabels = ['Server 1', 'Server 2', 'Server 3', 'Server 4', 'Server 5'];
+          const imdbId6 = await getImdbId(m.id, type);
+          const s6Url = imdbId6 ? (type === 'tv' ? `https://primesrc.me/embed/tv?imdb=${imdbId6}&season=1&episode=1` : `https://primesrc.me/embed/movie?imdb=${imdbId6}`) : null;
+          const s7Url = type === 'tv' ? `https://vixsrc.to/tv/${m.id}/1/1` : `https://vixsrc.to/movie/${m.id}`;
+          const s8Url = type === 'tv' ? `https://cinesrc.st/embed/tv/${m.id}?s=1&e=1` : `https://cinesrc.st/embed/movie/${m.id}`;
+          const s9Url = type === 'tv' ? `https://anyembed.xyz/embed/tmdb-tv-${m.id}-1-1?logo=false` : `https://anyembed.xyz/embed/tmdb-movie-${m.id}?logo=false`;
+          const allUrls = [s1Url, s2Url, s3Url, s4Url, s5Url, ...(s6Url ? [s6Url] : []), s7Url, s8Url, s9Url];
+          const allLabels = ['Server 1', 'Server 2', 'Server 3', 'Server 4', 'Server 5', ...(s6Url ? ['Server 6'] : []), 'Server 7', 'Server 8', 'Server 9'];
           heroPlayBtn.onclick = () => {
             _currentModalItem = m;
             _currentModalType = type;
@@ -4062,45 +4115,73 @@
       } catch { return []; }
     }
 
-    function buildEpisodeUrl(server, id, season, episode) {
+    // Cache IMDB IDs to avoid redundant API calls
+    const _imdbIdCache = {};
+    async function getImdbId(tmdbId, type) {
+      const key = `${type}:${tmdbId}`;
+      if (_imdbIdCache[key] !== undefined) return _imdbIdCache[key];
+      try {
+        const data = await tmdb(`/${type}/${tmdbId}/external_ids`);
+        _imdbIdCache[key] = data.imdb_id || null;
+        return _imdbIdCache[key];
+      } catch { _imdbIdCache[key] = null; return null; }
+    }
+
+    function buildEpisodeUrl(server, id, season, episode, imdbId = null) {
       switch (server) {
         case 1: return `https://vidfast.pro/tv/${id}/${season}/${episode}?autoplay=1`;
         case 2: return `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}&autoplay=1`;
         case 3: return `https://player.videasy.net/tv/${id}/${season}/${episode}?autoplay=1`;
         case 4: return `https://embedmaster.link/tv/${id}/${season}/${episode}?autoplay=1`;
         case 5: return `https://vidcore.net/tv/${id}/${season}/${episode}?autoplay=1`;
+        case 6: return imdbId ? `https://primesrc.me/embed/tv?imdb=${imdbId}&season=${season}&episode=${episode}` : null;
+        case 7: return `https://vixsrc.to/tv/${id}/${season}/${episode}`;
+        case 8: return `https://cinesrc.st/embed/tv/${id}?s=${season}&e=${episode}`;
+        case 9: return `https://anyembed.xyz/embed/tmdb-tv-${id}-${season}-${episode}?logo=false`;
         default: return `https://vidfast.pro/tv/${id}/${season}/${episode}?autoplay=1`;
       }
     }
 
-    function getModalServerUrls(id, type, season, episode) {
+    async function getModalServerUrls(id, type, season, episode) {
+      const imdbId = await getImdbId(id, type);
       if (type === 'tv') {
-        return [
+        const urls = [
           buildEpisodeUrl(1, id, season, episode),
           buildEpisodeUrl(2, id, season, episode),
           buildEpisodeUrl(3, id, season, episode),
           buildEpisodeUrl(4, id, season, episode),
           buildEpisodeUrl(5, id, season, episode),
         ];
+        const s6 = buildEpisodeUrl(6, id, season, episode, imdbId);
+        if (s6) urls.push(s6);
+        urls.push(buildEpisodeUrl(7, id, season, episode));
+        urls.push(buildEpisodeUrl(8, id, season, episode));
+        urls.push(buildEpisodeUrl(9, id, season, episode));
+        return urls;
       }
-      return [
+      const urls = [
         `https://vidfast.pro/movie/${id}?autoplay=1`,
         `https://vidsrc.me/embed/movie?tmdb=${id}&autoplay=1`,
         `https://player.videasy.net/movie/${id}?autoplay=1`,
         `https://embedmaster.link/movie/${id}?autoplay=1`,
         `https://vidcore.net/movie/${id}?autoplay=1`,
       ];
+      if (imdbId) urls.push(`https://primesrc.me/embed/movie?imdb=${imdbId}`);
+      urls.push(`https://vixsrc.to/movie/${id}`);
+      urls.push(`https://cinesrc.st/embed/movie/${id}`);
+      urls.push(`https://anyembed.xyz/embed/tmdb-movie-${id}?logo=false`);
+      return urls;
     }
 
-    function refreshModalPlayButtons() {
+    async function refreshModalPlayButtons() {
       const id = _currentModalId;
       const type = _currentModalType;
       if (!id) return;
       const s = _selectedSeason, e = _selectedEpisode;
-      const allUrls = getModalServerUrls(id, type, s, e);
-      const allLabels = ['▶ Server 1', '▶ Server 2', '▶ Server 3', '▶ Server 4', '▶ Server 5'];
-      const colors = ['var(--green)', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444'];
-      const textColors = ['#fff', '#fff', '#fff', '#07090F', '#fff'];
+      const allUrls = await getModalServerUrls(id, type, s, e);
+      const allLabels = allUrls.map((_, i) => `▶ Server ${i + 1}`);
+      const colors = ['var(--green)', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899'];
+      const textColors = ['#fff', '#fff', '#fff', '#07090F', '#fff', '#fff'];
       const btns = document.querySelectorAll('.modal-play-btn');
       btns.forEach((btn, i) => {
         btn.onclick = () => playStream(allUrls[i], allUrls, allLabels);
@@ -4332,13 +4413,13 @@
           }
           wlBtn.onclick = () => toggleWishlist(id, type, details, wlBtn);
 
-          const allUrls = getModalServerUrls(id, type, 1, 1);
-          const allLabels = ['▶ Server 1', '▶ Server 2', '▶ Server 3', '▶ Server 4', '▶ Server 5'];
-          const colors = ['var(--green)', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444'];
-          const textColors = ['#fff', '#fff', '#fff', '#07090F', '#fff'];
+          const allUrls = await getModalServerUrls(id, type, 1, 1);
+          const allLabels = allUrls.map((_, i) => `▶ Server ${i + 1}`);
+          const colors = ['var(--green)', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899'];
+          const textColors = ['#fff', '#fff', '#fff', '#07090F', '#fff', '#fff'];
 
           let playBtnsHtml = allUrls.map((u, i) =>
-            `<button class="modal-stream-pill modal-play-btn" data-server="${i}" style="background:${colors[i]};color:${textColors[i]};border:none;margin-right:0.5rem;margin-bottom:0.3rem;cursor:pointer">${allLabels[i]}</button>`
+            `<button class="modal-stream-pill modal-play-btn" data-server="${i}" style="background:${colors[i] || '#6B7280'};color:${textColors[i] || '#fff'};border:none;cursor:pointer">${allLabels[i]}</button>`
           ).join('');
 
           if (ms.innerHTML.includes('no-stream')) {
@@ -4349,8 +4430,8 @@
 
           // Wire up play buttons
           ms.querySelectorAll('.modal-play-btn').forEach((btn, i) => {
-            btn.onclick = () => {
-              const urls = getModalServerUrls(_currentModalId, _currentModalType, _selectedSeason, _selectedEpisode);
+            btn.onclick = async () => {
+              const urls = await getModalServerUrls(_currentModalId, _currentModalType, _selectedSeason, _selectedEpisode);
               playStream(urls[i], urls, allLabels);
             };
           });
@@ -4750,8 +4831,8 @@
         if (episodeSel) episodeSel.value = String(next.episode);
       }
 
-      const urls = getModalServerUrls(_currentModalId, _currentModalType, _selectedSeason, _selectedEpisode);
-      const allLabels = ['▶ Server 1', '▶ Server 2', '▶ Server 3', '▶ Server 4', '▶ Server 5'];
+      const urls = await getModalServerUrls(_currentModalId, _currentModalType, _selectedSeason, _selectedEpisode);
+      const allLabels = urls.map((_, i) => `▶ Server ${i + 1}`);
       playStream(urls[_activeServerIndex], urls, allLabels);
       updateEpNavButtons();
     }
@@ -4780,8 +4861,8 @@
         if (episodeSel) episodeSel.value = String(prev.episode);
       }
 
-      const urls = getModalServerUrls(_currentModalId, _currentModalType, _selectedSeason, _selectedEpisode);
-      const allLabels = ['▶ Server 1', '▶ Server 2', '▶ Server 3', '▶ Server 4', '▶ Server 5'];
+      const urls = await getModalServerUrls(_currentModalId, _currentModalType, _selectedSeason, _selectedEpisode);
+      const allLabels = urls.map((_, i) => `▶ Server ${i + 1}`);
       playStream(urls[_activeServerIndex], urls, allLabels);
       updateEpNavButtons();
     }
@@ -4960,13 +5041,14 @@
     }
 
     function getVisibleFocusables() {
+      const vw = window.innerWidth;
       return [...document.querySelectorAll(FOCUSABLE_SEL)].filter(el => {
         if (el.closest('#searchOverlay:not(.open)') ||
             el.closest('#modal:not(.open)') ||
             el.closest('#playerOverlay:not(.open)')) return false;
         const r = el.getBoundingClientRect();
-        // Element must have dimensions to be focusable (visible in DOM)
-        return r.width > 0 && r.height > 0;
+        // Element must have dimensions and not be far off-screen horizontally
+        return r.width > 0 && r.height > 0 && r.right >= -vw && r.left <= vw * 2;
       });
     }
 
@@ -5007,7 +5089,11 @@
       }
       if (best) {
         best.focus();
-        best.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+        best.scrollIntoView({ 
+          block: 'nearest', 
+          inline: best.classList.contains('movie-card') ? 'center' : 'nearest', 
+          behavior: 'smooth' 
+        });
       }
     }
 
@@ -5233,24 +5319,37 @@
       await loadHero(heroPool);
       await loadRecentWatch();
 
-      // Stagger loading to prevent UI freezing on low-end TV hardware
-      await loadTrending();
-      await new Promise(r => setTimeout(r, 100));
-      await loadMovies('now_playing');
-      await new Promise(r => setTimeout(r, 100));
-      await loadTV('on_the_air');
-      await new Promise(r => setTimeout(r, 100));
+      // Lazy load sections as they scroll into view
+      const observer = new IntersectionObserver(async (entries, obs) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const section = entry.target;
+            obs.unobserve(section);
+            const id = section.id;
+            
+            if (id === 'trending') await loadTrending();
+            else if (id === 'movies') await loadMovies('now_playing');
+            else if (id === 'tvshows') await loadTV('on_the_air');
+            else if (id === 'toprated') {
+              const topRated = await tmdb('/movie/top_rated?language=en-US&page=1');
+              await loadTopRated();
+              await loadFeatured((topRated.results || []).filter(m => m.backdrop_path));
+              
+              // Build platform overview from all loaded cards
+              setTimeout(() => {
+                const allCards = document.querySelectorAll('.movie-card[data-providers]');
+                buildPlatformGrid(allCards);
+              }, 1500);
+            }
+          }
+        }
+      }, { rootMargin: '300px 0px' });
       
-      const topRated = await tmdb('/movie/top_rated?language=en-US&page=1');
-      await loadTopRated();
-      await new Promise(r => setTimeout(r, 100));
-      await loadFeatured((topRated.results || []).filter(m => m.backdrop_path));
-
-      // Build platform overview from all loaded cards
-      setTimeout(() => {
-        const allCards = document.querySelectorAll('.movie-card[data-providers]');
-        buildPlatformGrid(allCards);
-      }, 1500);
+      const sectionsToObserve = ['trending', 'movies', 'tvshows', 'toprated'];
+      sectionsToObserve.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) observer.observe(el);
+      });
 
       gsap.fromTo('#mainNav', { y: -60, opacity: 0 }, { y: 0, opacity: 1, duration: .7, delay: .2, ease: 'power3.out' });
 
