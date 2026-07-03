@@ -3895,9 +3895,9 @@
       try {
         if (heroPlayBtn) {
           heroPlayBtn.style.display = 'inline-flex';
-          const s1Url = type === 'tv' ? `https://player.videasy.net/tv/${m.id}/1/1` : `https://player.videasy.net/movie/${m.id}`;
+          const s1Url = type === 'tv' ? `https://vidfast.pro/tv/${m.id}/1/1` : `https://vidfast.pro/movie/${m.id}`;
           const s2Url = type === 'tv' ? `https://vidsrc.me/embed/tv?tmdb=${m.id}&season=1&episode=1` : `https://vidsrc.me/embed/movie?tmdb=${m.id}`;
-          const s3Url = type === 'tv' ? `https://vidfast.pro/tv/${m.id}/1/1` : `https://vidfast.pro/movie/${m.id}`;
+          const s3Url = type === 'tv' ? `https://player.videasy.net/tv/${m.id}/1/1` : `https://player.videasy.net/movie/${m.id}`;
           const s4Url = type === 'tv' ? `https://vidsrc.xyz/embed/tv?tmdb=${m.id}&season=1&episode=1` : `https://vidsrc.xyz/embed/movie?tmdb=${m.id}`;
           const s5Url = type === 'tv' ? `https://vidcore.net/tv/${m.id}/1/1` : `https://vidcore.net/movie/${m.id}`;
           const allUrls = [s1Url, s2Url, s3Url, s4Url, s5Url];
@@ -4064,12 +4064,12 @@
 
     function buildEpisodeUrl(server, id, season, episode) {
       switch (server) {
-        case 1: return `https://player.videasy.net/tv/${id}/${season}/${episode}?autoplay=1`;
+        case 1: return `https://vidfast.pro/tv/${id}/${season}/${episode}?autoplay=1`;
         case 2: return `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}&autoplay=1`;
-        case 3: return `https://vidfast.pro/tv/${id}/${season}/${episode}?autoplay=1`;
+        case 3: return `https://player.videasy.net/tv/${id}/${season}/${episode}?autoplay=1`;
         case 4: return `https://embedmaster.link/tv/${id}/${season}/${episode}?autoplay=1`;
         case 5: return `https://vidcore.net/tv/${id}/${season}/${episode}?autoplay=1`;
-        default: return `https://player.videasy.net/tv/${id}/${season}/${episode}?autoplay=1`;
+        default: return `https://vidfast.pro/tv/${id}/${season}/${episode}?autoplay=1`;
       }
     }
 
@@ -4084,9 +4084,9 @@
         ];
       }
       return [
-        `https://player.videasy.net/movie/${id}?autoplay=1`,
-        `https://vidsrc.me/embed/movie?tmdb=${id}&autoplay=1`,
         `https://vidfast.pro/movie/${id}?autoplay=1`,
+        `https://vidsrc.me/embed/movie?tmdb=${id}&autoplay=1`,
+        `https://player.videasy.net/movie/${id}?autoplay=1`,
         `https://embedmaster.link/movie/${id}?autoplay=1`,
         `https://vidcore.net/movie/${id}?autoplay=1`,
       ];
