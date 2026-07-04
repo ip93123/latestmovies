@@ -3,7 +3,8 @@
 
 User-agent: *
 Disallow: /
-
+Disallow: /tv
+Disallow: /tv.html
 # ── Search Engines ──────────────────────────────────
 User-agent: Googlebot
 Disallow: /

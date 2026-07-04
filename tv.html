@@ -2951,8 +2951,7 @@
     }
   </style>
 </head>
-
-<body>
+<body class="tv-mode">
 
   <!-- FINGERPRINT VERIFICATION OVERLAY -->
   <style>
@@ -3073,6 +3072,13 @@
     #fpCheckboxRow:hover {
       border-color: #10b981;
       box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    #fpCheckboxRow:focus {
+      outline: 3px solid var(--gold);
+      outline-offset: 3px;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(232, 201, 122, 0.3);
     }
 
     #fpCheckboxBox {
@@ -3275,8 +3281,8 @@
       <h2 id="fpTitle">Verify you are human</h2>
       <p id="fpSubtitle">This site is protected. Click the checkbox below to confirm you are not a bot.</p>
 
-      <!-- Cloudflare-style checkbox -->
-      <div id="fpCheckboxRow" onclick="fpStartVerify()">
+      <!-- Cloudflare-style checkbox with tabindex="0" for TV remote! -->
+      <div id="fpCheckboxRow" tabindex="0" onclick="fpStartVerify()">
         <div id="fpCheckboxBox">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"
             stroke-linecap="round" stroke-linejoin="round">
@@ -3331,6 +3337,12 @@
         return;
       }
 
+      // Auto-focus the checkbox for TV remote immediately
+      setTimeout(() => {
+        const checkbox = document.getElementById('fpCheckboxRow');
+        if (checkbox) checkbox.focus();
+      }, 500);
+
       let started = false;
 
       window.fpStartVerify = function () {
@@ -3381,6 +3393,7 @@
       };
     })();
   </script>
+
 
 
   <div id="searchOverlay">
