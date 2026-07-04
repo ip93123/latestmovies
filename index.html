@@ -5,6 +5,10 @@
   <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Block all search engines from indexing this page -->
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="bingbot" content="noindex, nofollow">
   <title>Hacky Max</title>
   <link rel="icon" type="image/png" sizes="192x192" href="logo.png">
   <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
@@ -3943,23 +3947,23 @@
       try {
         if (heroPlayBtn) {
           heroPlayBtn.style.display = 'inline-flex';
-          const s1Url = type === 'tv' ? `https://peachify.top/embed/tv/${m.id}/1/1?autoNext=5` : `https://peachify.top/embed/movie/${m.id}`;
-          const s2Url = type === 'tv' ? `https://vidsrc.me/embed/tv?tmdb=${m.id}&season=1&episode=1` : `https://vidsrc.me/embed/movie?tmdb=${m.id}`;
-          const s3Url = type === 'tv' ? `https://player.videasy.net/tv/${m.id}/1/1` : `https://player.videasy.net/movie/${m.id}`;
-          const s4Url = type === 'tv' ? `https://vidsrc.win/embed/tv?tmdb=${m.id}&season=1&episode=1` : `https://vidsrc.win/embed/movie?tmdb=${m.id}`;
-          const s5Url = type === 'tv' ? `https://vidcore.net/tv/${m.id}/1/1?autoplay=1&server=orbit` : `https://vidcore.net/movie/${m.id}?autoplay=1&server=orbit`;
-          const imdbId6 = await getImdbId(m.id, type);
-          const s6Url = imdbId6 ? (type === 'tv' ? `https://primesrc.me/embed/tv?imdb=${imdbId6}&season=1&episode=1` : `https://primesrc.me/embed/movie?imdb=${imdbId6}`) : null;
-          const s7Url = type === 'tv' ? `https://vixsrc.to/tv/${m.id}/1/1` : `https://vixsrc.to/movie/${m.id}`;
-          const s8Url = type === 'tv' ? `https://cinesrc.st/embed/tv/${m.id}?s=1&e=1` : `https://cinesrc.st/embed/movie/${m.id}`;
-          const s9Url = type === 'tv' ? `https://anyembed.xyz/embed/tmdb-tv-${m.id}-1-1?logo=false` : `https://anyembed.xyz/embed/tmdb-movie-${m.id}?logo=false`;
-          const s10Url = type === 'tv' ? `https://vidfast.pro/tv/${m.id}/1/1` : `https://vidfast.pro/movie/${m.id}`;
-          const allUrls = [s1Url, s2Url, s3Url, s4Url, s5Url, ...(s6Url ? [s6Url] : []), s7Url, s8Url, s9Url, s10Url];
-          const allLabels = ['Server 1', 'Server 2', 'Server 3', 'Server 4', 'Server 5', ...(s6Url ? ['Server 6'] : []), 'Server 7', 'Server 8', 'Server 9', 'Server 10'];
-          heroPlayBtn.onclick = () => {
+          heroPlayBtn.onclick = async () => {
             _currentModalItem = m;
             _currentModalType = type;
-            playStream(s1Url, allUrls, allLabels);
+            const prevText = heroPlayBtn.innerHTML;
+            heroPlayBtn.textContent = 'Loading...';
+            try {
+              const res = await fetch(`/api/servers?id=${m.id}&type=${type}`);
+              if (!res.ok) throw new Error('Network error');
+              const data = await res.json();
+              if (data.urls && data.urls.length > 0) {
+                playStream(data.urls[0], data.urls, data.labels);
+              }
+            } catch (e) {
+              alert('Failed to load streaming servers.');
+            } finally {
+              heroPlayBtn.innerHTML = prevText;
+            }
           };
         }
       } catch { }
@@ -4128,53 +4132,15 @@
       } catch { _imdbIdCache[key] = null; return null; }
     }
 
-    function buildEpisodeUrl(server, id, season, episode, imdbId = null) {
-      switch (server) {
-        case 1: return `https://peachify.top/embed/tv/${id}/${season}/${episode}?autoNext=5`;
-        case 2: return `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}&autoplay=1`;
-        case 3: return `https://player.videasy.net/tv/${id}/${season}/${episode}?autoplay=1`;
-        case 4: return `https://embedmaster.link/tv/${id}/${season}/${episode}?autoplay=1`;
-        case 5: return `https://vidcore.net/tv/${id}/${season}/${episode}?autoplay=1&server=orbit`;
-        case 6: return imdbId ? `https://primesrc.me/embed/tv?imdb=${imdbId}&season=${season}&episode=${episode}` : null;
-        case 7: return `https://vixsrc.to/tv/${id}/${season}/${episode}`;
-        case 8: return `https://cinesrc.st/embed/tv/${id}?s=${season}&e=${episode}`;
-        case 9: return `https://anyembed.xyz/embed/tmdb-tv-${id}-${season}-${episode}?logo=false`;
-        case 10: return `https://vidfast.pro/tv/${id}/${season}/${episode}?autoplay=1`;
-        default: return `https://peachify.top/embed/tv/${id}/${season}/${episode}?autoNext=5`;
-      }
-    }
-
     async function getModalServerUrls(id, type, season, episode) {
-      const imdbId = await getImdbId(id, type);
-      if (type === 'tv') {
-        const urls = [
-          buildEpisodeUrl(1, id, season, episode),
-          buildEpisodeUrl(2, id, season, episode),
-          buildEpisodeUrl(3, id, season, episode),
-          buildEpisodeUrl(4, id, season, episode),
-          buildEpisodeUrl(5, id, season, episode),
-        ];
-        const s6 = buildEpisodeUrl(6, id, season, episode, imdbId);
-        if (s6) urls.push(s6);
-        urls.push(buildEpisodeUrl(7, id, season, episode));
-        urls.push(buildEpisodeUrl(8, id, season, episode));
-        urls.push(buildEpisodeUrl(9, id, season, episode));
-        urls.push(buildEpisodeUrl(10, id, season, episode));
-        return urls;
+      try {
+        const res = await fetch(`/api/servers?id=${id}&type=${type}&season=${season || 1}&episode=${episode || 1}`);
+        if (!res.ok) throw new Error('API Error');
+        const data = await res.json();
+        return data; // Returns { urls, labels }
+      } catch (e) {
+        return { urls: [], labels: [] };
       }
-      const urls = [
-        `https://peachify.top/embed/movie/${id}`,
-        `https://vidsrc.me/embed/movie?tmdb=${id}&autoplay=1`,
-        `https://player.videasy.net/movie/${id}?autoplay=1`,
-        `https://embedmaster.link/movie/${id}?autoplay=1`,
-        `https://vidcore.net/movie/${id}?autoplay=1&server=orbit`,
-      ];
-      if (imdbId) urls.push(`https://primesrc.me/embed/movie?imdb=${imdbId}`);
-      urls.push(`https://vixsrc.to/movie/${id}`);
-      urls.push(`https://cinesrc.st/embed/movie/${id}`);
-      urls.push(`https://anyembed.xyz/embed/tmdb-movie-${id}?logo=false`);
-      urls.push(`https://vidfast.pro/movie/${id}?autoplay=1`);
-      return urls;
     }
 
     async function refreshModalPlayButtons() {
@@ -4182,13 +4148,14 @@
       const type = _currentModalType;
       if (!id) return;
       const s = _selectedSeason, e = _selectedEpisode;
-      const allUrls = await getModalServerUrls(id, type, s, e);
-      const allLabels = allUrls.map((_, i) => `▶ Server ${i + 1}`);
-      const colors = ['var(--green)', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899'];
-      const textColors = ['#fff', '#fff', '#fff', '#07090F', '#fff', '#fff'];
+      const data = await getModalServerUrls(id, type, s, e);
+      const allUrls = data.urls || [];
+      const allLabels = data.labels || [];
+      const colors = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#F97316', '#A855F7', '#14B8A6'];
+      const textColors = ['#fff',    '#fff',    '#fff',    '#fff',    '#fff',    '#fff',    '#fff',    '#fff',    '#fff',    '#fff'];
       const btns = document.querySelectorAll('.modal-play-btn');
       btns.forEach((btn, i) => {
-        btn.onclick = () => playStream(allUrls[i], allUrls, allLabels);
+        if (allUrls[i]) btn.onclick = () => playStream(allUrls[i], allUrls, allLabels);
       });
     }
 
@@ -4417,10 +4384,11 @@
           }
           wlBtn.onclick = () => toggleWishlist(id, type, details, wlBtn);
 
-          const allUrls = await getModalServerUrls(id, type, 1, 1);
-          const allLabels = allUrls.map((_, i) => `▶ Server ${i + 1}`);
-          const colors = ['var(--green)', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899'];
-          const textColors = ['#fff', '#fff', '#fff', '#07090F', '#fff', '#fff'];
+          const data = await getModalServerUrls(id, type, 1, 1);
+          const allUrls = data.urls || [];
+          const allLabels = data.labels || [];
+          const colors = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#F97316', '#A855F7', '#14B8A6'];
+          const textColors = ['#fff',    '#fff',    '#fff',    '#fff',    '#fff',    '#fff',    '#fff',    '#fff',    '#fff',    '#fff'];
 
           let playBtnsHtml = '';
           const maxVisible = 5;
@@ -4448,8 +4416,10 @@
           ms.querySelectorAll('.modal-play-btn').forEach((btn) => {
             const serverIdx = parseInt(btn.dataset.server);
             btn.onclick = async () => {
-              const urls = await getModalServerUrls(_currentModalId, _currentModalType, _selectedSeason, _selectedEpisode);
-              playStream(urls[serverIdx], urls, allLabels);
+              const resData = await getModalServerUrls(_currentModalId, _currentModalType, _selectedSeason, _selectedEpisode);
+              const curUrls = resData.urls || [];
+              const curLabels = resData.labels || [];
+              playStream(curUrls[serverIdx], curUrls, curLabels);
             };
           });
 
@@ -5604,6 +5574,28 @@
       };
       toggleWishlist(item.id, item.type, item, btn);
     }
+  </script>
+  <script>
+    // Anti-Inspect / Anti-DevTools Script
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    
+    document.addEventListener('keydown', e => {
+      // F12
+      if (e.key === 'F12') {
+        e.preventDefault();
+        return false;
+      }
+      // Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C
+      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
+        e.preventDefault();
+        return false;
+      }
+      // Ctrl+U (View Source)
+      if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) {
+        e.preventDefault();
+        return false;
+      }
+    });
   </script>
 </body>
 
