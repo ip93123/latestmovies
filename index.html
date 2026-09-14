@@ -2095,6 +2095,59 @@
       transition: opacity 0.3s;
     }
 
+    /* ── Skip Intro Button ──────────────────────────────────────────────── */
+    #skipIntroBtn {
+      display: none;
+      position: absolute;
+      bottom: 72px;
+      right: 24px;
+      z-index: 720;
+      padding: 10px 22px;
+      background: rgba(20,20,20,0.85);
+      border: 2px solid var(--gold);
+      border-radius: 50px;
+      color: var(--gold);
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 20px rgba(255,200,60,0.25);
+      transition: all 0.25s ease;
+      animation: skipIntroSlide 0.4s ease;
+    }
+    @keyframes skipIntroSlide {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    #skipIntroBtn:hover {
+      background: var(--gold);
+      color: #000;
+      box-shadow: 0 0 32px rgba(255,200,60,0.5);
+      transform: scale(1.04);
+    }
+    #skipIntroBtn.pulsing {
+      animation: skipIntroSlide 0.4s ease, skipIntroPulse 2s ease-in-out infinite;
+    }
+    @keyframes skipIntroPulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(255,200,60,0.25); }
+      50%       { box-shadow: 0 0 40px rgba(255,200,60,0.6); }
+    }
+    #skipInfoBadge {
+      display: none;
+      position: absolute;
+      bottom: 72px;
+      left: 24px;
+      z-index: 720;
+      padding: 6px 14px;
+      background: rgba(0,0,0,0.7);
+      border-radius: 20px;
+      color: rgba(255,255,255,0.5);
+      font-size: 0.78rem;
+      backdrop-filter: blur(8px);
+      pointer-events: none;
+    }
+
     /* ── Sinhala Subtitle Overlay ────────────────────────────────────── */
     #subOverlay {
       position: absolute;
@@ -3770,9 +3823,10 @@
         </svg></button>
       <button class="player-fullscreen" id="playerFullscreenBtn" title="Full Screen"
         style="position: absolute; top: 1.7rem; right: 7rem; font-size: 1.4rem; cursor: pointer; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 36px; height: 36px; color: var(--text); z-index: 710; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); transition: all 0.2s;">⛶</button>
-      <!-- Sinhala Subtitle Toggle Button -->
-      <button id="subToggleBtn" title="Sinhala Subtitles from Baiscope" style="display:none">
-        <span class="sub-flag">🇱🇰</span> SI SUB
+      <!-- Subtitle File Loader (always visible) -->
+      <input type="file" id="subFileInput" accept=".srt,.vtt,.ass,.ssa" style="display:none">
+      <button id="subToggleBtn" title="Load subtitle file (.srt / .vtt from Baiscope or any source)">
+        <span class="sub-flag">📁</span> LOAD SUB
       </button>
       <button class="player-close" id="playerClose">&#10005;</button>
       <div id="playerLoading"
@@ -3781,12 +3835,15 @@
           style="width:40px;height:40px;border:4px solid rgba(255,255,255,0.1);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;">
         </div>
       </div>
+      <!-- Skip Intro / Skip Credits Button -->
+      <button id="skipIntroBtn">⏭ Skip Intro</button>
+      <div id="skipInfoBadge">Intro: <span id="skipInfoText"></span></div>
 
       <!-- Subtitle Overlay (rendered on top of iframe) -->
       <div id="subOverlay"><span id="subText"></span></div>
       <!-- Sync Panel -->
       <div id="subSyncPanel">
-        <p>Press <strong>▶ Start Subtitles</strong> exactly when the video begins playing</p>
+        <p id="subPanelMsg">Download .srt from <strong><a id="baiscopeLink" href="https://www.baiscope.lk" target="_blank" style="color:var(--gold)">Baiscope</a></strong>, then click <strong>📁 LOAD SUB</strong> again</p>
         <div class="sub-sync-btns">
           <button class="sub-sync-btn primary" id="subStartBtn">▶ Start Subtitles</button>
           <button class="sub-sync-btn" id="subResetBtn">↺ Reset</button>
@@ -3794,7 +3851,7 @@
         <div class="sub-sync-btns">
           <button class="sub-sync-btn" onclick="subShift(-2000)">−2s</button>
           <button class="sub-sync-btn" onclick="subShift(-500)">−0.5s</button>
-          <span id="subStatusLine">Not started</span>
+          <span id="subStatusLine">No file loaded</span>
           <button class="sub-sync-btn" onclick="subShift(500)">+0.5s</button>
           <button class="sub-sync-btn" onclick="subShift(2000)">+2s</button>
         </div>
@@ -5509,6 +5566,111 @@
 
 
 
+    // ─── SKIP INTRO ENGINE (theintrodb.org + skipdb.tv) ─────────────────────
+    (function() {
+      const _skipBtn      = document.getElementById('skipIntroBtn');
+      const _skipBadge    = document.getElementById('skipInfoBadge');
+      const _skipInfoText = document.getElementById('skipInfoText');
+
+      let _introStart  = null;   // seconds
+      let _introEnd    = null;   // seconds
+      let _outroStart  = null;   // seconds
+      let _skipStartMs = null;   // Date.now() when user pressed play/start
+      let _skipRaf     = null;
+      let _skipState   = 'idle'; // idle | intro | credits | done
+
+      function _fmtTime(s) {
+        const m = Math.floor(s / 60), sec = Math.floor(s % 60);
+        return `${m}:${String(sec).padStart(2,'0')}`;
+      }
+
+      function _resetSkip() {
+        cancelAnimationFrame(_skipRaf); _skipRaf = null;
+        _skipBtn.style.display = 'none';
+        _skipBadge.style.display = 'none';
+        _skipBtn.classList.remove('pulsing');
+        _introStart = _introEnd = _outroStart = _skipStartMs = null;
+        _skipState = 'idle';
+      }
+
+      // RAF loop — shows/hides button based on elapsed play time
+      function _skipLoop() {
+        if (!_skipStartMs) return;
+        const elapsed = (Date.now() - _skipStartMs) / 1000;
+
+        if (_introStart !== null && _introEnd !== null) {
+          const inIntro = elapsed >= _introStart && elapsed < _introEnd;
+          if (inIntro && _skipState !== 'intro') {
+            _skipState = 'intro';
+            _skipBtn.textContent = '⏭ Skip Intro';
+            _skipBtn.style.display = 'block';
+            _skipBtn.classList.add('pulsing');
+          } else if (!inIntro && elapsed >= _introEnd && _skipState === 'intro') {
+            _skipState = 'post-intro';
+            _skipBtn.style.display = 'none';
+            _skipBtn.classList.remove('pulsing');
+          }
+        }
+
+        if (_outroStart !== null) {
+          const inOutro = elapsed >= _outroStart;
+          if (inOutro && _skipState !== 'credits') {
+            _skipState = 'credits';
+            _skipBtn.textContent = '⏭ Skip Credits';
+            _skipBtn.style.display = 'block';
+            _skipBtn.classList.add('pulsing');
+          }
+        }
+
+        _skipRaf = requestAnimationFrame(_skipLoop);
+      }
+
+      // Load intro data from /api/skipintro
+      async function loadSkipIntro(tmdbId, season, episode) {
+        _resetSkip();
+        if (!tmdbId || !season) return;
+        try {
+          const res = await fetch(`/api/skipintro?id=${tmdbId}&season=${season}&episode=${episode}`);
+          if (!res.ok) return;
+          const data = await res.json();
+          if (!data.introEnd) return;
+          _introStart = data.introStart ?? 0;
+          _introEnd   = data.introEnd;
+          _outroStart = data.outroStart ?? null;
+          // Show info badge
+          _skipInfoText.textContent = `${_fmtTime(_introStart)} – ${_fmtTime(_introEnd)}`;
+          _skipBadge.style.display = 'block';
+          console.log(`[SkipIntro] Intro: ${_fmtTime(_introStart)} → ${_fmtTime(_introEnd)} (source: ${data.source})`);
+        } catch(e) {
+          console.warn('[SkipIntro] Failed:', e);
+        }
+      }
+
+      // Skip button click — reload iframe at introEnd seconds
+      _skipBtn.addEventListener('click', () => {
+        const frame = document.getElementById('playerFrame');
+        if (!frame) return;
+        const currentSrc = frame.src;
+        const skipTo = _skipState === 'credits' ? (_outroStart + 2) : _introEnd;
+        if (!skipTo) return;
+        // Append ?t=N or &t=N depending on existing query string
+        const sep = currentSrc.includes('?') ? '&' : '?';
+        frame.src = currentSrc + `${sep}t=${Math.round(skipTo)}`;
+        // After the skip, reset the elapsed timer to skipTo
+        _skipStartMs = Date.now() - skipTo * 1000;
+        _skipBtn.style.display = 'none';
+        _skipBtn.classList.remove('pulsing');
+      });
+
+      // Expose so playStream can trigger it
+      window._loadSkipIntro   = loadSkipIntro;
+      window._startSkipTimer  = () => { _skipStartMs = Date.now(); _skipLoop(); };
+      window._resetSkipIntro  = _resetSkip;
+
+      // Clean up on player close
+      document.getElementById('playerClose').addEventListener('click', _resetSkip, { capture: true });
+    })();
+
     // ─── SINHALA SUBTITLE ENGINE (Baiscope.lk) ────────────────────────────────
     // Loads /api/subtitles → parses WebVTT → overlays cues on top of the iframe
 
@@ -5599,8 +5761,17 @@
     async function loadSubtitles(title, season, episode, year) {
       _subLoaded = false;
       _subCues = [];
-      _subToggleBtn.style.display = 'none';
       _stopSubLoop();
+
+      // Show button immediately with loading state
+      _subToggleBtn.style.display = 'flex';
+      _subToggleBtn.style.opacity = '0.5';
+      _subToggleBtn.style.cursor = 'wait';
+      _subToggleBtn.title = 'Loading Sinhala subtitles...';
+      _subToggleBtn.querySelector('.sub-flag').textContent = '⏳';
+      _subToggleBtn.classList.remove('active');
+      _subSyncPanel.classList.remove('visible');
+      _subActive = false;
 
       const params = new URLSearchParams({ title });
       if (season)  params.set('season', season);
@@ -5609,17 +5780,33 @@
 
       try {
         const res = await fetch(`/api/subtitles?${params}`);
-        if (!res.ok) return; // silently — not all titles will have subtitles
+        if (!res.ok) {
+          // Not found — show greyed out button so user knows we checked
+          _subToggleBtn.querySelector('.sub-flag').textContent = '🇱🇰';
+          _subToggleBtn.style.opacity = '0.3';
+          _subToggleBtn.style.cursor = 'default';
+          _subToggleBtn.title = 'No Sinhala subtitles found on Baiscope for this title';
+          return;
+        }
         const vtt = await res.text();
         _subCues = parseVtt(vtt);
-        if (!_subCues.length) return;
+        if (!_subCues.length) {
+          _subToggleBtn.querySelector('.sub-flag').textContent = '🇱🇰';
+          _subToggleBtn.style.opacity = '0.3';
+          _subToggleBtn.style.cursor = 'default';
+          _subToggleBtn.title = 'No Sinhala subtitles found on Baiscope for this title';
+          return;
+        }
+        // Subtitles ready!
         _subLoaded = true;
-        _subToggleBtn.style.display = 'flex';
-        _subToggleBtn.classList.remove('active');
-        _subSyncPanel.classList.remove('visible');
-        _subActive = false;
+        _subToggleBtn.querySelector('.sub-flag').textContent = '🇱🇰';
+        _subToggleBtn.style.opacity = '1';
+        _subToggleBtn.style.cursor = 'pointer';
+        _subToggleBtn.title = 'Click to enable Sinhala subtitles';
         console.log(`[Subtitles] Loaded ${_subCues.length} cues for "${title}"`);
       } catch (e) {
+        // Network error — hide the button entirely
+        _subToggleBtn.style.display = 'none';
         console.warn('[Subtitles] Failed to load:', e);
       }
     }
@@ -5665,6 +5852,9 @@
       _subCues = [];
       _subOffset = 0;
       _subToggleBtn.style.display = 'none';
+      _subToggleBtn.style.opacity = '1';
+      _subToggleBtn.style.cursor = 'pointer';
+      _subToggleBtn.querySelector('.sub-flag').textContent = '🇱🇰';
       _subToggleBtn.classList.remove('active');
       _subSyncPanel.classList.remove('visible');
       _subStartBtn.textContent = '▶ Start Subtitles';
@@ -5718,6 +5908,14 @@
         const subSeason  = _currentModalType === 'tv' ? (_selectedSeason  || 1) : null;
         const subEpisode = _currentModalType === 'tv' ? (_selectedEpisode || 1) : null;
         loadSubtitles(subTitle, subSeason, subEpisode, subYear);
+      }
+
+      // ── Skip Intro — TV only, load + start wall-clock timer ──────────────
+      if (_currentModalType === 'tv' && _currentModalId && typeof window._loadSkipIntro === 'function') {
+        window._loadSkipIntro(_currentModalId, _selectedSeason || 1, _selectedEpisode || 1);
+        window._startSkipTimer && window._startSkipTimer();
+      } else if (typeof window._resetSkipIntro === 'function') {
+        window._resetSkipIntro(); // hide on movies
       }
       // Push history recovery state — if an ad redirects the page, pressing Back
       // will trigger popstate and auto-reopen this video.
