@@ -1877,32 +1877,32 @@
       box-shadow: 0 0 14px rgba(232, 201, 122, 0.4);
     }
 
-    /* ── Cast Cards ──────────────────────────────────────────────────────── */
+    /* ── Cast Cards (6 per row, wraps downwards) ────────────────────────── */
     .modal-cast {
-      display: flex;
-      gap: 12px;
-      overflow-x: auto;
-      padding-bottom: 8px;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 14px 10px;
       margin-bottom: 1rem;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(255,255,255,0.15) transparent;
     }
-    .modal-cast::-webkit-scrollbar { height: 4px; }
-    .modal-cast::-webkit-scrollbar-track { background: transparent; }
-    .modal-cast::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+    @media (max-width: 768px) {
+      .modal-cast {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px 8px;
+      }
+    }
     .cast-card {
-      flex: 0 0 90px;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 6px;
       cursor: default;
       transition: transform 0.2s;
+      min-width: 0;
     }
     .cast-card:hover { transform: translateY(-3px); }
     .cast-avatar {
-      width: 72px;
-      height: 72px;
+      width: 68px;
+      height: 68px;
       border-radius: 50%;
       object-fit: cover;
       background: rgba(255,255,255,0.07);
@@ -1911,12 +1911,13 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       color: rgba(255,255,255,0.3);
+      flex-shrink: 0;
     }
     .cast-avatar img {
-      width: 72px;
-      height: 72px;
+      width: 68px;
+      height: 68px;
       border-radius: 50%;
       object-fit: cover;
       display: block;
@@ -1931,7 +1932,7 @@
       color: var(--text);
       text-align: center;
       line-height: 1.3;
-      max-width: 80px;
+      width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -1940,7 +1941,7 @@
       font-size: 0.65rem;
       color: var(--muted);
       text-align: center;
-      max-width: 80px;
+      width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -5506,8 +5507,8 @@
           document.getElementById('modalRent').innerHTML = buildRentPills(rentBuy);
         }
 
-        // Cast — photo cards
-        const castList = (credits && credits.cast ? credits.cast : []).slice(0, 10);
+        // Cast — photo cards (6 per row)
+        const castList = (credits && credits.cast ? credits.cast : []).slice(0, 18);
         const castEl = document.getElementById('modalCast');
         if (castList.length) {
           castEl.innerHTML = castList.map(c => {
