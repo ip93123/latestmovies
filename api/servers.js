@@ -33,9 +33,9 @@ export default async function handler(req, res) {
     const e = episode || 1;
     
     urls = [
-      `https://player.videasy.net/tv/${id}/${s}/${e}?autoplay=1`,
-      `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}&autoplay=1`,
       `https://peachify.top/embed/tv/${id}/${s}/${e}?autoNext=5`,
+      `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}&autoplay=1`,
+      `https://player.videasy.net/tv/${id}/${s}/${e}?autoplay=1`,
       `https://embedmaster.link/tv/${id}/${s}/${e}?autoplay=1`,
       `https://vidcore.net/tv/${id}/${s}/${e}?autoplay=1&server=orbit`,
     ];
@@ -57,9 +57,9 @@ export default async function handler(req, res) {
   } else {
     // Movie
     urls = [
-      `https://player.videasy.net/movie/${id}?autoplay=1`,
-      `https://vidsrc.me/embed/movie?tmdb=${id}&autoplay=1`,
       `https://peachify.top/embed/movie/${id}`,
+      `https://vidsrc.me/embed/movie?tmdb=${id}&autoplay=1`,
+      `https://player.videasy.net/movie/${id}?autoplay=1`,
       `https://embedmaster.link/movie/${id}?autoplay=1`,
       `https://vidcore.net/movie/${id}?autoplay=1&server=orbit`,
     ];
