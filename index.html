@@ -5761,33 +5761,33 @@
       if (type === 'tv') {
         urls = [
           `https://vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true`,
-          `https://peachify.top/embed/tv/${id}/${s}/${e}?autoNext=5`,
           `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}&autoplay=1`,
+          `https://peachify.top/embed/tv/${id}/${s}/${e}?autoNext=5`,
           `https://player.videasy.net/tv/${id}/${s}/${e}?autoplay=1`,
           `https://embedmaster.link/tv/${id}/${s}/${e}?autoplay=1`,
         ];
-        labels = ['Vidy ✨', 'Server 1', 'Server 2', 'Server 3', 'Server 4'];
-        urls.push(`https://vidcore.net/tv/${id}/${s}/${e}?autoplay=1&server=orbit`); labels.push('Server 5');
-        if (imdbId) { urls.push(`https://primesrc.me/embed/tv?imdb=${imdbId}&season=${s}&episode=${e}`); labels.push('Server 6'); }
-        urls.push(`https://vixsrc.to/tv/${id}/${s}/${e}`); labels.push('Server 7');
-        urls.push(`https://cinesrc.st/embed/tv/${id}?s=${s}&e=${e}`); labels.push('Server 8');
-        urls.push(`https://anyembed.xyz/embed/tmdb-tv-${id}-${s}-${e}?logo=false`); labels.push('Server 9');
-        urls.push(`https://vidfast.pro/tv/${id}/${s}/${e}?autoplay=1`); labels.push('Server 10');
+        labels = ['Infinity', 'Aether', 'Nexus', 'Phantom', 'Spectra'];
+        urls.push(`https://vidcore.net/tv/${id}/${s}/${e}?autoplay=1&server=orbit`); labels.push('Orbit');
+        if (imdbId) { urls.push(`https://primesrc.me/embed/tv?imdb=${imdbId}&season=${s}&episode=${e}`); labels.push('Pulse'); }
+        urls.push(`https://vixsrc.to/tv/${id}/${s}/${e}`); labels.push('Hyperion');
+        urls.push(`https://cinesrc.st/embed/tv/${id}?s=${s}&e=${e}`); labels.push('Flux');
+        urls.push(`https://anyembed.xyz/embed/tmdb-tv-${id}-${s}-${e}?logo=false`); labels.push('Stellar');
+        urls.push(`https://vidfast.pro/tv/${id}/${s}/${e}?autoplay=1`); labels.push('OmniPlay');
       } else {
         urls = [
           `https://vidy.st/movie/${id}?color=E8C97A&autoplay=true`,
-          `https://peachify.top/embed/movie/${id}`,
           `https://vidsrc.me/embed/movie?tmdb=${id}&autoplay=1`,
+          `https://peachify.top/embed/movie/${id}`,
           `https://player.videasy.net/movie/${id}?autoplay=1`,
           `https://embedmaster.link/movie/${id}?autoplay=1`,
         ];
-        labels = ['Vidy ✨', 'Server 1', 'Server 2', 'Server 3', 'Server 4'];
-        urls.push(`https://vidcore.net/movie/${id}?autoplay=1&server=orbit`); labels.push('Server 5');
-        if (imdbId) { urls.push(`https://primesrc.me/embed/movie?imdb=${imdbId}`); labels.push('Server 6'); }
-        urls.push(`https://vixsrc.to/movie/${id}`); labels.push('Server 7');
-        urls.push(`https://cinesrc.st/embed/movie/${id}`); labels.push('Server 8');
-        urls.push(`https://anyembed.xyz/embed/tmdb-movie-${id}?logo=false`); labels.push('Server 9');
-        urls.push(`https://vidfast.pro/movie/${id}?autoplay=1`); labels.push('Server 10');
+        labels = ['Infinity', 'Aether', 'Nexus', 'Phantom', 'Spectra'];
+        urls.push(`https://vidcore.net/movie/${id}?autoplay=1&server=orbit`); labels.push('Orbit');
+        if (imdbId) { urls.push(`https://primesrc.me/embed/movie?imdb=${imdbId}`); labels.push('Pulse'); }
+        urls.push(`https://vixsrc.to/movie/${id}`); labels.push('Hyperion');
+        urls.push(`https://cinesrc.st/embed/movie/${id}`); labels.push('Flux');
+        urls.push(`https://anyembed.xyz/embed/tmdb-movie-${id}?logo=false`); labels.push('Stellar');
+        urls.push(`https://vidfast.pro/movie/${id}?autoplay=1`); labels.push('OmniPlay');
       }
       return { urls, labels };
     }
@@ -6067,22 +6067,22 @@
           const hiddenUrls = allUrls.slice(maxVisible);
 
           playBtnsHtml += visibleUrls.map((u, i) => {
-            const isVidy = allLabels[i] && allLabels[i].includes('Vidy');
-            const style = isVidy
+            const isInfinity = allLabels[i] && allLabels[i] === 'Infinity';
+            const style = isInfinity
               ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 2px 12px rgba(232,201,122,.4);letter-spacing:.3px`
               : `background:${colors[i] || '#6B7280'};color:${textColors[i] || '#fff'};border:none;cursor:pointer`;
-            return `<button class="modal-stream-pill modal-play-btn${isVidy ? ' vidy-server-btn' : ''}" data-server="${i}" style="${style}">${allLabels[i]}</button>`;
+            return `<button class="modal-stream-pill modal-play-btn${isInfinity ? ' vidy-server-btn' : ''}" data-server="${i}" style="${style}">${allLabels[i]}</button>`;
           }).join('');
 
           if (hiddenUrls.length > 0) {
             playBtnsHtml += `<button class="modal-stream-pill" id="showMoreServersBtn" style="background:var(--dark3);color:#fff;border:1px solid rgba(255,255,255,0.2);cursor:pointer">➕ ${hiddenUrls.length} More</button>`;
             playBtnsHtml += hiddenUrls.map((u, i) => {
               const idx = i + maxVisible;
-              const isVidy = allLabels[idx] && allLabels[idx].includes('Vidy');
-              const style = isVidy
+              const isInfinity = allLabels[idx] && allLabels[idx] === 'Infinity';
+              const style = isInfinity
                 ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 2px 12px rgba(232,201,122,.4);display:none`
                 : `background:${colors[idx] || '#6B7280'};color:${textColors[idx] || '#fff'};border:none;cursor:pointer;display:none`;
-              return `<button class="modal-stream-pill modal-play-btn extra-server-btn${isVidy ? ' vidy-server-btn' : ''}" data-server="${idx}" style="${style}">${allLabels[idx]}</button>`;
+              return `<button class="modal-stream-pill modal-play-btn extra-server-btn${isInfinity ? ' vidy-server-btn' : ''}" data-server="${idx}" style="${style}">${allLabels[idx]}</button>`;
             }).join('');
           }
 
@@ -6484,8 +6484,8 @@
       if (allUrls && allUrls.length) {
         bar.innerHTML = allUrls.map((u, i) => {
           const lbl = labels ? labels[i] : `Server ${i + 1}`;
-          const isVidy = lbl.includes('Vidy');
-          const vidyStyle = isVidy ? ' style="background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;font-weight:800;border-color:transparent"' : '';
+          const isInfinity = lbl === 'Infinity';
+          const vidyStyle = isInfinity ? ' style="background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;font-weight:800;border-color:transparent"' : '';
           return `<button class="player-server-btn${u === url ? ' active' : ''}"${vidyStyle} onclick="_activeServerIndex=${i}; switchServer('${u}', this)">${lbl}</button>`;
         }).join('');
         // Track which server is currently active

@@ -34,46 +34,46 @@ export default async function handler(req, res) {
     
     urls = [
       `https://vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true`,
-      `https://peachify.top/embed/tv/${id}/${s}/${e}?autoNext=5`,
       `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}&autoplay=1`,
+      `https://peachify.top/embed/tv/${id}/${s}/${e}?autoNext=5`,
       `https://player.videasy.net/tv/${id}/${s}/${e}?autoplay=1`,
       `https://embedmaster.link/tv/${id}/${s}/${e}?autoplay=1`,
     ];
-    labels = ['Vidy ✨', 'Server 1', 'Server 2', 'Server 3', 'Server 4'];
-    
+    labels = ['Infinity', 'Aether', 'Nexus', 'Phantom', 'Spectra'];
+
     urls.push(`https://vidcore.net/tv/${id}/${s}/${e}?autoplay=1&server=orbit`);
-    labels.push('Server 5');
+    labels.push('Orbit');
 
     if (imdbId) {
       urls.push(`https://primesrc.me/embed/tv?imdb=${imdbId}&season=${s}&episode=${e}`);
-      labels.push('Server 6');
+      labels.push('Pulse');
     }
-    
+
     urls.push(
       `https://vixsrc.to/tv/${id}/${s}/${e}`,
       `https://cinesrc.st/embed/tv/${id}?s=${s}&e=${e}`,
       `https://anyembed.xyz/embed/tmdb-tv-${id}-${s}-${e}?logo=false`,
       `https://vidfast.pro/tv/${id}/${s}/${e}?autoplay=1`
     );
-    labels.push('Server 7', 'Server 8', 'Server 9', 'Server 10');
+    labels.push('Hyperion', 'Flux', 'Stellar', 'OmniPlay');
 
   } else {
     // Movie
     urls = [
       `https://vidy.st/movie/${id}?color=E8C97A&autoplay=true`,
-      `https://peachify.top/embed/movie/${id}`,
       `https://vidsrc.me/embed/movie?tmdb=${id}&autoplay=1`,
+      `https://peachify.top/embed/movie/${id}`,
       `https://player.videasy.net/movie/${id}?autoplay=1`,
       `https://embedmaster.link/movie/${id}?autoplay=1`,
     ];
-    labels = ['Vidy ✨', 'Server 1', 'Server 2', 'Server 3', 'Server 4'];
+    labels = ['Infinity', 'Aether', 'Nexus', 'Phantom', 'Spectra'];
 
     urls.push(`https://vidcore.net/movie/${id}?autoplay=1&server=orbit`);
-    labels.push('Server 5');
+    labels.push('Orbit');
 
     if (imdbId) {
       urls.push(`https://primesrc.me/embed/movie?imdb=${imdbId}`);
-      labels.push('Server 6');
+      labels.push('Pulse');
     }
 
     urls.push(
@@ -82,7 +82,7 @@ export default async function handler(req, res) {
       `https://anyembed.xyz/embed/tmdb-movie-${id}?logo=false`,
       `https://vidfast.pro/movie/${id}?autoplay=1`
     );
-    labels.push('Server 7', 'Server 8', 'Server 9', 'Server 10');
+    labels.push('Hyperion', 'Flux', 'Stellar', 'OmniPlay');
   }
 
   // Short cache so new servers appear quickly
