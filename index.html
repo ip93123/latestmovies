@@ -6400,7 +6400,7 @@
             const style = isVidLove
               ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 2px 12px rgba(232,201,122,.4);letter-spacing:.3px`
               : `background:${colors[i] || '#6B7280'};color:${textColors[i] || '#fff'};border:none;cursor:pointer`;
-            return `<button class="modal-stream-pill modal-play-btn${isVidLove ? ' vidy-server-btn' : ''}" data-server="${i}" style="${style}">${allLabels[i]}</button>`;
+            return `<button class="modal-stream-pill modal-play-btn${isVidLove ? ' vidlove-server-btn' : ''}" data-server="${i}" style="${style}">${allLabels[i]}</button>`;
           }).join('');
 
           if (hiddenUrls.length > 0) {
@@ -6411,7 +6411,7 @@
               const style = isVidLove
                 ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 2px 12px rgba(232,201,122,.4);display:none`
                 : `background:${colors[idx] || '#6B7280'};color:${textColors[idx] || '#fff'};border:none;cursor:pointer;display:none`;
-              return `<button class="modal-stream-pill modal-play-btn extra-server-btn${isVidLove ? ' vidy-server-btn' : ''}" data-server="${idx}" style="${style}">${allLabels[idx]}</button>`;
+              return `<button class="modal-stream-pill modal-play-btn extra-server-btn${isVidLove ? ' vidlove-server-btn' : ''}" data-server="${idx}" style="${style}">${allLabels[idx]}</button>`;
             }).join('');
           }
 
@@ -6814,8 +6814,8 @@
         bar.innerHTML = allUrls.map((u, i) => {
           const lbl = labels ? labels[i] : `Server ${i + 1}`;
           const isVidLove = lbl === 'VidLove' || lbl === 'Infinity';
-          const vidyStyle = isVidLove ? ' style="background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;font-weight:800;border-color:transparent"' : '';
-          return `<button class="player-server-btn${u === url ? ' active' : ''}"${vidyStyle} onclick="_activeServerIndex=${i}; switchServer('${u}', this)">${lbl}</button>`;
+          const vidLoveStyle = isVidLove ? ' style="background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;font-weight:800;border-color:transparent"' : '';
+          return `<button class="player-server-btn${u === url ? ' active' : ''}"${vidLoveStyle} onclick="_activeServerIndex=${i}; switchServer('${u}', this)">${lbl}</button>`;
         }).join('');
         // Track which server is currently active
         _activeServerIndex = allUrls.indexOf(url);
@@ -6851,9 +6851,8 @@
 
       // NOTE: We intentionally do NOT auto-request fullscreen here.
       // Calling requestFullscreen() on the container immediately takes the browser's
-      // fullscreen slot, which prevents cross-origin iframes (e.g. Vidy/vidy.st) from
+      // fullscreen slot, which prevents cross-origin embed iframes from
       // calling their own requestFullscreen() internally — causing a NotAllowedError
-      // that propagates to React's ErrorBoundary ("Something went wrong").
       // The player overlay is already full-viewport via CSS (position:fixed + inset:0),
       // so system fullscreen is not needed at play-start.
       // The explicit fullscreen button still works when the user clicks it manually.

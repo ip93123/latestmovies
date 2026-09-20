@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Vidy Test Player</title>
+  <title>VidLove Test Player</title>
   <style>
     body {
       margin: 0;
@@ -40,17 +40,18 @@
       padding: 8px 16px;
       border-radius: 6px;
       border: none;
-      background: #e50914;
-      color: #fff;
+      background: linear-gradient(135deg, #E8C97A, #c9a227);
+      color: #07090F;
       font-size: 14px;
-      font-weight: 600;
-      transition: background 0.2s;
+      font-weight: 700;
+      transition: opacity 0.2s;
     }
     button:hover {
-      background: #b91c1c;
+      opacity: 0.9;
     }
     .btn-tv {
       background: #2563eb;
+      color: #fff;
     }
     .btn-tv:hover {
       background: #1d4ed8;
@@ -78,19 +79,19 @@
   </style>
 </head>
 <body>
-  <h1>Vidy.st Official Player Test</h1>
+  <h1>VidLove Player Test</h1>
 
   <div class="controls">
     <input id="mediaId" type="text" value="315162" placeholder="TMDB ID" />
     <button onclick="playMovie()">Play Movie (315162)</button>
     <button class="btn-tv" onclick="playTv()">Play TV Show (Breaking Bad: 1396)</button>
-    <button style="background:#4b5563" onclick="testMovyMovie()">Play User Test Movie (1516698)</button>
+    <button style="background:#4b5563;color:#fff" onclick="testCustomMovie('1516698')">Play Movie (1516698)</button>
   </div>
 
   <div class="player-wrapper">
     <iframe
       id="testFrame"
-      src="https://vidy.st/movie/315162?color=E8C97A"
+      src="https://vidlove.cc/embed/movie/315162?primarycolor=E8C97A&secondarycolor=07090F&iconcolor=E8C97A&autoplay=1"
       width="100%"
       height="100%"
       frameborder="0"
@@ -99,7 +100,7 @@
     ></iframe>
   </div>
 
-  <div id="status">Listening for player events...</div>
+  <div id="status">Ready</div>
 
   <script>
     const frame = document.getElementById('testFrame');
@@ -107,22 +108,21 @@
 
     function playMovie() {
       const id = document.getElementById('mediaId').value.trim() || '315162';
-      const url = `https://vidy.st/movie/${id}?color=E8C97A`;
+      const url = `https://vidlove.cc/embed/movie/${id}?primarycolor=E8C97A&secondarycolor=07090F&iconcolor=E8C97A&autoplay=1`;
       statusDiv.textContent = `Loading: ${url}`;
       frame.src = url;
     }
 
     function playTv() {
       const id = document.getElementById('mediaId').value.trim() || '1396';
-      const url = `https://vidy.st/tv/${id}/1/1?color=E8C97A&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true`;
+      const url = `https://vidlove.cc/embed/tv/${id}/1/1?primarycolor=E8C97A&secondarycolor=07090F&iconcolor=E8C97A&autoplay=1&showNextEpisode=1`;
       statusDiv.textContent = `Loading: ${url}`;
       frame.src = url;
     }
 
-    function testMovyMovie() {
-      const id = '1516698';
+    function testCustomMovie(id) {
       document.getElementById('mediaId').value = id;
-      const url = `https://vidy.st/movie/${id}?color=E8C97A`;
+      const url = `https://vidlove.cc/embed/movie/${id}?primarycolor=E8C97A&secondarycolor=07090F&iconcolor=E8C97A&autoplay=1`;
       statusDiv.textContent = `Loading: ${url}`;
       frame.src = url;
     }
