@@ -4281,7 +4281,11 @@
           <button class="sub-sync-btn" onclick="subShift(2000)">+2s</button>
         </div>
       </div>
-      <iframe id="playerFrame" src="about:blank" allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+      <iframe id="playerFrame" src="about:blank"
+        allow="encrypted-media; autoplay *; fullscreen *; picture-in-picture *"
+        allowfullscreen="true"
+        webkitallowfullscreen="true"
+        mozallowfullscreen="true"
         frameborder="0"></iframe>
     </div>
   </div>
@@ -6125,7 +6129,7 @@
 
       if (type === 'tv') {
         urls = [
-          `https://www.vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true`,
+          `https://www.vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true`,
           `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}&autoplay=1`,
           `https://peachify.top/embed/tv/${id}/${s}/${e}?autoNext=5`,
           `https://player.videasy.net/tv/${id}/${s}/${e}?autoplay=1`,
@@ -7021,6 +7025,7 @@
       let _blurTimer = null;
       window.addEventListener('blur', function () {
         if (!isPlayerOpen()) return;
+        if (document.activeElement === document.getElementById('playerFrame')) return;
         _blurTimer = setTimeout(function () { try { window.focus(); } catch (e) { } }, 80);
       });
       window.addEventListener('focus', function () {
