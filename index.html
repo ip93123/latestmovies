@@ -6891,14 +6891,14 @@
 
 
 
-      // Auto fullscreen if possible (helpful for all devices)
-      const pContainer = document.getElementById('playerContainer');
-      if (pContainer) {
-        try {
-          if (pContainer.requestFullscreen) pContainer.requestFullscreen().catch(() => { });
-          else if (pContainer.webkitRequestFullscreen) pContainer.webkitRequestFullscreen();
-        } catch (e) { }
-      }
+      // NOTE: We intentionally do NOT auto-request fullscreen here.
+      // Calling requestFullscreen() on the container immediately takes the browser's
+      // fullscreen slot, which prevents cross-origin iframes (e.g. Vidy/vidy.st) from
+      // calling their own requestFullscreen() internally — causing a NotAllowedError
+      // that propagates to React's ErrorBoundary ("Something went wrong").
+      // The player overlay is already full-viewport via CSS (position:fixed + inset:0),
+      // so system fullscreen is not needed at play-start.
+      // The explicit fullscreen button still works when the user clicks it manually.
 
       gsap.fromTo('.player-container', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'power3.out' });
       // TV remote: auto-focus the UI buttons so the user isn't trapped in the cross-origin iframe!
