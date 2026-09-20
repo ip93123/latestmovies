@@ -2699,6 +2699,50 @@
       font-size: .85rem;
     }
 
+    /* Year selector */
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0 3rem .6rem;
+      flex-wrap: wrap;
+    }
+
+    .year-select {
+      appearance: none;
+      -webkit-appearance: none;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: .78rem;
+      font-family: inherit;
+      font-weight: 600;
+      padding: .3rem .8rem .3rem .65rem;
+      cursor: pointer;
+      outline: none;
+      transition: all .2s;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right .5rem center;
+      padding-right: 1.6rem;
+    }
+
+    .year-select:hover, .year-select:focus {
+      border-color: rgba(var(--accent1), .5);
+      color: var(--text);
+      background-color: rgba(var(--accent1), .06);
+    }
+
+    .filter-label {
+      font-size: .72rem;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
     /* SEARCH */
     #searchOverlay {
       position: fixed;
@@ -4333,6 +4377,12 @@
       <div class="tab" data-type="upcoming">Upcoming</div>
     </div>
     <div class="genre-bar" id="movieGenreBar"></div>
+    <div class="filter-row">
+      <span class="filter-label">Year:</span>
+      <select class="year-select" id="movieYearSelect">
+        <option value="">All Years</option>
+      </select>
+    </div>
     <div class="stream-filter-bar" id="movieFilterBar"></div>
     <div class="scroll-wrapper">
       <button class="scroll-btn scroll-left" onclick="scrollRow('moviesGrid', -1)">❮</button>
@@ -4352,6 +4402,12 @@
       <div class="tab" data-type="top_rated">Top Rated</div>
     </div>
     <div class="genre-bar" id="tvGenreBar"></div>
+    <div class="filter-row">
+      <span class="filter-label">Year:</span>
+      <select class="year-select" id="tvYearSelect">
+        <option value="">All Years</option>
+      </select>
+    </div>
     <div class="stream-filter-bar" id="tvFilterBar"></div>
     <div class="scroll-wrapper">
       <button class="scroll-btn scroll-left" onclick="scrollRow('tvGrid', -1)">❮</button>
@@ -5428,15 +5484,25 @@
       });
     }
 
-    async function loadMoviesByGenre(genreId) {
+    let _activeMovieYear = '';
+    let _activeTvYear    = '';
+
+    async function loadDiscoverMovies() {
       const grid = document.getElementById('moviesGrid');
       const isTV = window.DEVICE && window.DEVICE.isTV;
       const cardLimit = isTV ? 10 : 20;
       grid.innerHTML = Array.from({ length: isTV ? 8 : 15 }, () =>
         `<div class="movie-card"><div class="card-poster sk" style="aspect-ratio:2/3"></div><div class="card-info"><div class="sk" style="height:14px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:60%"></div></div></div>`
       ).join('');
-      if (!genreId) { loadMovies('now_playing'); return; }
-      const data = await tmdb(`/discover/movie?language=en-US&sort_by=popularity.desc&with_genres=${genreId}&page=1`);
+
+      // If no genre AND no year — show default
+      if (!_activeMovieGenre && !_activeMovieYear) { loadMovies('now_playing'); return; }
+
+      let params = 'language=en-US&sort_by=popularity.desc&page=1';
+      if (_activeMovieGenre) params += `&with_genres=${_activeMovieGenre}`;
+      if (_activeMovieYear)  params += `&primary_release_year=${_activeMovieYear}`;
+
+      const data = await tmdb(`/discover/movie?${params}`);
       const movies = (data.results || []).slice(0, cardLimit);
       const watchDatas = await Promise.all(movies.map(m => getWatch(m.id, 'movie')));
       currentMovies = movies;
@@ -5445,21 +5511,31 @@
       addCardListeners(grid, '.movie-card');
     }
 
-    async function loadTVByGenre(genreId) {
+    async function loadDiscoverTV() {
       const grid = document.getElementById('tvGrid');
       const isTV = window.DEVICE && window.DEVICE.isTV;
       const cardLimit = isTV ? 10 : 20;
       grid.innerHTML = Array.from({ length: isTV ? 8 : 15 }, () =>
         `<div class="movie-card"><div class="card-poster sk" style="aspect-ratio:2/3"></div><div class="card-info"><div class="sk" style="height:14px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:60%"></div></div></div>`
       ).join('');
-      if (!genreId) { loadTV('on_the_air'); return; }
-      const data = await tmdb(`/discover/tv?language=en-US&sort_by=popularity.desc&with_genres=${genreId}&page=1`);
+
+      if (!_activeTvGenre && !_activeTvYear) { loadTV('on_the_air'); return; }
+
+      let params = 'language=en-US&sort_by=popularity.desc&page=1';
+      if (_activeTvGenre) params += `&with_genres=${_activeTvGenre}`;
+      if (_activeTvYear)  params += `&first_air_date_year=${_activeTvYear}`;
+
+      const data = await tmdb(`/discover/tv?${params}`);
       const shows = (data.results || []).slice(0, cardLimit);
       const watchDatas = await Promise.all(shows.map(s => getWatch(s.id, 'tv')));
       grid.innerHTML = shows.map((s, i) => buildCard(s, null, 'tv', watchDatas[i])).join('');
       animateGrid(grid);
       addCardListeners(grid, '.movie-card');
     }
+
+    // Keep old names as aliases for genre-only calls
+    function loadMoviesByGenre(gid) { _activeMovieGenre = gid; loadDiscoverMovies(); }
+    function loadTVByGenre(gid)    { _activeTvGenre    = gid; loadDiscoverTV();    }
 
     async function loadMovies(type = 'now_playing') {
       const isTV = window.DEVICE && window.DEVICE.isTV;
@@ -7163,9 +7239,12 @@
         document.querySelectorAll('#movieTabs .tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         gsap.fromTo(tab, { scale: .94 }, { scale: 1, duration: .25, ease: 'back.out(2)' });
-        // Clear genre selection
+        // Clear genre + year selection
         document.querySelectorAll('#movieGenreBar .genre-pill').forEach(p => p.classList.remove('active'));
         _activeMovieGenre = null;
+        _activeMovieYear  = '';
+        const mySel = document.getElementById('movieYearSelect');
+        if (mySel) mySel.value = '';
         loadMovies(tab.dataset.type);
       });
     });
@@ -7174,9 +7253,12 @@
         document.querySelectorAll('#tvTabs .tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         gsap.fromTo(tab, { scale: .94 }, { scale: 1, duration: .25, ease: 'back.out(2)' });
-        // Clear genre selection
+        // Clear genre + year selection
         document.querySelectorAll('#tvGenreBar .genre-pill').forEach(p => p.classList.remove('active'));
         _activeTvGenre = null;
+        _activeTvYear  = '';
+        const tvSel = document.getElementById('tvYearSelect');
+        if (tvSel) tvSel.value = '';
         loadTV(tab.dataset.type);
       });
     });
@@ -7184,12 +7266,36 @@
     // Build genre bars
     buildGenreBar('movieGenreBar', MOVIE_GENRES, (gid) => {
       _activeMovieGenre = gid;
-      loadMoviesByGenre(gid);
+      loadDiscoverMovies();
     });
     buildGenreBar('tvGenreBar', TV_GENRES, (gid) => {
       _activeTvGenre = gid;
-      loadTVByGenre(gid);
+      loadDiscoverTV();
     });
+
+    // Populate year dropdowns (current year → 1970)
+    (function populateYears() {
+      const curYear = new Date().getFullYear();
+      const movieSel = document.getElementById('movieYearSelect');
+      const tvSel    = document.getElementById('tvYearSelect');
+      let opts = '';
+      for (let y = curYear; y >= 1970; y--) {
+        opts += `<option value="${y}">${y}</option>`;
+      }
+      if (movieSel) movieSel.innerHTML = '<option value="">All Years</option>' + opts;
+      if (tvSel)    tvSel.innerHTML    = '<option value="">All Years</option>' + opts;
+    })();
+
+    // Year change → trigger discover
+    document.getElementById('movieYearSelect')?.addEventListener('change', (e) => {
+      _activeMovieYear = e.target.value;
+      loadDiscoverMovies();
+    });
+    document.getElementById('tvYearSelect')?.addEventListener('change', (e) => {
+      _activeTvYear = e.target.value;
+      loadDiscoverTV();
+    });
+
 
     // SEARCH
     const searchOverlay = document.getElementById('searchOverlay');
