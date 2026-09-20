@@ -818,6 +818,28 @@
       flex: 0 0 200px;
     }
 
+    /* ── LATEST MOVIES 2-ROW GRID ─────────────────────────────────────────── */
+    #moviesGrid:not(.expanded) {
+      display: grid;
+      grid-template-rows: repeat(2, auto);
+      grid-auto-flow: column;
+      grid-auto-columns: 200px;
+      gap: 1.5rem 1.25rem;
+      overflow-x: auto;
+      overflow-y: hidden;
+      align-content: start;
+      scrollbar-width: none;
+    }
+
+    #moviesGrid:not(.expanded)::-webkit-scrollbar {
+      display: none;
+    }
+
+    #moviesGrid:not(.expanded) .movie-card {
+      width: 200px;
+      flex: none;
+    }
+
     /* SCROLL BUTTONS */
     .scroll-wrapper {
       position: relative;
@@ -3082,6 +3104,14 @@
         flex: 0 0 150px;
       }
 
+      #moviesGrid:not(.expanded) {
+        grid-auto-columns: 150px;
+        gap: 1rem .85rem;
+      }
+      #moviesGrid:not(.expanded) .movie-card {
+        width: 150px;
+      }
+
       .platform-grid {
         grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
         gap: 1rem
@@ -3266,6 +3296,14 @@
 
       .cards-grid .movie-card {
         flex: 0 0 130px;
+      }
+
+      #moviesGrid:not(.expanded) {
+        grid-auto-columns: 130px;
+        gap: .8rem .7rem;
+      }
+      #moviesGrid:not(.expanded) .movie-card {
+        width: 130px;
       }
 
       .platform-grid {
