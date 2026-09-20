@@ -2390,7 +2390,6 @@
       padding-bottom: 1rem;
       width: min(1000px, 90vw);
       margin-bottom: 2rem;
-      position: relative;  /* anchor for suggestions dropdown */
     }
 
     .search-input-wrap input {
@@ -2401,111 +2400,11 @@
       font-size: 2.5rem;
       letter-spacing: 2px;
       color: var(--text);
-      width: 100%
+      width: 100%;
     }
 
     .search-input-wrap input::placeholder {
-      color: var(--muted)
-    }
-
-    /* ── Search Suggestions Dropdown ─────────────────────────────────── */
-    #searchSuggestions {
-      position: absolute;
-      top: calc(100% + 8px);
-      left: 0;
-      right: 0;
-      background: rgba(13,17,23,0.97);
-      border: 1px solid rgba(232,201,122,0.25);
-      border-radius: 14px;
-      overflow: hidden;
-      z-index: 10;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(232,201,122,0.08);
-      opacity: 0;
-      transform: translateY(-8px);
-      pointer-events: none;
-      transition: opacity .18s ease, transform .18s ease;
-    }
-    #searchSuggestions.visible {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: all;
-    }
-    .suggestion-item {
-      display: flex;
-      align-items: center;
-      gap: 0.9rem;
-      padding: 0.65rem 1rem;
-      cursor: pointer;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      transition: background .12s;
-    }
-    .suggestion-item:last-child { border-bottom: none; }
-    .suggestion-item:hover,
-    .suggestion-item.active {
-      background: rgba(232,201,122,0.08);
-    }
-    .suggestion-item.active .suggestion-title {
-      color: var(--gold);
-    }
-    .suggestion-thumb {
-      width: 36px;
-      height: 54px;
-      border-radius: 6px;
-      object-fit: cover;
-      background: var(--dark3);
-      flex-shrink: 0;
-    }
-    .suggestion-thumb.no-img {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
       color: var(--muted);
-    }
-    .suggestion-info { flex: 1; min-width: 0; }
-    .suggestion-title {
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--text);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      transition: color .12s;
-    }
-    .suggestion-meta {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-top: 0.2rem;
-    }
-    .suggestion-year {
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
-    .suggestion-type {
-      font-size: 0.62rem;
-      font-weight: 700;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
-      padding: 0.1rem 0.4rem;
-      border-radius: 4px;
-      background: rgba(255,255,255,0.07);
-    }
-    .suggestion-type.movie { color: #60A5FA; }
-    .suggestion-type.tv    { color: #A78BFA; }
-    .suggestion-rating {
-      font-size: 0.73rem;
-      color: var(--gold);
-      margin-left: auto;
-      flex-shrink: 0;
-    }
-    .suggestion-kbd {
-      font-size: 0.65rem;
-      color: var(--muted);
-      padding: 0.5rem 1rem;
-      border-top: 1px solid rgba(255,255,255,0.05);
-      text-align: center;
-      letter-spacing: 0.5px;
     }
 
     .search-close {
@@ -2921,7 +2820,7 @@
       }
 
       .search-input-wrap input {
-        font-size: 1.8rem
+        font-size: 1.8rem;
       }
 
       .search-close {
@@ -3848,7 +3747,6 @@
         <line x1="21" y1="21" x2="16.65" y2="16.65" />
       </svg>
       <input type="text" id="searchInput" placeholder="Search movies &amp; shows..." autocomplete="off">
-      <div id="searchSuggestions"></div>
     </div>
     <div class="search-results" id="searchResults"></div>
   </div>
@@ -6754,143 +6652,60 @@
     document.addEventListener('keydown', e => {
       if ([37, 38, 39, 40].includes(e.keyCode) && !_tvMode) enableTvMode();
     }, { once: false });
-    // ─── SEARCH SUGGESTIONS + RESULTS ────────────────────────────────────────
+    // ─── SEARCH RESULTS (CARDS) ──────────────────────────────────────────────
     let searchTimer2;
-    let _suggTimer = null;
     let searchRequestId = 0;
-    let _suggRequestId = 0;
-    let _activeSuggIdx = -1;  // keyboard navigation index
-
-    const _suggEl = document.getElementById('searchSuggestions');
     const _searchInput = document.getElementById('searchInput');
     const _searchResults = document.getElementById('searchResults');
 
-    function _hideSuggestions() {
-      _suggEl.classList.remove('visible');
-      _activeSuggIdx = -1;
-    }
-
-    function _showSuggestions(items) {
-      if (!items.length) { _hideSuggestions(); return; }
-      const IMG_BASE = 'https://image.tmdb.org/t/p/w92';
-      _suggEl.innerHTML = items.map((r, i) => {
-        const title = r.title || r.name || 'Unknown';
-        const year  = (r.release_date || r.first_air_date || '').slice(0, 4);
-        const type  = r.media_type === 'tv' ? 'tv' : 'movie';
-        const rating = r.vote_average ? `⭐ ${r.vote_average.toFixed(1)}` : '';
-        const thumb = r.poster_path
-          ? `<img class="suggestion-thumb" src="${IMG_BASE}${r.poster_path}" alt="${title}" loading="lazy">`
-          : `<div class="suggestion-thumb no-img">🎬</div>`;
-        return `<div class="suggestion-item" data-id="${r.id}" data-type="${type}" data-idx="${i}">
-          ${thumb}
-          <div class="suggestion-info">
-            <div class="suggestion-title">${title}</div>
-            <div class="suggestion-meta">
-              ${year ? `<span class="suggestion-year">${year}</span>` : ''}
-              <span class="suggestion-type ${type}">${type === 'tv' ? 'TV' : 'Movie'}</span>
-            </div>
-          </div>
-          ${rating ? `<span class="suggestion-rating">${rating}</span>` : ''}
-        </div>`;
-      }).join('') + `<div class="suggestion-kbd">↑↓ navigate &nbsp;·&nbsp; Enter to open &nbsp;·&nbsp; Esc to close</div>`;
-
-      // Wire up click handlers
-      _suggEl.querySelectorAll('.suggestion-item').forEach(el => {
-        el.addEventListener('mousedown', e => {
-          e.preventDefault(); // prevent blur before click
-          const id = el.dataset.id;
-          const type = el.dataset.type;
-          _hideSuggestions();
-          closeSearch();
-          openModal(id, type);
-        });
-      });
-      _suggEl.classList.add('visible');
-    }
-
-    function _setActiveSugg(idx) {
-      const items = _suggEl.querySelectorAll('.suggestion-item');
-      items.forEach(el => el.classList.remove('active'));
-      _activeSuggIdx = Math.max(-1, Math.min(idx, items.length - 1));
-      if (_activeSuggIdx >= 0) items[_activeSuggIdx].classList.add('active');
-    }
-
-    // Keyboard navigation inside search input
-    _searchInput.addEventListener('keydown', e => {
-      const items = _suggEl.querySelectorAll('.suggestion-item');
-      if (!_suggEl.classList.contains('visible') || !items.length) return;
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        _setActiveSugg(_activeSuggIdx + 1);
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        _setActiveSugg(_activeSuggIdx - 1);
-      } else if (e.key === 'Enter' && _activeSuggIdx >= 0) {
-        e.preventDefault();
-        const active = items[_activeSuggIdx];
-        if (active) {
-          _hideSuggestions();
-          closeSearch();
-          openModal(active.dataset.id, active.dataset.type);
-        }
-      } else if (e.key === 'Escape') {
-        _hideSuggestions();
-      }
-    });
-
-    // Hide suggestions on blur (click outside)
-    _searchInput.addEventListener('blur', () => setTimeout(_hideSuggestions, 150));
-
     _searchInput.addEventListener('input', e => {
+      clearTimeout(searchTimer2);
       const q = e.target.value.trim();
 
-      // Clear both timers
-      clearTimeout(_suggTimer);
-      clearTimeout(searchTimer2);
-
-      if (q.length < 1) {
-        _hideSuggestions();
+      if (q.length < 2) {
         _searchResults.innerHTML = '';
         return;
       }
 
-      // ── Tier 1: Fast suggestions at 150ms ──
-      _suggTimer = setTimeout(async () => {
-        const reqId = ++_suggRequestId;
-        try {
-          const data = await tmdb(`/search/multi?query=${encodeURIComponent(q)}&language=en-US&page=1`);
-          if (reqId !== _suggRequestId) return;
-          const items = (data.results || [])
-            .filter(r => r.media_type !== 'person' && (r.title || r.name))
-            .slice(0, 6);
-          _showSuggestions(items);
-        } catch { /* silently ignore */ }
-      }, 150);
-
-      if (q.length < 2) return; // full results need at least 2 chars
-
-      // ── Tier 2: Full card results at 400ms ──
       searchTimer2 = setTimeout(async () => {
         const currentReq = ++searchRequestId;
-        const data = await tmdb(`/search/multi?query=${encodeURIComponent(q)}&language=en-US&page=1`);
-        if (currentReq !== searchRequestId) return;
+        try {
+          const data = await tmdb(`/search/multi?query=${encodeURIComponent(q)}&language=en-US&page=1`);
+          if (currentReq !== searchRequestId) return;
 
-        const results = (data.results || []).filter(r => r.media_type !== 'person');
-        const watchDatas = await Promise.all(results.map(r => getWatch(r.id, r.media_type)));
-        if (currentReq !== searchRequestId) return;
+          const results = (data.results || []).filter(r => r.media_type !== 'person');
+          const watchDatas = await Promise.all(results.map(r => getWatch(r.id, r.media_type)));
+          if (currentReq !== searchRequestId) return;
 
-        // Hide suggestions once full results are ready
-        _hideSuggestions();
+          if (results.length === 0) {
+            _searchResults.innerHTML = '<div style="color:var(--muted);text-align:center;grid-column:1/-1;padding:2rem">No results found</div>';
+            return;
+          }
 
-        if (results.length === 0) {
-          _searchResults.innerHTML = '<div style="color:var(--muted);text-align:center;grid-column:1/-1;padding:2rem">No results found</div>';
-          return;
+          _searchResults.innerHTML = results.map((r, i) => buildCard(r, null, r.media_type, watchDatas[i])).join('');
+          gsap.fromTo('#searchResults .movie-card', { opacity: 0, y: 20 }, { opacity: 1, y: 0, stagger: .05, duration: .3, ease: 'power3.out' });
+          addCardListeners(_searchResults, '.movie-card');
+        } catch (err) {
+          console.error('Search error:', err);
         }
+      }, 350);
+    });
 
-        _searchResults.innerHTML = results.map((r, i) => buildCard(r, null, r.media_type, watchDatas[i])).join('');
-        gsap.fromTo('#searchResults .movie-card', { opacity: 0, y: 20 }, { opacity: 1, y: 0, stagger: .05, duration: .3, ease: 'power3.out' });
-        addCardListeners(_searchResults, '.movie-card');
-      }, 400);
+    _searchInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const firstCard = _searchResults.querySelector('.movie-card');
+        if (firstCard) {
+          const id = firstCard.dataset.id;
+          const type = firstCard.dataset.type || 'movie';
+          if (id) {
+            closeSearch();
+            openModal(id, type);
+          }
+        }
+      } else if (e.key === 'Escape') {
+        closeSearch();
+      }
     });
 
     // NAV SCROLL — RAF-throttled so it fires at most once per frame, not every pixel
