@@ -6496,14 +6496,16 @@
       }
       overlay.classList.add('open');
 
-      // ── Auto-load Sinhala subtitles from Baiscope (async — won't delay video) ──
-      if (_currentModalItem) {
-        const subTitle = _currentModalItem.title || _currentModalItem.name || '';
-        const subYear  = (_currentModalItem.release_date || _currentModalItem.first_air_date || '').slice(0,4);
-        const subSeason  = _currentModalType === 'tv' ? (_selectedSeason  || 1) : null;
-        const subEpisode = _currentModalType === 'tv' ? (_selectedEpisode || 1) : null;
-        loadSubtitles(subTitle, subSeason, subEpisode, subYear);
-      }
+      // ── Auto-load Sinhala subtitles from Baiscope — DISABLED ──────────────
+      // if (_currentModalItem) {
+      //   const subTitle = _currentModalItem.title || _currentModalItem.name || '';
+      //   const subYear  = (_currentModalItem.release_date || _currentModalItem.first_air_date || '').slice(0,4);
+      //   const subSeason  = _currentModalType === 'tv' ? (_selectedSeason  || 1) : null;
+      //   const subEpisode = _currentModalType === 'tv' ? (_selectedEpisode || 1) : null;
+      //   loadSubtitles(subTitle, subSeason, subEpisode, subYear);
+      // }
+      // Hide the subtitle button since auto-load is off
+      if (_subToggleBtn) _subToggleBtn.style.display = 'none';
 
       // ── Skip Intro — TV only, load + start wall-clock timer ──────────────
       if (_currentModalType === 'tv' && _currentModalId && typeof window._loadSkipIntro === 'function') {
