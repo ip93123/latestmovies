@@ -53,9 +53,10 @@ export default async function handler(req, res) {
       `https://vixsrc.to/tv/${id}/${s}/${e}`,
       `https://cinesrc.st/embed/tv/${id}?s=${s}&e=${e}`,
       `https://anyembed.xyz/embed/tmdb-tv-${id}-${s}-${e}?logo=false`,
-      `https://vidfast.pro/tv/${id}/${s}/${e}?autoplay=1`
+      `https://vidfast.pro/tv/${id}/${s}/${e}?autoplay=1`,
+      `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=1`
     );
-    labels.push('Hyperion', 'Flux', 'Stellar', 'OmniPlay');
+    labels.push('Hyperion', 'Flux', 'Stellar', 'OmniPlay', 'VidLove');
 
   } else {
     // Movie
@@ -80,9 +81,10 @@ export default async function handler(req, res) {
       `https://vixsrc.to/movie/${id}`,
       `https://cinesrc.st/embed/movie/${id}`,
       `https://anyembed.xyz/embed/tmdb-movie-${id}?logo=false`,
-      `https://vidfast.pro/movie/${id}?autoplay=1`
+      `https://vidfast.pro/movie/${id}?autoplay=1`,
+      `https://vidlove.cc/embed/movie/${id}?autoplay=1`
     );
-    labels.push('Hyperion', 'Flux', 'Stellar', 'OmniPlay');
+    labels.push('Hyperion', 'Flux', 'Stellar', 'OmniPlay', 'VidLove');
   }
 
   // Short cache so new servers appear quickly
