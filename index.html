@@ -6138,7 +6138,7 @@
         urls.push(`https://cinesrc.st/embed/tv/${id}?s=${s}&e=${e}`); labels.push('Flux');
         urls.push(`https://anyembed.xyz/embed/tmdb-tv-${id}-${s}-${e}?logo=false`); labels.push('Stellar');
         urls.push(`https://vidfast.pro/tv/${id}/${s}/${e}?autoplay=1`); labels.push('OmniPlay');
-        urls.push(`https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=1`); labels.push('VidLove');
+        urls.push(`https://vidlove.cc/embed/tv/${id}/${s}/${e}?primarycolor=E8C97A&secondarycolor=07090F&iconcolor=E8C97A&autoplay=1&showNextEpisode=1`); labels.push('VidLove');
       } else {
         urls = [
           `https://vidy.st/movie/${id}?color=E8C97A&autoplay=true`,
@@ -6154,7 +6154,7 @@
         urls.push(`https://cinesrc.st/embed/movie/${id}`); labels.push('Flux');
         urls.push(`https://anyembed.xyz/embed/tmdb-movie-${id}?logo=false`); labels.push('Stellar');
         urls.push(`https://vidfast.pro/movie/${id}?autoplay=1`); labels.push('OmniPlay');
-        urls.push(`https://vidlove.cc/embed/movie/${id}?autoplay=1`); labels.push('VidLove');
+        urls.push(`https://vidlove.cc/embed/movie/${id}?primarycolor=E8C97A&secondarycolor=07090F&iconcolor=E8C97A&autoplay=1`); labels.push('VidLove');
       }
       return { urls, labels };
     }
@@ -6167,8 +6167,8 @@
       const data = await getModalServerUrls(id, type, s, e);
       const allUrls = data.urls || [];
       const allLabels = data.labels || [];
-      const colors = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#F97316', '#A855F7', '#14B8A6'];
-      const textColors = ['#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff'];
+      const colors = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#F97316', '#A855F7', '#14B8A6', 'linear-gradient(135deg,#E8C97A,#c9a227)', '#FF4D6D'];
+      const textColors = ['#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#07090F', '#fff'];
       const btns = document.querySelectorAll('.modal-play-btn');
       btns.forEach((btn, i) => {
         if (allUrls[i]) btn.onclick = () => playStream(allUrls[i], allUrls, allLabels);

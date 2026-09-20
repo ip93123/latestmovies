@@ -54,7 +54,7 @@ export default async function handler(req, res) {
       `https://cinesrc.st/embed/tv/${id}?s=${s}&e=${e}`,
       `https://anyembed.xyz/embed/tmdb-tv-${id}-${s}-${e}?logo=false`,
       `https://vidfast.pro/tv/${id}/${s}/${e}?autoplay=1`,
-      `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=1`
+      `https://vidlove.cc/embed/tv/${id}/${s}/${e}?primarycolor=E8C97A&secondarycolor=07090F&iconcolor=E8C97A&autoplay=1&showNextEpisode=1`
     );
     labels.push('Hyperion', 'Flux', 'Stellar', 'OmniPlay', 'VidLove');
 
@@ -82,7 +82,7 @@ export default async function handler(req, res) {
       `https://cinesrc.st/embed/movie/${id}`,
       `https://anyembed.xyz/embed/tmdb-movie-${id}?logo=false`,
       `https://vidfast.pro/movie/${id}?autoplay=1`,
-      `https://vidlove.cc/embed/movie/${id}?autoplay=1`
+      `https://vidlove.cc/embed/movie/${id}?primarycolor=E8C97A&secondarycolor=07090F&iconcolor=E8C97A&autoplay=1`
     );
     labels.push('Hyperion', 'Flux', 'Stellar', 'OmniPlay', 'VidLove');
   }
