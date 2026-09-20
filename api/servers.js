@@ -33,13 +33,13 @@ export default async function handler(req, res) {
     const e = episode || 1;
     
     urls = [
-      `https://vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true`,
+      `https://vidlove.cc/embed/tv/${id}/${s}/${e}?primarycolor=E8C97A&secondarycolor=07090F&iconcolor=E8C97A&autoplay=1&showNextEpisode=1`,
       `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}&autoplay=1`,
       `https://peachify.top/embed/tv/${id}/${s}/${e}?autoNext=5`,
       `https://player.videasy.net/tv/${id}/${s}/${e}?autoplay=1`,
       `https://embedmaster.link/tv/${id}/${s}/${e}?autoplay=1`,
     ];
-    labels = ['Infinity', 'Aether', 'Nexus', 'Phantom', 'Spectra'];
+    labels = ['VidLove', 'Aether', 'Nexus', 'Phantom', 'Spectra'];
 
     urls.push(`https://vidcore.net/tv/${id}/${s}/${e}?autoplay=1&server=orbit`);
     labels.push('Orbit');
@@ -53,21 +53,20 @@ export default async function handler(req, res) {
       `https://vixsrc.to/tv/${id}/${s}/${e}`,
       `https://cinesrc.st/embed/tv/${id}?s=${s}&e=${e}`,
       `https://anyembed.xyz/embed/tmdb-tv-${id}-${s}-${e}?logo=false`,
-      `https://vidfast.pro/tv/${id}/${s}/${e}?autoplay=1`,
-      `https://vidlove.cc/embed/tv/${id}/${s}/${e}?primarycolor=E8C97A&secondarycolor=07090F&iconcolor=E8C97A&autoplay=1&showNextEpisode=1`
+      `https://vidfast.pro/tv/${id}/${s}/${e}?autoplay=1`
     );
-    labels.push('Hyperion', 'Flux', 'Stellar', 'OmniPlay', 'VidLove');
+    labels.push('Hyperion', 'Flux', 'Stellar', 'OmniPlay');
 
   } else {
     // Movie
     urls = [
-      `https://vidy.st/movie/${id}?color=E8C97A&autoplay=true`,
+      `https://vidlove.cc/embed/movie/${id}?primarycolor=E8C97A&secondarycolor=07090F&iconcolor=E8C97A&autoplay=1`,
       `https://vidsrc.me/embed/movie?tmdb=${id}&autoplay=1`,
       `https://peachify.top/embed/movie/${id}`,
       `https://player.videasy.net/movie/${id}?autoplay=1`,
       `https://embedmaster.link/movie/${id}?autoplay=1`,
     ];
-    labels = ['Infinity', 'Aether', 'Nexus', 'Phantom', 'Spectra'];
+    labels = ['VidLove', 'Aether', 'Nexus', 'Phantom', 'Spectra'];
 
     urls.push(`https://vidcore.net/movie/${id}?autoplay=1&server=orbit`);
     labels.push('Orbit');
@@ -81,10 +80,9 @@ export default async function handler(req, res) {
       `https://vixsrc.to/movie/${id}`,
       `https://cinesrc.st/embed/movie/${id}`,
       `https://anyembed.xyz/embed/tmdb-movie-${id}?logo=false`,
-      `https://vidfast.pro/movie/${id}?autoplay=1`,
-      `https://vidlove.cc/embed/movie/${id}?primarycolor=E8C97A&secondarycolor=07090F&iconcolor=E8C97A&autoplay=1`
+      `https://vidfast.pro/movie/${id}?autoplay=1`
     );
-    labels.push('Hyperion', 'Flux', 'Stellar', 'OmniPlay', 'VidLove');
+    labels.push('Hyperion', 'Flux', 'Stellar', 'OmniPlay');
   }
 
   // Short cache so new servers appear quickly
