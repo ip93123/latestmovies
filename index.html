@@ -5539,21 +5539,27 @@
     async function loadDiscoverMovies() {
       const grid = document.getElementById('moviesGrid');
       const isTV = window.DEVICE && window.DEVICE.isTV;
-      const cardLimit = isTV ? 10 : 20;
-      grid.innerHTML = Array.from({ length: isTV ? 8 : 15 }, () =>
+      const cardLimit = isTV ? 16 : 40;
+      grid.innerHTML = Array.from({ length: isTV ? 8 : 16 }, () =>
         `<div class="movie-card"><div class="card-poster sk" style="aspect-ratio:2/3"></div><div class="card-info"><div class="sk" style="height:14px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:60%"></div></div></div>`
       ).join('');
 
       // If nothing selected — show default
       if (!_activeMovieGenre && !_activeMovieYear && !_activeMovieLang) { loadMovies('now_playing'); return; }
 
-      let params = 'sort_by=popularity.desc&page=1';
+      let params = 'sort_by=popularity.desc';
       if (_activeMovieGenre) params += `&with_genres=${_activeMovieGenre}`;
       if (_activeMovieYear)  params += `&primary_release_year=${_activeMovieYear}`;
       if (_activeMovieLang)  params += `&with_original_language=${_activeMovieLang}`;
 
-      const data = await tmdb(`/discover/movie?${params}`);
-      const movies = (data.results || []).slice(0, cardLimit);
+      const [d1, d2] = await Promise.all([
+        tmdb(`/discover/movie?${params}&page=1`),
+        tmdb(`/discover/movie?${params}&page=2`)
+      ]);
+      const combined = [...(d1?.results || []), ...(d2?.results || [])];
+      const seen = new Set();
+      const unique = combined.filter(m => m && m.id && !seen.has(m.id) && seen.add(m.id));
+      const movies = unique.slice(0, cardLimit);
       const watchDatas = await Promise.all(movies.map(m => getWatch(m.id, 'movie')));
       currentMovies = movies;
       grid.innerHTML = movies.map((m, i) => buildCard(m, null, 'movie', watchDatas[i])).join('');
@@ -5591,11 +5597,17 @@
 
     async function loadMovies(type = 'now_playing') {
       const isTV = window.DEVICE && window.DEVICE.isTV;
-      const cardLimit = isTV ? 10 : 20;
+      const cardLimit = isTV ? 16 : 40;
       const grid = document.getElementById('moviesGrid');
-      grid.innerHTML = Array.from({ length: isTV ? 8 : 15 }, () => `<div class="movie-card"><div class="card-poster sk" style="aspect-ratio:2/3"></div><div class="card-info"><div class="sk" style="height:14px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:60%"></div></div></div>`).join('');
-      const data = await tmdb(`/movie/${type}?language=en-US&page=1`);
-      const movies = (data.results || []).slice(0, cardLimit);
+      grid.innerHTML = Array.from({ length: isTV ? 8 : 16 }, () => `<div class="movie-card"><div class="card-poster sk" style="aspect-ratio:2/3"></div><div class="card-info"><div class="sk" style="height:14px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:60%"></div></div></div>`).join('');
+      const [d1, d2] = await Promise.all([
+        tmdb(`/movie/${type}?language=en-US&page=1`),
+        tmdb(`/movie/${type}?language=en-US&page=2`)
+      ]);
+      const combined = [...(d1?.results || []), ...(d2?.results || [])];
+      const seen = new Set();
+      const unique = combined.filter(m => m && m.id && !seen.has(m.id) && seen.add(m.id));
+      const movies = unique.slice(0, cardLimit);
       const watchDatas = await Promise.all(movies.map(m => getWatch(m.id, 'movie')));
       currentMovies = movies;
       grid.innerHTML = movies.map((m, i) => buildCard(m, null, 'movie', watchDatas[i])).join('');
