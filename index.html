@@ -2579,6 +2579,81 @@
       50% { opacity: .4; transform: scale(.7); }
     }
 
+    /* ── 4K SECTION ────────────────────────────────────────────────────── */
+    .fourk-badge-title {
+      display: inline-block;
+      background: linear-gradient(135deg, #00d4ff, #0080ff);
+      color: #fff;
+      font-weight: 900;
+      font-size: 1em;
+      padding: .08em .35em;
+      border-radius: 6px;
+      letter-spacing: 1px;
+      box-shadow: 0 0 18px rgba(0,212,255,.4);
+      vertical-align: middle;
+    }
+
+    .fourk-platform-tabs {
+      display: flex;
+      gap: .5rem;
+      padding: 0 3rem 1.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .fourk-tab {
+      display: flex;
+      align-items: center;
+      gap: .45rem;
+      padding: .4rem .85rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-size: .78rem;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      white-space: nowrap;
+    }
+
+    .fourk-tab img {
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+      object-fit: cover;
+    }
+
+    .fourk-tab:hover,
+    .fourk-tab.active {
+      border-color: rgba(0,212,255,.5);
+      background: rgba(0,212,255,.08);
+      color: #00d4ff;
+    }
+
+    /* 4K glow on cards inside fourk section */
+    #fourkGrid .movie-card {
+      position: relative;
+    }
+
+    #fourkGrid .movie-card::after {
+      content: '4K';
+      position: absolute;
+      top: .5rem;
+      left: .5rem;
+      background: linear-gradient(135deg, #00d4ff, #0080ff);
+      color: #fff;
+      font-size: .6rem;
+      font-weight: 900;
+      padding: .15rem .38rem;
+      border-radius: 4px;
+      letter-spacing: .8px;
+      box-shadow: 0 2px 10px rgba(0,212,255,.5);
+      z-index: 3;
+      pointer-events: none;
+    }
+
     /* SEARCH */
     #searchOverlay {
       position: fixed;
@@ -4111,6 +4186,7 @@
       <li><a href="#tvshows">TV Shows</a></li>
       <li><a href="#wheretowatch">Streaming</a></li>
       <li><a href="#toprated">Top Rated</a></li>
+      <li><a href="#fourk">4K</a></li>
       <li><a href="javascript:void(0)" id="navWishlistLink" onclick="openWishlist()" title="WishList">WishList</a></li>
     </ul>
     <div class="nav-search" id="navSearch">
@@ -4267,6 +4343,20 @@
       <button class="scroll-btn scroll-left" onclick="scrollRow('topRatedGrid', -1)">❮</button>
       <div class="cards-grid" id="topRatedGrid"></div>
       <button class="scroll-btn scroll-right" onclick="scrollRow('topRatedGrid', 1)">❯</button>
+    </div>
+  </section>
+
+  <!-- 4K SECTION -->
+  <section id="fourk" style="background:var(--dark2)">
+    <div class="section-header">
+      <h2 class="section-title"><span class="fourk-badge-title">4K</span> <span>Ultra HD</span> Picks</h2>
+      <span class="see-all" onclick="toggleExpand('fourkGrid', this)">View all →</span>
+    </div>
+    <div class="fourk-platform-tabs" id="fourkPlatformTabs"></div>
+    <div class="scroll-wrapper">
+      <button class="scroll-btn scroll-left" onclick="scrollRow('fourkGrid', -1)">❮</button>
+      <div class="cards-grid" id="fourkGrid"></div>
+      <button class="scroll-btn scroll-right" onclick="scrollRow('fourkGrid', 1)">❯</button>
     </div>
   </section>
 
@@ -5472,6 +5562,105 @@
       animateGrid(grid);
       addCardListeners(grid, '.movie-card');
 
+    }
+
+    // ── 4K ULTRA HD SECTION ──────────────────────────────────────────────────
+    // Providers known to stream in 4K UHD
+    const FOURK_PROVIDERS = [
+      { id: 8,   name: 'Netflix',    short: 'NF',   color: '#E50914' },
+      { id: 119, name: 'Prime Video',short: 'PV',   color: '#00A8E1' },
+      { id: 337, name: 'Disney+',    short: 'D+',   color: '#113CA6' },
+      { id: 1899,name: 'Max',        short: 'MAX',  color: '#A020F0' },
+      { id: 350, name: 'Apple TV+',  short: 'ATV',  color: '#555' },
+      { id: 531, name: 'Paramount+', short: 'P+',   color: '#0064FF' },
+    ];
+    const FOURK_PROVIDER_IDS = new Set(FOURK_PROVIDERS.map(p => p.id));
+    let _fourkActivePid = 'all';
+    let _fourkAllMovies = [];
+
+    async function loadFourK() {
+      const grid = document.getElementById('fourkGrid');
+      const tabBar = document.getElementById('fourkPlatformTabs');
+      if (!grid) return;
+
+      // Skeleton
+      grid.innerHTML = Array.from({ length: 8 }, () =>
+        `<div class="movie-card"><div class="card-poster sk" style="aspect-ratio:2/3"></div><div class="card-info"><div class="sk" style="height:14px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:60%"></div></div></div>`
+      ).join('');
+
+      try {
+        // Fetch popular movies across 2 pages for more variety
+        const [p1, p2] = await Promise.all([
+          tmdb('/movie/popular?language=en-US&page=1'),
+          tmdb('/movie/popular?language=en-US&page=2'),
+        ]);
+        const allMovies = [...(p1.results || []), ...(p2.results || [])].filter(m => m.backdrop_path);
+
+        // Fetch watch providers for each (batched)
+        const watchResults = await Promise.allSettled(
+          allMovies.slice(0, 30).map(m => getWatch(m.id, 'movie').then(w => ({ m, w })))
+        );
+
+        // Keep only movies on 4K-capable platforms
+        const fourkMovies = watchResults
+          .filter(r => r.status === 'fulfilled' && r.value.w)
+          .map(r => {
+            const { m, w } = r.value;
+            const flatrate = w.flatrate || [];
+            const fourkPids = flatrate.filter(p => FOURK_PROVIDER_IDS.has(p.provider_id)).map(p => p.provider_id);
+            if (!fourkPids.length) return null;
+            return { ...m, _fourkPids: fourkPids, _watchData: w };
+          })
+          .filter(Boolean);
+
+        if (!fourkMovies.length) {
+          grid.innerHTML = `<div style="padding:2rem;color:var(--muted)">No 4K titles found for your region.</div>`;
+          return;
+        }
+
+        _fourkAllMovies = fourkMovies;
+
+        // Build platform tab bar
+        const activePids = new Set(fourkMovies.flatMap(m => m._fourkPids));
+        const tabs = [{ id: 'all', name: 'All 4K', short: 'ALL', color: '#00d4ff' },
+          ...FOURK_PROVIDERS.filter(p => activePids.has(p.id))];
+
+        if (tabBar) {
+          tabBar.innerHTML = tabs.map(t => {
+            const logoPath = providerLogos[t.id];
+            const imgHtml = logoPath ? `<img src="https://image.tmdb.org/t/p/w45${logoPath}" alt="${t.name}">` : '';
+            return `<button class="fourk-tab${t.id === 'all' ? ' active' : ''}" data-pid="${t.id}" style="--tab-color:${t.color}">
+              ${imgHtml}<span>${t.name}</span>
+            </button>`;
+          }).join('');
+
+          tabBar.querySelectorAll('.fourk-tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+              tabBar.querySelectorAll('.fourk-tab').forEach(b => b.classList.remove('active'));
+              btn.classList.add('active');
+              _fourkActivePid = btn.dataset.pid;
+              _renderFourkCards(_fourkActivePid);
+            });
+          });
+        }
+
+        _renderFourkCards('all');
+
+      } catch (err) {
+        grid.innerHTML = `<div style="padding:2rem;color:var(--muted)">Failed to load 4K titles.</div>`;
+      }
+    }
+
+    function _renderFourkCards(pid) {
+      const grid = document.getElementById('fourkGrid');
+      if (!grid) return;
+      const filtered = pid === 'all'
+        ? _fourkAllMovies
+        : _fourkAllMovies.filter(m => m._fourkPids.includes(Number(pid)));
+
+      grid.innerHTML = filtered.slice(0, 20).map(m => buildCard(m, null, 'movie', m._watchData)).join('');
+      animateGrid(grid);
+      addCardListeners(grid, '.movie-card');
     }
 
     async function loadFeatured(movies) {
@@ -7296,6 +7485,19 @@
         const el = document.getElementById(id);
         if (el) observer.observe(el);
       });
+
+      // Lazy load 4K section
+      if (document.getElementById('fourk')) {
+        const fourkObs = new IntersectionObserver((entries, obs) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              obs.unobserve(entry.target);
+              loadFourK();
+            }
+          }
+        }, { rootMargin: '300px 0px' });
+        fourkObs.observe(document.getElementById('fourk'));
+      }
 
       gsap.fromTo('#mainNav', { y: -60, opacity: 0 }, { y: 0, opacity: 1, duration: .7, delay: .2, ease: 'power3.out' });
 
