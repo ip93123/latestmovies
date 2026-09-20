@@ -2743,6 +2743,34 @@
       white-space: nowrap;
     }
 
+    .lang-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: .2rem;
+      padding: .28rem .65rem;
+      border-radius: 50px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-size: .73rem;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .18s;
+      white-space: nowrap;
+    }
+    .lang-pill:hover {
+      border-color: rgba(var(--accent1), .5);
+      background: rgba(var(--accent1), .08);
+      color: var(--text);
+    }
+    .lang-pill.active {
+      background: rgb(var(--accent1));
+      border-color: rgb(var(--accent1));
+      color: #07090F;
+      font-weight: 700;
+    }
+
     /* SEARCH */
     #searchOverlay {
       position: fixed;
@@ -4378,7 +4406,13 @@
     </div>
     <div class="genre-bar" id="movieGenreBar"></div>
     <div class="filter-row">
-      <span class="filter-label">Year:</span>
+      <span class="filter-label">Language:</span>
+      <button class="lang-pill active" data-lang="">🌐 All</button>
+      <button class="lang-pill" data-lang="ko">🇰🇷 Korean</button>
+      <button class="lang-pill" data-lang="ta">🎬 Tamil</button>
+      <button class="lang-pill" data-lang="ml">🌴 Malayalam</button>
+      <button class="lang-pill" data-lang="hi">🎭 Hindi</button>
+      <span class="filter-label" style="margin-left:.5rem">Year:</span>
       <select class="year-select" id="movieYearSelect">
         <option value="">All Years</option>
       </select>
@@ -4403,7 +4437,13 @@
     </div>
     <div class="genre-bar" id="tvGenreBar"></div>
     <div class="filter-row">
-      <span class="filter-label">Year:</span>
+      <span class="filter-label">Language:</span>
+      <button class="lang-pill active" data-lang="">🌐 All</button>
+      <button class="lang-pill" data-lang="ko">🇰🇷 Korean</button>
+      <button class="lang-pill" data-lang="ta">🎬 Tamil</button>
+      <button class="lang-pill" data-lang="ml">🌴 Malayalam</button>
+      <button class="lang-pill" data-lang="hi">🎭 Hindi</button>
+      <span class="filter-label" style="margin-left:.5rem">Year:</span>
       <select class="year-select" id="tvYearSelect">
         <option value="">All Years</option>
       </select>
@@ -5486,6 +5526,8 @@
 
     let _activeMovieYear = '';
     let _activeTvYear    = '';
+    let _activeMovieLang = '';
+    let _activeTvLang    = '';
 
     async function loadDiscoverMovies() {
       const grid = document.getElementById('moviesGrid');
@@ -5495,12 +5537,13 @@
         `<div class="movie-card"><div class="card-poster sk" style="aspect-ratio:2/3"></div><div class="card-info"><div class="sk" style="height:14px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:60%"></div></div></div>`
       ).join('');
 
-      // If no genre AND no year — show default
-      if (!_activeMovieGenre && !_activeMovieYear) { loadMovies('now_playing'); return; }
+      // If nothing selected — show default
+      if (!_activeMovieGenre && !_activeMovieYear && !_activeMovieLang) { loadMovies('now_playing'); return; }
 
-      let params = 'language=en-US&sort_by=popularity.desc&page=1';
+      let params = 'sort_by=popularity.desc&page=1';
       if (_activeMovieGenre) params += `&with_genres=${_activeMovieGenre}`;
       if (_activeMovieYear)  params += `&primary_release_year=${_activeMovieYear}`;
+      if (_activeMovieLang)  params += `&with_original_language=${_activeMovieLang}`;
 
       const data = await tmdb(`/discover/movie?${params}`);
       const movies = (data.results || []).slice(0, cardLimit);
@@ -5519,11 +5562,12 @@
         `<div class="movie-card"><div class="card-poster sk" style="aspect-ratio:2/3"></div><div class="card-info"><div class="sk" style="height:14px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:60%"></div></div></div>`
       ).join('');
 
-      if (!_activeTvGenre && !_activeTvYear) { loadTV('on_the_air'); return; }
+      if (!_activeTvGenre && !_activeTvYear && !_activeTvLang) { loadTV('on_the_air'); return; }
 
-      let params = 'language=en-US&sort_by=popularity.desc&page=1';
+      let params = 'sort_by=popularity.desc&page=1';
       if (_activeTvGenre) params += `&with_genres=${_activeTvGenre}`;
       if (_activeTvYear)  params += `&first_air_date_year=${_activeTvYear}`;
+      if (_activeTvLang)  params += `&with_original_language=${_activeTvLang}`;
 
       const data = await tmdb(`/discover/tv?${params}`);
       const shows = (data.results || []).slice(0, cardLimit);
@@ -5536,6 +5580,7 @@
     // Keep old names as aliases for genre-only calls
     function loadMoviesByGenre(gid) { _activeMovieGenre = gid; loadDiscoverMovies(); }
     function loadTVByGenre(gid)    { _activeTvGenre    = gid; loadDiscoverTV();    }
+
 
     async function loadMovies(type = 'now_playing') {
       const isTV = window.DEVICE && window.DEVICE.isTV;
@@ -5735,19 +5780,30 @@
     async function loadTrailers() {
       const row = document.getElementById('trailerRow');
       if (!row) return;
-      // Skeleton
       row.innerHTML = Array.from({ length: 6 }, () =>
         `<div class="trailer-card"><div class="trailer-thumb sk" style="aspect-ratio:16/9"></div><div class="trailer-info"><div class="sk" style="height:14px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:50%"></div></div></div>`
       ).join('');
 
       try {
-        const data = await tmdb('/movie/now_playing?language=en-US&page=1');
-        const movies = (data.results || []).filter(m => m.backdrop_path).slice(0, 18);
+        // Fetch English + Korean + Tamil + Malayalam + Hindi now-playing in parallel
+        const langFetches = ['', 'ko', 'ta', 'ml', 'hi'].map(lang => {
+          const q = lang ? `/discover/movie?sort_by=popularity.desc&with_original_language=${lang}&primary_release_date.gte=${new Date(Date.now()-90*24*60*60*1000).toISOString().slice(0,10)}&page=1`
+                        : '/movie/now_playing?language=en-US&page=1';
+          return tmdb(q).catch(() => ({ results: [] }));
+        });
+        const [enData, koData, taData, mlData, hiData] = await Promise.all(langFetches);
 
-        // Fetch trailers in parallel (batched to avoid hammering API)
-        const batch = movies.slice(0, 12);
+        // Merge, deduplicate by id, keep those with backdrop
+        const seen = new Set();
+        const allMovies = [enData, koData, taData, mlData, hiData]
+          .flatMap(d => d.results || [])
+          .filter(m => m.backdrop_path && !seen.has(m.id) && seen.add(m.id))
+          .sort((a, b) => b.popularity - a.popularity)
+          .slice(0, 20);
+
+        // Fetch trailers in parallel
         const videoResults = await Promise.allSettled(
-          batch.map(m => tmdb(`/movie/${m.id}/videos`).then(d => {
+          allMovies.map(m => tmdb(`/movie/${m.id}/videos`).then(d => {
             const t = (d.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube')
               || (d.results || []).find(v => v.site === 'YouTube');
             return { m, key: t ? t.key : null };
@@ -5770,6 +5826,7 @@
         row.innerHTML = `<div style="padding:2rem;color:var(--muted)">Failed to load trailers.</div>`;
       }
     }
+
 
     async function loadTopRated() {
       const isTV = window.DEVICE && window.DEVICE.isTV;
@@ -7239,12 +7296,14 @@
         document.querySelectorAll('#movieTabs .tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         gsap.fromTo(tab, { scale: .94 }, { scale: 1, duration: .25, ease: 'back.out(2)' });
-        // Clear genre + year selection
+        // Clear genre + year + language
         document.querySelectorAll('#movieGenreBar .genre-pill').forEach(p => p.classList.remove('active'));
         _activeMovieGenre = null;
         _activeMovieYear  = '';
+        _activeMovieLang  = '';
         const mySel = document.getElementById('movieYearSelect');
         if (mySel) mySel.value = '';
+        document.querySelectorAll('#movies .lang-pill').forEach(p => { p.classList.remove('active'); if (!p.dataset.lang) p.classList.add('active'); });
         loadMovies(tab.dataset.type);
       });
     });
@@ -7253,12 +7312,14 @@
         document.querySelectorAll('#tvTabs .tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         gsap.fromTo(tab, { scale: .94 }, { scale: 1, duration: .25, ease: 'back.out(2)' });
-        // Clear genre + year selection
+        // Clear genre + year + language
         document.querySelectorAll('#tvGenreBar .genre-pill').forEach(p => p.classList.remove('active'));
         _activeTvGenre = null;
         _activeTvYear  = '';
+        _activeTvLang  = '';
         const tvSel = document.getElementById('tvYearSelect');
         if (tvSel) tvSel.value = '';
+        document.querySelectorAll('#tvshows .lang-pill').forEach(p => { p.classList.remove('active'); if (!p.dataset.lang) p.classList.add('active'); });
         loadTV(tab.dataset.type);
       });
     });
@@ -7296,6 +7357,25 @@
       loadDiscoverTV();
     });
 
+    // Language pill clicks — Movies
+    document.querySelectorAll('#movies .lang-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('#movies .lang-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        _activeMovieLang = pill.dataset.lang;
+        loadDiscoverMovies();
+      });
+    });
+
+    // Language pill clicks — TV
+    document.querySelectorAll('#tvshows .lang-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('#tvshows .lang-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        _activeTvLang = pill.dataset.lang;
+        loadDiscoverTV();
+      });
+    });
 
     // SEARCH
     const searchOverlay = document.getElementById('searchOverlay');
