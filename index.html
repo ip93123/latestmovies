@@ -2574,6 +2574,16 @@
       animation: tl-pulse 1.2s ease-in-out infinite;
     }
 
+    .trailer-label.series-badge {
+      background: rgba(155,89,182,.14);
+      border-color: rgba(155,89,182,.38);
+      color: #c39bd3;
+    }
+
+    .trailer-label.series-badge::before {
+      background: #c39bd3;
+    }
+
     @keyframes tl-pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: .4; transform: scale(.7); }
@@ -4422,7 +4432,7 @@
   <!-- TRAILERS SECTION -->
   <section id="trailers" style="background:var(--dark2)">
     <div class="section-header">
-      <h2 class="section-title">🎬 Now In <span>Theatres</span></h2>
+      <h2 class="section-title">🎬 Now <span>Showing</span></h2>
       <span class="see-all" id="trailersViewAll" onclick="this.style.display='none'" style="display:none">View all →</span>
     </div>
     <div class="trailer-filter-bar" id="trailerFilterBar"></div>
@@ -5654,9 +5664,11 @@
 
     }
 
-    // ── TRAILERS ──────────────────────────────────────────────────────────────
+    // ── TRAILERS (NOW SHOWING) ────────────────────────────────────────────────
     const TRAILER_GENRES = [
       { id: 'all', label: 'All' },
+      { id: 'series', label: 'TV Series' },
+      { id: 'movies', label: 'Movies' },
       { id: '28', label: 'Action' },
       { id: '35', label: 'Comedy' },
       { id: '27', label: 'Horror' },
@@ -5670,35 +5682,40 @@
     let _trailerMovies = [];   // full list for re-filtering
     let _trailerGenre = 'all';
     let _trailerMuted = true;
-    // map: movieId -> { iframeEl, muteBtn }
+    // map: uniqueKey -> { iframeEl, muteBtn }
     let _trailerPlayers = {};
 
     function _buildTrailerCard(m, trailerKey) {
+      const isTV = m._mediaType === 'tv';
       const thumb = m.backdrop_path
         ? `https://image.tmdb.org/t/p/w780${m.backdrop_path}`
         : (m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '');
-      const year = (m.release_date || '').slice(0, 4);
+      const year = (m.release_date || m.first_air_date || '').slice(0, 4);
       const rating = m.vote_average ? m.vote_average.toFixed(1) : null;
+      const labelText = isTV ? 'NEW SERIES' : 'IN THEATRES';
+      const labelClass = isTV ? 'trailer-label series-badge' : 'trailer-label';
+      const cardKey = `${m._mediaType || 'movie'}-${m.id}`;
 
       const div = document.createElement('div');
       div.className = 'trailer-card';
       div.dataset.movieId = m.id;
+      div.dataset.mediaType = m._mediaType || 'movie';
       div.dataset.trailerKey = trailerKey;
       div.dataset.genreIds = (m.genre_ids || []).join(',');
       div.innerHTML = `
-        <div class="trailer-thumb" id="tthumb-${m.id}">
-          ${thumb ? `<img src="${thumb}" alt="${m.title || ''}" loading="lazy">` : `<div style="width:100%;height:100%;background:var(--dark3)"></div>`}
+        <div class="trailer-thumb" id="tthumb-${cardKey}">
+          ${thumb ? `<img src="${thumb}" alt="${m.title || m.name || ''}" loading="lazy">` : `<div style="width:100%;height:100%;background:var(--dark3)"></div>`}
           <div class="trailer-play-overlay">
             <div class="trailer-play-icon">
               <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
             </div>
           </div>
-          <button class="trailer-mute-btn" id="tmute-${m.id}" title="Toggle Mute">🔇</button>
+          <button class="trailer-mute-btn" id="tmute-${cardKey}" title="Toggle Mute">🔇</button>
         </div>
         <div class="trailer-info">
           <div class="trailer-title">${m.title || m.name || 'Unknown'}</div>
           <div class="trailer-meta">
-            <span class="trailer-label">IN THEATRES</span>
+            <span class="${labelClass}">${labelText}</span>
             <span class="trailer-year">${year}</span>
             ${rating ? `<span class="trailer-rating">⭐ ${rating}</span>` : ''}
           </div>
@@ -5706,7 +5723,7 @@
 
       // Hover → swap thumbnail for autoplay iframe
       const thumb_el = div.querySelector('.trailer-thumb');
-      const muteBtn = div.querySelector(`#tmute-${m.id}`);
+      const muteBtn = div.querySelector(`#tmute-${cardKey}`);
       let hoverTimer = null;
       let iframeInjected = false;
 
@@ -5717,16 +5734,15 @@
           const iframe = document.createElement('iframe');
           iframe.src = `https://www.youtube-nocookie.com/embed/${trailerKey}?autoplay=1&mute=1&controls=0&rel=0&modestbranding=1&playsinline=1&loop=1&playlist=${trailerKey}`;
           iframe.allow = 'autoplay; encrypted-media';
-          iframe.title = m.title || '';
+          iframe.title = m.title || m.name || '';
           thumb_el.appendChild(iframe);
           setTimeout(() => iframe.classList.add('loaded'), 300);
-          _trailerPlayers[m.id] = { iframe, muteBtn };
+          _trailerPlayers[cardKey] = { iframe, muteBtn };
 
           muteBtn.innerHTML = '🔇';
           muteBtn.onclick = (e) => {
             e.stopPropagation();
             _trailerMuted = !_trailerMuted;
-            // Toggle mute via src manipulation (simplest cross-origin approach)
             const cur = iframe.src;
             if (_trailerMuted) {
               iframe.src = cur.includes('mute=0') ? cur.replace('mute=0', 'mute=1') : cur;
@@ -5741,17 +5757,16 @@
 
       div.addEventListener('mouseleave', () => {
         clearTimeout(hoverTimer);
-        // Remove iframe on leave to stop audio
         if (iframeInjected) {
           const existing = thumb_el.querySelector('iframe');
           if (existing) { existing.remove(); }
           iframeInjected = false;
-          delete _trailerPlayers[m.id];
+          delete _trailerPlayers[cardKey];
         }
       });
 
-      // Click → open full modal
-      div.addEventListener('click', () => openModal(m.id, 'movie'));
+      // Click → open full modal (movie or tv)
+      div.addEventListener('click', () => openModal(m.id, isTV ? 'tv' : 'movie'));
 
       return div;
     }
@@ -5759,12 +5774,17 @@
     function _renderTrailerCards(genreId) {
       const row = document.getElementById('trailerRow');
       if (!row) return;
-      const filtered = genreId === 'all'
-        ? _trailerMovies
-        : _trailerMovies.filter(m => (m.genre_ids || []).map(String).includes(String(genreId)));
+      let filtered = _trailerMovies;
+      if (genreId === 'series') {
+        filtered = _trailerMovies.filter(m => m._mediaType === 'tv');
+      } else if (genreId === 'movies') {
+        filtered = _trailerMovies.filter(m => m._mediaType === 'movie');
+      } else if (genreId !== 'all') {
+        filtered = _trailerMovies.filter(m => (m.genre_ids || []).map(String).includes(String(genreId)));
+      }
 
       if (filtered.length === 0) {
-        row.innerHTML = `<div style="padding:2rem;color:var(--muted);font-size:.9rem">No trailers for this genre.</div>`;
+        row.innerHTML = `<div style="padding:2rem;color:var(--muted);font-size:.9rem">No trailers for this category.</div>`;
         return;
       }
 
@@ -5804,26 +5824,36 @@
       ).join('');
 
       try {
-        // Fetch English + Korean + Tamil + Malayalam + Hindi now-playing in parallel
-        const langFetches = ['', 'ko', 'ta', 'ml', 'hi'].map(lang => {
-          const q = lang ? `/discover/movie?sort_by=popularity.desc&with_original_language=${lang}&primary_release_date.gte=${new Date(Date.now()-90*24*60*60*1000).toISOString().slice(0,10)}&page=1`
-                        : '/movie/now_playing?language=en-US&page=1';
-          return tmdb(q).catch(() => ({ results: [] }));
+        // Fetch English now playing + Korean, Tamil, Malayalam, Hindi movies
+        const movieFetches = ['', 'ko', 'ta', 'ml', 'hi'].map(lang => {
+          const q = lang
+            ? `/discover/movie?sort_by=popularity.desc&with_original_language=${lang}&page=1`
+            : '/movie/now_playing?language=en-US&page=1';
+          return tmdb(q).then(d => (d.results || []).map(x => ({ ...x, _mediaType: 'movie' }))).catch(() => []);
         });
-        const [enData, koData, taData, mlData, hiData] = await Promise.all(langFetches);
 
-        // Merge, deduplicate by id, keep those with backdrop
+        // Fetch English on the air + Korean, Tamil, Malayalam, Hindi new TV series
+        const tvFetches = ['', 'ko', 'ta', 'ml', 'hi'].map(lang => {
+          const q = lang
+            ? `/discover/tv?sort_by=popularity.desc&with_original_language=${lang}&page=1`
+            : '/tv/on_the_air?language=en-US&page=1';
+          return tmdb(q).then(d => (d.results || []).map(x => ({ ...x, _mediaType: 'tv' }))).catch(() => []);
+        });
+
+        const allResults = await Promise.all([...movieFetches, ...tvFetches]);
+
+        // Merge, deduplicate by mediaType-id, keep items with backdrop or poster
         const seen = new Set();
-        const allMovies = [enData, koData, taData, mlData, hiData]
-          .flatMap(d => d.results || [])
-          .filter(m => m.backdrop_path && !seen.has(m.id) && seen.add(m.id))
-          .sort((a, b) => b.popularity - a.popularity)
-          .slice(0, 20);
+        const allItems = allResults.flat()
+          .filter(m => (m.backdrop_path || m.poster_path) && !seen.has(`${m._mediaType}-${m.id}`) && seen.add(`${m._mediaType}-${m.id}`))
+          .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
+          .slice(0, 26);
 
-        // Fetch trailers in parallel
+        // Fetch trailers in parallel for both movies and tv series
         const videoResults = await Promise.allSettled(
-          allMovies.map(m => tmdb(`/movie/${m.id}/videos`).then(d => {
+          allItems.map(m => tmdb(`/${m._mediaType}/${m.id}/videos`).then(d => {
             const t = (d.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube')
+              || (d.results || []).find(v => v.type === 'Teaser' && v.site === 'YouTube')
               || (d.results || []).find(v => v.site === 'YouTube');
             return { m, key: t ? t.key : null };
           }))
