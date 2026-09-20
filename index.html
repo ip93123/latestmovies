@@ -2361,6 +2361,224 @@
     }
 
 
+    /* ── TRAILER SECTION ─────────────────────────────────────────────── */
+    #trailers {
+      background: var(--dark);
+      padding: 3rem 0;
+      overflow: hidden;
+    }
+
+    .trailer-filter-bar {
+      display: flex;
+      gap: .5rem;
+      padding: 0 3rem 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .trailer-filter-btn {
+      padding: .35rem .9rem;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-size: .75rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all .2s;
+      white-space: nowrap;
+    }
+
+    .trailer-filter-btn:hover,
+    .trailer-filter-btn.active {
+      background: var(--gold);
+      color: #07090F;
+      border-color: var(--gold);
+      font-weight: 700;
+    }
+
+    .trailer-row {
+      display: flex;
+      gap: 1rem;
+      overflow-x: auto;
+      padding: 0 3rem 1rem;
+      scrollbar-width: none;
+    }
+
+    .trailer-row::-webkit-scrollbar { display: none; }
+
+    .trailer-card {
+      position: relative;
+      flex: 0 0 320px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--card);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s;
+      group: true;
+    }
+
+    .trailer-card:hover {
+      transform: scale(1.04) translateY(-6px);
+      box-shadow: 0 20px 60px rgba(0,0,0,.7), 0 0 30px rgba(232,201,122,.12);
+      z-index: 10;
+    }
+
+    .trailer-thumb {
+      width: 100%;
+      aspect-ratio: 16/9;
+      position: relative;
+      overflow: hidden;
+      background: var(--dark3);
+    }
+
+    .trailer-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: opacity .3s;
+    }
+
+    .trailer-thumb iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      opacity: 0;
+      transition: opacity .5s;
+    }
+
+    .trailer-thumb iframe.loaded {
+      opacity: 1;
+    }
+
+    .trailer-play-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,.3);
+      transition: opacity .3s;
+    }
+
+    .trailer-card:hover .trailer-play-overlay {
+      opacity: 0;
+    }
+
+    .trailer-play-icon {
+      width: 52px;
+      height: 52px;
+      background: rgba(232,201,122,.92);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,.5);
+      transition: transform .2s;
+    }
+
+    .trailer-card:hover .trailer-play-icon {
+      transform: scale(1.1);
+    }
+
+    .trailer-play-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: #07090F;
+      margin-left: 3px;
+    }
+
+    .trailer-mute-btn {
+      position: absolute;
+      bottom: .6rem;
+      right: .6rem;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(0,0,0,.7);
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      transition: background .2s;
+      backdrop-filter: blur(4px);
+    }
+
+    .trailer-mute-btn:hover { background: rgba(232,201,122,.3); }
+
+    .trailer-card:hover .trailer-mute-btn { display: flex; }
+
+    .trailer-info {
+      padding: .9rem 1rem;
+    }
+
+    .trailer-title {
+      font-weight: 700;
+      font-size: .92rem;
+      margin-bottom: .3rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text);
+    }
+
+    .trailer-meta {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .75rem;
+      color: var(--muted);
+    }
+
+    .trailer-year {
+      color: var(--muted);
+    }
+
+    .trailer-rating {
+      background: rgba(232,201,122,.15);
+      color: var(--gold);
+      border: 1px solid rgba(232,201,122,.25);
+      padding: .1rem .4rem;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: .7rem;
+    }
+
+    .trailer-label {
+      display: inline-flex;
+      align-items: center;
+      gap: .3rem;
+      background: rgba(231,76,60,.12);
+      border: 1px solid rgba(231,76,60,.3);
+      color: #E74C3C;
+      padding: .12rem .5rem;
+      border-radius: 4px;
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .5px;
+    }
+
+    .trailer-label::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #E74C3C;
+      animation: tl-pulse 1.2s ease-in-out infinite;
+    }
+
+    @keyframes tl-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .4; transform: scale(.7); }
+    }
+
     /* SEARCH */
     #searchOverlay {
       position: fixed;
@@ -3888,6 +4106,7 @@
     </div>
     <ul class="nav-links">
       <li><a href="#trending">Trending</a></li>
+      <li><a href="#trailers">Trailers</a></li>
       <li><a href="#movies">Movies</a></li>
       <li><a href="#tvshows">TV Shows</a></li>
       <li><a href="#wheretowatch">Streaming</a></li>
@@ -3965,6 +4184,20 @@
       <button class="scroll-btn scroll-left" onclick="scrollRow('trendingRow', -1)">❮</button>
       <div class="trending-row" id="trendingRow"></div>
       <button class="scroll-btn scroll-right" onclick="scrollRow('trendingRow', 1)">❯</button>
+    </div>
+  </section>
+
+  <!-- TRAILERS SECTION -->
+  <section id="trailers">
+    <div class="section-header">
+      <h2 class="section-title">🎬 Now In <span>Theatres</span></h2>
+      <span class="see-all" id="trailersViewAll" onclick="this.style.display='none'" style="display:none">View all →</span>
+    </div>
+    <div class="trailer-filter-bar" id="trailerFilterBar"></div>
+    <div class="scroll-wrapper">
+      <button class="scroll-btn scroll-left" onclick="scrollRow('trailerRow', -1)">❮</button>
+      <div class="trailer-row" id="trailerRow"></div>
+      <button class="scroll-btn scroll-right" onclick="scrollRow('trailerRow', 1)">❯</button>
     </div>
   </section>
 
@@ -5044,6 +5277,187 @@
       const cards = grid.querySelectorAll('.movie-card');
       buildFilterBar('tvFilterBar', cards, 'all', (id) => { activeTVFilter = id; filterCards('tvGrid', id); });
 
+    }
+
+    // ── TRAILERS ──────────────────────────────────────────────────────────────
+    const TRAILER_GENRES = [
+      { id: 'all', label: 'All' },
+      { id: '28', label: 'Action' },
+      { id: '35', label: 'Comedy' },
+      { id: '27', label: 'Horror' },
+      { id: '878', label: 'Sci-Fi' },
+      { id: '18', label: 'Drama' },
+      { id: '10749', label: 'Romance' },
+      { id: '16', label: 'Animation' },
+      { id: '12', label: 'Adventure' },
+    ];
+
+    let _trailerMovies = [];   // full list for re-filtering
+    let _trailerGenre = 'all';
+    let _trailerMuted = true;
+    // map: movieId -> { iframeEl, muteBtn }
+    let _trailerPlayers = {};
+
+    function _buildTrailerCard(m, trailerKey) {
+      const thumb = m.backdrop_path
+        ? `https://image.tmdb.org/t/p/w780${m.backdrop_path}`
+        : (m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '');
+      const year = (m.release_date || '').slice(0, 4);
+      const rating = m.vote_average ? m.vote_average.toFixed(1) : null;
+
+      const div = document.createElement('div');
+      div.className = 'trailer-card';
+      div.dataset.movieId = m.id;
+      div.dataset.trailerKey = trailerKey;
+      div.dataset.genreIds = (m.genre_ids || []).join(',');
+      div.innerHTML = `
+        <div class="trailer-thumb" id="tthumb-${m.id}">
+          ${thumb ? `<img src="${thumb}" alt="${m.title || ''}" loading="lazy">` : `<div style="width:100%;height:100%;background:var(--dark3)"></div>`}
+          <div class="trailer-play-overlay">
+            <div class="trailer-play-icon">
+              <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+            </div>
+          </div>
+          <button class="trailer-mute-btn" id="tmute-${m.id}" title="Toggle Mute">🔇</button>
+        </div>
+        <div class="trailer-info">
+          <div class="trailer-title">${m.title || m.name || 'Unknown'}</div>
+          <div class="trailer-meta">
+            <span class="trailer-label">IN THEATRES</span>
+            <span class="trailer-year">${year}</span>
+            ${rating ? `<span class="trailer-rating">⭐ ${rating}</span>` : ''}
+          </div>
+        </div>`;
+
+      // Hover → swap thumbnail for autoplay iframe
+      const thumb_el = div.querySelector('.trailer-thumb');
+      const muteBtn = div.querySelector(`#tmute-${m.id}`);
+      let hoverTimer = null;
+      let iframeInjected = false;
+
+      div.addEventListener('mouseenter', () => {
+        hoverTimer = setTimeout(() => {
+          if (iframeInjected) return;
+          iframeInjected = true;
+          const iframe = document.createElement('iframe');
+          iframe.src = `https://www.youtube-nocookie.com/embed/${trailerKey}?autoplay=1&mute=1&controls=0&rel=0&modestbranding=1&playsinline=1&loop=1&playlist=${trailerKey}`;
+          iframe.allow = 'autoplay; encrypted-media';
+          iframe.title = m.title || '';
+          thumb_el.appendChild(iframe);
+          setTimeout(() => iframe.classList.add('loaded'), 300);
+          _trailerPlayers[m.id] = { iframe, muteBtn };
+
+          muteBtn.innerHTML = '🔇';
+          muteBtn.onclick = (e) => {
+            e.stopPropagation();
+            _trailerMuted = !_trailerMuted;
+            // Toggle mute via src manipulation (simplest cross-origin approach)
+            const cur = iframe.src;
+            if (_trailerMuted) {
+              iframe.src = cur.includes('mute=0') ? cur.replace('mute=0', 'mute=1') : cur;
+              muteBtn.innerHTML = '🔇';
+            } else {
+              iframe.src = cur.includes('mute=1') ? cur.replace('mute=1', 'mute=0') : cur;
+              muteBtn.innerHTML = '🔊';
+            }
+          };
+        }, 400);
+      });
+
+      div.addEventListener('mouseleave', () => {
+        clearTimeout(hoverTimer);
+        // Remove iframe on leave to stop audio
+        if (iframeInjected) {
+          const existing = thumb_el.querySelector('iframe');
+          if (existing) { existing.remove(); }
+          iframeInjected = false;
+          delete _trailerPlayers[m.id];
+        }
+      });
+
+      // Click → open full modal
+      div.addEventListener('click', () => openModal(m.id, 'movie'));
+
+      return div;
+    }
+
+    function _renderTrailerCards(genreId) {
+      const row = document.getElementById('trailerRow');
+      if (!row) return;
+      const filtered = genreId === 'all'
+        ? _trailerMovies
+        : _trailerMovies.filter(m => (m.genre_ids || []).map(String).includes(String(genreId)));
+
+      if (filtered.length === 0) {
+        row.innerHTML = `<div style="padding:2rem;color:var(--muted);font-size:.9rem">No trailers for this genre.</div>`;
+        return;
+      }
+
+      row.innerHTML = '';
+      filtered.forEach(m => {
+        const card = _buildTrailerCard(m, m._trailerKey);
+        row.appendChild(card);
+      });
+
+      gsap.fromTo(row.children,
+        { opacity: 0, y: 30, scale: 0.93 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.4, stagger: 0.06, ease: 'back.out(1.4)' }
+      );
+    }
+
+    function _buildTrailerFilterBar() {
+      const bar = document.getElementById('trailerFilterBar');
+      if (!bar) return;
+      bar.innerHTML = TRAILER_GENRES.map(g =>
+        `<button class="trailer-filter-btn${g.id === 'all' ? ' active' : ''}" data-gid="${g.id}">${g.label}</button>`
+      ).join('');
+      bar.querySelectorAll('.trailer-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          bar.querySelectorAll('.trailer-filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          _trailerGenre = btn.dataset.gid;
+          _renderTrailerCards(_trailerGenre);
+        });
+      });
+    }
+
+    async function loadTrailers() {
+      const row = document.getElementById('trailerRow');
+      if (!row) return;
+      // Skeleton
+      row.innerHTML = Array.from({ length: 6 }, () =>
+        `<div class="trailer-card"><div class="trailer-thumb sk" style="aspect-ratio:16/9"></div><div class="trailer-info"><div class="sk" style="height:14px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:50%"></div></div></div>`
+      ).join('');
+
+      try {
+        const data = await tmdb('/movie/now_playing?language=en-US&page=1');
+        const movies = (data.results || []).filter(m => m.backdrop_path).slice(0, 18);
+
+        // Fetch trailers in parallel (batched to avoid hammering API)
+        const batch = movies.slice(0, 12);
+        const videoResults = await Promise.allSettled(
+          batch.map(m => tmdb(`/movie/${m.id}/videos`).then(d => {
+            const t = (d.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube')
+              || (d.results || []).find(v => v.site === 'YouTube');
+            return { m, key: t ? t.key : null };
+          }))
+        );
+
+        _trailerMovies = videoResults
+          .filter(r => r.status === 'fulfilled' && r.value.key)
+          .map(r => ({ ...r.value.m, _trailerKey: r.value.key }));
+
+        if (_trailerMovies.length === 0) {
+          row.innerHTML = `<div style="padding:2rem;color:var(--muted)">No trailers available right now.</div>`;
+          return;
+        }
+
+        _buildTrailerFilterBar();
+        _renderTrailerCards('all');
+
+      } catch (err) {
+        row.innerHTML = `<div style="padding:2rem;color:var(--muted)">Failed to load trailers.</div>`;
+      }
     }
 
     async function loadTopRated() {
@@ -6863,6 +7277,19 @@
           }
         }
       }, { rootMargin: '300px 0px' });
+
+      // Also observe trailers section
+      if (document.getElementById('trailers')) {
+        const trailerObs = new IntersectionObserver((entries, obs) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              obs.unobserve(entry.target);
+              loadTrailers();
+            }
+          }
+        }, { rootMargin: '300px 0px' });
+        trailerObs.observe(document.getElementById('trailers'));
+      }
 
       const sectionsToObserve = ['trending', 'movies', 'tvshows', 'toprated'];
       sectionsToObserve.forEach(id => {
