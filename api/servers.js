@@ -58,10 +58,9 @@ export default async function handler(req, res) {
       `https://cinesrc.st/embed/tv/${id}?s=${s}&e=${e}`,
       `https://anyembed.xyz/embed/tmdb-tv-${id}-${s}-${e}?logo=false`,
       `https://vidfast.pro/tv/${id}/${s}/${e}?autoplay=1`,
-      `https://vidup.to/tv/${id}/${s}/${e}`,
-      `https://vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true`
+      `https://vidup.to/tv/${id}/${s}/${e}`
     );
-    labels.push('Hyperion', 'Flux', 'Stellar', 'OmniPlay', 'Vidup', 'Vidy');
+    labels.push('Hyperion', 'Flux', 'Stellar', 'OmniPlay', 'Vidup');
 
   } else {
     // Movie
@@ -91,10 +90,9 @@ export default async function handler(req, res) {
       `https://cinesrc.st/embed/movie/${id}`,
       `https://anyembed.xyz/embed/tmdb-movie-${id}?logo=false`,
       `https://vidfast.pro/movie/${id}?autoplay=1`,
-      `https://vidup.to/movie/${id}`,
-      `https://vidy.st/movie/${id}?color=E8C97A&autoplay=true`
+      `https://vidup.to/movie/${id}`
     );
-    labels.push('Hyperion', 'Flux', 'Stellar', 'OmniPlay', 'Vidup', 'Vidy');
+    labels.push('Hyperion', 'Flux', 'Stellar', 'OmniPlay', 'Vidup');
   }
 
   // Short cache so new servers appear quickly
