@@ -33,7 +33,7 @@ export default async function handler(req, res) {
     const e = episode || 1;
     
     urls = [
-      `https://www.vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true`,
+      `https://vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true`,
       `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}&autoplay=1`,
       `https://peachify.top/embed/tv/${id}/${s}/${e}?autoNext=5`,
       `https://player.videasy.net/tv/${id}/${s}/${e}?autoplay=1`,
@@ -61,7 +61,7 @@ export default async function handler(req, res) {
   } else {
     // Movie
     urls = [
-      `https://www.vidy.st/movie/${id}?color=E8C97A&autoplay=true`,
+      `https://vidy.st/movie/${id}?color=E8C97A&autoplay=true`,
       `https://vidsrc.me/embed/movie?tmdb=${id}&autoplay=1`,
       `https://peachify.top/embed/movie/${id}`,
       `https://player.videasy.net/movie/${id}?autoplay=1`,

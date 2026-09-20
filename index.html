@@ -4282,11 +4282,10 @@
         </div>
       </div>
       <iframe id="playerFrame" src="about:blank"
-        allow="encrypted-media; autoplay *; fullscreen *; picture-in-picture *"
-        allowfullscreen="true"
-        webkitallowfullscreen="true"
-        mozallowfullscreen="true"
-        frameborder="0"></iframe>
+        allow="encrypted-media; autoplay *; fullscreen *"
+        allowfullscreen
+        frameborder="0"
+        referrerpolicy="no-referrer"></iframe>
     </div>
   </div>
 
@@ -6129,7 +6128,7 @@
 
       if (type === 'tv') {
         urls = [
-          `https://www.vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true`,
+          `https://vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true`,
           `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}&autoplay=1`,
           `https://peachify.top/embed/tv/${id}/${s}/${e}?autoNext=5`,
           `https://player.videasy.net/tv/${id}/${s}/${e}?autoplay=1`,
@@ -6145,7 +6144,7 @@
         urls.push(`https://vidlove.cc/embed/tv/${id}/${s}/${e}?primarycolor=E8C97A&secondarycolor=07090F&iconcolor=E8C97A&autoplay=1&showNextEpisode=1`); labels.push('VidLove');
       } else {
         urls = [
-          `https://www.vidy.st/movie/${id}?color=E8C97A&autoplay=true`,
+          `https://vidy.st/movie/${id}?color=E8C97A&autoplay=true`,
           `https://vidsrc.me/embed/movie?tmdb=${id}&autoplay=1`,
           `https://peachify.top/embed/movie/${id}`,
           `https://player.videasy.net/movie/${id}?autoplay=1`,
