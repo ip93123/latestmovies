@@ -39,7 +39,7 @@ export default async function handler(req, res) {
       `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}&autoplay=1`,
       `https://peachify.top/embed/tv/${id}/${s}/${e}?autoNext=5`,
     ];
-    labels = ['VidLove', 'VidLink', 'VidNest', 'Aether', 'Nexus'];
+    labels = ['Infinity', 'VidLink', 'VidNest', 'Aether', 'Nexus'];
 
     urls.push(
       `https://player.videasy.net/tv/${id}/${s}/${e}?autoplay=1`,
@@ -58,9 +58,10 @@ export default async function handler(req, res) {
       `https://cinesrc.st/embed/tv/${id}?s=${s}&e=${e}`,
       `https://anyembed.xyz/embed/tmdb-tv-${id}-${s}-${e}?logo=false`,
       `https://vidfast.pro/tv/${id}/${s}/${e}?autoplay=1`,
-      `https://vidup.to/tv/${id}/${s}/${e}`
+      `https://vidup.to/tv/${id}/${s}/${e}`,
+      `https://vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true`
     );
-    labels.push('Hyperion', 'Flux', 'Stellar', 'OmniPlay', 'Vidup');
+    labels.push('Hyperion', 'Flux', 'Stellar', 'OmniPlay', 'Vidup', 'Vidy');
 
   } else {
     // Movie
@@ -71,7 +72,7 @@ export default async function handler(req, res) {
       `https://vidsrc.me/embed/movie?tmdb=${id}&autoplay=1`,
       `https://peachify.top/embed/movie/${id}`,
     ];
-    labels = ['VidLove', 'VidLink', 'VidNest', 'Aether', 'Nexus'];
+    labels = ['Infinity', 'VidLink', 'VidNest', 'Aether', 'Nexus'];
 
     urls.push(
       `https://player.videasy.net/movie/${id}?autoplay=1`,
@@ -90,9 +91,10 @@ export default async function handler(req, res) {
       `https://cinesrc.st/embed/movie/${id}`,
       `https://anyembed.xyz/embed/tmdb-movie-${id}?logo=false`,
       `https://vidfast.pro/movie/${id}?autoplay=1`,
-      `https://vidup.to/movie/${id}`
+      `https://vidup.to/movie/${id}`,
+      `https://vidy.st/movie/${id}?color=E8C97A&autoplay=true`
     );
-    labels.push('Hyperion', 'Flux', 'Stellar', 'OmniPlay', 'Vidup');
+    labels.push('Hyperion', 'Flux', 'Stellar', 'OmniPlay', 'Vidup', 'Vidy');
   }
 
   // Short cache so new servers appear quickly
