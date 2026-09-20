@@ -5772,6 +5772,7 @@
         urls.push(`https://cinesrc.st/embed/tv/${id}?s=${s}&e=${e}`); labels.push('Server 8');
         urls.push(`https://anyembed.xyz/embed/tmdb-tv-${id}-${s}-${e}?logo=false`); labels.push('Server 9');
         urls.push(`https://vidfast.pro/tv/${id}/${s}/${e}?autoplay=1`); labels.push('Server 10');
+        urls.push(`https://vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true`); labels.push('Vidy ✨');
       } else {
         urls = [
           `https://peachify.top/embed/movie/${id}`,
@@ -5786,6 +5787,7 @@
         urls.push(`https://cinesrc.st/embed/movie/${id}`); labels.push('Server 8');
         urls.push(`https://anyembed.xyz/embed/tmdb-movie-${id}?logo=false`); labels.push('Server 9');
         urls.push(`https://vidfast.pro/movie/${id}?autoplay=1`); labels.push('Server 10');
+        urls.push(`https://vidy.st/movie/${id}?color=E8C97A&autoplay=true`); labels.push('Vidy ✨');
       }
       return { urls, labels };
     }
@@ -6056,23 +6058,32 @@
           const data = await getModalServerUrls(id, type, 1, 1);
           const allUrls = data.urls || [];
           const allLabels = data.labels || [];
-          const colors = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#F97316', '#A855F7', '#14B8A6'];
-          const textColors = ['#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff'];
+          const colors = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#F97316', '#A855F7', '#14B8A6', 'linear-gradient(135deg,#E8C97A,#c9a227)'];
+          const textColors = ['#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#07090F'];
 
           let playBtnsHtml = '';
           const maxVisible = 5;
           const visibleUrls = allUrls.slice(0, maxVisible);
           const hiddenUrls = allUrls.slice(maxVisible);
 
-          playBtnsHtml += visibleUrls.map((u, i) =>
-            `<button class="modal-stream-pill modal-play-btn" data-server="${i}" style="background:${colors[i] || '#6B7280'};color:${textColors[i] || '#fff'};border:none;cursor:pointer">${allLabels[i]}</button>`
-          ).join('');
+          playBtnsHtml += visibleUrls.map((u, i) => {
+            const isVidy = allLabels[i] && allLabels[i].includes('Vidy');
+            const style = isVidy
+              ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 2px 12px rgba(232,201,122,.4);letter-spacing:.3px`
+              : `background:${colors[i] || '#6B7280'};color:${textColors[i] || '#fff'};border:none;cursor:pointer`;
+            return `<button class="modal-stream-pill modal-play-btn${isVidy ? ' vidy-server-btn' : ''}" data-server="${i}" style="${style}">${allLabels[i]}</button>`;
+          }).join('');
 
           if (hiddenUrls.length > 0) {
             playBtnsHtml += `<button class="modal-stream-pill" id="showMoreServersBtn" style="background:var(--dark3);color:#fff;border:1px solid rgba(255,255,255,0.2);cursor:pointer">➕ ${hiddenUrls.length} More</button>`;
-            playBtnsHtml += hiddenUrls.map((u, i) =>
-              `<button class="modal-stream-pill modal-play-btn extra-server-btn" data-server="${i + maxVisible}" style="background:${colors[i + maxVisible] || '#6B7280'};color:${textColors[i + maxVisible] || '#fff'};border:none;cursor:pointer;display:none">${allLabels[i + maxVisible]}</button>`
-            ).join('');
+            playBtnsHtml += hiddenUrls.map((u, i) => {
+              const idx = i + maxVisible;
+              const isVidy = allLabels[idx] && allLabels[idx].includes('Vidy');
+              const style = isVidy
+                ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 2px 12px rgba(232,201,122,.4);display:none`
+                : `background:${colors[idx] || '#6B7280'};color:${textColors[idx] || '#fff'};border:none;cursor:pointer;display:none`;
+              return `<button class="modal-stream-pill modal-play-btn extra-server-btn${isVidy ? ' vidy-server-btn' : ''}" data-server="${idx}" style="${style}">${allLabels[idx]}</button>`;
+            }).join('');
           }
 
           if (ms.innerHTML.includes('no-stream')) {
@@ -6473,7 +6484,9 @@
       if (allUrls && allUrls.length) {
         bar.innerHTML = allUrls.map((u, i) => {
           const lbl = labels ? labels[i] : `Server ${i + 1}`;
-          return `<button class="player-server-btn${u === url ? ' active' : ''}" onclick="_activeServerIndex=${i}; switchServer('${u}', this)">${lbl}</button>`;
+          const isVidy = lbl.includes('Vidy');
+          const vidyStyle = isVidy ? ' style="background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;font-weight:800;border-color:transparent"' : '';
+          return `<button class="player-server-btn${u === url ? ' active' : ''}"${vidyStyle} onclick="_activeServerIndex=${i}; switchServer('${u}', this)">${lbl}</button>`;
         }).join('');
         // Track which server is currently active
         _activeServerIndex = allUrls.indexOf(url);
