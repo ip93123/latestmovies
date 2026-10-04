@@ -6846,6 +6846,7 @@
       } else {
         bar.innerHTML = '';
       }
+      const wasAlreadyOpen = overlay.classList.contains('open');
       overlay.classList.add('open');
 
       // ── Auto-load Sinhala subtitles from Baiscope — DISABLED ──────────────
@@ -6880,7 +6881,11 @@
       // so system fullscreen is not needed at play-start.
       // The explicit fullscreen button still works when the user clicks it manually.
 
-      gsap.fromTo('.player-container', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'power3.out' });
+      // Only animate open if the player wasn't already visible
+      // Prevents the "new player on top of old" flash when switching servers or next episode
+      if (!wasAlreadyOpen) {
+        gsap.fromTo('.player-container', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'power3.out' });
+      }
       // TV remote: auto-focus the UI buttons so the user isn't trapped in the cross-origin iframe!
       if (_tvMode) {
         setTimeout(() => {
@@ -6909,11 +6914,16 @@
     }
 
     document.getElementById('playerClose').addEventListener('click', () => {
-      if (history.state && (history.state.ui === 'player' || history.state._hackyMaxPlayer)) {
-        history.back();
-      } else {
-        closePlayerInternal();
-      }
+      // Always close the player visually immediately
+      closePlayerInternal();
+      // Purge the player state from history so pressing Back never reopens the old player.
+      // Use replaceState (not back()) so the modal stays accessible and the
+      // hardware back button on mobile correctly closes the modal next.
+      try {
+        if (history.state && (history.state.ui === 'player' || history.state._hackyMaxPlayer)) {
+          history.replaceState({ ui: 'modal' }, '', location.href);
+        }
+      } catch (e) { }
     });
 
     function closePlayerInternal() {
