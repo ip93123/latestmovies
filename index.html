@@ -4284,7 +4284,6 @@
       <iframe id="playerFrame" src="about:blank"
         allow="encrypted-media; autoplay *; fullscreen *"
         allowfullscreen
-        sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation"
         frameborder="0"></iframe>
     </div>
   </div>
@@ -6991,6 +6990,28 @@
           _origReplace(url);
         };
       } catch (e) { /* security error in some browsers — safe to ignore */ }
+
+      // ── Layer 2b: location.href direct assignment intercept ───────────────────
+      // The most common redirect vector: top.location.href = "ad-url"
+      // Override the href setter so it checks isPlayerOpen() first.
+      try {
+        const _locationProto = Object.getPrototypeOf(window.location);
+        const _origHrefDesc = Object.getOwnPropertyDescriptor(_locationProto, 'href');
+        if (_origHrefDesc && _origHrefDesc.set) {
+          Object.defineProperty(_locationProto, 'href', {
+            get: _origHrefDesc.get,
+            set: function (url) {
+              if (isPlayerOpen()) {
+                console.warn('[AdBlock] Blocked href redirect:', url);
+                return;
+              }
+              _origHrefDesc.set.call(this, url);
+            },
+            configurable: true
+          });
+        }
+      } catch (e) { /* some browsers disallow redefining location.href — safe to ignore */ }
+
 
       // ── Layer 3: beforeunload guard ───────────────────────────────────────────
       // Desktop: shows "Leave page?" dialog so user can cancel the redirect.
