@@ -6172,10 +6172,13 @@
         if (eps.length) {
           episodeSel.value = '1';
           _selectedEpisode = 1;
+          // Bug #2 fix: write actual count so getNextEpInfo() has a fallback when DOM is gone
+          _totalEpisodesInSeason = eps.length;
           hint.textContent = `${eps.length} episode${eps.length !== 1 ? 's' : ''} in this season`;
         }
         episodeSel.disabled = false;
         refreshModalPlayButtons();
+        return eps.length; // Bug #3/#4 fix: callers can await the real count
       }
 
       await populateEpisodes(1);
@@ -6377,7 +6380,12 @@
           _currentModalType = type;
           _selectedSeason = 1;
           _selectedEpisode = 1;
-          _totalSeasons = (type === 'tv' && details.number_of_seasons) ? details.number_of_seasons : 0;
+          _totalEpisodesInSeason = 0; // reset; will be filled by populateEpisodes
+          // Bug #7 fix: fall back to season dropdown count if TMDB field is missing
+          const seasonSelFallback = document.getElementById('epSeasonSelect');
+          _totalSeasons = (type === 'tv' && details.number_of_seasons)
+            ? details.number_of_seasons
+            : (seasonSelFallback ? Math.max(0, seasonSelFallback.options.length - 1) : 0);
 
           // Set modal WishList button state
           const wlBtn = document.getElementById('modalWishlistBtn');
@@ -6817,12 +6825,21 @@
       }
       // Build server switcher
       if (allUrls && allUrls.length) {
+        // Bug #5 fix: use data-url attribute instead of inline onclick string
+        // so URLs containing & or ' don't break the handler
         bar.innerHTML = allUrls.map((u, i) => {
           const lbl = labels ? labels[i] : `Server ${i + 1}`;
           const isVidLove = lbl === 'VidLove' || lbl === 'Infinity';
           const vidLoveStyle = isVidLove ? ' style="background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;font-weight:800;border-color:transparent"' : '';
-          return `<button class="player-server-btn${u === url ? ' active' : ''}"${vidLoveStyle} onclick="_activeServerIndex=${i}; switchServer('${u}', this)">${lbl}</button>`;
+          const activeClass = u === url ? ' active' : '';
+          return `<button class="player-server-btn${activeClass}"${vidLoveStyle} data-server-index="${i}">${lbl}</button>`;
         }).join('');
+        bar.querySelectorAll('.player-server-btn').forEach((btn, i) => {
+          btn.addEventListener('click', () => {
+            _activeServerIndex = i;
+            switchServer(allUrls[i], btn);
+          });
+        });
         // Track which server is currently active
         _activeServerIndex = allUrls.indexOf(url);
         if (_activeServerIndex < 0) _activeServerIndex = 0;
@@ -7112,9 +7129,15 @@
     });
 
     function getNextEpInfo() {
+      // Bug #1/#2/#6 fix: prefer the known state var; only read DOM as a live refresh
       const episodeSel = document.getElementById('epEpisodeSelect');
-      const seasonSel = document.getElementById('epSeasonSelect');
-      const totalEps = episodeSel ? episodeSel.options.length - 1 : 0; // -1 for placeholder
+      const domCount = episodeSel ? Math.max(0, episodeSel.options.length - 1) : 0; // -1 for placeholder
+      const totalEps = domCount > 0 ? domCount : _totalEpisodesInSeason;
+      // Bug #7 fix: also re-sync _totalSeasons from the dropdown if it was 0
+      if (_totalSeasons === 0) {
+        const seasonSel = document.getElementById('epSeasonSelect');
+        if (seasonSel) _totalSeasons = Math.max(0, seasonSel.options.length - 1);
+      }
       const nextEp = _selectedEpisode + 1;
       const nextSeason = _selectedSeason + 1;
       if (nextEp <= totalEps) {
@@ -7141,28 +7164,43 @@
       if (!next) return;
 
       if (next.newSeason) {
-        // Need to reload the season dropdown first
+        // Bug #3 fix: drive populateEpisodes directly instead of a hardcoded 800ms race
         const seasonSel = document.getElementById('epSeasonSelect');
-        const episodeSel = document.getElementById('epEpisodeSelect');
         if (seasonSel) {
           seasonSel.value = String(next.season);
-          seasonSel.dispatchEvent(new Event('change'));
-          // Wait for episodes to load then play ep 1
-          await new Promise(resolve => setTimeout(resolve, 800));
+          // Trigger onchange which calls populateEpisodes and awaits it
+          _selectedSeason = next.season;
+          const epSel = document.getElementById('epEpisodeSelect');
+          if (epSel) {
+            epSel.disabled = true;
+            epSel.innerHTML = '<option value="">Loading…</option>';
+          }
+          // Await the actual season load via the same API path
+          const eps = await loadSeasonEpisodes(_currentModalId, next.season);
+          if (epSel) {
+            epSel.innerHTML = '<option value="">Episode…</option>';
+            eps.forEach(ep => {
+              epSel.innerHTML += `<option value="${ep.number}">Ep ${ep.number}${ep.name ? ' — ' + ep.name : ''}</option>`;
+            });
+            epSel.value = '1';
+            epSel.disabled = false;
+          }
+          _totalEpisodesInSeason = eps.length;
         }
         _selectedSeason = next.season;
         _selectedEpisode = 1;
       } else {
         _selectedSeason = next.season;
         _selectedEpisode = next.episode;
-        // Update select UI
         const episodeSel = document.getElementById('epEpisodeSelect');
         if (episodeSel) episodeSel.value = String(next.episode);
       }
 
-      const urls = await getModalServerUrls(_currentModalId, _currentModalType, _selectedSeason, _selectedEpisode);
-      const allLabels = urls.map((_, i) => `▶ Server ${i + 1}`);
-      playStream(urls[_activeServerIndex], urls, allLabels);
+      const data = await getModalServerUrls(_currentModalId, _currentModalType, _selectedSeason, _selectedEpisode);
+      const urls = data.urls || data;
+      const allLabels = data.labels || urls.map((_, i) => `Server ${i + 1}`);
+      const idx = Math.min(_activeServerIndex, urls.length - 1);
+      playStream(urls[idx], urls, allLabels);
       updateEpNavButtons();
     }
 
@@ -7171,18 +7209,29 @@
       if (!prev) return;
 
       if (prev.episode === null) {
-        // Go to last ep of previous season
+        // Bug #4 fix: await the actual episode load instead of hardcoded 800ms race
         const seasonSel = document.getElementById('epSeasonSelect');
-        if (seasonSel) {
-          seasonSel.value = String(prev.season);
-          seasonSel.dispatchEvent(new Event('change'));
-          await new Promise(resolve => setTimeout(resolve, 800));
-        }
-        const episodeSel = document.getElementById('epEpisodeSelect');
-        const totalEps = episodeSel ? episodeSel.options.length - 1 : 1;
+        const epSel = document.getElementById('epEpisodeSelect');
         _selectedSeason = prev.season;
+        if (seasonSel) seasonSel.value = String(prev.season);
+        if (epSel) {
+          epSel.disabled = true;
+          epSel.innerHTML = '<option value="">Loading…</option>';
+        }
+        const eps = await loadSeasonEpisodes(_currentModalId, prev.season);
+        let totalEps = eps.length;
+        if (epSel) {
+          epSel.innerHTML = '<option value="">Episode…</option>';
+          eps.forEach(ep => {
+            epSel.innerHTML += `<option value="${ep.number}">Ep ${ep.number}${ep.name ? ' — ' + ep.name : ''}</option>`;
+          });
+          // If TMDB returns episodes by number, find actual last ep number
+          if (eps.length > 0) totalEps = eps[eps.length - 1].number;
+          epSel.value = String(totalEps);
+          epSel.disabled = false;
+        }
+        _totalEpisodesInSeason = eps.length;
         _selectedEpisode = totalEps;
-        if (episodeSel) episodeSel.value = String(totalEps);
       } else {
         _selectedSeason = prev.season;
         _selectedEpisode = prev.episode;
@@ -7190,9 +7239,11 @@
         if (episodeSel) episodeSel.value = String(prev.episode);
       }
 
-      const urls = await getModalServerUrls(_currentModalId, _currentModalType, _selectedSeason, _selectedEpisode);
-      const allLabels = urls.map((_, i) => `▶ Server ${i + 1}`);
-      playStream(urls[_activeServerIndex], urls, allLabels);
+      const data = await getModalServerUrls(_currentModalId, _currentModalType, _selectedSeason, _selectedEpisode);
+      const urls = data.urls || data;
+      const allLabels = data.labels || urls.map((_, i) => `Server ${i + 1}`);
+      const idx = Math.min(_activeServerIndex, urls.length - 1);
+      playStream(urls[idx], urls, allLabels);
       updateEpNavButtons();
     }
 
