@@ -6951,13 +6951,12 @@
       // Always close the player visually immediately
       closePlayerInternal();
       // Purge the player state from history so pressing Back never reopens the old player.
-      // Use replaceState (not back()) so the modal stays accessible and the
-      // hardware back button on mobile correctly closes the modal next.
-      try {
-        if (history.state && (history.state.ui === 'player' || history.state._hackyMaxPlayer)) {
-          history.replaceState({ ui: 'modal' }, '', location.href);
-        }
-      } catch (e) { }
+      // Use history.back() to pop the player state cleanly (so modal X only needs one press).
+      // The _intentionalPlayerClose flag prevents the popstate handler from re-opening an old player.
+      window._intentionalPlayerClose = true;
+      if (history.state && (history.state.ui === 'player' || history.state._hackyMaxPlayer)) {
+        history.back();
+      }
     });
 
     function closePlayerInternal() {
@@ -7114,15 +7113,26 @@
         const playerOverlay = document.getElementById('playerOverlay');
         const frame = document.getElementById('playerFrame');
         if (state.ui === 'player' || state._hackyMaxPlayer) {
-          // User navigated forward back to the player, or an ad redirect popped
-          history.replaceState(state, '', location.href);
-          if (playerOverlay && frame && state._src && state._src !== 'about:blank') {
-            frame.src = state._src;
-            playerOverlay.classList.add('open');
-            try { gsap.fromTo('.player-container', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'power3.out' }); } catch (ex) { }
+          // If the user intentionally closed the player (pressed X), don't reopen it.
+          if (window._intentionalPlayerClose) {
+            window._intentionalPlayerClose = false;
+            // Close player if it is still visually open (GSAP may still be running)
+            if (playerOverlay && playerOverlay.classList.contains('open')) {
+              closePlayerInternal();
+            }
+            // Don't fall into the else branch — modal handling below will run
+          } else {
+            // Ad redirect recovery: reopen the player with the saved src
+            history.replaceState(state, '', location.href);
+            if (playerOverlay && frame && state._src && state._src !== 'about:blank') {
+              frame.src = state._src;
+              playerOverlay.classList.add('open');
+              try { gsap.fromTo('.player-container', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'power3.out' }); } catch (ex) { }
+            }
+            return; // modal handling not needed when re-opening player
           }
         } else {
-          // Hardware back button pressed, close player if open
+          // Hardware back button pressed while player is open → close it
           if (playerOverlay && playerOverlay.classList.contains('open')) {
             closePlayerInternal();
           }
