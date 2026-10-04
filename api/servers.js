@@ -33,64 +33,64 @@ export default async function handler(req, res) {
     const e = episode || 1;
     
     urls = [
-      `https://vidlove.cc/embed/tv/${id}/${s}/${e}?primarycolor=E8C97A&secondarycolor=07090F&iconcolor=E8C97A&autoplay=1&showNextEpisode=1`,
-      `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true`,
-      `https://vidnest.fun/tv/${id}/${s}/${e}`,
-      `https://vixsrc.to/tv/${id}/${s}/${e}`,
-      `https://vidup.to/tv/${id}/${s}/${e}`,
-      `https://vidfast.pro/tv/${id}/${s}/${e}?autoplay=1`,
+      `https://vidlove.cc/embed/tv/${id}/${s}/${e}?primarycolor=E8C97A&secondarycolor=07090F&iconcolor=E8C97A&autoplay=1&mute=0&showNextEpisode=1`,
+      `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&muted=false&nextEpisode=true&episodeSelector=true`,
+      `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
+      `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`,
+      `https://vidup.to/tv/${id}/${s}/${e}?autoplay=1`,
+      `https://vidfast.pro/tv/${id}/${s}/${e}?autoplay=1&mute=0`,
     ];
     labels = ['Infinity', 'Nova', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay'];
 
     urls.push(
-      `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}&autoplay=1`,
-      `https://peachify.top/embed/tv/${id}/${s}/${e}?autoNext=5`,
-      `https://player.videasy.net/tv/${id}/${s}/${e}?autoplay=1`,
+      `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}&autoplay=1&mute=0`,
+      `https://peachify.top/embed/tv/${id}/${s}/${e}?autoNext=5&autoplay=1`,
+      `https://player.videasy.net/tv/${id}/${s}/${e}?autoplay=1&muted=0`,
       `https://embedmaster.link/tv/${id}/${s}/${e}?autoplay=1`,
       `https://vidcore.net/tv/${id}/${s}/${e}?autoplay=1&server=orbit`
     );
     labels.push('Aether', 'Nexus', 'Phantom', 'Spectra', 'Orbit');
 
     if (imdbId) {
-      urls.push(`https://primesrc.me/embed/tv?imdb=${imdbId}&season=${s}&episode=${e}`);
+      urls.push(`https://primesrc.me/embed/tv?imdb=${imdbId}&season=${s}&episode=${e}&autoplay=1`);
       labels.push('Pulse');
     }
 
     urls.push(
-      `https://cinesrc.st/embed/tv/${id}?s=${s}&e=${e}`,
-      `https://anyembed.xyz/embed/tmdb-tv-${id}-${s}-${e}?logo=false`
+      `https://cinesrc.st/embed/tv/${id}?s=${s}&e=${e}&autoplay=1`,
+      `https://anyembed.xyz/embed/tmdb-tv-${id}-${s}-${e}?logo=false&autoplay=1`
     );
     labels.push('Flux', 'Stellar');
 
   } else {
     // Movie
     urls = [
-      `https://vidlove.cc/embed/movie/${id}?primarycolor=E8C97A&secondarycolor=07090F&iconcolor=E8C97A&autoplay=1`,
-      `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true`,
-      `https://vidnest.fun/movie/${id}`,
-      `https://vixsrc.to/movie/${id}`,
-      `https://vidup.to/movie/${id}`,
-      `https://vidfast.pro/movie/${id}?autoplay=1`,
+      `https://vidlove.cc/embed/movie/${id}?primarycolor=E8C97A&secondarycolor=07090F&iconcolor=E8C97A&autoplay=1&mute=0`,
+      `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&muted=false`,
+      `https://vidnest.fun/movie/${id}?autoplay=1`,
+      `https://vixsrc.to/movie/${id}?autoplay=1`,
+      `https://vidup.to/movie/${id}?autoplay=1`,
+      `https://vidfast.pro/movie/${id}?autoplay=1&mute=0`,
     ];
     labels = ['Infinity', 'Nova', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay'];
 
     urls.push(
-      `https://vidsrc.me/embed/movie?tmdb=${id}&autoplay=1`,
-      `https://peachify.top/embed/movie/${id}`,
-      `https://player.videasy.net/movie/${id}?autoplay=1`,
+      `https://vidsrc.me/embed/movie?tmdb=${id}&autoplay=1&mute=0`,
+      `https://peachify.top/embed/movie/${id}?autoplay=1`,
+      `https://player.videasy.net/movie/${id}?autoplay=1&muted=0`,
       `https://embedmaster.link/movie/${id}?autoplay=1`,
       `https://vidcore.net/movie/${id}?autoplay=1&server=orbit`
     );
     labels.push('Aether', 'Nexus', 'Phantom', 'Spectra', 'Orbit');
 
     if (imdbId) {
-      urls.push(`https://primesrc.me/embed/movie?imdb=${imdbId}`);
+      urls.push(`https://primesrc.me/embed/movie?imdb=${imdbId}&autoplay=1`);
       labels.push('Pulse');
     }
 
     urls.push(
-      `https://cinesrc.st/embed/movie/${id}`,
-      `https://anyembed.xyz/embed/tmdb-movie-${id}?logo=false`
+      `https://cinesrc.st/embed/movie/${id}?autoplay=1`,
+      `https://anyembed.xyz/embed/tmdb-movie-${id}?logo=false&autoplay=1`
     );
     labels.push('Flux', 'Stellar');
   }
