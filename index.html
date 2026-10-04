@@ -4240,7 +4240,7 @@
       <button class="player-ep-btn" id="playerNextEp" title="Next Episode">Next Ep ⏭</button>
     </div>
     <div class="player-container" id="playerContainer">
-      <button class="popup-home" id="playerHome" onclick="document.getElementById('playerClose').click()"
+      <button class="popup-home" id="playerHome"
         title="Go Home"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
           stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" />
@@ -4295,7 +4295,7 @@
       <div class="modal-body">
         <div class="modal-top-actions">
           <button class="popup-home" id="modalWishlistBtn" title="Add to WishList">🔖</button>
-          <button class="popup-home" id="modalHome" onclick="document.getElementById('modalClose').click()"
+          <button class="popup-home" id="modalHome"
             title="Go Home"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
               stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" />
@@ -6477,6 +6477,40 @@
         closeModalInternal();
       }
     });
+
+    // ── Go Home buttons — close ALL overlays and return cleanly to the home page ──
+    function goHome() {
+      // 1. Close player if open
+      const playerOverlay = document.getElementById('playerOverlay');
+      if (playerOverlay && playerOverlay.classList.contains('open')) {
+        // Immediately stop the iframe so audio cuts instantly
+        const frame = document.getElementById('playerFrame');
+        if (frame) frame.src = '';
+        playerOverlay.classList.remove('open');
+        const epBar = document.getElementById('playerEpBar');
+        if (epBar) epBar.classList.remove('visible');
+      }
+      // 2. Close modal if open
+      const modal = document.getElementById('modal');
+      if (modal && modal.classList.contains('open')) {
+        modal.classList.remove('open');
+        _currentModalId = null;
+        const epChooser = document.getElementById('modalEpChooser');
+        if (epChooser) epChooser.style.display = 'none';
+      }
+      // 3. Reset history to a clean page state (no player/modal in stack)
+      try {
+        const st = history.state || {};
+        if (st.ui === 'player' || st._hackyMaxPlayer || st.ui === 'modal') {
+          history.replaceState({ ui: 'page' }, '', location.href);
+        }
+      } catch (e) { }
+      // 4. Scroll to top smoothly
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('playerHome').addEventListener('click', goHome);
+    document.getElementById('modalHome').addEventListener('click', goHome);
 
     function closeModalInternal() {
       gsap.to('#modalBox', {
