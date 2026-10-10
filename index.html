@@ -4330,7 +4330,8 @@
         <div id="maxError" style="display:none; position:absolute; inset:0; background:linear-gradient(135deg,#07090F 0%,#0D1117 100%); flex-direction:column; align-items:center; justify-content:center; gap:1.2rem; z-index:11; text-align:center; padding:2rem;">
           <div style="width:64px;height:64px;background:rgba(232,201,122,0.12);border:1.5px solid rgba(232,201,122,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;">⚡</div>
           <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:3px;color:#E8C97A;">MAX</div>
-          <div style="color:#6B7A94;font-size:0.9rem;font-family:'Inter',sans-serif;max-width:320px;line-height:1.6;" id="maxErrorMsg">HLS stream unavailable for this title.<br>Switch to another server below.</div>
+          <div style="color:#6B7A94;font-size:0.9rem;font-family:'Inter',sans-serif;max-width:320px;line-height:1.6;" id="maxErrorMsg">HLS stream unavailable for this title.<br><span style="color:#E8C97A;font-weight:600;">Switching to Infinity...</span></div>
+          <button id="maxFallbackBtn" type="button" style="background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;font-weight:700;font-family:'Inter',sans-serif;font-size:0.85rem;padding:8px 18px;border-radius:20px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">Switch to Infinity ✦</button>
           <div style="height:1px;width:60px;background:linear-gradient(90deg,transparent,rgba(232,201,122,0.4),transparent);"></div>
           <div style="color:#4a5568;font-size:0.75rem;font-family:'Inter',sans-serif;">Tip: Try Infinity or Nova as fallback</div>
         </div>
@@ -7107,6 +7108,26 @@
         return;
       }
 
+      function _fallbackFromMax() {
+        setTimeout(() => {
+          if (_maxWrap.classList.contains('error')) {
+            const btns = document.querySelectorAll('.player-server-btn');
+            const fallbackBtn = Array.from(btns).find(b => !b.classList.contains('max-btn'));
+            if (fallbackBtn) fallbackBtn.click();
+          }
+        }, 1600);
+      }
+
+      const fbBtn = document.getElementById('maxFallbackBtn');
+      if (fbBtn && !fbBtn._wired) {
+        fbBtn._wired = true;
+        fbBtn.onclick = () => {
+          const btns = document.querySelectorAll('.player-server-btn');
+          const fallbackBtn = Array.from(btns).find(b => !b.classList.contains('max-btn'));
+          if (fallbackBtn) fallbackBtn.click();
+        };
+      }
+
       // ── Fetch HLS stream URL from /api/hls ────────────────────────────
       let streamUrl = null;
       try {
@@ -7121,6 +7142,10 @@
       if (!streamUrl) {
         _maxWrap.classList.remove('buffering');
         _maxWrap.classList.add('error');
+        if (_maxErrMsg) {
+          _maxErrMsg.innerHTML = 'HLS stream unavailable for this title.<br><span style="color:#E8C97A;font-weight:600;">Switching to Infinity...</span>';
+        }
+        _fallbackFromMax();
         return;
       }
 
@@ -7154,8 +7179,9 @@
           if (data.fatal) {
             _maxWrap.classList.remove('buffering', 'ready');
             _maxWrap.classList.add('error');
-            if (_maxErrMsg) _maxErrMsg.innerHTML = `Stream error: ${data.type}<br>Try another server.`;
+            if (_maxErrMsg) _maxErrMsg.innerHTML = `Stream error: ${data.type}<br><span style="color:#E8C97A;font-weight:600;">Switching to Infinity...</span>`;
             _maxHls.destroy(); _maxHls = null;
+            _fallbackFromMax();
           }
         });
 
