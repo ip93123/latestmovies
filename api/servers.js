@@ -33,6 +33,7 @@ export default async function handler(req, res) {
     const e = episode || 1;
     
     urls = [
+      `max://tv/${id}/${s}/${e}`,
       `https://vidlove.cc/embed/tv/${id}/${s}/${e}?primarycolor=E8C97A&secondarycolor=07090F&iconcolor=E8C97A&autoplay=1&mute=0&showNextEpisode=1`,
       `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&muted=false&nextEpisode=true&episodeSelector=true`,
       `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
@@ -40,7 +41,7 @@ export default async function handler(req, res) {
       `https://vidup.to/tv/${id}/${s}/${e}?autoplay=1`,
       `https://vidfast.pro/tv/${id}/${s}/${e}?autoplay=1&mute=0`,
     ];
-    labels = ['Infinity', 'Nova', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay'];
+    labels = ['Max ✦', 'Infinity', 'Nova', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay'];
 
     urls.push(
       `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}&autoplay=1&mute=0`,
@@ -65,6 +66,7 @@ export default async function handler(req, res) {
   } else {
     // Movie
     urls = [
+      `max://movie/${id}`,
       `https://vidlove.cc/embed/movie/${id}?primarycolor=E8C97A&secondarycolor=07090F&iconcolor=E8C97A&autoplay=1&mute=0`,
       `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&muted=false`,
       `https://vidnest.fun/movie/${id}?autoplay=1`,
@@ -72,7 +74,7 @@ export default async function handler(req, res) {
       `https://vidup.to/movie/${id}?autoplay=1`,
       `https://vidfast.pro/movie/${id}?autoplay=1&mute=0`,
     ];
-    labels = ['Infinity', 'Nova', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay'];
+    labels = ['Max ✦', 'Infinity', 'Nova', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay'];
 
     urls.push(
       `https://vidsrc.me/embed/movie?tmdb=${id}&autoplay=1&mute=0`,

@@ -19,6 +19,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
+  <!-- hls.js — loaded lazily only when Max player is activated -->
+  <script>window._hlsJsLoaded = false;</script>
   <style>
     * {
       margin: 0;
@@ -2290,6 +2292,38 @@
     #subToggleBtn.active { background: rgba(232,201,122,0.25); border-color: var(--gold); color: var(--gold); }
     #subToggleBtn .sub-flag { font-size: 1rem; }
 
+    /* ── Max Player server button ─────────────────────────────────────── */
+    .player-server-btn.max-btn {
+      background: linear-gradient(135deg, #E8C97A 0%, #c9a227 100%);
+      color: #07090F;
+      font-weight: 800;
+      border-color: transparent;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 14px rgba(232,201,122,0.35);
+    }
+    .player-server-btn.max-btn:hover {
+      box-shadow: 0 0 22px rgba(232,201,122,0.55);
+      transform: translateY(-1px);
+    }
+    .player-server-btn.max-btn.active {
+      box-shadow: 0 0 28px rgba(232,201,122,0.7);
+      animation: maxPulse 2.5s ease-in-out infinite;
+    }
+    @keyframes maxPulse {
+      0%, 100% { box-shadow: 0 0 14px rgba(232,201,122,0.5); }
+      50%       { box-shadow: 0 0 28px rgba(232,201,122,0.85); }
+    }
+
+    /* Max video element — show native controls styled to dark theme */
+    #maxVideo::-webkit-media-controls-panel { background: rgba(7,9,15,0.92); }
+    #maxVideo { outline: none; }
+
+    /* Buffering — hide when video plays */
+    #maxPlayerWrap.buffering #maxBuffering { display: flex !important; }
+    #maxPlayerWrap.ready    #maxBuffering { display: none  !important; }
+    #maxPlayerWrap.error    #maxError     { display: flex !important; }
+    #maxPlayerWrap.ready    #maxQualityBadge { display: block !important; }
+
     /* Sync panel */
     #subSyncPanel {
       position: absolute;
@@ -4280,6 +4314,28 @@
           <button class="sub-sync-btn" onclick="subShift(500)">+0.5s</button>
           <button class="sub-sync-btn" onclick="subShift(2000)">+2s</button>
         </div>
+      </div>
+      <!-- ══ MAX PLAYER ══ Custom HLS player — shown instead of iframe when Max server selected -->
+      <div id="maxPlayerWrap" style="display:none; position:absolute; inset:0; background:#000; z-index:5; border-radius:inherit; overflow:hidden;">
+        <!-- Video element -->
+        <video id="maxVideo" playsinline style="width:100%;height:100%;display:block;background:#000;"></video>
+        <!-- Quality badge top-left -->
+        <div id="maxQualityBadge" style="display:none; position:absolute; top:1rem; left:1rem; background:rgba(232,201,122,0.15); border:1px solid rgba(232,201,122,0.4); color:#E8C97A; font-size:0.7rem; font-weight:700; letter-spacing:1px; padding:3px 10px; border-radius:20px; backdrop-filter:blur(8px); pointer-events:none; z-index:12; font-family:'Inter',sans-serif; text-transform:uppercase;"></div>
+        <!-- Buffering spinner -->
+        <div id="maxBuffering" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.6); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem; z-index:11;">
+          <div style="width:48px;height:48px;border:4px solid rgba(232,201,122,0.2);border-top-color:#E8C97A;border-radius:50%;animation:spin 1s linear infinite;"></div>
+          <span style="color:#E8C97A;font-size:0.85rem;font-family:'Inter',sans-serif;letter-spacing:1px;font-weight:600;">MAX · LOADING</span>
+        </div>
+        <!-- Error / no stream state -->
+        <div id="maxError" style="display:none; position:absolute; inset:0; background:linear-gradient(135deg,#07090F 0%,#0D1117 100%); flex-direction:column; align-items:center; justify-content:center; gap:1.2rem; z-index:11; text-align:center; padding:2rem;">
+          <div style="width:64px;height:64px;background:rgba(232,201,122,0.12);border:1.5px solid rgba(232,201,122,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;">⚡</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:3px;color:#E8C97A;">MAX</div>
+          <div style="color:#6B7A94;font-size:0.9rem;font-family:'Inter',sans-serif;max-width:320px;line-height:1.6;" id="maxErrorMsg">HLS stream unavailable for this title.<br>Switch to another server below.</div>
+          <div style="height:1px;width:60px;background:linear-gradient(90deg,transparent,rgba(232,201,122,0.4),transparent);"></div>
+          <div style="color:#4a5568;font-size:0.75rem;font-family:'Inter',sans-serif;">Tip: Try Infinity or Nova as fallback</div>
+        </div>
+        <!-- Max branding watermark -->
+        <div style="position:absolute;bottom:1rem;left:50%;transform:translateX(-50%);font-family:'Bebas Neue',sans-serif;font-size:0.85rem;letter-spacing:4px;color:rgba(232,201,122,0.2);pointer-events:none;z-index:6;">MAX</div>
       </div>
       <iframe id="playerFrame" src="about:blank"
         allow="autoplay; encrypted-media; fullscreen; picture-in-picture; web-share"
@@ -6410,11 +6466,14 @@
           const hiddenUrls = allUrls.slice(maxVisible);
 
           playBtnsHtml += visibleUrls.map((u, i) => {
-            const isVidLove = allLabels[i] && (allLabels[i] === 'VidLove' || allLabels[i] === 'Infinity');
-            const style = isVidLove
+            const isMax     = u.startsWith('max://');
+            const isVidLove = !isMax && allLabels[i] && (allLabels[i] === 'VidLove' || allLabels[i] === 'Infinity');
+            const style = isMax
+              ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(232,201,122,.45);letter-spacing:.5px`
+              : isVidLove
               ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 2px 12px rgba(232,201,122,.4);letter-spacing:.3px`
               : `background:${colors[i] || '#6B7280'};color:${textColors[i] || '#fff'};border:none;cursor:pointer`;
-            return `<button class="modal-stream-pill modal-play-btn${isVidLove ? ' vidlove-server-btn' : ''}" data-server="${i}" style="${style}">${allLabels[i]}</button>`;
+            return `<button class="modal-stream-pill modal-play-btn${isMax ? ' max-btn' : isVidLove ? ' vidlove-server-btn' : ''}" data-server="${i}" style="${style}">${allLabels[i]}</button>`;
           }).join('');
 
           if (hiddenUrls.length > 0) {
@@ -6652,51 +6711,155 @@
       document.head.appendChild(lnk);
     })();
 
-    let _subCues = [];          // parsed VTT cues [{start, end, text}]
+    let _subCues = [];          // parsed cues [{start, end, text}]
     let _subStartTime = null;   // Date.now() when user pressed Start
     let _subOffset = 0;         // manual shift in ms
     let _subRaf = null;         // requestAnimationFrame handle
     let _subActive = false;     // subtitle panel currently shown
-    let _subLoaded = false;     // subtitle file successfully fetched
+    let _subLoaded = false;     // subtitle file successfully loaded
+    let _subFileName = '';      // filename of loaded sub for display
 
     const _subToggleBtn  = document.getElementById('subToggleBtn');
+    const _subFileInput  = document.getElementById('subFileInput');
     const _subSyncPanel  = document.getElementById('subSyncPanel');
     const _subStartBtn   = document.getElementById('subStartBtn');
     const _subResetBtn   = document.getElementById('subResetBtn');
     const _subStatusLine = document.getElementById('subStatusLine');
     const _subText       = document.getElementById('subText');
 
-    // Parse WebVTT text → array of cue objects
+    // ── Time helpers ────────────────────────────────────────────────────────
+    function vttTimeToMs(ts) {
+      // Supports HH:MM:SS.mmm, HH:MM:SS,mmm (SRT) and MM:SS.mmm
+      ts = ts.replace(',', '.');
+      const parts = ts.trim().split(':');
+      let h = 0, m = 0, s = 0, ms = 0;
+      if (parts.length === 3) {
+        h = +parts[0]; m = +parts[1];
+        const sm = parts[2].split('.');
+        s = +sm[0]; ms = +(sm[1] || 0);
+      } else {
+        m = +parts[0];
+        const sm = parts[1].split('.');
+        s = +sm[0]; ms = +(sm[1] || 0);
+      }
+      return ((h * 3600 + m * 60 + s) * 1000) + ms;
+    }
+
+    // Parse WebVTT → cues
     function parseVtt(vtt) {
       const cues = [];
-      // Split into blocks by double newline
       const blocks = vtt.replace(/\r\n/g, '\n').split(/\n\n+/);
       for (const block of blocks) {
         const lines = block.trim().split('\n');
-        // Find the timing line: HH:MM:SS.mmm --> HH:MM:SS.mmm
         const timingIdx = lines.findIndex(l => l.includes('-->'));
         if (timingIdx < 0) continue;
         const [startStr, endStr] = lines[timingIdx].split('-->').map(s => s.trim());
-        const text = lines.slice(timingIdx + 1).join('\n').trim();
+        const text = lines.slice(timingIdx + 1).join('\n')
+          .replace(/<[^>]+>/g, '').trim(); // strip VTT tags
         if (!text) continue;
         cues.push({ start: vttTimeToMs(startStr), end: vttTimeToMs(endStr), text });
       }
       return cues;
     }
 
-    function vttTimeToMs(ts) {
-      // Supports HH:MM:SS.mmm and MM:SS.mmm
-      const parts = ts.split(':');
-      let h = 0, m = 0, s = 0, ms = 0;
-      if (parts.length === 3) {
-        h = +parts[0];
-        m = +parts[1];
-        [s, ms] = parts[2].split('.').map(Number);
-      } else {
-        m = +parts[0];
-        [s, ms] = parts[1].split('.').map(Number);
+    // Parse SRT → cues
+    function parseSrt(srt) {
+      const cues = [];
+      const blocks = srt.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split(/\n\n+/);
+      for (const block of blocks) {
+        const lines = block.trim().split('\n');
+        if (lines.length < 2) continue;
+        const timingIdx = lines.findIndex(l => l.includes('-->'));
+        if (timingIdx < 0) continue;
+        const [startStr, endStr] = lines[timingIdx].split('-->').map(s => s.trim());
+        const text = lines.slice(timingIdx + 1).join('\n')
+          .replace(/<[^>]+>/g, '').trim(); // strip HTML tags
+        if (!text) continue;
+        cues.push({ start: vttTimeToMs(startStr), end: vttTimeToMs(endStr), text });
       }
-      return ((h * 3600 + m * 60 + s) * 1000) + (ms || 0);
+      return cues;
+    }
+
+    // Parse ASS/SSA → cues (basic Dialogue line extraction)
+    function parseAss(ass) {
+      const cues = [];
+      const lines = ass.replace(/\r\n/g, '\n').split('\n');
+      // Find Format line to know column indices
+      let startIdx = -1, endIdx = -1, textIdx = -1;
+      for (const line of lines) {
+        if (/^Format:/i.test(line)) {
+          const cols = line.replace(/^Format:\s*/i, '').split(',').map(c => c.trim().toLowerCase());
+          startIdx = cols.indexOf('start');
+          endIdx   = cols.indexOf('end');
+          textIdx  = cols.indexOf('text');
+        }
+        if (/^Dialogue:/i.test(line) && startIdx >= 0) {
+          const parts = line.replace(/^Dialogue:\s*/i, '').split(',');
+          // text field may contain commas itself — rejoin from textIdx onwards
+          const startStr = (parts[startIdx] || '').trim();
+          const endStr   = (parts[endIdx]   || '').trim();
+          const rawText  = parts.slice(textIdx).join(',').trim();
+          // Remove ASS override tags {\xxx} and soft line breaks
+          const text = rawText.replace(/\{[^}]*\}/g, '').replace(/\\[nNh]/g, '\n').trim();
+          if (!text) continue;
+          // ASS time format: H:MM:SS.cs (centiseconds)
+          function assTimeToMs(t) {
+            const p = t.split(':');
+            const h = +p[0], min = +p[1];
+            const [sec, cs] = (p[2] || '0.0').split('.');
+            return ((h * 3600 + min * 60 + +sec) * 1000) + (+cs || 0) * 10;
+          }
+          cues.push({ start: assTimeToMs(startStr), end: assTimeToMs(endStr), text });
+        }
+      }
+      cues.sort((a, b) => a.start - b.start);
+      return cues;
+    }
+
+    // Load cues into player and show sync panel
+    function _loadSubCues(cues, filename) {
+      if (!cues.length) {
+        alert('No subtitle cues found in this file. Please check the file format.');
+        return;
+      }
+      _subCues = cues;
+      _subFileName = filename || 'subtitle';
+      _subLoaded = true;
+      _stopSubLoop();
+      _subStartTime = null;
+      _subOffset = 0;
+
+      // Update button state
+      _subToggleBtn.querySelector('.sub-flag').textContent = '🇱🇰';
+      _subToggleBtn.classList.add('active');
+      _subToggleBtn.style.opacity = '1';
+      _subToggleBtn.title = `Subtitles loaded: ${_subFileName} (${cues.length} cues) — Click to hide`;
+
+      const msg = document.getElementById('subPanelMsg');
+
+      if (_maxMode && typeof _maxSubLoop === 'function') {
+        // ── MAX mode: drive subtitles via video.currentTime (no Start needed) ──
+        if (_maxSubRaf) cancelAnimationFrame(_maxSubRaf);
+        _maxSubRaf = requestAnimationFrame(_maxSubLoop);
+        _subActive = true;
+        if (msg) msg.innerHTML = `✅ <strong style="color:var(--gold)">${_escHtml(_subFileName)}</strong> loaded — <em>${cues.length} cues</em>.<br><span style="color:#27AE60;font-size:0.8em;">⚡ Auto-sync active (Max Player)</span>`;
+        // Hide the Start button row — not needed in Max mode
+        if (_subStartBtn) _subStartBtn.style.display = 'none';
+        if (_subStatusLine) _subStatusLine.textContent = 'Live sync via Max Player';
+      } else {
+        // ── Iframe mode: wall-clock sync, user presses Start ──────────────
+        if (msg) msg.innerHTML = `✅ Loaded <strong style="color:var(--gold)">${_escHtml(_subFileName)}</strong> — <em>${cues.length} cues</em>. Press <strong>▶ Start</strong> when movie begins.`;
+        if (_subStartBtn) _subStartBtn.style.display = '';
+        if (_subStatusLine) _subStatusLine.textContent = 'Ready — press Start';
+        _subStartBtn.textContent = '▶ Start Subtitles';
+      }
+      _subSyncPanel.classList.add('visible');
+      _subActive = true;
+      console.log(`[Subtitles] Loaded ${cues.length} cues from "${filename}" (${_maxMode ? 'Max/auto-sync' : 'wall-clock'})`);
+    }
+
+    function _escHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
     // RAF loop — renders current cue
@@ -6781,19 +6944,50 @@
       }
     }
 
-    // Toggle subtitle panel
+    // ── LOAD SUB button → open file picker ────────────────────────────────
     _subToggleBtn.addEventListener('click', () => {
-      if (!_subLoaded) return;
-      _subActive = !_subActive;
-      _subToggleBtn.classList.toggle('active', _subActive);
-      if (_subActive) {
-        _subSyncPanel.classList.add('visible');
-        // If already started, keep running; just show panel
-      } else {
-        _subSyncPanel.classList.remove('visible');
-        _stopSubLoop();
-        _subStartTime = null;
+      if (_subLoaded) {
+        // Already loaded: toggle panel visibility
+        _subActive = !_subActive;
+        _subToggleBtn.classList.toggle('active', _subActive);
+        if (_subActive) {
+          _subSyncPanel.classList.add('visible');
+        } else {
+          _subSyncPanel.classList.remove('visible');
+          _stopSubLoop();
+          _subStartTime = null;
+        }
+        return;
       }
+      // No sub loaded yet → open file picker
+      _subFileInput.value = ''; // reset so same file can be re-picked
+      _subFileInput.click();
+    });
+
+    // ── File picker → read & parse ─────────────────────────────────────────
+    _subFileInput.addEventListener('change', () => {
+      const file = _subFileInput.files[0];
+      if (!file) return;
+      const name = file.name.toLowerCase();
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const content = ev.target.result;
+        let cues = [];
+        if (name.endsWith('.srt')) {
+          cues = parseSrt(content);
+        } else if (name.endsWith('.vtt')) {
+          cues = parseVtt(content);
+        } else if (name.endsWith('.ass') || name.endsWith('.ssa')) {
+          cues = parseAss(content);
+        } else {
+          // Unknown — try SRT first, then VTT
+          cues = parseSrt(content);
+          if (!cues.length) cues = parseVtt(content);
+        }
+        _loadSubCues(cues, file.name);
+      };
+      reader.onerror = () => alert('Could not read subtitle file.');
+      reader.readAsText(file, 'UTF-8');
     });
 
     // Start button — record playback start time
@@ -6821,15 +7015,173 @@
       _subLoaded = false;
       _subCues = [];
       _subOffset = 0;
-      _subToggleBtn.style.display = 'none';
+      _subFileName = '';
+      _subActive = false;
       _subToggleBtn.style.opacity = '1';
       _subToggleBtn.style.cursor = 'pointer';
-      _subToggleBtn.querySelector('.sub-flag').textContent = '🇱🇰';
+      _subToggleBtn.querySelector('.sub-flag').textContent = '📁';
       _subToggleBtn.classList.remove('active');
+      _subToggleBtn.title = 'Load subtitle file (.srt / .vtt / .ass from Baiscope or any source)';
       _subSyncPanel.classList.remove('visible');
       _subStartBtn.textContent = '▶ Start Subtitles';
-      if (_subStatusLine) _subStatusLine.textContent = 'Not started';
+      if (_subStatusLine) _subStatusLine.textContent = 'No file loaded';
+      const msg = document.getElementById('subPanelMsg');
+      if (msg) msg.innerHTML = 'Download .srt from <strong><a id="baiscopeLink" href="https://www.baiscope.lk" target="_blank" style="color:var(--gold)">Baiscope</a></strong>, then click <strong>📁 LOAD SUB</strong>';
     }, { capture: true });  // capture = before the existing handler
+
+    // ════════════════════════════════════════════════════════════════════════
+    //  MAX PLAYER  — custom HLS player powered by hls.js
+    // ════════════════════════════════════════════════════════════════════════
+    let _maxHls        = null;   // hls.js instance
+    let _maxSubRaf     = null;   // RAF for currentTime-based subtitle loop
+    let _maxMode       = false;  // true when Max player is active
+
+    const _maxWrap     = document.getElementById('maxPlayerWrap');
+    const _maxVideo    = document.getElementById('maxVideo');
+    const _maxBuf      = document.getElementById('maxBuffering');
+    const _maxErr      = document.getElementById('maxError');
+    const _maxErrMsg   = document.getElementById('maxErrorMsg');
+    const _maxQBadge   = document.getElementById('maxQualityBadge');
+
+    // Lazy-load hls.js from CDN (only once, only when Max is selected)
+    function _loadHlsJs() {
+      return new Promise((resolve, reject) => {
+        if (window.Hls) { resolve(); return; }
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js';
+        s.onload  = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+
+    // Destroy any existing hls.js instance and reset UI
+    function _destroyMax() {
+      _maxMode = false;
+      if (_maxSubRaf) { cancelAnimationFrame(_maxSubRaf); _maxSubRaf = null; }
+      if (_maxHls)    { _maxHls.destroy(); _maxHls = null; }
+      _maxVideo.pause();
+      _maxVideo.removeAttribute('src');
+      _maxVideo.load();
+      _maxWrap.className = '';
+      _maxWrap.style.display = 'none';
+    }
+
+    // Update quality badge from current hls level
+    function _updateMaxQuality() {
+      if (!_maxHls || !_maxQBadge) return;
+      const lvl = _maxHls.levels[_maxHls.currentLevel];
+      if (!lvl) return;
+      const h = lvl.height || 0;
+      _maxQBadge.textContent = h >= 2160 ? '4K ✦' : h >= 1080 ? '1080p ✦' : h >= 720 ? '720p' : h >= 480 ? '480p' : h > 0 ? `${h}p` : 'HLS ✦';
+    }
+
+    // RAF loop — subtitle cues driven by video.currentTime (perfect seek/pause sync)
+    function _maxSubLoop() {
+      if (!_maxMode || !_maxVideo || !_subCues.length) return;
+      const ms = _maxVideo.currentTime * 1000 + _subOffset;
+      const cue = _subCues.find(c => ms >= c.start && ms < c.end);
+      if (cue) {
+        _subText.innerHTML = cue.text.replace(/\n/g, '<br>');
+        _subText.classList.add('active');
+      } else {
+        _subText.classList.remove('active');
+      }
+      _maxSubRaf = requestAnimationFrame(_maxSubLoop);
+    }
+
+    async function initMaxPlayer(tmdbId, mediaType, season, episode) {
+      // ── Reset UI ──────────────────────────────────────────────────────
+      _destroyMax();
+      const frame = document.getElementById('playerFrame');
+      frame.style.display  = 'none';
+      _maxWrap.style.display = 'block';
+      _maxWrap.classList.add('buffering');
+
+      // ── Load hls.js lazily ────────────────────────────────────────────
+      try { await _loadHlsJs(); }
+      catch (e) {
+        _maxWrap.classList.remove('buffering');
+        _maxWrap.classList.add('error');
+        if (_maxErrMsg) _maxErrMsg.innerHTML = 'Could not load player engine.<br>Check your internet connection.';
+        return;
+      }
+
+      // ── Fetch HLS stream URL from /api/hls ────────────────────────────
+      let streamUrl = null;
+      try {
+        const params = new URLSearchParams({ id: tmdbId, type: mediaType });
+        if (season)  params.set('season',  season);
+        if (episode) params.set('episode', episode);
+        const resp = await fetch(`/api/hls?${params}`);
+        const data = await resp.json();
+        if (data.url) streamUrl = data.url;
+      } catch (_) {}
+
+      if (!streamUrl) {
+        _maxWrap.classList.remove('buffering');
+        _maxWrap.classList.add('error');
+        return;
+      }
+
+      // ── Initialise hls.js ─────────────────────────────────────────────
+      _maxMode = true;
+
+      if (Hls.isSupported()) {
+        _maxHls = new Hls({
+          enableWorker: true,
+          lowLatencyMode: false,
+          backBufferLength: 90,
+        });
+        _maxHls.loadSource(streamUrl);
+        _maxHls.attachMedia(_maxVideo);
+
+        _maxHls.on(Hls.Events.MANIFEST_PARSED, () => {
+          _maxWrap.classList.remove('buffering');
+          _maxWrap.classList.add('ready');
+          _updateMaxQuality();
+          _maxVideo.play().catch(() => {});
+          // Start subtitle loop if cues are already loaded
+          if (_subCues.length) {
+            if (_maxSubRaf) cancelAnimationFrame(_maxSubRaf);
+            _maxSubRaf = requestAnimationFrame(_maxSubLoop);
+          }
+        });
+
+        _maxHls.on(Hls.Events.LEVEL_SWITCHED, () => _updateMaxQuality());
+
+        _maxHls.on(Hls.Events.ERROR, (event, data) => {
+          if (data.fatal) {
+            _maxWrap.classList.remove('buffering', 'ready');
+            _maxWrap.classList.add('error');
+            if (_maxErrMsg) _maxErrMsg.innerHTML = `Stream error: ${data.type}<br>Try another server.`;
+            _maxHls.destroy(); _maxHls = null;
+          }
+        });
+
+        // Show/hide buffering spinner
+        _maxVideo.addEventListener('waiting', () => _maxWrap.classList.add('buffering'));
+        _maxVideo.addEventListener('playing', () => _maxWrap.classList.remove('buffering'));
+        _maxVideo.addEventListener('canplay', () => _maxWrap.classList.remove('buffering'));
+
+      } else if (_maxVideo.canPlayType('application/vnd.apple.mpegurl')) {
+        // Safari native HLS
+        _maxVideo.src = streamUrl;
+        _maxVideo.addEventListener('loadedmetadata', () => {
+          _maxWrap.classList.remove('buffering');
+          _maxWrap.classList.add('ready');
+          _maxVideo.play().catch(() => {});
+          if (_subCues.length) {
+            if (_maxSubRaf) cancelAnimationFrame(_maxSubRaf);
+            _maxSubRaf = requestAnimationFrame(_maxSubLoop);
+          }
+        }, { once: true });
+      } else {
+        _maxWrap.classList.remove('buffering');
+        _maxWrap.classList.add('error');
+        if (_maxErrMsg) _maxErrMsg.innerHTML = 'Your browser does not support HLS.<br>Try Chrome or Firefox.';
+      }
+    }
 
     function playStream(url, allUrls, labels) {
       if (_currentModalItem) saveRecentWatch(_currentModalItem, _currentModalType);
@@ -6848,8 +7200,24 @@
         else { epBar.classList.remove('visible'); }
       }
 
-      if (loader) loader.style.opacity = '1';
-      if (frame) {
+      // ── If Max player selected, skip iframe and launch HLS player ──────
+      const isMaxUrl = url.startsWith('max://');
+      if (isMaxUrl) {
+        if (loader) loader.style.opacity = '0';
+        frame.style.display = 'none';
+        frame.src = 'about:blank';
+        // Parse max://type/id/season/episode  or  max://movie/id
+        const parts = url.replace('max://', '').split('/');
+        const mType = parts[0] || _currentModalType;
+        const mId   = parts[1] || _currentModalId;
+        const mSeas = parts[2] || _selectedSeason  || null;
+        const mEp   = parts[3] || _selectedEpisode || null;
+        initMaxPlayer(mId, mType, mSeas, mEp);
+      } else {
+        // ── Regular iframe player ───────────────────────────────────────
+        _destroyMax(); // Tear down Max if switching away from it
+        frame.style.display = '';
+        if (loader) loader.style.opacity = '1';
         frame.style.opacity = '0';
         frame.onload = () => {
           if (loader) loader.style.opacity = '0';
@@ -6859,14 +7227,15 @@
       }
       // Build server switcher
       if (allUrls && allUrls.length) {
-        // Bug #5 fix: use data-url attribute instead of inline onclick string
-        // so URLs containing & or ' don't break the handler
         bar.innerHTML = allUrls.map((u, i) => {
           const lbl = labels ? labels[i] : `Server ${i + 1}`;
+          const isMax     = u.startsWith('max://');
           const isVidLove = lbl === 'VidLove' || lbl === 'Infinity';
-          const vidLoveStyle = isVidLove ? ' style="background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;font-weight:800;border-color:transparent"' : '';
+          const extraClass = isMax ? ' max-btn' : '';
+          // Non-Max VidLove style (Infinity) via inline — Max uses CSS class
+          const vidLoveStyle = (!isMax && isVidLove) ? ' style="background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;font-weight:800;border-color:transparent"' : '';
           const activeClass = u === url ? ' active' : '';
-          return `<button class="player-server-btn${activeClass}"${vidLoveStyle} data-server-index="${i}">${lbl}</button>`;
+          return `<button class="player-server-btn${extraClass}${activeClass}"${vidLoveStyle} data-server-index="${i}">${lbl}</button>`;
         }).join('');
         bar.querySelectorAll('.player-server-btn').forEach((btn, i) => {
           btn.addEventListener('click', () => {
@@ -6874,7 +7243,6 @@
             switchServer(allUrls[i], btn);
           });
         });
-        // Track which server is currently active
         _activeServerIndex = allUrls.indexOf(url);
         if (_activeServerIndex < 0) _activeServerIndex = 0;
       } else {
@@ -6891,8 +7259,15 @@
       //   const subEpisode = _currentModalType === 'tv' ? (_selectedEpisode || 1) : null;
       //   loadSubtitles(subTitle, subSeason, subEpisode, subYear);
       // }
-      // Hide the subtitle button since auto-load is off
-      if (_subToggleBtn) _subToggleBtn.style.display = 'none';
+      // Show the LOAD SUB button whenever the player opens
+      if (_subToggleBtn) {
+        _subToggleBtn.style.display = 'flex';
+        if (!_subLoaded) {
+          _subToggleBtn.querySelector('.sub-flag').textContent = '📁';
+          _subToggleBtn.title = 'Load subtitle file (.srt / .vtt / .ass)';
+          _subToggleBtn.classList.remove('active');
+        }
+      }
 
       // ── Skip Intro — TV only, load + start wall-clock timer ──────────────
       if (_currentModalType === 'tv' && _currentModalId && typeof window._loadSkipIntro === 'function') {
@@ -6937,12 +7312,32 @@
     function switchServer(url, btn) {
       document.querySelectorAll('.player-server-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      const frame = document.getElementById('playerFrame');
+      const frame  = document.getElementById('playerFrame');
       const loader = document.getElementById('playerLoading');
-      if (loader) loader.style.opacity = '1';
-      if (frame) {
+
+      if (url.startsWith('max://')) {
+        // Switch TO Max player
+        _destroyMax();
+        if (loader) loader.style.opacity = '0';
+        frame.style.display = 'none';
+        frame.src = 'about:blank';
+        const parts = url.replace('max://', '').split('/');
+        const mType = parts[0] || _currentModalType;
+        const mId   = parts[1] || _currentModalId;
+        const mSeas = parts[2] || _selectedSeason  || null;
+        const mEp   = parts[3] || _selectedEpisode || null;
+        initMaxPlayer(mId, mType, mSeas, mEp);
+      } else {
+        // Switch FROM Max (or between regular servers)
+        _destroyMax();
+        frame.style.display = '';
+        if (loader) loader.style.opacity = '1';
         frame.style.opacity = '0';
         frame.src = url;
+        frame.onload = () => {
+          if (loader) loader.style.opacity = '0';
+          frame.style.opacity = '1';
+        };
         if (typeof window._adblock_pushRecovery === 'function') window._adblock_pushRecovery(url);
       }
     }
@@ -6963,7 +7358,10 @@
       gsap.to('.player-container', {
         scale: 0.9, opacity: 0, duration: 0.3, ease: 'power3.in', onComplete: () => {
           document.getElementById('playerOverlay').classList.remove('open');
-          document.getElementById('playerFrame').src = '';
+          const frame = document.getElementById('playerFrame');
+          frame.src = '';
+          frame.style.display = ''; // restore visibility for next open
+          _destroyMax();            // teardown Max player + hls.js
           const epBar = document.getElementById('playerEpBar');
           if (epBar) epBar.classList.remove('visible');
           if (document.fullscreenElement) {
