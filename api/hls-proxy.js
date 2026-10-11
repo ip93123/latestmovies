@@ -20,7 +20,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const upstream = await fetch(targetUrl, { headers: PROXY_HEADERS });
+    const upstream = await fetch(targetUrl, { headers: PROXY_HEADERS, signal: AbortSignal.timeout(8000) });
     if (!upstream.ok) {
       return res.status(upstream.status).send(`Upstream error: ${upstream.status}`);
     }

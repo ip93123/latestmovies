@@ -35,10 +35,10 @@ const M3U8_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
 };
 
-// Try to get direct HLS stream URL via vidlove API (server-side only, no CORS issue)
+// Get direct HLS (.m3u8) stream URL via vidlove API with fast timeouts
 async function getVidloveStream(id, type, season, episode) {
   const isTv = type === 'tv';
-  const sources = ['moviebox', 'moviebox2', 'dcloud'];
+  const sources = ['dcloud'];
 
   for (const src of sources) {
     try {
@@ -46,23 +46,27 @@ async function getVidloveStream(id, type, season, episode) {
         ? `https://api.vidlove.cc/tv?id=${id}&season=${season}&episode=${episode}&mode=json&sources=${src}`
         : `https://api.vidlove.cc/movie?id=${id}&mode=json&sources=${src}`;
 
-      const res = await fetch(apiUrl, { headers: VIDLOVE_HEADERS });
+      const res = await fetch(apiUrl, {
+        headers: VIDLOVE_HEADERS,
+        signal: AbortSignal.timeout(4000)
+      });
       if (!res.ok) continue;
 
       const data = await res.json();
       const streamUrl = data && data.source && data.source.url;
       if (!streamUrl) continue;
 
-      // Verify the m3u8 is accessible from Vercel (server-side)
-      const probe = await fetch(streamUrl, { headers: M3U8_HEADERS });
+      // Fast HEAD probe to verify the stream URL is responsive
+      const probe = await fetch(streamUrl, {
+        method: 'HEAD',
+        headers: M3U8_HEADERS,
+        signal: AbortSignal.timeout(3000)
+      });
       if (probe.ok) {
-        const text = await probe.text();
-        if (text.includes('#EXTM3U')) {
-          return streamUrl;
-        }
+        return streamUrl;
       }
     } catch (_) {
-      // Try next source
+      // Try next
     }
   }
   return null;
@@ -78,15 +82,14 @@ export default async function handler(req, res) {
   const subKey = type === 'tv' ? `${id}_S${season}_E${episode}` : `${id}`;
   const subtitleUrl = SUBTITLE_MAP[subKey] || SUBTITLE_MAP[id] || null;
 
-  // ── 1. Try vidlove API for direct HLS stream ──────────────────────────
+  // ── 1. Try vidlove API for direct HLS stream (fast, resolves in ~1s) ───
   let streamUrl = await getVidloveStream(id, type, season, episode);
 
-  // ── 2. Fallback: scrape .m3u8 link from embed providers ──────────────
+  // ── 2. Fallback: scrape .m3u8 link from embed providers with short timeout ──
   if (!streamUrl) {
     const legacyHeaders = {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      'Accept-Language': 'en-US,en;q=0.9',
       'Referer': 'https://www.google.com/',
     };
 
@@ -104,7 +107,11 @@ export default async function handler(req, res) {
 
     for (const url of providers) {
       try {
-        const resp = await fetch(url, { headers: legacyHeaders, redirect: 'follow' });
+        const resp = await fetch(url, {
+          headers: legacyHeaders,
+          redirect: 'follow',
+          signal: AbortSignal.timeout(2500)
+        });
         if (!resp.ok) continue;
         const html = await resp.text();
         const match = html.match(M3U8_RE);
@@ -117,7 +124,7 @@ export default async function handler(req, res) {
   }
 
   if (streamUrl) {
-    // Wrap through our HLS proxy so browser never hits ravenflix directly (CORS bypass)
+    // Wrap through our HLS proxy so browser bypasses ravenflix referer/CORS check
     const proxied = `/api/hls-proxy?url=${encodeURIComponent(streamUrl)}`;
     return res.status(200).json({ url: proxied, subtitle: subtitleUrl });
   }

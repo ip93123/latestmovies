@@ -2329,8 +2329,10 @@
     #maxVideo { outline: none; }
 
     /* Buffering — hide when video plays */
-    #maxPlayerWrap.buffering #maxBuffering { display: flex !important; }
-    #maxPlayerWrap.ready    #maxBuffering { display: none  !important; }
+    #maxBuffering { pointer-events: none; }
+    #maxPlayerWrap.buffering:not(.playing) #maxBuffering { display: flex !important; }
+    #maxPlayerWrap.playing  #maxBuffering { display: none  !important; }
+    #maxPlayerWrap.ready:not(.buffering) #maxBuffering { display: none  !important; }
     #maxPlayerWrap.error    #maxError     { display: flex !important; }
     /* Cue reset: prevent native duplicate subtitles and black background in windowed mode */
     video:not(:fullscreen)::cue {
@@ -8813,7 +8815,7 @@
         const params = new URLSearchParams({ id: tmdbId, type: mediaType });
         if (season)  params.set('season',  season);
         if (episode) params.set('episode', episode);
-        const resp = await fetch(`/api/hls?${params}`);
+        const resp = await fetch(`/api/hls?${params}`, { signal: AbortSignal.timeout(6000) });
         const data = await resp.json();
         if (data.url) streamUrl = data.url;
         if (data.subtitle) subtitleUrl = data.subtitle;
@@ -8855,7 +8857,9 @@
           _maxWrap.classList.add('ready');
           _updateMaxQuality();
           _maxVideo.playbackRate = _mxsSettings.speed;
-          _maxVideo.play().catch(() => {});
+          _maxVideo.play().catch(() => {
+            _maxWrap.classList.remove('buffering');
+          });
           // Start subtitle loop if cues are already loaded
           if (_subCues.length) {
             if (_maxSubRaf) cancelAnimationFrame(_maxSubRaf);
