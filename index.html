@@ -13113,23 +13113,24 @@
       _wpToast('🎬 Creating party room...');
       try {
         const code = await _createRoom();
+        const currentId = window._currentPlayingId || _currentModalId || (window._currentModalItem && window._currentModalItem.id) || new URLSearchParams(window.location.search).get('m') || new URLSearchParams(window.location.search).get('s');
+        const currentType = window._currentPlayingType || _currentModalType || (new URLSearchParams(window.location.search).get('s') ? 'tv' : 'movie');
+        const s = window._currentPlayingSeason || (typeof _selectedSeason !== 'undefined' && _selectedSeason) || 1;
+        const ep = window._currentPlayingEpisode || (typeof _selectedEpisode !== 'undefined' && _selectedEpisode) || 1;
+        const engine = window._currentPlayingEngine || window._currentMaxEngine;
+
         const shareUrl = (() => {
           const u = new URL(window.location.origin + window.location.pathname);
           u.hash = '';
-          const currentId = window._currentPlayingId || _currentModalId || (window._currentModalItem && window._currentModalItem.id) || new URLSearchParams(window.location.search).get('m') || new URLSearchParams(window.location.search).get('s');
-          const currentType = window._currentPlayingType || _currentModalType || (new URLSearchParams(window.location.search).get('s') ? 'tv' : 'movie');
           if (currentId) {
             if (currentType === 'tv') {
               u.searchParams.set('s', currentId);
-              const s = window._currentPlayingSeason || (typeof _selectedSeason !== 'undefined' && _selectedSeason);
-              const ep = window._currentPlayingEpisode || (typeof _selectedEpisode !== 'undefined' && _selectedEpisode);
               if (s) u.searchParams.set('season', s);
               if (ep) u.searchParams.set('episode', ep);
             } else {
               u.searchParams.set('m', currentId);
             }
           }
-          const engine = window._currentPlayingEngine || window._currentMaxEngine;
           if (engine) {
             u.searchParams.set('engine', engine);
           }
