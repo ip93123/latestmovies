@@ -92,7 +92,8 @@ export default {
 
     const ct      = upstream.headers.get('content-type') || '';
     const isM3U8  = targetUrl.pathname.toLowerCase().endsWith('.m3u8')
-                 || ct.toLowerCase().includes('mpegurl');
+                 || ct.toLowerCase().includes('mpegurl')
+                 || targetUrl.href.includes('.m3u8');
 
     // ── HLS Manifest: rewrite segment URLs to go through this worker ─────────
     if (isM3U8) {
@@ -149,7 +150,11 @@ export default {
     // Cloudflare Workers stream the body natively — no buffering, no chunking.
     // The ReadableStream from upstream is piped directly to the browser.
     const respHeaders = new Headers(CORS);
-    respHeaders.set('Content-Type',   ct || 'video/mp4');
+    let finalCt = ct || 'video/mp4';
+    if (finalCt.includes('image/') || finalCt.includes('webp')) {
+      finalCt = 'video/mp2t';
+    }
+    respHeaders.set('Content-Type',   finalCt);
     respHeaders.set('Accept-Ranges',  'bytes');
 
     const passThrough = ['Content-Range', 'Content-Length', 'Last-Modified', 'ETag'];

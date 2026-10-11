@@ -17,6 +17,13 @@ export default async function handler(req, res) {
   const { url } = req.query;
   if (!url) return res.status(400).send('Missing url parameter');
 
+  // If a Cloudflare Worker stream proxy is configured, redirect to it immediately
+  // This bypasses Vercel Serverless Function egress completely and saves 100% bandwidth!
+  if (process.env.CF_PROXY_URL) {
+    const cfBase = process.env.CF_PROXY_URL.replace(/\/$/, '');
+    return res.redirect(307, `${cfBase}?url=${encodeURIComponent(url)}`);
+  }
+
   let targetUrl;
   try {
     targetUrl = decodeURIComponent(url);
