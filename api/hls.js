@@ -65,7 +65,8 @@ async function getVidloveStream(id, type, season, episode) {
       return {
         streamUrl,
         format,
-        label: data.source.label || src
+        label: data.source.label || src,
+        imdbId: (data.meta && data.meta.imdb_id) || null
       };
     } catch (_) {
       // Try next source
@@ -83,26 +84,6 @@ export default async function handler(req, res) {
   const subKey = type === 'tv' ? `${id}_S${season}_E${episode}` : `${id}`;
   let subtitleUrl = SUBTITLE_MAP[subKey] || SUBTITLE_MAP[id] || null;
   let subtitleLang = subtitleUrl ? 'si' : null;
-
-  // ── Auto fallback to OpenSubtitles English subtitle if no Sinhala subtitle ──
-  if (!subtitleUrl && imdb) {
-    try {
-      const openSubPath = type === 'tv'
-        ? `series/${imdb}:${season}:${episode}`
-        : `movie/${imdb}`;
-      const osRes = await fetch(`https://opensubtitles-v3.strem.io/subtitles/${openSubPath}.json`, {
-        signal: AbortSignal.timeout(3000)
-      });
-      if (osRes.ok) {
-        const osData = await osRes.json();
-        const enSub = (osData.subtitles || []).find(s => s.lang === 'eng');
-        if (enSub && enSub.url) {
-          subtitleUrl = enSub.url;
-          subtitleLang = 'en';
-        }
-      }
-    } catch (_) {}
-  }
 
   // ── 1. Try vidlove API for stream (MovieBox clean master prioritized) ───
   let streamInfo = await getVidloveStream(id, type, season, episode);
@@ -145,6 +126,28 @@ export default async function handler(req, res) {
     }
   }
 
+  const effectiveImdb = (streamInfo && streamInfo.imdbId) || imdb || null;
+
+  // ── Auto fallback to OpenSubtitles English subtitle if no Sinhala subtitle ──
+  if (!subtitleUrl && effectiveImdb) {
+    try {
+      const openSubPath = type === 'tv'
+        ? `series/${effectiveImdb}:${season}:${episode}`
+        : `movie/${effectiveImdb}`;
+      const osRes = await fetch(`https://opensubtitles-v3.strem.io/subtitles/${openSubPath}.json`, {
+        signal: AbortSignal.timeout(3000)
+      });
+      if (osRes.ok) {
+        const osData = await osRes.json();
+        const enSub = (osData.subtitles || []).find(s => s.lang === 'eng');
+        if (enSub && enSub.url) {
+          subtitleUrl = enSub.url;
+          subtitleLang = 'en';
+        }
+      }
+    } catch (_) {}
+  }
+
   if (streamInfo && streamInfo.streamUrl) {
     // Wrap through our stream proxy
     const proxied = `/api/hls-proxy?url=${encodeURIComponent(streamInfo.streamUrl)}`;
@@ -153,9 +156,10 @@ export default async function handler(req, res) {
       format: streamInfo.format,
       source: streamInfo.label,
       subtitle: subtitleUrl,
-      subtitleLang: subtitleLang
+      subtitleLang: subtitleLang,
+      imdb: effectiveImdb
     });
   }
 
-  return res.status(404).json({ error: 'No stream found', subtitle: subtitleUrl, subtitleLang: subtitleLang });
+  return res.status(404).json({ error: 'No stream found', subtitle: subtitleUrl, subtitleLang: subtitleLang, imdb: effectiveImdb });
 }

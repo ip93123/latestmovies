@@ -17,6 +17,7 @@ const SUBTITLE_MAP = {
 
 const LANG_MAP = {
   eng: { label: 'English', flag: '🇬🇧' },
+  ben: { label: 'Bengali', flag: '🇧🇩' },
   spa: { label: 'Spanish', flag: '🇪🇸' },
   fre: { label: 'French', flag: '🇫🇷' },
   fra: { label: 'French', flag: '🇫🇷' },
@@ -30,6 +31,7 @@ const LANG_MAP = {
   tam: { label: 'Tamil', flag: '🇮🇳' },
   mal: { label: 'Malayalam', flag: '🇮🇳' },
   tel: { label: 'Telugu', flag: '🇮🇳' },
+  kan: { label: 'Kannada', flag: '🇮🇳' },
   ara: { label: 'Arabic', flag: '🇸🇦' },
   kor: { label: 'Korean', flag: '🇰🇷' },
   chi: { label: 'Chinese', flag: '🇨🇳' },
@@ -37,6 +39,11 @@ const LANG_MAP = {
   jpn: { label: 'Japanese', flag: '🇯🇵' },
   tur: { label: 'Turkish', flag: '🇹🇷' },
   ind: { label: 'Indonesian', flag: '🇮🇩' },
+  vie: { label: 'Vietnamese', flag: '🇻🇳' },
+  tha: { label: 'Thai', flag: '🇹🇭' },
+  pol: { label: 'Polish', flag: '🇵🇱' },
+  nld: { label: 'Dutch', flag: '🇳🇱' },
+  sin: { label: 'Sinhala', flag: '🇱🇰' },
 };
 
 export default async function handler(req, res) {
@@ -67,7 +74,7 @@ export default async function handler(req, res) {
   }
 
   // Mode 2: Get available subtitle tracks catalog for movie or episode
-  const { id, imdb, type = 'movie', season = 1, episode = 1 } = req.query;
+  let { id, imdb, type = 'movie', season = 1, episode = 1 } = req.query;
   if (!id && !imdb) {
     return res.status(400).json({ error: 'Missing id, imdb, or url parameter' });
   }
@@ -89,12 +96,37 @@ export default async function handler(req, res) {
     });
   }
 
+  // Resolve IMDB ID from Vidlove metadata if missing
+  let resolvedImdb = imdb || null;
+  if (!resolvedImdb && id) {
+    try {
+      const vUrl = type === 'tv'
+        ? `https://api.vidlove.cc/tv?id=${id}&season=${season}&episode=${episode}&mode=json&sources=moviebox`
+        : `https://api.vidlove.cc/movie?id=${id}&mode=json&sources=moviebox`;
+      const vRes = await fetch(vUrl, {
+        headers: {
+          'Accept': 'application/json',
+          'Referer': 'https://vidlove.cc/',
+          'Origin': 'https://vidlove.cc',
+          'User-Agent': 'Mozilla/5.0'
+        },
+        signal: AbortSignal.timeout(3500)
+      });
+      if (vRes.ok) {
+        const vData = await vRes.json();
+        if (vData.meta && vData.meta.imdb_id) {
+          resolvedImdb = vData.meta.imdb_id;
+        }
+      }
+    } catch (_) {}
+  }
+
   // Priority 2: Query OpenSubtitles for English and other language tracks
-  if (imdb) {
+  if (resolvedImdb) {
     try {
       const openSubPath = type === 'tv'
-        ? `series/${imdb}:${season}:${episode}`
-        : `movie/${imdb}`;
+        ? `series/${resolvedImdb}:${season}:${episode}`
+        : `movie/${resolvedImdb}`;
       const osRes = await fetch(`https://opensubtitles-v3.strem.io/subtitles/${openSubPath}.json`, {
         signal: AbortSignal.timeout(4000)
       });
@@ -131,7 +163,7 @@ export default async function handler(req, res) {
             isDefault: false,
             source: 'opensubtitles'
           });
-          if (tracks.length >= 12) break; // Limit to 12 clean choices
+          if (tracks.length >= 14) break; // Limit to 14 clean choices
         }
       }
     } catch (_) {}
@@ -140,7 +172,7 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'public, max-age=3600');
   return res.status(200).json({
     id,
-    imdb,
+    imdb: resolvedImdb,
     defaultLang: localSinhalaSub ? 'si' : (tracks.some(t => t.lang === 'en') ? 'en' : null),
     tracks
   });

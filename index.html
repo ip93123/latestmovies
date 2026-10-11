@@ -4797,8 +4797,6 @@
           <div style="height:1px;width:60px;background:linear-gradient(90deg,transparent,rgba(232,201,122,0.4),transparent);"></div>
           <div style="color:#4a5568;font-size:0.75rem;font-family:'Inter',sans-serif;">Tip: Try Infinity or Nova as fallback</div>
         </div>
-        <!-- Max branding watermark -->
-        <div style="position:absolute;bottom:1rem;left:50%;transform:translateX(-50%);font-family:'Bebas Neue',sans-serif;font-size:0.85rem;letter-spacing:4px;color:rgba(232,201,122,0.2);pointer-events:none;z-index:6;">MAX</div>
 
         <!-- ══ UNIFIED CONTROLS BAR (Play time bar on top + buttons below) ══ -->
         <div id="maxControlsBar">
@@ -8646,6 +8644,9 @@
       } else if (e.key === 'f' || e.key === 'F') {
         e.preventDefault();
         _togglePlayerFullscreen();
+      } else if (e.key === 'c' || e.key === 'C') {
+        e.preventDefault();
+        _mxsCycleSubtitles();
       }
     });
 
@@ -8773,6 +8774,94 @@
     let _mxsTracks = [];
     let _mxsActiveTrackId = 'off';
 
+    function _loadSubtitleFromFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const text = e.target.result;
+          let cues = [];
+          const cleanName = (file.name || '').toLowerCase();
+          if (cleanName.endsWith('.srt')) cues = parseSrt(text);
+          else if (cleanName.endsWith('.vtt')) cues = parseVtt(text);
+          else if (cleanName.endsWith('.ass') || cleanName.endsWith('.ssa')) cues = parseAss(text);
+          else cues = text.includes('WEBVTT') ? parseVtt(text) : parseSrt(text);
+          if (!cues.length) cues = parseAss(text);
+
+          if (cues && cues.length) {
+            _subCues = cues;
+            _subLoaded = true;
+            _subOffset = 0;
+            _attachSubOverlayToActiveWrap();
+            if (_maxMode) {
+              if (_maxSubRaf) cancelAnimationFrame(_maxSubRaf);
+              _maxSubRaf = requestAnimationFrame(_maxSubLoop);
+            }
+            if (_maxVideo && _maxVideo.textTracks) {
+              for (let i = 0; i < _maxVideo.textTracks.length; i++) {
+                try { _maxVideo.textTracks[i].mode = 'disabled'; } catch (_) {}
+              }
+            }
+            const shortName = file.name.length > 20 ? file.name.slice(0, 17) + '…' : file.name;
+            const trId = 'file_' + Date.now();
+            const customTrack = {
+              id: trId,
+              lang: 'custom',
+              label: '📄 ' + shortName,
+              cues: cues,
+              source: 'custom'
+            };
+            _mxsTracks.push(customTrack);
+            _mxsActiveTrackId = trId;
+            _mxsRenderTracks();
+            _showMaxToast(`Loaded ${cues.length} cues: ${shortName}`);
+          } else {
+            _showMaxToast(`Could not parse ${file.name}`);
+          }
+        } catch (err) {
+          _showMaxToast(`Error reading ${file.name}`);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function _mxsCycleSubtitles() {
+      if (!_mxsTracks || !_mxsTracks.length) return;
+      const allIds = ['off', ..._mxsTracks.map(t => t.id)];
+      const curIdx = allIds.indexOf(_mxsActiveTrackId);
+      const nextIdx = (curIdx + 1) % allIds.length;
+      const nextId = allIds[nextIdx];
+      _mxsActiveTrackId = nextId;
+      if (nextId === 'off') {
+        _subCues = [];
+        _subLoaded = false;
+        if (_subText) _subText.classList.remove('active');
+        _showMaxToast('Subtitles: Off');
+        _mxsRenderTracks();
+      } else {
+        const tr = _mxsTracks.find(t => t.id === nextId);
+        if (tr) {
+          if (tr.source === 'custom' && tr.cues) {
+            _subCues = tr.cues;
+            _subLoaded = true;
+            _attachSubOverlayToActiveWrap();
+            if (_maxMode) {
+              if (_maxSubRaf) cancelAnimationFrame(_maxSubRaf);
+              _maxSubRaf = requestAnimationFrame(_maxSubLoop);
+            }
+            _showMaxToast(`Subtitles: ${tr.label}`);
+            _mxsRenderTracks();
+          } else if (tr.url) {
+            _showMaxToast(`Loading ${tr.label}...`);
+            _loadMaxSubtitleFromUrl(tr.url).then(ok => {
+              _showMaxToast(ok ? `Subtitles: ${tr.label}` : `Failed to load ${tr.label}`);
+              _mxsRenderTracks();
+            });
+          }
+        }
+      }
+    }
+
     function _mxsRenderTracks() {
       const container = document.getElementById('mxsTrackList');
       const hint = document.getElementById('mxsTrackHint');
@@ -8783,7 +8872,7 @@
       const offBtn = document.createElement('button');
       const isOff = _mxsActiveTrackId === 'off' || !_subLoaded || !_subCues.length;
       offBtn.className = 'mxs-pill' + (isOff ? ' on' : '');
-      offBtn.textContent = 'Off';
+      offBtn.textContent = (isOff ? '✓ ' : '') + 'Off';
       offBtn.addEventListener('click', () => {
         _mxsActiveTrackId = 'off';
         _subCues = [];
@@ -8798,27 +8887,81 @@
         const btn = document.createElement('button');
         const isActive = _mxsActiveTrackId === tr.id && _subLoaded && _subCues.length > 0;
         btn.className = 'mxs-pill' + (isActive ? ' on' : '');
-        btn.textContent = tr.label;
-        btn.title = tr.source === 'master' ? 'Master Sinhala Subtitle' : 'OpenSubtitles Track';
+        btn.textContent = (isActive ? '✓ ' : '') + tr.label;
+        btn.title = tr.source === 'master' ? 'Master Sinhala Subtitle' : (tr.source === 'custom' ? 'Custom Subtitle File' : 'OpenSubtitles Track');
         btn.addEventListener('click', async () => {
           _mxsActiveTrackId = tr.id;
           _mxsRenderTracks();
-          _showMaxToast(`Loading ${tr.label}...`);
-          const ok = await _loadMaxSubtitleFromUrl(tr.url);
-          if (ok) {
+          if (tr.source === 'custom' && tr.cues) {
+            _subCues = tr.cues;
+            _subLoaded = true;
+            _attachSubOverlayToActiveWrap();
+            if (_maxMode) {
+              if (_maxSubRaf) cancelAnimationFrame(_maxSubRaf);
+              _maxSubRaf = requestAnimationFrame(_maxSubLoop);
+            }
             _showMaxToast(`Subtitles: ${tr.label}`);
+            _mxsRenderTracks();
           } else {
-            _showMaxToast(`Failed to load ${tr.label}`);
+            _showMaxToast(`Loading ${tr.label}...`);
+            const ok = await _loadMaxSubtitleFromUrl(tr.url);
+            if (ok) {
+              _showMaxToast(`Subtitles: ${tr.label}`);
+            } else {
+              _showMaxToast(`Failed to load ${tr.label}`);
+            }
+            _mxsRenderTracks();
           }
-          _mxsRenderTracks();
         });
         container.appendChild(btn);
       });
 
+      // + Choose File pill button (Upload/choose custom .srt from device)
+      const fileLabel = document.createElement('label');
+      fileLabel.className = 'mxs-pill';
+      fileLabel.style.display = 'inline-flex';
+      fileLabel.style.alignItems = 'center';
+      fileLabel.style.gap = '4px';
+      fileLabel.style.cursor = 'pointer';
+      fileLabel.style.background = 'rgba(232,201,122,0.12)';
+      fileLabel.style.borderColor = 'rgba(232,201,122,0.4)';
+      fileLabel.style.color = '#E8C97A';
+      fileLabel.title = 'Choose subtitle file (.srt, .vtt) from computer or phone';
+      fileLabel.innerHTML = '<span>+ Choose File</span><input type="file" accept=".srt,.vtt,.ass,.txt" style="display:none;">';
+      const fileInput = fileLabel.querySelector('input');
+      fileInput.addEventListener('change', (ev) => {
+        const file = ev.target.files && ev.target.files[0];
+        if (!file) return;
+        _loadSubtitleFromFile(file);
+        ev.target.value = '';
+      });
+      container.appendChild(fileLabel);
+
+      // Drag and drop subtitle files onto the player wrap
+      if (_maxWrap && !_maxWrap._dragDropInit) {
+        _maxWrap._dragDropInit = true;
+        _maxWrap.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        });
+        _maxWrap.addEventListener('drop', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            const f = e.dataTransfer.files[0];
+            const n = (f.name || '').toLowerCase();
+            if (n.endsWith('.srt') || n.endsWith('.vtt') || n.endsWith('.ass') || n.endsWith('.txt')) {
+              _loadSubtitleFromFile(f);
+            }
+          }
+        });
+      }
+
       if (hint) {
         const cur = _mxsTracks.find(t => t.id === _mxsActiveTrackId);
         if (cur && _subLoaded && _subCues.length) {
-          hint.innerHTML = `<span style="color:#E8C97A;">●</span> Active: <b>${cur.label}</b> (${_subCues.length} cues) • ${cur.source === 'master' ? 'Master Sync' : 'OpenSubtitles'}`;
+          const srcLabel = cur.source === 'master' ? 'Master Sync' : (cur.source === 'custom' ? 'Local File' : 'OpenSubtitles');
+          hint.innerHTML = `<span style="color:#E8C97A;">●</span> Active: <b>${cur.label}</b> (${_subCues.length} cues) • ${srcLabel}`;
         } else {
           hint.innerHTML = `<span style="color:rgba(255,255,255,0.4);">● Subtitles disabled</span>`;
         }
@@ -8931,6 +9074,7 @@
         if (data.url) streamUrl = data.url;
         if (data.format) streamFormat = data.format;
         if (data.subtitle) subtitleUrl = data.subtitle;
+        if (data.imdb) imdbId = data.imdb;
       } catch (_) {}
 
       if (!streamUrl) {
