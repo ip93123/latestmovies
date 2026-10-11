@@ -2143,6 +2143,59 @@
       z-index: 710;
     }
 
+    .topbar-wp-btn {
+      position: absolute;
+      top: 1.7rem;
+      right: 9.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0 0.85rem;
+      height: 36px;
+      border-radius: 50px;
+      background: rgba(168, 85, 247, 0.16);
+      border: 1px solid rgba(168, 85, 247, 0.45);
+      color: #E9D5FF;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      z-index: 710;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 16px rgba(168, 85, 247, 0.22);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .topbar-wp-btn:hover {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.35), rgba(124, 58, 237, 0.45));
+      border-color: rgba(168, 85, 247, 0.85);
+      color: #ffffff;
+      transform: translateY(-1px) scale(1.03);
+      box-shadow: 0 0 22px rgba(168, 85, 247, 0.5);
+    }
+
+    .topbar-wp-btn.active {
+      background: linear-gradient(135deg, #A855F7, #7C3AED);
+      border-color: #C084FC;
+      color: #ffffff;
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.65);
+    }
+
+    .topbar-wp-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 8px #22c55e;
+      display: none;
+    }
+
+    .topbar-wp-btn.active .topbar-wp-dot {
+      display: inline-block;
+      animation: wpPulse 1.8s infinite;
+    }
+
     .player-newtab-btn {
       display: inline-flex;
       align-items: center;
@@ -2634,6 +2687,17 @@
         width: 30px !important;
         height: 30px !important;
         font-size: 1rem !important;
+      }
+      #topbarWatchPartyBtn {
+        top: 0.6rem !important;
+        right: 5rem !important;
+        width: 30px !important;
+        height: 30px !important;
+        padding: 0 !important;
+        justify-content: center !important;
+      }
+      #topbarWatchPartyBtn span:not(.topbar-wp-dot) {
+        display: none !important;
       }
       #playerHome {
         top: 0.6rem !important;
@@ -5509,6 +5573,16 @@
           <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" />
           <path d="M9 21V12h6v9" />
         </svg></button>
+      <button class="topbar-wp-btn" id="topbarWatchPartyBtn" title="Watch Party — Watch together with friends">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
+          <circle cx="19" cy="9" r="3"/>
+          <path d="M23 21v-2a3 3 0 0 0-3-3h-1"/>
+        </svg>
+        <span>Watch Party</span>
+        <span class="topbar-wp-dot" id="topbarWpActiveDot"></span>
+      </button>
       <button class="player-fullscreen" id="playerFullscreenBtn" title="Full Screen"
         style="position: absolute; top: 1.7rem; right: 7rem; font-size: 1.4rem; cursor: pointer; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 36px; height: 36px; color: var(--text); z-index: 710; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); transition: all 0.2s;">⛶</button>
       <!-- Subtitle File Loader (always visible) -->
@@ -12693,6 +12767,8 @@
       document.getElementById('wpActiveDot').style.display = 'block';
       const maxWp = document.getElementById('maxWatchPartyBtn');
       if (maxWp) maxWp.classList.add('active');
+      const topbarWp = document.getElementById('topbarWatchPartyBtn');
+      if (topbarWp) topbarWp.classList.add('active');
     }
 
     function _refreshGuestList() {
@@ -12872,6 +12948,8 @@
       document.getElementById('wpActiveDot').style.display = 'none';
       const maxWp = document.getElementById('maxWatchPartyBtn');
       if (maxWp) maxWp.classList.remove('active');
+      const topbarWp = document.getElementById('topbarWatchPartyBtn');
+      if (topbarWp) topbarWp.classList.remove('active');
       document.getElementById('wpGuestLock').classList.remove('active');
 
       document.getElementById('wpRoomCode').textContent = '------';
@@ -13071,6 +13149,12 @@
         _refreshHud(1);
         _refreshGuestList();
 
+        // If the user started the Watch Party while on an iframe player (like Infinity),
+        // seamlessly transition to HackyMax so that full HTML5 P2P sync & Sinhala subtitles work!
+        if (!_maxMode && currentId && typeof initMaxPlayer === 'function') {
+          initMaxPlayer(currentId, currentType, s, ep, 'hackymax');
+        }
+
         document.getElementById('wpSetupView').style.display = 'none';
         document.getElementById('wpActiveView').style.display = 'block';
         _wpToast(`👑 Room ${code} created! Share the link with friends.`);
@@ -13094,7 +13178,7 @@
         return;
       }
       const v = _vid();
-      if (v && (v.src || v.currentSrc)) {
+      if ((v && (v.src || v.currentSrc)) || window._currentPlayingId || _currentModalId) {
         window.openWatchPartyModal('host');
       } else {
         window.openWatchPartyModal('join');
@@ -13105,6 +13189,9 @@
     document.addEventListener('DOMContentLoaded', () => {
       const wpBtn = document.getElementById('maxWatchPartyBtn');
       if (wpBtn) wpBtn.addEventListener('click', _onWpClick);
+
+      const topbarWpBtn = document.getElementById('topbarWatchPartyBtn');
+      if (topbarWpBtn) topbarWpBtn.addEventListener('click', _onWpClick);
 
       const closeBtn = document.getElementById('wpCloseBtn');
       if (closeBtn) closeBtn.onclick = () => document.getElementById('wpModal').classList.remove('active');
