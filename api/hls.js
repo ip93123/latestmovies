@@ -168,12 +168,13 @@ export default async function handler(req, res) {
       if (osRes.ok) {
         const osData = await osRes.json();
         const raw = osData.subtitles || [];
-        const sinSub = raw.find(s => s.lang === 'sin' || s.lang === 'si');
+        const isNotArabic = s => s.url && !s.url.includes('/ar/') && !s.url.includes('/ara/') && s.lang !== 'ar' && s.lang !== 'ara';
+        const sinSub = raw.find(s => (s.lang === 'sin' || s.lang === 'si') && isNotArabic(s));
         if (sinSub && sinSub.url) {
           subtitleUrl = sinSub.url;
           subtitleLang = 'si';
         } else {
-          const enSub = raw.find(s => s.lang === 'eng' || s.lang === 'en');
+          const enSub = raw.find(s => (s.lang === 'eng' || s.lang === 'en') && isNotArabic(s));
           if (enSub && enSub.url) {
             subtitleUrl = enSub.url;
             subtitleLang = 'en';
@@ -186,7 +187,10 @@ export default async function handler(req, res) {
   if (streamInfo && streamInfo.streamUrl) {
     let finalUrl = streamInfo.streamUrl;
     if (streamInfo.format === 'hls' || streamInfo.streamUrl.includes('.m3u8')) {
-      const PROXY_BASE = process.env.CF_PROXY_URL || '/api/hls-proxy';
+      const rawProxy = process.env.CF_PROXY_URL || '';
+      const PROXY_BASE = (rawProxy && !rawProxy.includes('onrender.com') && !rawProxy.includes('workers.dev') && !rawProxy.includes('deno.net'))
+        ? rawProxy
+        : 'https://funny-sfogliatella-4e51f6.netlify.app/proxy';
       finalUrl = `${PROXY_BASE}?url=${encodeURIComponent(streamInfo.streamUrl)}`;
     }
     return res.status(200).json({
