@@ -10196,9 +10196,10 @@
         return nextBtn;
       }
 
-      function _fallbackFromMax() {
+      function _fallbackFromMax(immediate = false) {
         if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
-        if (window._fallbackTimer) return; // Prevent multiple queued calls
+        if (window._fallbackTimer) { clearTimeout(window._fallbackTimer); window._fallbackTimer = null; }
+        const delay = immediate ? 150 : 600;
         window._fallbackTimer = setTimeout(() => {
           window._fallbackTimer = null;
           if (!_maxWrap.classList.contains('error')) return;
@@ -10212,8 +10213,8 @@
 
           let candidateOrder = [];
           if (engine === 'hackymax') candidateOrder = ['sinmax', 'zeemax'];
-          else if (engine === 'sinmax') candidateOrder = ['zeemax', 'hackymax'];
-          else candidateOrder = ['hackymax', 'sinmax'];
+          else if (engine === 'sinmax') candidateOrder = ['zeemax'];
+          else candidateOrder = [];
 
           let nextEng = null;
           for (const cand of candidateOrder) {
@@ -10228,7 +10229,7 @@
             return;
           }
 
-          // If all 3 custom engines exhausted, switch to first external embed
+          // If all custom engines exhausted, switch to first external embed
           console.log(`[Auto-Failover] All custom engines exhausted for this title, switching to external embed...`);
           getModalServerUrls(tmdbId, mediaType, season || 1, episode || 1).then(data => {
             if (data && data.urls && data.urls.length) {
@@ -10236,7 +10237,7 @@
               if (extUrl) playStream(extUrl, data.urls, data.labels);
             }
           }).catch(() => {});
-        }, 800);
+        }, delay);
       }
 
       const fbBtn = document.getElementById('maxFallbackBtn');
@@ -10560,7 +10561,8 @@
         _maxHls.on(Hls.Events.ERROR, (event, data) => {
           if (data.fatal) {
             console.warn(`[HLS Error] ${engineLabel}: ${data.type} (${data.details})`);
-            if (data.type === Hls.ErrorTypes.NETWORK_ERROR && _hlsNetRecoveries < 2) {
+            const isManifestError = data.details === 'manifestLoadError' || data.details === 'manifestParsingError';
+            if (data.type === Hls.ErrorTypes.NETWORK_ERROR && !isManifestError && _hlsNetRecoveries < 2) {
               _hlsNetRecoveries++;
               console.log(`[HLS] Attempting network recovery #${_hlsNetRecoveries}...`);
               _maxHls.startLoad();
@@ -10578,8 +10580,9 @@
             const candidate = _getNextFallbackBtn();
             const targetName = candidate ? candidate.textContent.trim() : (engine === 'hackymax' ? 'SinMax' : (engine === 'sinmax' ? 'ZeeMax' : 'Infinity'));
             if (_maxErrMsg) _maxErrMsg.innerHTML = `${engineLabel} stream error (${data.details || data.type})<br><span style="color:${accentCol};font-weight:600;">Auto-switching to ${targetName}...</span>`;
-            _maxHls.destroy(); _maxHls = null;
-            _fallbackFromMax();
+            try { _maxHls.destroy(); } catch (_) {}
+            _maxHls = null;
+            _fallbackFromMax(isManifestError);
           }
         });
 
