@@ -190,12 +190,13 @@ export default async function handler(req, res) {
       if (osRes.ok) {
         const osData = await osRes.json();
         const raw = osData.subtitles || [];
-        const sinSub = raw.find(s => s.lang === 'sin' || s.lang === 'si');
+        const isNotArabic = s => s.url && !s.url.includes('/ar/') && !s.url.includes('/ara/') && s.lang !== 'ar' && s.lang !== 'ara';
+        const sinSub = raw.find(s => (s.lang === 'sin' || s.lang === 'si') && isNotArabic(s));
         if (sinSub && sinSub.url) {
           subtitleUrl = sinSub.url;
           subtitleLang = 'si';
         } else {
-          const enSub = raw.find(s => s.lang === 'eng' || s.lang === 'en');
+          const enSub = raw.find(s => (s.lang === 'eng' || s.lang === 'en') && isNotArabic(s));
           if (enSub && enSub.url) {
             subtitleUrl = enSub.url;
             subtitleLang = 'en';

@@ -128,9 +128,11 @@ export default async function handler(req, res) {
         const osData = await osRes.json();
         const rawSubs = osData.subtitles || [];
 
+        const isNotArabic = s => s.url && !s.url.includes('/ar/') && !s.url.includes('/ara/') && s.lang !== 'ar' && s.lang !== 'ara';
+
         // Check for Sinhala from OpenSubtitles if no local Sinhala sub exists
         if (!localSinhalaSub) {
-          const sinSubs = rawSubs.filter(s => s.lang === 'sin' || s.lang === 'si');
+          const sinSubs = rawSubs.filter(s => (s.lang === 'sin' || s.lang === 'si') && isNotArabic(s));
           if (sinSubs.length > 0) {
             tracks.push({
               id: 'sinhala',
@@ -144,7 +146,7 @@ export default async function handler(req, res) {
         }
 
         // Add English track
-        const enSubs = rawSubs.filter(s => s.lang === 'eng' || s.lang === 'en');
+        const enSubs = rawSubs.filter(s => (s.lang === 'eng' || s.lang === 'en') && isNotArabic(s));
         if (enSubs.length > 0) {
           tracks.push({
             id: 'english',
@@ -155,7 +157,7 @@ export default async function handler(req, res) {
             source: 'opensubtitles'
           });
         }
-        // Strictly NO other languages (Arabic, French, Spanish, etc. are eliminated)
+        // Strictly NO other languages (Arabic, Persian, etc. are eliminated)
       }
     } catch (_) {}
   }

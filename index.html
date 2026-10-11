@@ -9779,6 +9779,14 @@
         if (!res.ok) return false;
 
         const text = await res.text();
+
+        // ── Strict Arabic / Persian / Urdu script elimination ──
+        // Only Sinhala and English are allowed. Reject any subtitle containing Arabic characters.
+        if (/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(text)) {
+          console.warn('[Max Subtitles] Blocked unwanted Arabic subtitle:', subUrl);
+          return false;
+        }
+
         let cues = [];
         const clean = subUrl.toLowerCase().split('?')[0];
         if (clean.endsWith('.srt')) {
@@ -10038,8 +10046,13 @@
           if (Array.isArray(d.tracks)) {
             d.tracks.forEach(tr => {
               const l = (tr.lang || '').toLowerCase();
-              const isAllowed = l === 'si' || l === 'sin' || l === 'sinhala' || l === 'en' || l === 'eng' || l === 'english';
-              if (isAllowed && !_mxsTracks.some(e => e.lang === tr.lang || e.url === tr.url)) {
+              const lbl = (tr.label || '').toLowerCase();
+              const isArabic = l.includes('ar') || l.includes('ara') || lbl.includes('arabic') || lbl.includes('العربية');
+              if (isArabic) return; // Strict elimination of Arabic tracks
+
+              const isSin = l === 'si' || l === 'sin' || l === 'sinhala' || lbl.includes('sinhala');
+              const isEn = l === 'en' || l === 'eng' || l === 'english' || lbl.includes('english');
+              if ((isSin || isEn) && !_mxsTracks.some(e => e.url === tr.url)) {
                 _mxsTracks.push(tr);
               }
             });
@@ -10047,21 +10060,39 @@
         }
       } catch (_) {}
 
-      // If no subtitle was active, auto-play Sinhala or English subtitle ONLY!
-      if (!_subLoaded && !_subCues.length && _mxsTracks.length) {
-        const targetTrack = _mxsTracks.find(t => t.lang === 'si' || t.lang === 'sin')
-                         || _mxsTracks.find(t => t.lang === 'en' || t.lang === 'eng');
-        if (targetTrack && targetTrack.url) {
-          _mxsActiveTrackId = targetTrack.id;
-          await _loadMaxSubtitleFromUrl(targetTrack.url);
+      // AUTO-SELECTION RULE:
+      // 1. MUST prefer Sinhala first (local SUBTITLE_MAP or OpenSubtitles Sinhala)
+      // 2. ONLY if Sinhala is NOT available or fails, then English should appear!
+      const sinhalaTrack = _mxsTracks.find(t => t.lang === 'si' || t.lang === 'sin' || (t.label && t.label.toLowerCase().includes('sinhala')));
+      const englishTracks = _mxsTracks.filter(t => t.lang === 'en' || t.lang === 'eng' || (t.label && t.label.toLowerCase().includes('english')));
+
+      if (sinhalaTrack && sinhalaTrack.url) {
+        // Enforce Sinhala as default!
+        if (!_subLoaded || _mxsActiveTrackId !== sinhalaTrack.id) {
+          _mxsActiveTrackId = sinhalaTrack.id;
+          const ok = await _loadMaxSubtitleFromUrl(sinhalaTrack.url);
+          if (ok) {
+            _mxsRenderTracks();
+            return;
+          }
+        } else {
+          _mxsRenderTracks();
+          return;
         }
-      } else if (localSub && activeSubUrl === localSub) {
-        _mxsActiveTrackId = 'sinhala';
-      } else if (activeSubUrl) {
-        const matching = _mxsTracks.find(t => t.url === activeSubUrl);
-        _mxsActiveTrackId = matching ? matching.id : (localSub ? 'sinhala' : 'english');
-      } else {
-        _mxsActiveTrackId = _subLoaded ? 'custom' : 'off';
+      }
+
+      // If no Sinhala track, or Sinhala failed, try English fallback tracks
+      if (!_subLoaded || !_subCues.length) {
+        for (const enTrack of englishTracks) {
+          if (enTrack && enTrack.url) {
+            _mxsActiveTrackId = enTrack.id;
+            const ok = await _loadMaxSubtitleFromUrl(enTrack.url);
+            if (ok) {
+              _mxsRenderTracks();
+              return;
+            }
+          }
+        }
       }
 
       _mxsRenderTracks();
@@ -10336,14 +10367,18 @@
         return;
       }
 
-      // Auto-load subtitle: Sinhala if mapped, or subtitle returned by /api/hls (OpenSubtitles English fallback)
-      const finalSub = (typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(tmdbId)]) || subtitleUrl;
-      if (finalSub) {
-        await _loadMaxSubtitleFromUrl(finalSub);
+      // Auto-load subtitle: Sinhala if mapped, or fallback subtitle
+      const localSinhala = (typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(tmdbId)]) || null;
+      const initialSub = localSinhala || subtitleUrl;
+      if (initialSub) {
+        const ok = await _loadMaxSubtitleFromUrl(initialSub);
+        if (ok && localSinhala) {
+          _mxsActiveTrackId = 'sinhala';
+        }
       }
 
-      // Populate subtitle track catalog and auto-play OpenSubtitles English if no sub yet
-      _loadMaxSubtitleTracks(tmdbId, imdbId, mediaType, season, episode, finalSub);
+      // Populate subtitle track catalog: guarantees Sinhala first, English fallback, ZERO Arabic
+      await _loadMaxSubtitleTracks(tmdbId, imdbId, mediaType, season, episode, initialSub);
 
       // ── Initialise player controls ────────────────────────────────────
       _maxMode = true;
@@ -10353,17 +10388,11 @@
       _setupMaxFullscreenHandlers();
       _initMaxCustomControls();
 
-      // ── Clean Subtitle Gatekeeper: suppress native tracks, especially in-band Arabic/yellow tracks ──
+      // ── Clean Subtitle Gatekeeper: suppress ALL native and in-band text tracks ──
       const _suppressNativeTracks = () => {
         if (_maxVideo && _maxVideo.textTracks) {
           for (let i = 0; i < _maxVideo.textTracks.length; i++) {
-            const tr = _maxVideo.textTracks[i];
-            const lang = ((tr.language || '') + ' ' + (tr.label || '')).toLowerCase();
-            const isEnOrSi = lang.includes('en') || lang.includes('eng') || lang.includes('si') || lang.includes('sin');
-            // If custom overlay has loaded cues, OR track is NOT English/Sinhala: disable it!
-            if ((_subLoaded && _subCues.length) || !isEnOrSi) {
-              try { tr.mode = 'disabled'; } catch (_) {}
-            }
+            try { _maxVideo.textTracks[i].mode = 'disabled'; } catch (_) {}
           }
         }
       };
@@ -10372,12 +10401,9 @@
         _maxVideo._subTrackWatcherAttached = true;
         _maxVideo.textTracks.addEventListener('addtrack', (e) => {
           if (e.track) {
-            const lang = ((e.track.language || '') + ' ' + (e.track.label || '')).toLowerCase();
-            const isEnOrSi = lang.includes('en') || lang.includes('eng') || lang.includes('si') || lang.includes('sin');
-            if ((_subLoaded && _subCues.length) || !isEnOrSi) {
-              try { e.track.mode = 'disabled'; } catch (_) {}
-            }
+            try { e.track.mode = 'disabled'; } catch (_) {}
           }
+          _suppressNativeTracks();
         });
       }
 
@@ -10499,23 +10525,10 @@
         });
         _maxHls.loadSource(streamUrl);
         _maxHls.attachMedia(_maxVideo);
-        _maxHls.subtitleTrack = -1;     // Keep native subtitle tracks disabled by default
+        _maxHls.subtitleTrack = -1;     // Keep native in-stream subtitle tracks strictly disabled
 
         _maxHls.on(Hls.Events.SUBTITLE_TRACKS_UPDATED, () => {
-          if (_maxHls && _maxHls.subtitleTracks && _maxHls.subtitleTracks.length) {
-            let allowedIdx = -1;
-            _maxHls.subtitleTracks.forEach((t, idx) => {
-              const lang = ((t.lang || '') + ' ' + (t.name || '')).toLowerCase();
-              if (lang.includes('en') || lang.includes('eng') || lang.includes('si') || lang.includes('sin')) {
-                if (allowedIdx === -1) allowedIdx = idx;
-              }
-            });
-            if ((_subLoaded && _subCues.length) || allowedIdx === -1) {
-              _maxHls.subtitleTrack = -1;
-            } else {
-              _maxHls.subtitleTrack = allowedIdx;
-            }
-          }
+          if (_maxHls) _maxHls.subtitleTrack = -1; // Permanently enforce OFF (all subtitles are handled cleanly by #subText)
           _suppressNativeTracks();
         });
 

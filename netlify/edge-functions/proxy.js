@@ -85,16 +85,9 @@ export default async (request, context) => {
       const rewritten = text.split('\n').map(line => {
         const trimmed = line.trim();
         if (!trimmed) return line;
-        if (trimmed.startsWith('#EXT-X-MEDIA:') && /TYPE=SUBTITLES/i.test(trimmed)) {
-          const isAllowedLang = /LANGUAGE=["']?(en|eng|si|sin)["']?/i.test(trimmed) ||
-                                /NAME=["']?(English|Sinhala)["']?/i.test(trimmed);
-          if (!isAllowedLang) return null;
-          return trimmed.replace(/URI=["']([^"']+)["']/i, (m, subUri) => {
-            try {
-              const abs = new URL(subUri, targetUrl.href).href;
-              return `URI="${proxyBase}?url=${encodeURIComponent(abs)}"`;
-            } catch { return m; }
-          });
+        // Strip out all upstream in-band subtitle and closed-caption tracks (e.g. Arabic, Persian)
+        if (trimmed.startsWith('#EXT-X-MEDIA:') && (/TYPE=SUBTITLES/i.test(trimmed) || /TYPE=CLOSED-CAPTIONS/i.test(trimmed))) {
+          return null;
         }
         if (trimmed.startsWith('#')) return line;
         try {
