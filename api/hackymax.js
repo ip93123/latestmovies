@@ -207,9 +207,9 @@ export default async function handler(req, res) {
 
   if (streamInfo && streamInfo.streamUrl) {
     const rawProxy = process.env.CF_PROXY_URL || '';
-    const PROXY_BASE = (rawProxy && !rawProxy.includes('onrender.com'))
+    const PROXY_BASE = (rawProxy && !rawProxy.includes('onrender.com') && !rawProxy.includes('workers.dev'))
       ? rawProxy
-      : 'https://latestmovies.ip93123.deno.net';
+      : 'https://quiet-dog-9101.ip93123.deno.net';
     const finalUrl = `${PROXY_BASE}?url=${encodeURIComponent(streamInfo.streamUrl)}`;
 
     let proxiedQualities = null;
