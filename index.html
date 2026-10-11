@@ -6806,7 +6806,8 @@
 
       // Update button state
       if (_subToggleBtn) {
-        _subToggleBtn.querySelector('.sub-flag')?.textContent = '🇱🇰';
+        const flag = _subToggleBtn.querySelector('.sub-flag');
+        if (flag) flag.textContent = '🇱🇰';
         _subToggleBtn.classList.add('active');
         _subToggleBtn.style.opacity = '1';
         _subToggleBtn.title = `Subtitles loaded: ${_subFileName} (${cues.length} cues) — Click to hide`;
@@ -6879,7 +6880,8 @@
         _subToggleBtn.style.opacity = '0.5';
         _subToggleBtn.style.cursor = 'wait';
         _subToggleBtn.title = 'Loading Sinhala subtitles...';
-        _subToggleBtn.querySelector('.sub-flag')?.textContent = '⏳';
+        const flag = _subToggleBtn.querySelector('.sub-flag');
+        if (flag) flag.textContent = '⏳';
         _subToggleBtn.classList.remove('active');
       }
       _subSyncPanel.classList.remove('visible');
@@ -6895,7 +6897,8 @@
         if (!res.ok) {
           // Not found — show greyed out button so user knows we checked
           if (_subToggleBtn) {
-            _subToggleBtn.querySelector('.sub-flag')?.textContent = '🇱🇰';
+            const flag = _subToggleBtn.querySelector('.sub-flag');
+            if (flag) flag.textContent = '🇱🇰';
             _subToggleBtn.style.opacity = '0.3';
             _subToggleBtn.style.cursor = 'default';
             _subToggleBtn.title = 'No Sinhala subtitles found on Baiscope for this title';
@@ -6906,7 +6909,8 @@
         _subCues = parseVtt(vtt);
         if (!_subCues.length) {
           if (_subToggleBtn) {
-            _subToggleBtn.querySelector('.sub-flag')?.textContent = '🇱🇰';
+            const flag = _subToggleBtn.querySelector('.sub-flag');
+            if (flag) flag.textContent = '🇱🇰';
             _subToggleBtn.style.opacity = '0.3';
             _subToggleBtn.style.cursor = 'default';
             _subToggleBtn.title = 'No Sinhala subtitles found on Baiscope for this title';
@@ -6916,7 +6920,8 @@
         // Subtitles ready!
         _subLoaded = true;
         if (_subToggleBtn) {
-          _subToggleBtn.querySelector('.sub-flag')?.textContent = '🇱🇰';
+          const flag = _subToggleBtn.querySelector('.sub-flag');
+          if (flag) flag.textContent = '🇱🇰';
           _subToggleBtn.style.opacity = '1';
           _subToggleBtn.style.cursor = 'pointer';
           _subToggleBtn.title = 'Click to enable Sinhala subtitles';
@@ -7007,7 +7012,8 @@
       if (_subToggleBtn) {
         _subToggleBtn.style.opacity = '1';
         _subToggleBtn.style.cursor = 'pointer';
-        _subToggleBtn.querySelector('.sub-flag')?.textContent = '📁';
+        const flag = _subToggleBtn.querySelector('.sub-flag');
+        if (flag) flag.textContent = '📁';
         _subToggleBtn.classList.remove('active');
         _subToggleBtn.title = 'Load subtitle file (.srt / .vtt / .ass from Baiscope or any source)';
       }
