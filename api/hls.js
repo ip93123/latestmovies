@@ -2,10 +2,24 @@
 // Format for movies:  'TMDB_ID': '/Subtitle/filename.srt'
 // Format for TV:      'TMDB_ID_S1_E1': '/Subtitle/filename.srt'
 const SUBTITLE_MAP = {
-  // DC (2026) — Sinhala dubbed from Tamil HQ HDRip
-  '1479832': '/Subtitle/DC%20%282026%29%20Tamil%20HQ%20HDRip.srt',
-  // Hitler (2024/2026) — Sinhala Subtitle by Dasun Sandaruwan
-  '1185591': '/Subtitle/Hi%5B2026%5Dsinhala_sub.srt',
+  // DC (2026)
+  '1479832': '/Subtitle/1479832.srt',
+  // Hitler (2024/2026)
+  '1185591': '/Subtitle/1185591.srt',
+  // Dude (2025)
+  '1321108': '/Subtitle/1321108.srt',
+  // Kara (2026)
+  '1433117': '/Subtitle/1433117.srt',
+  // Vishwanath & Sons (2026)
+  '1408162': '/Subtitle/1408162.srt',
+  // With Love (2026)
+  '1508564': '/Subtitle/1508564.srt',
+  // Manjummel Boys (2024)
+  '1069945': '/Subtitle/1069945.srt',
+  // Premalu (2024)
+  '1149791': '/Subtitle/1149791.srt',
+  // Bethlehem Kudumba Unit (2026)
+  '1508168': '/Subtitle/1508168.srt',
 };
 
 const VIDLOVE_HEADERS = {

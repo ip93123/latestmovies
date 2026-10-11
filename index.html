@@ -2302,24 +2302,31 @@
     #maxPlayerWrap.buffering #maxBuffering { display: flex !important; }
     #maxPlayerWrap.ready    #maxBuffering { display: none  !important; }
     #maxPlayerWrap.error    #maxError     { display: flex !important; }
-    #maxPlayerWrap.ready    #maxQualityBadge { display: block !important; }
+    /* Cue reset: prevent native video subtitles and black background */
+    ::cue, video::cue {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      background: transparent !important;
+      color: transparent !important;
+    }
 
     /* ── Max Player Settings Panel ───────────────────────────────────── */
     #maxSettingsBtn {
-      position: absolute; bottom: 3.5rem; right: 1rem;
-      width: 36px; height: 36px;
-      background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 50%; color: rgba(255,255,255,0.85); font-size: 1rem;
+      position: absolute; bottom: 0.85rem; right: 4.8rem;
+      width: 32px; height: 32px;
+      background: rgba(10, 14, 23, 0.72); border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 50%; color: rgba(255, 255, 255, 0.85); font-size: 0.95rem;
       display: none; align-items: center; justify-content: center;
       cursor: pointer; z-index: 20; backdrop-filter: blur(8px);
-      transition: all 0.25s; user-select: none;
+      transition: all 0.2s; user-select: none;
     }
     #maxPlayerWrap.ready #maxSettingsBtn { display: flex; }
-    #maxSettingsBtn:hover { background: rgba(232,201,122,0.25); color: #E8C97A; border-color: rgba(232,201,122,0.5); transform: rotate(60deg); }
+    #maxSettingsBtn:hover { background: rgba(232,201,122,0.25); color: #E8C97A; border-color: rgba(232,201,122,0.6); transform: rotate(45deg); }
     #maxSettingsBtn.open  { background: rgba(232,201,122,0.2);  color: #E8C97A; border-color: rgba(232,201,122,0.6); transform: rotate(45deg); }
 
     #maxSettingsPanel {
-      display: none; position: absolute; bottom: 5.5rem; right: 1rem;
+      display: none; position: absolute; bottom: 3.5rem; right: 2rem;
       width: 320px; background: rgba(5,7,14,0.97);
       border: 1px solid rgba(232,201,122,0.18); border-radius: 16px;
       z-index: 25; font-family: 'Inter', sans-serif;
@@ -2417,35 +2424,36 @@
 
     /* ── Max Player Skip Buttons ───────────────────────────────────── */
     #maxSkipBar {
-      position: absolute; bottom: 3.2rem; left: 50%;
-      transform: translateX(-50%);
-      display: none; align-items: center; gap: 0.9rem;
-      z-index: 18; pointer-events: auto;
+      position: absolute; bottom: 0.85rem; left: 168px;
+      display: none; align-items: center; gap: 0.35rem;
+      z-index: 20; pointer-events: auto;
     }
     #maxPlayerWrap.ready #maxSkipBar { display: flex; }
 
     .max-skip-btn {
       position: relative; overflow: hidden;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      width: 52px; height: 52px;
-      background: rgba(0,0,0,0.42);
-      border: 1.5px solid rgba(255,255,255,0.18);
+      display: flex; align-items: center; justify-content: center; gap: 2px;
+      width: 32px; height: 32px;
+      background: rgba(10, 14, 23, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.18);
       border-radius: 50%;
-      color: #fff; cursor: pointer;
+      color: rgba(255, 255, 255, 0.85); cursor: pointer;
       font-family: 'Inter', sans-serif;
-      backdrop-filter: blur(10px);
-      transition: background 0.18s, border-color 0.18s, transform 0.15s;
+      backdrop-filter: blur(8px);
+      transition: background 0.18s, border-color 0.18s, transform 0.15s, color 0.18s;
       user-select: none;
+      padding: 0;
     }
     .max-skip-btn:hover {
       background: rgba(232,201,122,0.22);
       border-color: rgba(232,201,122,0.6);
-      transform: scale(1.1);
+      color: #E8C97A;
+      transform: scale(1.08);
     }
     .max-skip-btn:active { transform: scale(0.95); }
-    .max-skip-btn .skip-icon  { font-size: 1.15rem; line-height: 1; }
-    .max-skip-btn .skip-label { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.5px;
-      text-transform: uppercase; color: rgba(255,255,255,0.65); margin-top: 1px; }
+    .max-skip-btn .skip-icon  { font-size: 0.82rem; line-height: 1; }
+    .max-skip-btn .skip-label { font-size: 0.48rem; font-weight: 800; letter-spacing: 0.2px;
+      color: #E8C97A; line-height: 1; }
 
     /* ripple burst on click */
     .max-skip-btn .skip-ripple {
@@ -2461,12 +2469,12 @@
 
     /* toast nudge label */
     #maxSkipToast {
-      position: absolute; bottom: 6.2rem; left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.7); color: #E8C97A;
-      font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 700;
-      padding: 0.3rem 0.85rem; border-radius: 20px;
-      pointer-events: none; z-index: 19;
+      position: absolute; bottom: 3.5rem; left: 168px;
+      background: rgba(0,0,0,0.85); color: #E8C97A;
+      border: 1px solid rgba(232,201,122,0.3);
+      font-family: 'Inter', sans-serif; font-size: 0.75rem; font-weight: 700;
+      padding: 0.25rem 0.65rem; border-radius: 12px;
+      pointer-events: none; z-index: 21;
       opacity: 0; transition: opacity 0.2s;
       white-space: nowrap;
     }
@@ -4465,10 +4473,6 @@
       <div id="maxPlayerWrap" style="display:none; position:absolute; inset:0; background:#000; z-index:5; border-radius:inherit; overflow:hidden;">
         <!-- Video element -->
         <video id="maxVideo" controls playsinline style="width:100%;height:100%;display:block;background:#000;"></video>
-        <!-- Quality badge top-left -->
-        <div id="maxQualityBadge" style="display:none; position:absolute; top:1rem; left:1rem; background:rgba(232,201,122,0.15); border:1px solid rgba(232,201,122,0.4); color:#E8C97A; font-size:0.7rem; font-weight:700; letter-spacing:1px; padding:3px 10px; border-radius:20px; backdrop-filter:blur(8px); pointer-events:none; z-index:12; font-family:'Inter',sans-serif; text-transform:uppercase;"></div>
-        <!-- Subtitle status badge top-right -->
-        <div id="maxSubBadge" style="display:none; position:absolute; top:1rem; right:1rem; background:rgba(39,174,96,0.25); border:1px solid rgba(46,204,113,0.6); color:#2ECC71; font-size:0.7rem; font-weight:700; letter-spacing:0.5px; padding:3px 12px; border-radius:20px; backdrop-filter:blur(8px); pointer-events:none; z-index:12; font-family:'Inter',sans-serif; text-transform:uppercase;">🇱🇰 SUBTITLES SYNCED</div>
         <!-- Buffering spinner -->
         <div id="maxBuffering" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.6); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem; z-index:11;">
           <div style="width:48px;height:48px;border:4px solid rgba(232,201,122,0.2);border-top-color:#E8C97A;border-radius:50%;animation:spin 1s linear infinite;"></div>
@@ -4489,12 +4493,10 @@
         <!-- ⏪⏩ Skip -10 / +10 buttons -->
         <div id="maxSkipBar">
           <button class="max-skip-btn" id="maxSkipBack" title="Back 10 seconds">
-            <span class="skip-icon">↺</span>
-            <span class="skip-label">10s</span>
+            <span class="skip-icon">↺</span><span class="skip-label">10</span>
           </button>
           <button class="max-skip-btn" id="maxSkipFwd" title="Forward 10 seconds">
-            <span class="skip-icon">↻</span>
-            <span class="skip-label">10s</span>
+            <span class="skip-icon">↻</span><span class="skip-label">10</span>
           </button>
         </div>
         <!-- skip toast -->
@@ -5427,6 +5429,7 @@
       ${rank ? `<div class="card-rank">${String(rank).padStart(2, '0')}</div>` : ''}
       ${!rank && !hasNewEp ? `<div class="type-badge ${typeClass}">${typeLabel}</div>` : ''}
       ${newEpBadgeHtml}
+      ${(typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(item.id)]) ? `<div class="card-sub-tag" style="position:absolute;top:8px;right:8px;background:rgba(5,7,14,0.85);border:1px solid rgba(46,204,113,0.7);color:#2ECC71;font-size:0.62rem;font-weight:800;padding:2px 6px;border-radius:10px;backdrop-filter:blur(6px);z-index:4;letter-spacing:0.4px;pointer-events:none;">🇱🇰 SUB</div>` : ''}
       ${buildRatingRing(vote, `${item.id}-card`, true)}
       <div class="card-stream-logos">${streamLogos}</div>
     </div>
@@ -6619,6 +6622,7 @@
       ${details.number_of_seasons ? `<span>· ${details.number_of_seasons} Season${details.number_of_seasons > 1 ? 's' : ''}</span>` : ''}
       ${details.vote_average ? `<span>· ★ ${details.vote_average.toFixed(1)}</span>` : ''}
       ${(details.genres || []).slice(0, 2).map(g => `<span style="background:rgba(232,201,122,0.1);color:var(--gold);padding:.15rem .5rem;border-radius:4px;font-size:.72rem">${g.name}</span>`).join('')}
+      ${(typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(id)]) ? `<span class="modal-sub-badge" style="background:rgba(46,204,113,0.18);border:1px solid rgba(46,204,113,0.5);color:#2ECC71;padding:.15rem .5rem;border-radius:20px;font-size:.72rem;font-weight:700;display:inline-flex;align-items:center;gap:3px;letter-spacing:0.3px;">🇱🇰 සිංහල උපසිරැසි සහිතයි</span>` : ''}
     `;
 
         const shareBtn = document.getElementById('modalShare');
@@ -7375,7 +7379,19 @@
     const _maxBuf      = document.getElementById('maxBuffering');
     const _maxErr      = document.getElementById('maxError');
     const _maxErrMsg   = document.getElementById('maxErrorMsg');
-    const _maxQBadge   = document.getElementById('maxQualityBadge');
+
+    // ── Predefined Sinhala Subtitles Mapping ──────────────────────────────
+    const SUBTITLE_MAP = {
+      '1479832': '/Subtitle/1479832.srt', // DC (2026)
+      '1185591': '/Subtitle/1185591.srt', // Hitler (2024/2026)
+      '1321108': '/Subtitle/1321108.srt', // Dude (2025)
+      '1433117': '/Subtitle/1433117.srt', // Kara (2026)
+      '1408162': '/Subtitle/1408162.srt', // Vishwanath & Sons (2026)
+      '1508564': '/Subtitle/1508564.srt', // With Love (2026)
+      '1069945': '/Subtitle/1069945.srt', // Manjummel Boys (2024)
+      '1149791': '/Subtitle/1149791.srt', // Premalu (2024)
+      '1508168': '/Subtitle/1508168.srt', // Bethlehem Kudumba Unit (2026)
+    };
 
     // ════════════════════════════════════════════════════════════════════════
     //  MAX PLAYER SETTINGS — subtitle style, quality, playback, auto-next
@@ -7390,6 +7406,7 @@
       const saved = JSON.parse(localStorage.getItem(MXS_KEY) || '{}');
       Object.assign(_mxsSettings, saved);
     } catch (_) {}
+    if (typeof _mxsSettings.subBgOp !== 'number') _mxsSettings.subBgOp = 0;
 
     function _mxsSave() {
       try { localStorage.setItem(MXS_KEY, JSON.stringify(_mxsSettings)); } catch (_) {}
@@ -7397,17 +7414,17 @@
 
     function _mxsApplySubStyle() {
       const el = document.getElementById('playerContainer') || document.body;
-      const r = parseInt(_mxsSettings.subBgOp / 100 * 255).toString(16).padStart(2, '0');
-      const bgHex = _mxsSettings.subBg.replace('#', '');
-      const bgR = parseInt(bgHex.slice(0,2),16), bgG = parseInt(bgHex.slice(2,4),16), bgB = parseInt(bgHex.slice(4,6),16);
-      const bgVal = _mxsSettings.subBgOp > 0
-        ? `rgba(${bgR},${bgG},${bgB},${(_mxsSettings.subBgOp/100).toFixed(2)})`
+      const bgHex = (_mxsSettings.subBg || '#000000').replace('#', '');
+      const bgR = parseInt(bgHex.slice(0,2),16) || 0, bgG = parseInt(bgHex.slice(2,4),16) || 0, bgB = parseInt(bgHex.slice(4,6),16) || 0;
+      const op = Math.max(0, Math.min(100, +_mxsSettings.subBgOp || 0));
+      const bgVal = op > 0
+        ? `rgba(${bgR},${bgG},${bgB},${(op/100).toFixed(2)})`
         : 'transparent';
-      const shadow = _mxsSettings.subShadow
+      const shadow = _mxsSettings.subShadow !== false
         ? '0 2px 8px rgba(0,0,0,1), 1px 1px 0 #000, -1px -1px 0 rgba(0,0,0,0.8)'
         : 'none';
-      el.style.setProperty('--sub-color', _mxsSettings.subColor);
-      el.style.setProperty('--sub-size', `${_mxsSettings.subSize}%`);
+      el.style.setProperty('--sub-color', _mxsSettings.subColor || '#ffffff');
+      el.style.setProperty('--sub-size', `${_mxsSettings.subSize || 100}%`);
       el.style.setProperty('--sub-bg', bgVal);
       el.style.setProperty('--sub-shadow', shadow);
       // Position
@@ -7753,8 +7770,6 @@
       _maxVideo.load();
       _maxWrap.className = '';
       _maxWrap.style.display = 'none';
-      const subBadge = document.getElementById('maxSubBadge');
-      if (subBadge) subBadge.style.display = 'none';
       if (_subText) _subText.classList.remove('active');
       _subCues = [];
       _subLoaded = false;
@@ -7765,14 +7780,8 @@
       }
     }
 
-    // Update quality badge from current hls level
-    function _updateMaxQuality() {
-      if (!_maxHls || !_maxQBadge) return;
-      const lvl = _maxHls.levels[_maxHls.currentLevel];
-      if (!lvl) return;
-      const h = lvl.height || 0;
-      _maxQBadge.textContent = h >= 2160 ? '4K ✦' : h >= 1080 ? '1080p ✦' : h >= 720 ? '720p' : h >= 480 ? '480p' : h > 0 ? `${h}p` : '';
-    }
+    // Update quality badge (top-left badge removed per user request)
+    function _updateMaxQuality() {}
 
     // RAF loop — subtitle cues driven by video.currentTime (perfect seek/pause sync)
     function _maxSubLoop() {
@@ -7824,20 +7833,12 @@
             if (_maxSubRaf) cancelAnimationFrame(_maxSubRaf);
             _maxSubRaf = requestAnimationFrame(_maxSubLoop);
           }
-          const subBadge = document.getElementById('maxSubBadge');
-          if (subBadge) {
-            subBadge.style.display = 'block';
-            subBadge.textContent = `🇱🇰 SUBTITLES SYNCED (${cues.length})`;
-          }
-          try {
-            const track = _maxVideo.addTextTrack('subtitles', 'Sinhala', 'si');
-            track.mode = 'showing';
-            for (const c of cues) {
-              if (window.VTTCue) {
-                track.addCue(new VTTCue(c.start / 1000, c.end / 1000, c.text));
-              }
+          // Disable native browser text tracks so only the clean custom overlay renders
+          if (_maxVideo && _maxVideo.textTracks) {
+            for (let i = 0; i < _maxVideo.textTracks.length; i++) {
+              try { _maxVideo.textTracks[i].mode = 'disabled'; } catch (_) {}
             }
-          } catch (_) {}
+          }
           console.log(`[Max Subtitles] Auto-loaded ${cues.length} cues from:`, subUrl);
         }
       } catch (err) {
@@ -7905,9 +7906,10 @@
         return;
       }
 
-      // Auto-load subtitle if provided
-      if (subtitleUrl) {
-        _loadMaxSubtitleFromUrl(subtitleUrl);
+      // Auto-load subtitle if provided or from SUBTITLE_MAP
+      const finalSub = subtitleUrl || (typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(tmdbId)]);
+      if (finalSub) {
+        _loadMaxSubtitleFromUrl(finalSub);
       }
 
       // ── Initialise hls.js ─────────────────────────────────────────────
@@ -8067,14 +8069,23 @@
       const wasAlreadyOpen = overlay.classList.contains('open');
       overlay.classList.add('open');
 
-      // ── Auto-load Sinhala subtitles from Baiscope — DISABLED ──────────────
-      // if (_currentModalItem) {
-      //   const subTitle = _currentModalItem.title || _currentModalItem.name || '';
-      //   const subYear  = (_currentModalItem.release_date || _currentModalItem.first_air_date || '').slice(0,4);
-      //   const subSeason  = _currentModalType === 'tv' ? (_selectedSeason  || 1) : null;
-      //   const subEpisode = _currentModalType === 'tv' ? (_selectedEpisode || 1) : null;
-      //   loadSubtitles(subTitle, subSeason, subEpisode, subYear);
-      // }
+      // ── Auto-load Sinhala subtitle from SUBTITLE_MAP if available ────────
+      if (!isMaxUrl && _currentModalId && typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(_currentModalId)]) {
+        const subFile = SUBTITLE_MAP[String(_currentModalId)];
+        fetch(subFile).then(r => r.text()).then(text => {
+          const cues = parseSrt(text);
+          if (cues && cues.length) {
+            _subCues = cues;
+            _subLoaded = true;
+            _subOffset = 0;
+            if (_subToggleBtn) {
+              _subToggleBtn.style.opacity = '1';
+              _subToggleBtn.style.cursor = 'pointer';
+              _subToggleBtn.title = 'Sinhala subtitles ready (Click to toggle sync)';
+            }
+          }
+        }).catch(() => {});
+      }
 
 
       // ── Skip Intro — TV only, load + start wall-clock timer ──────────────
