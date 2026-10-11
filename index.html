@@ -2317,6 +2317,30 @@
       50%       { box-shadow: 0 0 28px rgba(232,201,122,0.85); }
     }
 
+    /* ── SinMax Player server button ──────────────────────────────────── */
+    .player-server-btn.sinmax-btn,
+    .modal-stream-pill.sinmax-btn {
+      background: linear-gradient(135deg, #FF4B2B 0%, #FF416C 100%) !important;
+      color: #ffffff !important;
+      font-weight: 800 !important;
+      border-color: transparent !important;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 14px rgba(255, 65, 108, 0.45);
+    }
+    .player-server-btn.sinmax-btn:hover,
+    .modal-stream-pill.sinmax-btn:hover {
+      box-shadow: 0 0 22px rgba(255, 65, 108, 0.65);
+      transform: translateY(-1px);
+    }
+    .player-server-btn.sinmax-btn.active {
+      box-shadow: 0 0 28px rgba(255, 65, 108, 0.85);
+      animation: sinmaxPulse 2.5s ease-in-out infinite;
+    }
+    @keyframes sinmaxPulse {
+      0%, 100% { box-shadow: 0 0 14px rgba(255, 65, 108, 0.5); }
+      50%       { box-shadow: 0 0 28px rgba(255, 65, 108, 0.9); }
+    }
+
     /* Max video element — controls panel transparent so moving cursor never blacks out the movie */
     #maxVideo::-webkit-media-controls-panel,
     #maxVideo::-webkit-media-controls-enclosure,
@@ -7177,24 +7201,33 @@
 
           playBtnsHtml += visibleUrls.map((u, i) => {
             const isMax     = u.startsWith('max://');
-            const isVidLove = !isMax && allLabels[i] && (allLabels[i] === 'VidLove' || allLabels[i] === 'Infinity');
+            const isSinMax  = u.startsWith('sinmax://');
+            const isVidLove = !isMax && !isSinMax && allLabels[i] && (allLabels[i] === 'VidLove' || allLabels[i] === 'Infinity');
             const style = isMax
               ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(232,201,122,.45);letter-spacing:.5px`
+              : isSinMax
+              ? `background:linear-gradient(135deg,#FF4B2B,#FF416C);color:#fff;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(255,65,108,.45);letter-spacing:.5px`
               : isVidLove
               ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 2px 12px rgba(232,201,122,.4);letter-spacing:.3px`
               : `background:${colors[i] || '#6B7280'};color:${textColors[i] || '#fff'};border:none;cursor:pointer`;
-            return `<button class="modal-stream-pill modal-play-btn${isMax ? ' max-btn' : isVidLove ? ' vidlove-server-btn' : ''}" data-server="${i}" style="${style}">${allLabels[i]}</button>`;
+            return `<button class="modal-stream-pill modal-play-btn${isMax ? ' max-btn' : isSinMax ? ' sinmax-btn' : isVidLove ? ' vidlove-server-btn' : ''}" data-server="${i}" style="${style}">${allLabels[i]}</button>`;
           }).join('');
 
           if (hiddenUrls.length > 0) {
             playBtnsHtml += `<button class="modal-stream-pill" id="showMoreServersBtn" style="background:var(--dark3);color:#fff;border:1px solid rgba(255,255,255,0.2);cursor:pointer">➕ ${hiddenUrls.length} More</button>`;
             playBtnsHtml += hiddenUrls.map((u, i) => {
               const idx = i + maxVisible;
-              const isVidLove = allLabels[idx] && (allLabels[idx] === 'VidLove' || allLabels[idx] === 'Infinity');
-              const style = isVidLove
+              const isMax     = u.startsWith('max://');
+              const isSinMax  = u.startsWith('sinmax://');
+              const isVidLove = !isMax && !isSinMax && allLabels[idx] && (allLabels[idx] === 'VidLove' || allLabels[idx] === 'Infinity');
+              const style = isMax
+                ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(232,201,122,.45);display:none`
+                : isSinMax
+                ? `background:linear-gradient(135deg,#FF4B2B,#FF416C);color:#fff;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(255,65,108,.45);display:none`
+                : isVidLove
                 ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 2px 12px rgba(232,201,122,.4);display:none`
                 : `background:${colors[idx] || '#6B7280'};color:${textColors[idx] || '#fff'};border:none;cursor:pointer;display:none`;
-              return `<button class="modal-stream-pill modal-play-btn extra-server-btn${isVidLove ? ' vidlove-server-btn' : ''}" data-server="${idx}" style="${style}">${allLabels[idx]}</button>`;
+              return `<button class="modal-stream-pill modal-play-btn extra-server-btn${isMax ? ' max-btn' : isSinMax ? ' sinmax-btn' : isVidLove ? ' vidlove-server-btn' : ''}" data-server="${idx}" style="${style}">${allLabels[idx]}</button>`;
             }).join('');
           }
 
@@ -9018,13 +9051,16 @@
       _mxsRenderTracks();
     }
 
-    async function initMaxPlayer(tmdbId, mediaType, season, episode) {
+    async function initMaxPlayer(tmdbId, mediaType, season, episode, engine = 'max') {
       // ── Reset UI ──────────────────────────────────────────────────────
       _destroyMax();
       const frame = document.getElementById('playerFrame');
       frame.style.display  = 'none';
       _maxWrap.style.display = 'block';
       _maxWrap.classList.add('buffering');
+
+      const bufText = document.querySelector('#maxBuffering span');
+      if (bufText) bufText.textContent = engine === 'sinmax' ? 'SINMAX · LOADING' : 'MAX · LOADING';
 
       // ── Load hls.js lazily ────────────────────────────────────────────
       try { await _loadHlsJs(); }
@@ -9039,7 +9075,10 @@
         setTimeout(() => {
           if (_maxWrap.classList.contains('error')) {
             const btns = document.querySelectorAll('.player-server-btn');
-            const fallbackBtn = Array.from(btns).find(b => !b.classList.contains('max-btn'));
+            const fallbackBtn = Array.from(btns).find(b => {
+              if (engine === 'sinmax') return b.classList.contains('max-btn') || (!b.classList.contains('sinmax-btn'));
+              return !b.classList.contains('max-btn') && !b.classList.contains('sinmax-btn');
+            });
             if (fallbackBtn) fallbackBtn.click();
           }
         }, 1600);
@@ -9050,12 +9089,15 @@
         fbBtn._wired = true;
         fbBtn.onclick = () => {
           const btns = document.querySelectorAll('.player-server-btn');
-          const fallbackBtn = Array.from(btns).find(b => !b.classList.contains('max-btn'));
+          const fallbackBtn = Array.from(btns).find(b => {
+            if (engine === 'sinmax') return b.classList.contains('max-btn') || (!b.classList.contains('sinmax-btn'));
+            return !b.classList.contains('max-btn') && !b.classList.contains('sinmax-btn');
+          });
           if (fallbackBtn) fallbackBtn.click();
         };
       }
 
-      // ── Fetch stream URL & Subtitle from /api/hls ──────────────────
+      // ── Fetch stream URL & Subtitle from /api/hls or /api/sinmax ──────
       let streamUrl = null;
       let streamFormat = 'hls';
       let subtitleUrl = null;
@@ -9069,7 +9111,8 @@
         if (season)  params.set('season',  season);
         if (episode) params.set('episode', episode);
         if (imdbId)  params.set('imdb', imdbId);
-        const resp = await fetch(`/api/hls?${params}`, { signal: AbortSignal.timeout(6000) });
+        const apiPath = engine === 'sinmax' ? '/api/sinmax' : '/api/hls';
+        const resp = await fetch(`${apiPath}?${params}`, { signal: AbortSignal.timeout(6500) });
         const data = await resp.json();
         if (data.url) streamUrl = data.url;
         if (data.format) streamFormat = data.format;
@@ -9081,7 +9124,8 @@
         _maxWrap.classList.remove('buffering');
         _maxWrap.classList.add('error');
         if (_maxErrMsg) {
-          _maxErrMsg.innerHTML = 'HLS stream unavailable for this title.<br><span style="color:#E8C97A;font-weight:600;">Switching to Infinity...</span>';
+          const nextTarget = engine === 'sinmax' ? 'Max...' : 'Infinity...';
+          _maxErrMsg.innerHTML = `${engine === 'sinmax' ? 'SinMax' : 'HLS'} stream unavailable for this title.<br><span style="color:#E8C97A;font-weight:600;">Switching to ${nextTarget}</span>`;
         }
         _fallbackFromMax();
         return;
@@ -9251,19 +9295,20 @@
         else { epBar.classList.remove('visible'); }
       }
 
-      // ── If Max player selected, skip iframe and launch HLS player ──────
+      // ── If Max or SinMax player selected, skip iframe and launch HLS player ──────
       const isMaxUrl = url.startsWith('max://');
-      if (isMaxUrl) {
+      const isSinMaxUrl = url.startsWith('sinmax://');
+      if (isMaxUrl || isSinMaxUrl) {
         if (loader) loader.style.opacity = '0';
         frame.style.display = 'none';
         frame.src = 'about:blank';
-        // Parse max://type/id/season/episode  or  max://movie/id
-        const parts = url.replace('max://', '').split('/');
+        const prefix = isMaxUrl ? 'max://' : 'sinmax://';
+        const parts = url.replace(prefix, '').split('/');
         const mType = parts[0] || _currentModalType;
         const mId   = parts[1] || _currentModalId;
         const mSeas = parts[2] || _selectedSeason  || null;
         const mEp   = parts[3] || _selectedEpisode || null;
-        initMaxPlayer(mId, mType, mSeas, mEp);
+        initMaxPlayer(mId, mType, mSeas, mEp, isSinMaxUrl ? 'sinmax' : 'max');
       } else {
         // ── Regular iframe player ───────────────────────────────────────
         _destroyMax(); // Tear down Max if switching away from it
@@ -9281,12 +9326,13 @@
         bar.innerHTML = allUrls.map((u, i) => {
           const lbl = labels ? labels[i] : `Server ${i + 1}`;
           const isMax     = u.startsWith('max://');
-          const isVidLove = lbl === 'VidLove' || lbl === 'Infinity';
-          const extraClass = isMax ? ' max-btn' : '';
-          // Non-Max VidLove style (Infinity) via inline — Max uses CSS class
-          const vidLoveStyle = (!isMax && isVidLove) ? ' style="background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;font-weight:800;border-color:transparent"' : '';
+          const isSinMax  = u.startsWith('sinmax://');
+          const isVidLove = !isMax && !isSinMax && (lbl === 'VidLove' || lbl === 'Infinity');
+          const extraClass = isMax ? ' max-btn' : (isSinMax ? ' sinmax-btn' : '');
+          const sinMaxStyle = isSinMax ? ' style="background:linear-gradient(135deg,#FF4B2B,#FF416C);color:#fff;font-weight:800;border-color:transparent"' : '';
+          const vidLoveStyle = (!isMax && !isSinMax && isVidLove) ? ' style="background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;font-weight:800;border-color:transparent"' : '';
           const activeClass = u === url ? ' active' : '';
-          return `<button class="player-server-btn${extraClass}${activeClass}"${vidLoveStyle} data-server-index="${i}">${lbl}</button>`;
+          return `<button class="player-server-btn${extraClass}${activeClass}"${sinMaxStyle || vidLoveStyle} data-server-index="${i}">${lbl}</button>`;
         }).join('');
         bar.querySelectorAll('.player-server-btn').forEach((btn, i) => {
           btn.addEventListener('click', () => {
@@ -9303,7 +9349,7 @@
       overlay.classList.add('open');
 
       // ── Auto-load Sinhala subtitle from SUBTITLE_MAP if available ────────
-      if (!isMaxUrl && _currentModalId && typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(_currentModalId)]) {
+      if (!isMaxUrl && !isSinMaxUrl && _currentModalId && typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(_currentModalId)]) {
         const subFile = SUBTITLE_MAP[String(_currentModalId)];
         fetch(subFile).then(r => r.text()).then(text => {
           const cues = parseSrt(text);
@@ -9367,18 +9413,21 @@
       const frame  = document.getElementById('playerFrame');
       const loader = document.getElementById('playerLoading');
 
-      if (url.startsWith('max://')) {
-        // Switch TO Max player
+      const isMaxUrl = url.startsWith('max://');
+      const isSinMaxUrl = url.startsWith('sinmax://');
+      if (isMaxUrl || isSinMaxUrl) {
+        // Switch TO Max or SinMax player
         _destroyMax();
         if (loader) loader.style.opacity = '0';
         frame.style.display = 'none';
         frame.src = 'about:blank';
-        const parts = url.replace('max://', '').split('/');
+        const prefix = isMaxUrl ? 'max://' : 'sinmax://';
+        const parts = url.replace(prefix, '').split('/');
         const mType = parts[0] || _currentModalType;
         const mId   = parts[1] || _currentModalId;
         const mSeas = parts[2] || _selectedSeason  || null;
         const mEp   = parts[3] || _selectedEpisode || null;
-        initMaxPlayer(mId, mType, mSeas, mEp);
+        initMaxPlayer(mId, mType, mSeas, mEp, isSinMaxUrl ? 'sinmax' : 'max');
       } else {
         // Switch FROM Max (or between regular servers)
         _destroyMax();
