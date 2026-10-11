@@ -61,11 +61,10 @@ const VIDLOVE_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
 };
 
-// SinMax stream priority: DCloud (Adaptive HLS) first, then MovieBox, then embed scrapers
+// SinMax stream priority: MovieBox (clean 1080p) first, then DCloud (Adaptive HLS), then embed scrapers
 async function getSinMaxStream(id, type, season, episode) {
   const isTv = type === 'tv';
-  // Try DCloud first (adaptive HLS stream), then fallback to MovieBox
-  const sources = ['dcloud', 'moviebox'];
+  const sources = ['moviebox', 'dcloud'];
 
   for (const src of sources) {
     try {

@@ -9560,6 +9560,10 @@
 
     // Destroy any existing hls.js instance and reset UI
     function _destroyMax() {
+      if (window._fallbackTimer) {
+        clearTimeout(window._fallbackTimer);
+        window._fallbackTimer = null;
+      }
       if (window._activeMaxLoadTimer) {
         clearTimeout(window._activeMaxLoadTimer);
         window._activeMaxLoadTimer = null;
@@ -9574,6 +9578,7 @@
       _maxVideo.removeAttribute('src');
       _maxVideo.load();
       _maxWrap.className = '';
+      _maxWrap.classList.remove('error', 'buffering', 'ready');
       _maxWrap.style.display = 'none';
       if (_subText) _subText.classList.remove('active');
       _subCues = [];
@@ -10074,16 +10079,12 @@
 
       function _fallbackFromMax() {
         if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
-        setTimeout(() => {
+        if (window._fallbackTimer) return; // Prevent multiple queued calls
+        window._fallbackTimer = setTimeout(() => {
+          window._fallbackTimer = null;
           if (!_maxWrap.classList.contains('error')) return;
-          const nextBtn = _getNextFallbackBtn();
-          if (nextBtn) {
-            console.log(`[Auto-Failover] ${engine} failed, switching to:`, nextBtn.textContent.trim());
-            nextBtn.click();
-            return;
-          }
 
-          // Direct engine fallback if DOM button is absent
+          // Record current engine attempt
           const key = `${tmdbId}_${mediaType}_${season || 1}_${episode || 1}`;
           if (!window._engineAttempts) window._engineAttempts = {};
           if (!window._engineAttempts[key]) window._engineAttempts[key] = new Set();
@@ -10100,19 +10101,21 @@
             if (!tried.has(cand)) { nextEng = cand; break; }
           }
           if (nextEng) {
-            console.log(`[Auto-Failover] Direct switch from ${engine} to ${nextEng}`);
+            console.log(`[Auto-Failover] ${engine} failed, directly switching to: ${nextEng}`);
+            _maxWrap.classList.remove('error');
             initMaxPlayer(tmdbId, mediaType, season, episode, nextEng);
             return;
           }
 
           // If all 3 custom engines exhausted, switch to first external embed
+          console.log(`[Auto-Failover] All custom engines exhausted for this title, switching to external embed...`);
           getModalServerUrls(tmdbId, mediaType, season || 1, episode || 1).then(data => {
             if (data && data.urls && data.urls.length) {
               const extUrl = data.urls.find(u => !u.startsWith('hackymax://') && !u.startsWith('sinmax://') && !u.startsWith('zeemax://') && !u.startsWith('max://'));
               if (extUrl) playStream(extUrl, data.urls, data.labels);
             }
           }).catch(() => {});
-        }, 1100);
+        }, 800);
       }
 
       const fbBtn = document.getElementById('maxFallbackBtn');
@@ -12773,8 +12776,8 @@
           try { WP.hostConn.send({ type: 'request-state' }); } catch (_) {}
         }
       } catch (e) {
-        _wpToast('⚠ Could not join room — check the code');
-        console.error('[WatchParty] join error:', e);
+        _wpToast('⚠ Host is offline — playing independently');
+        console.warn('[WatchParty] Host is offline or room closed:', e?.message || e);
         WP.code = null; WP.isHost = false;
         if (WP.peer) { try { WP.peer.destroy(); } catch (_) {} WP.peer = null; }
       }
