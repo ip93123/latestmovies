@@ -9212,6 +9212,10 @@
 
     function _maxSkip(seconds) {
       if (!_maxVideo) return;
+      if (typeof WP !== 'undefined' && WP && WP.code && !WP.isHost) {
+        if (typeof _wpToast === 'function') _wpToast('🔒 Playback is synchronized to the Host');
+        return;
+      }
       const was = _maxVideo.currentTime || 0;
       const dur = _maxVideo.duration || Infinity;
       _maxVideo.currentTime = Math.max(0, Math.min(dur, was + seconds));
@@ -9240,6 +9244,23 @@
 
     function _togglePlayPause() {
       if (!_maxVideo) return;
+      if (typeof WP !== 'undefined' && WP && WP.code && !WP.isHost) {
+        if (_maxVideo.muted) {
+          _maxVideo.muted = false;
+          _updateVolIcons();
+          _showMaxToast('Unmuted');
+        }
+        const isLockActive = document.getElementById('wpGuestLock') && document.getElementById('wpGuestLock').classList.contains('active');
+        if (isLockActive) {
+          if (typeof _wpToast === 'function') _wpToast('⏸ Playback is controlled by the Host');
+          return;
+        }
+        if (_maxVideo.paused) {
+          if (typeof _safePlay === 'function') _safePlay(_maxVideo);
+          else _maxVideo.play().catch(() => {});
+        }
+        return;
+      }
       if (_maxVideo.paused || _maxVideo.ended) {
         _maxVideo.play().catch(() => {});
         _flashCenterIcon(true);
@@ -9373,6 +9394,10 @@
 
       function _seekAt(e) {
         if (!progressBar || !_maxVideo || !_maxVideo.duration) return;
+        if (typeof WP !== 'undefined' && WP && WP.code && !WP.isHost) {
+          if (typeof _wpToast === 'function') _wpToast('🔒 Playback is synchronized to the Host');
+          return;
+        }
         const rect = progressBar.getBoundingClientRect();
         const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
         const offsetX = Math.max(0, Math.min(rect.width, clientX - rect.left));
@@ -10337,9 +10362,16 @@
         _maxVideo.referrerPolicy = 'no-referrer';
         _maxVideo.src = streamUrl;
         _maxVideo.playbackRate = _mxsSettings.speed;
-        _maxVideo.play().catch(() => {
-          _maxWrap.classList.remove('buffering');
-        });
+        if (_maxVideo && _maxVideo._wpPendingPlay === false) {
+          _maxVideo.pause();
+          const lockEl = document.getElementById('wpGuestLock');
+          if (lockEl) lockEl.classList.add('active');
+          const msgEl = document.getElementById('wpGuestLockMsg');
+          if (msgEl) msgEl.textContent = 'Host paused';
+        } else {
+          if (typeof _safePlay === 'function') _safePlay(_maxVideo);
+          else _maxVideo.play().catch(() => {});
+        }
         const _onMp4Ready = () => {
           if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
           _suppressNativeTracks();
@@ -10355,8 +10387,18 @@
             try { _maxVideo.currentTime = _maxVideo._wpPendingSeek; } catch (_) {}
             delete _maxVideo._wpPendingSeek;
           }
-          if (_maxVideo && _maxVideo._wpPendingPlay) {
-            _maxVideo.play().catch(() => {});
+          if (_maxVideo && _maxVideo._wpPendingPlay === true) {
+            if (typeof _safePlay === 'function') _safePlay(_maxVideo);
+            else _maxVideo.play().catch(() => {});
+            const lockEl = document.getElementById('wpGuestLock');
+            if (lockEl) lockEl.classList.remove('active');
+            delete _maxVideo._wpPendingPlay;
+          } else if (_maxVideo && _maxVideo._wpPendingPlay === false) {
+            _maxVideo.pause();
+            const lockEl = document.getElementById('wpGuestLock');
+            if (lockEl) lockEl.classList.add('active');
+            const msgEl = document.getElementById('wpGuestLockMsg');
+            if (msgEl) msgEl.textContent = 'Host paused';
             delete _maxVideo._wpPendingPlay;
           }
         };
@@ -10395,6 +10437,9 @@
         });
         // ─────────────────────────────────────────────────────────────────────
       } else if (Hls.isSupported()) {
+        const _hlsStartPos = (_maxVideo && typeof _maxVideo._wpPendingSeek === 'number' && _maxVideo._wpPendingSeek > 0)
+          ? _maxVideo._wpPendingSeek
+          : -1;
         _maxHls = new Hls({
           enableWorker: true,
           lowLatencyMode: false,
@@ -10423,6 +10468,7 @@
           abrBandWidthFactor: 0.8,
           abrBandWidthUpFactor: 0.7,
           startLevel: -1,               // auto-pick best level initially
+          startPosition: _hlsStartPos,
         });
         _maxHls.loadSource(streamUrl);
         _maxHls.attachMedia(_maxVideo);
@@ -10453,29 +10499,58 @@
           _maxWrap.classList.add('ready');
           _updateMaxQuality();
           _maxVideo.playbackRate = _mxsSettings.speed;
-          _maxVideo.play().catch(() => {
-            _maxWrap.classList.remove('buffering');
-          });
-          // Start subtitle loop if cues are already loaded
           if (_subCues.length) {
             if (_maxSubRaf) cancelAnimationFrame(_maxSubRaf);
             _maxSubRaf = requestAnimationFrame(_maxSubLoop);
           }
-          // Populate quality grid
           _mxsRefreshQualityGrid();
-          if (_maxVideo && typeof _maxVideo._wpPendingSeek === 'number') {
-            try { _maxVideo.currentTime = _maxVideo._wpPendingSeek; } catch (_) {}
-            delete _maxVideo._wpPendingSeek;
-          }
-          if (_maxVideo && _maxVideo._wpPendingPlay) {
-            _maxVideo.play().catch(() => {});
-            delete _maxVideo._wpPendingPlay;
+
+          if (_maxVideo && _maxVideo._wpPendingPlay === false) {
+            _maxVideo.pause();
+            const lockEl = document.getElementById('wpGuestLock');
+            if (lockEl) lockEl.classList.add('active');
+            const msgEl = document.getElementById('wpGuestLockMsg');
+            if (msgEl) msgEl.textContent = 'Host paused';
+          } else {
+            if (typeof _safePlay === 'function') _safePlay(_maxVideo);
+            else _maxVideo.play().catch(() => {});
           }
         });
 
+        const _applyHlsWpPendingSync = () => {
+          if (!_maxVideo) return;
+          if (typeof _maxVideo._wpPendingSeek === 'number' && _maxVideo._wpPendingSeek >= 0) {
+            if (_maxVideo.readyState >= 1) {
+              if (Math.abs(_maxVideo.currentTime - _maxVideo._wpPendingSeek) > 1.0) {
+                try { _maxVideo.currentTime = _maxVideo._wpPendingSeek; } catch (_) {}
+              }
+              if (_maxVideo.readyState >= 2) {
+                delete _maxVideo._wpPendingSeek;
+              }
+            }
+          }
+          if (_maxVideo._wpPendingPlay === true) {
+            if (typeof _safePlay === 'function') _safePlay(_maxVideo);
+            else _maxVideo.play().catch(() => {});
+            const lockEl = document.getElementById('wpGuestLock');
+            if (lockEl) lockEl.classList.remove('active');
+            delete _maxVideo._wpPendingPlay;
+          } else if (_maxVideo._wpPendingPlay === false) {
+            _maxVideo.pause();
+            const lockEl = document.getElementById('wpGuestLock');
+            if (lockEl) lockEl.classList.add('active');
+            const msgEl = document.getElementById('wpGuestLockMsg');
+            if (msgEl) msgEl.textContent = 'Host paused';
+            delete _maxVideo._wpPendingPlay;
+          }
+        };
+
         _maxHls.on(Hls.Events.FRAG_LOADED, () => {
           if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
+          _applyHlsWpPendingSync();
         });
+        _maxVideo.addEventListener('loadeddata', _applyHlsWpPendingSync, { once: true });
+        _maxVideo.addEventListener('canplay', _applyHlsWpPendingSync, { once: true });
 
         _maxHls.on(Hls.Events.LEVEL_SWITCHED, () => { _suppressNativeTracks(); _updateMaxQuality(); _mxsRefreshQualityGrid(); });
 
@@ -12130,6 +12205,60 @@
       el._t = setTimeout(() => { el.style.display = 'none'; }, 2800);
     }
 
+    function _safePlay(v) {
+      if (!v) return;
+      const p = v.play();
+      if (p && typeof p.catch === 'function') {
+        p.catch(err => {
+          if (err && (err.name === 'NotAllowedError' || String(err).includes('NotAllowedError'))) {
+            v.muted = true;
+            const p2 = v.play();
+            if (p2 && typeof p2.catch === 'function') p2.catch(() => {});
+            _wpToast('🔇 Audio muted by browser. Tap video to unmute');
+          }
+        });
+      }
+    }
+    window._safePlay = _safePlay;
+
+    let _wpHeartbeatInterval = null;
+
+    function _startHostHeartbeat() {
+      if (_wpHeartbeatInterval) return;
+      _wpHeartbeatInterval = setInterval(() => {
+        if (!WP.isHost || !WP.code || !WP.peer || !WP.conns.length) return;
+        const v = _vid();
+        if (!v) return;
+        const p = new URLSearchParams(window.location.search);
+        const movieId = window._currentPlayingId || _currentModalId || (window._currentModalItem && window._currentModalItem.id) || p.get('m') || p.get('s');
+        if (!movieId) return;
+        const mediaType = window._currentPlayingType || _currentModalType || (p.get('s') ? 'tv' : 'movie');
+        const season = (typeof window._currentPlayingSeason !== 'undefined' && window._currentPlayingSeason) || (typeof _selectedSeason !== 'undefined' && _selectedSeason) || p.get('season') || 1;
+        const episode = (typeof window._currentPlayingEpisode !== 'undefined' && window._currentPlayingEpisode) || (typeof _selectedEpisode !== 'undefined' && _selectedEpisode) || p.get('episode') || 1;
+        const engine = window._currentPlayingEngine || window._currentMaxEngine || p.get('engine') || 'hackymax';
+
+        _broadcast({
+          type: 'heartbeat',
+          ct: v.currentTime,
+          playing: !v.paused,
+          speed: v.playbackRate || 1,
+          ts: Date.now(),
+          mId: movieId,
+          mType: mediaType,
+          season: parseInt(season, 10) || 1,
+          episode: parseInt(episode, 10) || 1,
+          engine: engine
+        });
+      }, 2000);
+    }
+
+    function _stopHostHeartbeat() {
+      if (_wpHeartbeatInterval) {
+        clearInterval(_wpHeartbeatInterval);
+        _wpHeartbeatInterval = null;
+      }
+    }
+
     /* ── Watch Party State ───────────────────────────────────── */
     const WP = {
       peer:        null,
@@ -12160,10 +12289,11 @@
 
     /* ── Apply sync event on guest side ─────────────────────── */
     function _applySync(data) {
+      if (!data) return;
       const v = _vid();
 
       // If any playback packet contains movie ID and guest has not loaded this movie yet, launch it immediately!
-      if (data.type === 'play' || data.type === 'seek' || data.type === 'pause') {
+      if (data.type === 'play' || data.type === 'seek' || data.type === 'pause' || data.type === 'heartbeat' || data.type === 'state') {
         const rawId = data.mId || data.mParam || data.sParam;
         const id = rawId ? parseInt(String(rawId).split('-')[0], 10) : null;
         const type = data.mType || (data.sParam ? 'tv' : 'movie');
@@ -12173,106 +12303,12 @@
 
         const isCurrentLoadingOrPlaying = (
           String(window._currentPlayingId) === String(id) &&
+          window._currentPlayingEngine === activeEngine &&
+          (type !== 'tv' || (window._currentPlayingSeason === season && window._currentPlayingEpisode === episode)) &&
           (window._maxMode || (window._maxLoading && String(window._maxLoadingId) === String(id)))
         );
 
         if (id && !isCurrentLoadingOrPlaying) {
-          window._currentPlayingId = id;
-          window._currentPlayingType = type;
-          window._currentPlayingSeason = season;
-          window._currentPlayingEpisode = episode;
-          window._currentPlayingEngine = activeEngine;
-
-          try {
-            const u = new URL(window.location.origin + window.location.pathname);
-            u.hash = '';
-            if (type === 'tv') {
-              u.searchParams.set('s', id);
-              if (season) u.searchParams.set('season', season);
-              if (episode) u.searchParams.set('episode', episode);
-            } else {
-              u.searchParams.set('m', id);
-            }
-            if (WP.code) u.searchParams.set('party', WP.code);
-            history.replaceState(null, '', u.toString());
-          } catch (_) {}
-
-          if (!_currentModalId || String(_currentModalId) !== String(id)) {
-            if (typeof openModal === 'function') openModal(id, type);
-          }
-
-          const overlay = document.getElementById('playerOverlay');
-          if (overlay) overlay.classList.add('open');
-
-          if (typeof initMaxPlayer === 'function') {
-            initMaxPlayer(id, type, season, episode, activeEngine);
-          }
-        }
-      }
-
-      if (data.type === 'play') {
-        if (!v || (!v.src && !v.currentSrc) || v.readyState < 1) {
-          if (v) {
-            v._wpPendingPlay = true;
-            if (typeof data.ct === 'number') v._wpPendingSeek = data.ct;
-          }
-          return;
-        }
-        const lag = (Date.now() - (data.ts || Date.now())) / 1000;
-        const target = (data.ct || 0) + lag;
-        if (Math.abs(v.currentTime - target) > 1.5) v.currentTime = target;
-        document.getElementById('wpGuestLock').classList.remove('active');
-        v.play().catch(() => {});
-        _wpToast('▶ Host resumed');
-
-      } else if (data.type === 'pause') {
-        if (!v) return;
-        if (v.readyState < 1) {
-          v._wpPendingPlay = false;
-          if (typeof data.ct === 'number') v._wpPendingSeek = data.ct;
-          document.getElementById('wpGuestLock').classList.add('active');
-          return;
-        }
-        v.pause();
-        if (Math.abs(v.currentTime - (data.ct || 0)) > 1.5) v.currentTime = data.ct || 0;
-        document.getElementById('wpGuestLock').classList.add('active');
-        document.getElementById('wpGuestLockMsg').textContent = 'Host paused';
-        _wpToast('⏸ Host paused');
-
-      } else if (data.type === 'seek') {
-        if (!v) return;
-        if (v.readyState < 1) {
-          v._wpPendingSeek = data.ct || 0;
-          return;
-        }
-        v.currentTime = data.ct || 0;
-        _wpToast(`⏩ Host seeked to ${_fmtTime(data.ct)}`);
-
-      } else if (data.type === 'state') {
-        // Initial state sync when guest joins or host switches movie
-        if (data.engine) {
-          window.setWatchPartyTheme(data.engine);
-        }
-
-        const rawId = data.mId || data.mParam || data.sParam;
-        const id = rawId ? parseInt(String(rawId).split('-')[0], 10) : null;
-        const type = data.mType || (data.sParam ? 'tv' : 'movie');
-        const season = parseInt(data.season || 1, 10);
-        const episode = parseInt(data.episode || 1, 10);
-        const activeEngine = data.engine || window._currentMaxEngine || 'hackymax';
-
-        if (id) {
-          if (window._wpPollInterval) {
-            clearInterval(window._wpPollInterval);
-            window._wpPollInterval = null;
-          }
-
-          const isAlreadyPlayingThis = (
-            String(window._currentPlayingId) === String(id) &&
-            window._currentPlayingEngine === activeEngine &&
-            (window._maxMode || (window._maxLoading && String(window._maxLoadingId) === String(id)))
-          );
-
           window._currentPlayingId = id;
           window._currentPlayingType = type;
           window._currentPlayingSeason = season;
@@ -12295,32 +12331,137 @@
             history.replaceState(null, '', u.toString());
           } catch (_) {}
 
-          // 1. Ensure modal is open for title & metadata
           if (!_currentModalId || String(_currentModalId) !== String(id)) {
             if (typeof openModal === 'function') openModal(id, type);
           }
 
-          // 2. Open player overlay & launch player only if not already active or loading!
           const overlay = document.getElementById('playerOverlay');
           if (overlay) overlay.classList.add('open');
 
-          if (!isAlreadyPlayingThis && typeof initMaxPlayer === 'function') {
+          if (typeof initMaxPlayer === 'function') {
             initMaxPlayer(id, type, season, episode, activeEngine);
           }
+        }
+      }
 
-          // 3. Sync video position
-          const targetCt = data.ct || 0;
-          const isPlaying = !!data.playing;
-          if (v && v.readyState >= 1) {
-            const lag = (Date.now() - (data.ts || Date.now())) / 1000;
-            v.currentTime = targetCt + (isPlaying ? Math.max(0, lag) : 0);
-            const lockEl = document.getElementById('wpGuestLock');
-            if (lockEl) lockEl.classList.toggle('active', !isPlaying);
-            if (isPlaying) v.play().catch(() => {});
-            else v.pause();
-          } else if (v) {
+      if (data.type === 'heartbeat') {
+        const isPlaying = !!data.playing;
+        const lag = Math.max(0, (Date.now() - (data.ts || Date.now())) / 1000);
+        const target = (typeof data.ct === 'number' ? data.ct : 0) + (isPlaying ? lag : 0);
+
+        if (!v || (!v.src && !v.currentSrc) || v.readyState < 2) {
+          if (v) {
+            v._wpPendingSeek = target;
+            v._wpPendingPlay = isPlaying;
+          }
+          return;
+        }
+
+        const drift = Math.abs(v.currentTime - target);
+        const lockEl = document.getElementById('wpGuestLock');
+        const lockMsg = document.getElementById('wpGuestLockMsg');
+
+        if (!isPlaying) {
+          if (!v.paused) v.pause();
+          if (lockEl) lockEl.classList.add('active');
+          if (lockMsg) lockMsg.textContent = 'Host paused';
+          if (drift > 1.2) v.currentTime = target;
+          return;
+        }
+
+        // Host is playing
+        if (lockEl) lockEl.classList.remove('active');
+        if (v.paused) {
+          if (drift > 1.2) v.currentTime = target;
+          _safePlay(v);
+          return;
+        }
+
+        // Both are playing: drift correction
+        if (drift > 1.5) {
+          v.currentTime = target;
+        } else if (drift > 0.4) {
+          const baseRate = (_mxsSettings && _mxsSettings.speed) || 1.0;
+          v.playbackRate = v.currentTime < target ? (baseRate * 1.08) : (baseRate * 0.92);
+        } else {
+          const baseRate = (_mxsSettings && _mxsSettings.speed) || 1.0;
+          if (v.playbackRate !== baseRate) {
+            v.playbackRate = baseRate;
+          }
+        }
+
+      } else if (data.type === 'play') {
+        const lag = Math.max(0, (Date.now() - (data.ts || Date.now())) / 1000);
+        const target = (data.ct || 0) + lag;
+        const lockEl = document.getElementById('wpGuestLock');
+        if (lockEl) lockEl.classList.remove('active');
+
+        if (!v || (!v.src && !v.currentSrc) || v.readyState < 2) {
+          if (v) {
+            v._wpPendingPlay = true;
+            v._wpPendingSeek = target;
+          }
+          return;
+        }
+        if (Math.abs(v.currentTime - target) > 1.2) v.currentTime = target;
+        _safePlay(v);
+        _wpToast('▶ Host resumed');
+
+      } else if (data.type === 'pause') {
+        const target = data.ct || 0;
+        const lockEl = document.getElementById('wpGuestLock');
+        const lockMsg = document.getElementById('wpGuestLockMsg');
+        if (lockEl) lockEl.classList.add('active');
+        if (lockMsg) lockMsg.textContent = 'Host paused';
+
+        if (!v || (!v.src && !v.currentSrc) || v.readyState < 2) {
+          if (v) {
+            v._wpPendingPlay = false;
+            v._wpPendingSeek = target;
+          }
+          return;
+        }
+        v.pause();
+        if (Math.abs(v.currentTime - target) > 1.2) v.currentTime = target;
+        _wpToast('⏸ Host paused');
+
+      } else if (data.type === 'seek') {
+        const target = data.ct || 0;
+        if (!v || (!v.src && !v.currentSrc) || v.readyState < 2) {
+          if (v) v._wpPendingSeek = target;
+          return;
+        }
+        v.currentTime = target;
+        _wpToast(`⏩ Host seeked to ${_fmtTime(data.ct)}`);
+
+      } else if (data.type === 'state') {
+        if (data.engine) {
+          window.setWatchPartyTheme(data.engine);
+        }
+
+        const rawId = data.mId || data.mParam || data.sParam;
+        const id = rawId ? parseInt(String(rawId).split('-')[0], 10) : null;
+        const isPlaying = !!data.playing;
+        const lag = Math.max(0, (Date.now() - (data.ts || Date.now())) / 1000);
+        const targetCt = (typeof data.ct === 'number' ? data.ct : 0) + (isPlaying ? lag : 0);
+
+        if (id) {
+          if (window._wpPollInterval) {
+            clearInterval(window._wpPollInterval);
+            window._wpPollInterval = null;
+          }
+
+          if (v) {
             v._wpPendingSeek = targetCt;
             v._wpPendingPlay = isPlaying;
+          }
+
+          if (v && v.readyState >= 2) {
+            v.currentTime = targetCt;
+            const lockEl = document.getElementById('wpGuestLock');
+            if (lockEl) lockEl.classList.toggle('active', !isPlaying);
+            if (isPlaying) _safePlay(v);
+            else v.pause();
           }
         } else {
           _wpToast('🎬 Connected! Waiting for host to select a movie...');
@@ -12346,6 +12487,9 @@
     /* ── Hook video events (host side) ──────────────────────── */
     function _hookVideo() {
       const v = _vid();
+      if (WP.isHost && WP.code) {
+        _startHostHeartbeat();
+      }
       if (!v || v._wpHooked) return;
       v._wpHooked = true;
 
@@ -12353,6 +12497,7 @@
 
       v.addEventListener('play', () => {
         if (!WP.isHost || !WP.code) return;
+        _startHostHeartbeat();
         _broadcast({
           type: 'play',
           ct: v.currentTime,
@@ -12380,7 +12525,7 @@
       v.addEventListener('seeked', () => {
         if (!WP.isHost || !WP.code) return;
         const now = Date.now();
-        if (now - _seekDebounce < 400) return;
+        if (now - _seekDebounce < 350) return;
         _seekDebounce = now;
         _broadcast({
           type: 'seek',
@@ -12463,9 +12608,11 @@
     }
 
     function _hostListen() {
+      _startHostHeartbeat();
       WP.peer.on('connection', conn => {
         conn.on('open', () => {
           WP.conns.push(conn);
+          _startHostHeartbeat();
           conn.send(_hostGetState());
           _broadcastMeta();
           _refreshGuestList();
@@ -12554,6 +12701,7 @@
 
     /* ── Leave / cleanup ─────────────────────────────────────── */
     function _leave() {
+      _stopHostHeartbeat();
       if (window._wpPollInterval) {
         clearInterval(window._wpPollInterval);
         window._wpPollInterval = null;
