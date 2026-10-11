@@ -4593,8 +4593,9 @@
           <div class="mxs-pane" id="mxs-pane-quality">
             <div class="mxs-section">Stream Quality</div>
             <div id="mxsQualityGrid">
-              <button class="mxs-pill on" data-level="-1">Auto</button>
+              <button class="mxs-pill on" data-quality="auto">Auto</button>
             </div>
+            <div id="mxsQualityHint" style="font-size:0.7rem;color:rgba(255,255,255,0.55);margin-top:0.45rem;line-height:1.4;"></div>
             <div class="mxs-divider" style="margin-top:1rem"></div>
             <div class="mxs-section">Playback Speed</div>
             <div class="mxs-ctrl" id="mxsSpeedBtns" style="flex-wrap:wrap;gap:0.35rem;justify-content:flex-start">
@@ -7399,7 +7400,7 @@
     const MXS_KEY = 'hacky_mxs_v1';
     let _mxsSettings = {
       subColor: '#ffffff', subSize: 100, subBg: '#000000', subBgOp: 0,
-      subPos: 'bottom', subShadow: true, speed: 1,
+      subPos: 'bottom', subShadow: true, speed: 1, quality: 'auto',
       autoNext: true, autoNextCountdown: true, autoSub: true
     };
     try {
@@ -7642,36 +7643,123 @@
       _mxsApplySubStyle();
     }
 
+    function _mxsGetResLabel(w, h, bitrate) {
+      const width = w || 0;
+      const height = h || 0;
+      if (width >= 3800 || height >= 2100) return '4K';
+      if (width >= 2500 || height >= 1400) return '1440p';
+      if (width >= 1900 || height >= 800)  return '1080p';
+      if (width >= 1200 || height >= 680)  return '720p';
+      if (width >= 800  || height >= 450)  return '480p';
+      if (width >= 600  || height >= 340)  return '360p';
+      if (height > 0) return height + 'p';
+      if (bitrate >= 5000000) return '1080p';
+      if (bitrate >= 2500000) return '720p';
+      if (bitrate >= 1000000) return '480p';
+      if (bitrate > 0) return '360p';
+      return '1080p';
+    }
+
     function _mxsRefreshQualityGrid() {
       const grid = document.getElementById('mxsQualityGrid');
-      if (!grid || !_maxHls) return;
-      const levels = _maxHls.levels || [];
-      const cur = _maxHls.currentLevel; // -1 = auto
+      const hint = document.getElementById('mxsQualityHint');
+      if (!grid) return;
       grid.innerHTML = '';
-      // Auto button
+
+      const levels = (_maxHls && _maxHls.levels) || [];
+      const curLevel = _maxHls ? _maxHls.currentLevel : -1;
+      const vw = (_maxVideo && _maxVideo.videoWidth) || 0;
+      const vh = (_maxVideo && _maxVideo.videoHeight) || 0;
+      const nativeLabel = _mxsGetResLabel(vw, vh, 0);
+
+      const activeChoice = _mxsSettings.quality || 'auto';
+
+      // ── Auto button ──
       const autoBtn = document.createElement('button');
-      autoBtn.className = 'mxs-pill' + (cur === -1 ? ' on' : '');
+      autoBtn.className = 'mxs-pill' + (activeChoice === 'auto' || curLevel === -1 ? ' on' : '');
+      autoBtn.dataset.quality = 'auto';
       autoBtn.dataset.level = -1;
       autoBtn.textContent = 'Auto';
-      autoBtn.addEventListener('click', () => _mxsSetQuality(-1, grid));
-      grid.appendChild(autoBtn);
-      // Per-level buttons (highest first)
-      const sorted = levels.map((l, i) => ({ i, h: l.height || 0, bitrate: l.bitrate || 0 }));
-      sorted.sort((a, b) => b.h - a.h);
-      sorted.forEach(({ i, h, bitrate }) => {
-        const qBtn = document.createElement('button');
-        qBtn.className = 'mxs-pill' + (i === cur && cur !== -1 ? ' on' : '');
-        qBtn.dataset.level = i;
-        qBtn.textContent = h >= 2160 ? '4K' : h >= 1440 ? '1440p' : h >= 1080 ? '1080p' : h >= 720 ? '720p' : h >= 480 ? '480p' : h >= 360 ? '360p' : h >= 240 ? '240p' : h > 0 ? h + 'p' : (bitrate ? Math.round(bitrate/1000) + 'kbps' : `Stream ${i+1}`);
-        qBtn.addEventListener('click', () => _mxsSetQuality(i, grid));
-        grid.appendChild(qBtn);
+      autoBtn.addEventListener('click', () => {
+        _mxsSettings.quality = 'auto';
+        _mxsSave();
+        if (_maxHls) _maxHls.currentLevel = -1;
+        _mxsRefreshQualityGrid();
+        _showMaxToast(`Quality: Auto (${nativeLabel})`);
       });
+      grid.appendChild(autoBtn);
+
+      if (levels.length > 1) {
+        // Multi-level HLS stream available
+        const sorted = levels.map((l, i) => {
+          const res = _mxsGetResLabel(l.width || (i === 0 ? vw : 0), l.height || (i === 0 ? vh : 0), l.bitrate);
+          return { i, res, bitrate: l.bitrate || 0 };
+        });
+        const order = { '4K': 5, '1440p': 4, '1080p': 3, '720p': 2, '480p': 1, '360p': 0 };
+        sorted.sort((a, b) => (order[b.res] || 0) - (order[a.res] || 0) || b.bitrate - a.bitrate);
+
+        const seen = new Set();
+        sorted.forEach(({ i, res, bitrate }) => {
+          let label = res;
+          if (seen.has(label)) {
+            label = bitrate ? `${res} (${Math.round(bitrate / 1000)}k)` : `${res} #${i + 1}`;
+          }
+          seen.add(res);
+
+          const qBtn = document.createElement('button');
+          const isSelected = activeChoice === res || (activeChoice !== 'auto' && curLevel === i);
+          qBtn.className = 'mxs-pill' + (isSelected ? ' on' : '');
+          qBtn.dataset.quality = res;
+          qBtn.dataset.level = i;
+          qBtn.textContent = label;
+          qBtn.addEventListener('click', () => {
+            _mxsSettings.quality = res;
+            _mxsSave();
+            if (_maxHls) _maxHls.currentLevel = i;
+            _mxsRefreshQualityGrid();
+            _showMaxToast(`Quality set to ${label}`);
+          });
+          grid.appendChild(qBtn);
+        });
+
+        if (hint) {
+          const curL = curLevel >= 0 && levels[curLevel] ? _mxsGetResLabel(levels[curLevel].width || vw, levels[curLevel].height || vh, levels[curLevel].bitrate) : nativeLabel;
+          hint.innerHTML = `<span style="color:#E8C97A;">●</span> Active: <b>${curL}</b> ${vw > 0 ? `(${vw}×${vh})` : ''} • Multi-bitrate HLS`;
+        }
+      } else {
+        // Single direct stream (e.g. 1080p full HD source)
+        // Show standard quality tiers: 1080p, 720p, 480p, 360p
+        const standardTiers = ['1080p', '720p', '480p', '360p'];
+        if (nativeLabel === '4K' || vw >= 3800) standardTiers.unshift('4K');
+
+        standardTiers.forEach(res => {
+          const qBtn = document.createElement('button');
+          const isSelected = activeChoice === res;
+          qBtn.className = 'mxs-pill' + (isSelected ? ' on' : '');
+          qBtn.dataset.quality = res;
+          qBtn.textContent = res;
+          qBtn.addEventListener('click', () => {
+            _mxsSettings.quality = res;
+            _mxsSave();
+            if (_maxHls) {
+              if (res === '1080p' || res === nativeLabel) {
+                _maxHls.currentLevel = 0;
+              }
+            }
+            _mxsRefreshQualityGrid();
+            _showMaxToast(`Quality set to ${res}`);
+          });
+          grid.appendChild(qBtn);
+        });
+
+        if (hint) {
+          hint.innerHTML = `<span style="color:#E8C97A;">●</span> Source: <b>${nativeLabel}</b> ${vw > 0 ? `(${vw}×${vh})` : 'Full HD'} • Direct High-Speed Stream`;
+        }
+      }
     }
 
     function _mxsSetQuality(level, grid) {
-      if (!_maxHls) return;
-      _maxHls.currentLevel = level;
-      if (grid) grid.querySelectorAll('.mxs-pill').forEach(b => b.classList.toggle('on', +b.dataset.level === level));
+      if (_maxHls) _maxHls.currentLevel = level;
       _updateMaxQuality();
     }
 
@@ -7707,9 +7795,19 @@
     _mxsInitUI();
 
     // ════════════════════════════════════════════════════════════════════════
-    //  SKIP −10 / +10 buttons
+    //  SKIP −10 / +10 buttons & TOAST
     // ════════════════════════════════════════════════════════════════════════
     let _skipToastTimer = null;
+
+    function _showMaxToast(msg) {
+      const toast = document.getElementById('maxSkipToast');
+      if (toast) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(_skipToastTimer);
+        _skipToastTimer = setTimeout(() => toast.classList.remove('show'), 1200);
+      }
+    }
 
     function _maxSkip(seconds) {
       if (!_maxVideo) return;
@@ -7724,14 +7822,7 @@
         btn.appendChild(ripple);
         setTimeout(() => ripple.remove(), 420);
       }
-      // Toast
-      const toast = document.getElementById('maxSkipToast');
-      if (toast) {
-        toast.textContent = seconds < 0 ? `\u21ba ${Math.abs(seconds)}s` : `\u21bb +${seconds}s`;
-        toast.classList.add('show');
-        clearTimeout(_skipToastTimer);
-        _skipToastTimer = setTimeout(() => toast.classList.remove('show'), 900);
-      }
+      _showMaxToast(seconds < 0 ? `\u21ba ${Math.abs(seconds)}s` : `\u21bb +${seconds}s`);
     }
 
     const _skipBackBtn = document.getElementById('maxSkipBack');
@@ -7780,8 +7871,10 @@
       }
     }
 
-    // Update quality badge (top-left badge removed per user request)
-    function _updateMaxQuality() {}
+    // Update quality grid
+    function _updateMaxQuality() {
+      _mxsRefreshQualityGrid();
+    }
 
     // RAF loop — subtitle cues driven by video.currentTime (perfect seek/pause sync)
     function _maxSubLoop() {
@@ -7955,6 +8048,7 @@
         _maxVideo.addEventListener('waiting', () => _maxWrap.classList.add('buffering'));
         _maxVideo.addEventListener('playing', () => _maxWrap.classList.remove('buffering'));
         _maxVideo.addEventListener('canplay', () => _maxWrap.classList.remove('buffering'));
+        _maxVideo.addEventListener('loadedmetadata', () => _mxsRefreshQualityGrid(), { once: true });
         _maxVideo.addEventListener('seeked', () => {
           if (_maxMode && _subCues.length) {
             const ms = _maxVideo.currentTime * 1000 + _subOffset;
