@@ -6109,12 +6109,34 @@
   <script>
     gsap.registerPlugin(ScrollTrigger);
 
+    function _isHeroBlocked() {
+      const overlayOpen = document.getElementById('playerOverlay')?.classList.contains('open');
+      const modalOpen = document.getElementById('modal')?.classList.contains('open');
+      const params = new URLSearchParams(window.location.search);
+      const hasDirectPlay = params.has('m') || params.has('s') || params.has('party');
+      return Boolean(overlayOpen || modalOpen || hasDirectPlay);
+    }
+
+    function _destroyHeroPlayer() {
+      _pendingTrailerKey = null;
+      if (ytPlayer && typeof ytPlayer.destroy === 'function') {
+        try { ytPlayer.destroy(); } catch (_) {}
+      }
+      ytPlayer = null;
+      const heroVideo = document.getElementById('heroVideoContainer');
+      if (heroVideo) {
+        heroVideo.innerHTML = '';
+        heroVideo.style.opacity = '0';
+      }
+    }
+
     // Load YouTube Iframe API lazily — after initial paint, not blocking critical path.
     // Also skipped on Save-Data / slow connections to preserve bandwidth.
     function loadYouTubeAPI() {
       if (isYtApiReady) return;
       // Skip YouTube background player entirely on TV — 3-5 MB iframe API is too heavy
       if (window.DEVICE && window.DEVICE.isTV) return;
+      if (_isHeroBlocked()) return;
       const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
       if (conn && (conn.saveData || conn.effectiveType === 'slow-2g' || conn.effectiveType === '2g')) {
         return; // Skip autoplay trailer on slow/metered connections
@@ -6134,6 +6156,10 @@
 
     window.onYouTubeIframeAPIReady = function () {
       isYtApiReady = true;
+      if (_isHeroBlocked()) {
+        _destroyHeroPlayer();
+        return;
+      }
       // If hero already found a trailer but the API wasn't ready yet, create player now
       if (_pendingTrailerKey) {
         _createHeroPlayer(_pendingTrailerKey);
@@ -6145,13 +6171,14 @@
     function _createHeroPlayer(trailerKey) {
       // YouTube iframe is too GPU/RAM heavy for low-end TVs — skip entirely
       if (window.DEVICE && window.DEVICE.isTV) return;
+      if (_isHeroBlocked()) {
+        _destroyHeroPlayer();
+        return;
+      }
       const heroVideo = document.getElementById('heroVideoContainer');
       if (!heroVideo) return;
       // Destroy any existing player first
-      if (ytPlayer && typeof ytPlayer.destroy === 'function') {
-        ytPlayer.destroy();
-        ytPlayer = null;
-      }
+      _destroyHeroPlayer();
       heroVideo.innerHTML = `<div id="heroYtPlayer"></div>`;
       const isMuted = localStorage.getItem('hackyMax_trailerMuted') === 'true';
       const muteBtn = document.getElementById('heroMuteBtn');
@@ -6174,40 +6201,51 @@
         };
       }
       let autoPlayAttempted = false;
-      ytPlayer = new YT.Player('heroYtPlayer', {
-        videoId: trailerKey,
-        playerVars: {
-          autoplay: 1, controls: 0, showinfo: 0, rel: 0,
-          loop: 1, playlist: trailerKey, modestbranding: 1,
-          playsinline: 1, mute: 1
-        },
-        events: {
-          onReady: (e) => {
-            e.target.setVolume(50);
-            if (!isMuted) {
-              autoPlayAttempted = true;
-              e.target.unMute();
-              setTimeout(() => { autoPlayAttempted = false; }, 2000);
-            }
-            setTimeout(() => { heroVideo.style.opacity = '0.65'; }, 1500);
+      try {
+        ytPlayer = new YT.Player('heroYtPlayer', {
+          videoId: trailerKey,
+          playerVars: {
+            autoplay: 1, controls: 0, showinfo: 0, rel: 0,
+            loop: 1, playlist: trailerKey, modestbranding: 1,
+            playsinline: 1, mute: 1,
+            origin: window.location.origin,
+            enablejsapi: 1
           },
-          onStateChange: (e) => {
-            if (e.data === YT.PlayerState.PAUSED && autoPlayAttempted) {
-              e.target.mute();
-              e.target.playVideo();
-              localStorage.setItem('hackyMax_trailerMuted', 'true');
-              if (muteBtn) muteBtn.innerHTML = `🔇`;
+          events: {
+            onReady: (e) => {
+              if (_isHeroBlocked()) {
+                _destroyHeroPlayer();
+                return;
+              }
+              e.target.setVolume(50);
+              if (!isMuted) {
+                autoPlayAttempted = true;
+                e.target.unMute();
+                setTimeout(() => { autoPlayAttempted = false; }, 2000);
+              }
+              setTimeout(() => {
+                if (!_isHeroBlocked() && heroVideo) heroVideo.style.opacity = '0.65';
+              }, 1500);
+            },
+            onStateChange: (e) => {
+              if (e.data === YT.PlayerState.PAUSED && autoPlayAttempted) {
+                e.target.mute();
+                e.target.playVideo();
+                localStorage.setItem('hackyMax_trailerMuted', 'true');
+                if (muteBtn) muteBtn.innerHTML = `🔇`;
+              }
+            },
+            onError: (e) => {
+              console.warn('YouTube Player Error:', e.data);
+              _destroyHeroPlayer();
+              const hv = document.getElementById('heroVideoContainer');
+              if (hv) hv.style.opacity = '0';
             }
-          },
-          onError: (e) => {
-            console.warn('YouTube Player Error:', e.data);
-            if (ytPlayer && typeof ytPlayer.destroy === 'function') {
-              ytPlayer.destroy();
-            }
-            document.getElementById('heroVideoContainer').style.opacity = '0';
           }
-        }
-      });
+        });
+      } catch (_) {
+        _destroyHeroPlayer();
+      }
     }
 
     const IMG = 'https://image.tmdb.org/t/p/';
@@ -7771,6 +7809,7 @@
           if (firstBtn) firstBtn.focus();
         }
       }, 500);
+      if (typeof _destroyHeroPlayer === 'function') _destroyHeroPlayer();
       const heroVideo = document.getElementById('heroVideoContainer');
       if (heroVideo) heroVideo.innerHTML = '';
 
@@ -9521,6 +9560,11 @@
 
     // Destroy any existing hls.js instance and reset UI
     function _destroyMax() {
+      if (window._activeMaxLoadTimer) {
+        clearTimeout(window._activeMaxLoadTimer);
+        window._activeMaxLoadTimer = null;
+      }
+      if (typeof _destroyHeroPlayer === 'function') _destroyHeroPlayer();
       _maxMode = false;
       _attachSubOverlayToActiveWrap();
       if (typeof _mxsCancelCountdown === 'function') _mxsCancelCountdown();
@@ -10029,7 +10073,7 @@
       }
 
       function _fallbackFromMax() {
-        if (_loadTimeoutTimer) { clearTimeout(_loadTimeoutTimer); _loadTimeoutTimer = null; }
+        if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
         setTimeout(() => {
           if (!_maxWrap.classList.contains('error')) return;
           const nextBtn = _getNextFallbackBtn();
@@ -10075,6 +10119,7 @@
       if (fbBtn && !fbBtn._wired) {
         fbBtn._wired = true;
         fbBtn.onclick = () => {
+          if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
           const nextBtn = _getNextFallbackBtn() || document.querySelector('.player-server-btn:not(.active)');
           if (nextBtn) {
             nextBtn.click();
@@ -10089,10 +10134,12 @@
         };
       }
 
-      // Initial loading watchdog: if buffering takes >10s without becoming ready, auto-failover
-      let _loadTimeoutTimer = setTimeout(() => {
+      // Initial loading watchdog: if buffering takes >22s without becoming ready, auto-failover
+      if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
+      window._activeMaxLoadTimer = setTimeout(() => {
+        window._activeMaxLoadTimer = null;
         if (_maxWrap.classList.contains('buffering') && !_maxWrap.classList.contains('ready') && _maxMode) {
-          console.warn(`[Auto-Failover] ${engine} initial load timeout (>10s), switching...`);
+          console.warn(`[Auto-Failover] ${engine} initial load timeout (>22s), switching...`);
           _maxWrap.classList.remove('buffering');
           _maxWrap.classList.add('error');
           if (_maxHls) { try { _maxHls.destroy(); } catch (_) {} _maxHls = null; }
@@ -10102,7 +10149,7 @@
           if (_maxErrMsg) _maxErrMsg.innerHTML = `${engineLabel} stream timed out.<br><span style="color:${accentCol};font-weight:600;">Auto-switching to ${targetName}...</span>`;
           _fallbackFromMax();
         }
-      }, 10000);
+      }, 22000);
 
       // ── Fetch stream URL & Subtitle from /api/hls or /api/sinmax ──────
       let streamUrl = null;
@@ -10119,7 +10166,7 @@
         if (episode) params.set('episode', episode);
         if (imdbId)  params.set('imdb', imdbId);
         const apiPath = engine === 'hackymax' ? '/api/hackymax' : (engine === 'sinmax' ? '/api/sinmax' : '/api/zeemax');
-        const resp = await fetch(`${apiPath}?${params}`, { signal: AbortSignal.timeout(6500) });
+        const resp = await fetch(`${apiPath}?${params}`, { signal: AbortSignal.timeout(12000) });
         const data = await resp.json();
         if (data.url) streamUrl = data.url;
         if (data.format) streamFormat = data.format;
@@ -10128,7 +10175,7 @@
       } catch (_) {}
 
       if (!streamUrl) {
-        if (_loadTimeoutTimer) { clearTimeout(_loadTimeoutTimer); _loadTimeoutTimer = null; }
+        if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
         _maxWrap.classList.remove('buffering');
         _maxWrap.classList.add('error');
         if (_maxErrMsg) {
@@ -10193,8 +10240,8 @@
         _maxVideo.play().catch(() => {
           _maxWrap.classList.remove('buffering');
         });
-        _maxVideo.addEventListener('loadeddata', () => {
-          if (_loadTimeoutTimer) { clearTimeout(_loadTimeoutTimer); _loadTimeoutTimer = null; }
+        const _onMp4Ready = () => {
+          if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
           _suppressNativeTracks();
           _maxWrap.classList.remove('buffering');
           _maxWrap.classList.add('ready');
@@ -10204,10 +10251,12 @@
             _maxSubRaf = requestAnimationFrame(_maxSubLoop);
           }
           _mxsRefreshQualityGrid();
-        }, { once: true });
+        };
+        _maxVideo.addEventListener('loadeddata', _onMp4Ready, { once: true });
+        _maxVideo.addEventListener('canplay', _onMp4Ready, { once: true });
         _maxVideo.addEventListener('error', () => {
           if (_maxMode && streamFormat === 'mp4') {
-            if (_loadTimeoutTimer) { clearTimeout(_loadTimeoutTimer); _loadTimeoutTimer = null; }
+            if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
             _maxWrap.classList.remove('buffering', 'ready');
             _maxWrap.classList.add('error');
             const candidate = _getNextFallbackBtn();
@@ -10290,7 +10339,7 @@
         });
 
         _maxHls.on(Hls.Events.MANIFEST_PARSED, () => {
-          if (_loadTimeoutTimer) { clearTimeout(_loadTimeoutTimer); _loadTimeoutTimer = null; }
+          if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
           _suppressNativeTracks();
           _maxWrap.classList.remove('buffering');
           _maxWrap.classList.add('ready');
@@ -10308,11 +10357,15 @@
           _mxsRefreshQualityGrid();
         });
 
+        _maxHls.on(Hls.Events.FRAG_LOADED, () => {
+          if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
+        });
+
         _maxHls.on(Hls.Events.LEVEL_SWITCHED, () => { _suppressNativeTracks(); _updateMaxQuality(); _mxsRefreshQualityGrid(); });
 
         _maxHls.on(Hls.Events.ERROR, (event, data) => {
           if (data.fatal) {
-            if (_loadTimeoutTimer) { clearTimeout(_loadTimeoutTimer); _loadTimeoutTimer = null; }
+            if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
             _maxWrap.classList.remove('buffering', 'ready');
             _maxWrap.classList.add('error');
             const candidate = _getNextFallbackBtn();
@@ -10404,6 +10457,7 @@
     function playStream(url, allUrls, labels) {
       if (_currentModalItem) saveRecentWatch(_currentModalItem, _currentModalType);
       // Stop background video
+      if (typeof _destroyHeroPlayer === 'function') _destroyHeroPlayer();
       const heroVideo = document.getElementById('heroVideoContainer');
       if (heroVideo) heroVideo.innerHTML = '';
 
@@ -11589,8 +11643,9 @@
       const params = new URLSearchParams(window.location.search);
       const mParam = params.get('m');
       const tvParam = params.get('s');
+      const partyParam = params.get('party');
       const paramVal = mParam || tvParam;
-      if (paramVal) {
+      if (paramVal && !partyParam) {
         const id = parseInt(paramVal, 10);
         setTimeout(() => openModal(id, tvParam ? 'tv' : 'movie'), 600);
       }
@@ -12080,6 +12135,12 @@
             window._wpPollInterval = null;
           }
 
+          const isAlreadyPlayingThis = (
+            String(window._currentPlayingId) === String(id) &&
+            window._currentPlayingEngine === activeEngine &&
+            window._maxMode
+          );
+
           window._currentPlayingId = id;
           window._currentPlayingType = type;
           window._currentPlayingSeason = season;
@@ -12107,11 +12168,11 @@
             if (typeof openModal === 'function') openModal(id, type);
           }
 
-          // 2. Open player overlay & launch player immediately!
+          // 2. Open player overlay & launch player only if not already active!
           const overlay = document.getElementById('playerOverlay');
           if (overlay) overlay.classList.add('open');
 
-          if (typeof initMaxPlayer === 'function') {
+          if (!isAlreadyPlayingThis && typeof initMaxPlayer === 'function') {
             initMaxPlayer(id, type, season, episode, activeEngine);
           }
 
@@ -12671,11 +12732,17 @@
 
       const mParam = params.get('m');
       const tvParam = params.get('s');
+      const engParam = params.get('engine') || 'hackymax';
       const paramVal = mParam || tvParam;
       if (paramVal) {
         const id = parseInt(paramVal, 10);
         if (typeof openModal === 'function') {
           openModal(id, tvParam ? 'tv' : 'movie');
+        }
+        const overlay = document.getElementById('playerOverlay');
+        if (overlay) overlay.classList.add('open');
+        if (typeof initMaxPlayer === 'function') {
+          initMaxPlayer(id, tvParam ? 'tv' : 'movie', 1, 1, engParam);
         }
       }
 

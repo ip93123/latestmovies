@@ -111,7 +111,12 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Expose-Headers', 'Content-Range, Accept-Ranges, Content-Length, Content-Type');
     res.setHeader('Accept-Ranges', 'bytes');
-    res.setHeader('Content-Type', contentType || 'video/mp4');
+
+    let finalContentType = contentType || 'video/mp4';
+    if (finalContentType.includes('image/') || finalContentType.includes('webp')) {
+      finalContentType = 'video/mp2t';
+    }
+    res.setHeader('Content-Type', finalContentType);
 
     if (upstream.headers.has('content-range')) {
       res.setHeader('Content-Range', upstream.headers.get('content-range'));
