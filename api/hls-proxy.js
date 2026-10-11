@@ -30,14 +30,6 @@ export default async function handler(req, res) {
     const clean = targetUrl.toLowerCase().split('?')[0];
     const isM3U8 = clean.endsWith('.m3u8') || targetUrl.includes('.m3u8');
 
-    // For direct MP4 streams (e.g. ravenflix/moviebox), redirect directly to upstream Cloudflare CDN
-    // to bypass Vercel serverless payload limits, QUIC timeouts, and socket drops
-    if (!isM3U8 && (clean.endsWith('.mp4') || targetUrl.includes('ravenflix.st'))) {
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Cache-Control', 'public, max-age=3600');
-      return res.redirect(302, targetUrl);
-    }
-
     // For binary streams/segments: chunk open-ended ranges to prevent Vercel Serverless timeouts & hangs
     if (!isM3U8) {
       const clientRange = req.headers && req.headers['range'];

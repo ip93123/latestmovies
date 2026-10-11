@@ -67,11 +67,10 @@ const M3U8_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
 };
 
-// Prioritize MovieBox (pure clean 1080p, no burned-in Persian/Arabic subs)
-// Falls back to DCloud only if MovieBox is unavailable
+// Prioritize DCloud (Adaptive HLS) first, then MovieBox
 async function getVidloveStream(id, type, season, episode) {
   const isTv = type === 'tv';
-  const sources = ['moviebox', 'dcloud'];
+  const sources = ['dcloud', 'moviebox'];
 
   for (const src of sources) {
     try {
@@ -89,7 +88,8 @@ async function getVidloveStream(id, type, season, episode) {
       const streamUrl = data && data.source && data.source.url;
       if (!streamUrl) continue;
 
-      const format = (streamUrl.includes('.m3u8') || (data.source && data.source.label === 'DCloud')) ? 'hls' : 'mp4';
+      const isDcloud = (data.source && (data.source.label === 'DCloud' || data.source.source === 'dcloud')) || streamUrl.includes('dcloud');
+      const format = (streamUrl.includes('.m3u8') || isDcloud) ? 'hls' : 'mp4';
       return {
         streamUrl,
         format,
