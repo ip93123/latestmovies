@@ -5745,7 +5745,6 @@
       </div>
       <iframe id="playerFrame" src="about:blank"
         allow="autoplay; encrypted-media; fullscreen; picture-in-picture; web-share"
-        allowfullscreen
         frameborder="0"></iframe>
     </div>
   </div>
@@ -6108,6 +6107,7 @@
       }
       const ytTag = document.createElement('script');
       ytTag.src = 'https://www.youtube.com/iframe_api';
+      ytTag.onerror = () => { /* gracefully ignore blocked/closed connections to youtube */ };
       document.head.appendChild(ytTag);
     }
     // Defer until after the browser has finished painting the page
@@ -7969,12 +7969,12 @@
             const isHackyMax = u.startsWith('hackymax://');
             const isSinMax   = u.startsWith('sinmax://');
             const isZeeMax   = u.startsWith('zeemax://') || u.startsWith('max://');
-            const style = isMax
-              ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(232,201,122,.45);letter-spacing:.5px`
+            const style = isHackyMax
+              ? `background:linear-gradient(135deg,#00C6FF,#0072FF);color:#fff;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(0,198,255,.45);letter-spacing:.5px`
               : isSinMax
               ? `background:linear-gradient(135deg,#FF4B2B,#FF416C);color:#fff;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(255,65,108,.45);letter-spacing:.5px`
               : isZeeMax
-              ? `background:linear-gradient(135deg,#00C6FF,#0072FF);color:#fff;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(0,198,255,.45);letter-spacing:.5px`
+              ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(232,201,122,.45);letter-spacing:.5px`
               : `background:${colors[i] || '#6B7280'};color:${textColors[i] || '#fff'};border:none;cursor:pointer`;
             return `<button class="modal-stream-pill modal-play-btn${isHackyMax ? ' hackymax-btn' : isSinMax ? ' sinmax-btn' : isZeeMax ? ' zeemax-btn' : ''}" data-server="${i}" style="${style}">${allLabels[i]}</button>`;
           }).join('');
@@ -7983,15 +7983,15 @@
             playBtnsHtml += `<button class="modal-stream-pill" id="showMoreServersBtn" style="background:var(--dark3);color:#fff;border:1px solid rgba(255,255,255,0.2);cursor:pointer">➕ ${hiddenUrls.length} More</button>`;
             playBtnsHtml += hiddenUrls.map((u, i) => {
               const idx = i + maxVisible;
-              const isMax     = u.startsWith('max://');
-              const isSinMax  = u.startsWith('sinmax://');
-              const isZeeMax  = u.startsWith('zeemax://');
-              const style = isMax
-                ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(232,201,122,.45);display:none`
+              const isHackyMax = u.startsWith('hackymax://');
+              const isSinMax   = u.startsWith('sinmax://');
+              const isZeeMax   = u.startsWith('zeemax://') || u.startsWith('max://');
+              const style = isHackyMax
+                ? `background:linear-gradient(135deg,#00C6FF,#0072FF);color:#fff;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(0,198,255,.45);display:none`
                 : isSinMax
                 ? `background:linear-gradient(135deg,#FF4B2B,#FF416C);color:#fff;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(255,65,108,.45);display:none`
                 : isZeeMax
-                ? `background:linear-gradient(135deg,#00C6FF,#0072FF);color:#fff;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(0,198,255,.45);display:none`
+                ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(232,201,122,.45);display:none`
                 : `background:${colors[idx] || '#6B7280'};color:${textColors[idx] || '#fff'};border:none;cursor:pointer;display:none`;
               return `<button class="modal-stream-pill modal-play-btn extra-server-btn${isHackyMax ? ' hackymax-btn' : isSinMax ? ' sinmax-btn' : isZeeMax ? ' zeemax-btn' : ''}" data-server="${idx}" style="${style}">${allLabels[idx]}</button>`;
             }).join('');
@@ -8031,7 +8031,9 @@
           if (type === 'tv' && details.number_of_seasons) {
             await setupEpChooser(id, details.number_of_seasons);
           }
-        } catch { }
+        } catch (serverErr) {
+          console.error('[Modal] Error setting up play buttons:', serverErr);
+        }
       } catch (e) {
         document.getElementById('modalTitle').textContent = 'Failed to load';
         document.getElementById('modalPlot').textContent = 'Could not fetch details. Please try again.';
@@ -10271,7 +10273,7 @@
       overlay.classList.add('open');
 
       // ── Auto-load Sinhala subtitle from SUBTITLE_MAP if available ────────
-      if (!isMaxUrl && !isSinMaxUrl && !isZeeMaxUrl && _currentModalId && typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(_currentModalId)]) {
+      if (!isHackyMaxUrl && !isSinMaxUrl && !isZeeMaxUrl && _currentModalId && typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(_currentModalId)]) {
         const subFile = SUBTITLE_MAP[String(_currentModalId)];
         fetch(subFile).then(r => r.text()).then(text => {
           const cues = parseSrt(text);
@@ -10335,17 +10337,17 @@
       const frame  = document.getElementById('playerFrame');
       const loader = document.getElementById('playerLoading');
 
-      const isMaxUrl = url.startsWith('max://');
-      const isSinMaxUrl = url.startsWith('sinmax://');
-      const isZeeMaxUrl = url.startsWith('zeemax://');
-      if (isMaxUrl || isSinMaxUrl || isZeeMaxUrl) {
-        // Switch TO Max, SinMax or ZeeMax player
+      const isHackyMaxUrl = url.startsWith('hackymax://');
+      const isSinMaxUrl   = url.startsWith('sinmax://');
+      const isZeeMaxUrl   = url.startsWith('zeemax://') || url.startsWith('max://');
+      if (isHackyMaxUrl || isSinMaxUrl || isZeeMaxUrl) {
+        // Switch TO HackyMax, SinMax or ZeeMax player
         _destroyMax();
         if (loader) loader.style.opacity = '0';
         frame.style.display = 'none';
         frame.src = 'about:blank';
-        const prefix = isZeeMaxUrl ? 'zeemax://' : (isSinMaxUrl ? 'sinmax://' : 'max://');
-        const engine = isZeeMaxUrl ? 'zeemax' : (isSinMaxUrl ? 'sinmax' : 'max');
+        const prefix = isHackyMaxUrl ? 'hackymax://' : (isSinMaxUrl ? 'sinmax://' : (url.startsWith('zeemax://') ? 'zeemax://' : 'max://'));
+        const engine = isHackyMaxUrl ? 'hackymax' : (isSinMaxUrl ? 'sinmax' : 'zeemax');
         const parts = url.replace(prefix, '').split('/');
         const mType = parts[0] || _currentModalType;
         const mId   = parts[1] || _currentModalId;
