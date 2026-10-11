@@ -5,26 +5,6 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing required parameters' });
   }
 
-  // Helper to fetch IMDb ID securely
-  async function getImdbId(tmdbId, mediaType) {
-    try {
-      const url = `https://api.themoviedb.org/3/${mediaType}/${tmdbId}/external_ids`;
-      const fetchRes = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${process.env.TMDB_TOKEN}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      if (!fetchRes.ok) return null;
-      const data = await fetchRes.json();
-      return data.imdb_id || null;
-    } catch {
-      return null;
-    }
-  }
-
-  const imdbId = await getImdbId(id, type);
-
   let urls = [];
   let labels = [];
 
@@ -40,28 +20,10 @@ export default async function handler(req, res) {
       `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`,
       `https://vidup.to/tv/${id}/${s}/${e}?autoplay=1`,
       `https://vidfast.pro/tv/${id}/${s}/${e}?autoplay=1&mute=0`,
-    ];
-    labels = ['Max ✦', 'Infinity', 'Nova', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay'];
-
-    urls.push(
-      `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}&autoplay=1&mute=0`,
-      `https://peachify.top/embed/tv/${id}/${s}/${e}?autoNext=5&autoplay=1`,
-      `https://player.videasy.net/tv/${id}/${s}/${e}?autoplay=1&muted=0`,
-      `https://embedmaster.link/tv/${id}/${s}/${e}?autoplay=1`,
-      `https://vidcore.net/tv/${id}/${s}/${e}?autoplay=1&server=orbit`
-    );
-    labels.push('Aether', 'Nexus', 'Phantom', 'Spectra', 'Orbit');
-
-    if (imdbId) {
-      urls.push(`https://primesrc.me/embed/tv?imdb=${imdbId}&season=${s}&episode=${e}&autoplay=1`);
-      labels.push('Pulse');
-    }
-
-    urls.push(
-      `https://cinesrc.st/embed/tv/${id}?s=${s}&e=${e}&autoplay=1`,
+      `https://vidcore.net/tv/${id}/${s}/${e}?autoplay=1&server=orbit`,
       `https://anyembed.xyz/embed/tmdb-tv-${id}-${s}-${e}?logo=false&autoplay=1`
-    );
-    labels.push('Flux', 'Stellar');
+    ];
+    labels = ['Max ✦', 'Infinity', 'Nova', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
 
   } else {
     // Movie
@@ -73,28 +35,10 @@ export default async function handler(req, res) {
       `https://vixsrc.to/movie/${id}?autoplay=1`,
       `https://vidup.to/movie/${id}?autoplay=1`,
       `https://vidfast.pro/movie/${id}?autoplay=1&mute=0`,
-    ];
-    labels = ['Max ✦', 'Infinity', 'Nova', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay'];
-
-    urls.push(
-      `https://vidsrc.me/embed/movie?tmdb=${id}&autoplay=1&mute=0`,
-      `https://peachify.top/embed/movie/${id}?autoplay=1`,
-      `https://player.videasy.net/movie/${id}?autoplay=1&muted=0`,
-      `https://embedmaster.link/movie/${id}?autoplay=1`,
-      `https://vidcore.net/movie/${id}?autoplay=1&server=orbit`
-    );
-    labels.push('Aether', 'Nexus', 'Phantom', 'Spectra', 'Orbit');
-
-    if (imdbId) {
-      urls.push(`https://primesrc.me/embed/movie?imdb=${imdbId}&autoplay=1`);
-      labels.push('Pulse');
-    }
-
-    urls.push(
-      `https://cinesrc.st/embed/movie/${id}?autoplay=1`,
+      `https://vidcore.net/movie/${id}?autoplay=1&server=orbit`,
       `https://anyembed.xyz/embed/tmdb-movie-${id}?logo=false&autoplay=1`
-    );
-    labels.push('Flux', 'Stellar');
+    ];
+    labels = ['Max ✦', 'Infinity', 'Nova', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
   }
 
   // Short cache so new servers appear quickly
