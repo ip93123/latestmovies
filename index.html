@@ -2613,10 +2613,9 @@
         max-height: 120px !important;
       }
       #wpHud {
-        top: 10px !important;
-        left: 10px !important;
-        padding: 4px 10px !important;
-        font-size: 0.7rem !important;
+        top: 12px !important;
+        right: 12px !important;
+        left: auto !important;
       }
 
       /* Player Controls on Mobile */
@@ -2934,22 +2933,104 @@
       z-index: 9999;
       display: none;
       flex-direction: column;
-      gap: 8px;
-      pointer-events: none;
+      align-items: flex-end;
+      gap: 6px;
+      pointer-events: auto;
+      user-select: none;
     }
     #wpHud.active { display: flex; }
     .wp-hud-badge {
-      background: rgba(10,7,25,0.82);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background: rgba(10,7,25,0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border: 1px solid rgba(168,85,247,0.35);
       border-radius: 30px;
-      padding: 6px 14px 6px 10px;
+      padding: 6px 13px 6px 10px;
       display: flex;
       align-items: center;
       gap: 9px;
       font-family: 'Inter', sans-serif;
       box-shadow: 0 4px 20px rgba(168,85,247,0.25);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .wp-hud-badge:hover {
+      background: rgba(20,14,45,0.92);
+      border-color: rgba(168,85,247,0.7);
+      box-shadow: 0 6px 24px rgba(168,85,247,0.4);
+      transform: translateY(-1px);
+    }
+    .wp-hud-badge:active {
+      transform: scale(0.97);
+    }
+    .wp-hud-menu {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      background: rgba(12,9,26,0.95);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(168,85,247,0.35);
+      border-radius: 14px;
+      padding: 10px;
+      min-width: 175px;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.6), 0 0 20px rgba(168,85,247,0.2);
+      transform-origin: top right;
+      animation: wpHudMenuIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .wp-hud-menu.open {
+      display: flex;
+    }
+    @keyframes wpHudMenuIn {
+      from { opacity: 0; transform: translateY(-6px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .wp-hud-menu-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2px 4px 6px 4px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 2px;
+      font-family: 'Inter', sans-serif;
+    }
+    .wp-hud-btn-manage, .wp-hud-btn-leave {
+      border: none;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      width: 100%;
+      transition: all 0.2s ease;
+      font-weight: 600;
+    }
+    .wp-hud-btn-manage {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.85);
+      font-size: 0.74rem;
+      padding: 7px 10px;
+    }
+    .wp-hud-btn-manage:hover {
+      background: rgba(168,85,247,0.2);
+      border-color: rgba(168,85,247,0.4);
+      color: #fff;
+    }
+    .wp-hud-btn-leave {
+      background: rgba(239,68,68,0.14);
+      border: 1px solid rgba(239,68,68,0.32);
+      color: #f87171;
+      font-size: 0.78rem;
+      padding: 8px 12px;
+    }
+    .wp-hud-btn-leave:hover {
+      background: rgba(239,68,68,0.28);
+      border-color: rgba(239,68,68,0.6);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(239,68,68,0.3);
     }
     /* ── Host action toast ── */
     #wpNotif {
@@ -12274,6 +12355,12 @@
       const count = total || (WP.isHost ? WP.conns.length + 1 : (WP.guestNames.length + 2));
       document.getElementById('wpHudRole').textContent  = WP.isHost ? 'HOST' : 'GUEST';
       document.getElementById('wpHudCount').textContent = `${count} watching`;
+      const menuCode = document.getElementById('wpHudMenuCode');
+      if (menuCode && WP.code) menuCode.textContent = WP.code;
+      const hudLeaveBtn = document.getElementById('wpHudLeaveBtn');
+      if (hudLeaveBtn) {
+        hudLeaveBtn.innerHTML = WP.isHost ? '<span>🛑</span> End Party' : '<span>🚪</span> Leave Party';
+      }
       document.getElementById('wpHud').classList.add('active');
       document.getElementById('wpActiveDot').style.display = 'block';
       const maxWp = document.getElementById('maxWatchPartyBtn');
@@ -12430,6 +12517,10 @@
       WP.conns = []; WP.hostConn = null;
       WP.code = null; WP.isHost = false;
       document.getElementById('wpHud').classList.remove('active');
+      const hudMenu = document.getElementById('wpHudMenu');
+      if (hudMenu) hudMenu.classList.remove('open');
+      const chevron = document.getElementById('wpHudChevron');
+      if (chevron) chevron.style.transform = 'rotate(0deg)';
       document.getElementById('wpActiveDot').style.display = 'none';
       const maxWp = document.getElementById('maxWatchPartyBtn');
       if (maxWp) maxWp.classList.remove('active');
@@ -12717,6 +12808,57 @@
           }
         });
       }
+
+      const hudBadge = document.getElementById('wpHudBadge');
+      const hudMenu = document.getElementById('wpHudMenu');
+      const hudChevron = document.getElementById('wpHudChevron');
+      const hudLeaveBtn = document.getElementById('wpHudLeaveBtn');
+      const hudManageBtn = document.getElementById('wpHudOpenModalBtn');
+
+      if (hudBadge) {
+        hudBadge.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (!hudMenu) return;
+          const willOpen = !hudMenu.classList.contains('open');
+          hudMenu.classList.toggle('open', willOpen);
+          if (hudChevron) hudChevron.style.transform = willOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+          if (WP.code) {
+            const menuCode = document.getElementById('wpHudMenuCode');
+            if (menuCode) menuCode.textContent = WP.code;
+          }
+          if (hudLeaveBtn) {
+            hudLeaveBtn.innerHTML = WP.isHost ? '<span>🛑</span> End Party' : '<span>🚪</span> Leave Party';
+          }
+        });
+      }
+
+      if (hudLeaveBtn) {
+        hudLeaveBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (hudMenu) hudMenu.classList.remove('open');
+          if (hudChevron) hudChevron.style.transform = 'rotate(0deg)';
+          _leave();
+        });
+      }
+
+      if (hudManageBtn) {
+        hudManageBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (hudMenu) hudMenu.classList.remove('open');
+          if (hudChevron) hudChevron.style.transform = 'rotate(0deg)';
+          window.openWatchPartyModal(WP.isHost ? 'host' : 'join');
+        });
+      }
+
+      document.addEventListener('click', (e) => {
+        const hud = document.getElementById('wpHud');
+        if (hud && hudMenu && hudMenu.classList.contains('open')) {
+          if (!hud.contains(e.target)) {
+            hudMenu.classList.remove('open');
+            if (hudChevron) hudChevron.style.transform = 'rotate(0deg)';
+          }
+        }
+      });
     });
 
     /* ── Auto-join when page loads with ?party=CODE in URL ───── */
@@ -12912,13 +13054,27 @@
 
   <!-- Party HUD badge (always visible while in party) -->
   <div id="wpHud">
-    <div class="wp-hud-badge">
+    <div class="wp-hud-badge" id="wpHudBadge" title="Watch Party menu">
       <div style="width:28px;height:28px;background:linear-gradient(135deg,#7C3AED,#A855F7);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;">🎬</div>
       <div>
         <div id="wpHudRole" style="font-size:0.62rem;color:rgba(255,255,255,0.45);letter-spacing:1px;text-transform:uppercase;">HOST</div>
         <div id="wpHudCount" style="font-size:0.78rem;font-weight:600;color:#fff;">1 watching</div>
       </div>
       <div id="wpHudDot" style="width:8px;height:8px;background:#00ff88;border-radius:50%;animation:wpPulse 1.5s infinite;box-shadow:0 0 6px #00ff88;"></div>
+      <div style="font-size:0.65rem;color:rgba(255,255,255,0.5);margin-left:-2px;transition:transform 0.2s;" id="wpHudChevron">▾</div>
+    </div>
+    <!-- HUD Dropdown Menu -->
+    <div id="wpHudMenu" class="wp-hud-menu">
+      <div class="wp-hud-menu-header">
+        <span style="font-size:0.68rem;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.5px;">Party Room</span>
+        <span id="wpHudMenuCode" style="font-size:0.75rem;font-weight:700;color:#A855F7;letter-spacing:1px;">------</span>
+      </div>
+      <button id="wpHudOpenModalBtn" class="wp-hud-btn-manage" type="button">
+        <span>👥</span> Room Details & Invite
+      </button>
+      <button id="wpHudLeaveBtn" class="wp-hud-btn-leave" type="button">
+        <span>🚪</span> Leave Party
+      </button>
     </div>
   </div>
 
