@@ -101,7 +101,9 @@ export default async function handler(req, res) {
   }
 
   if (streamUrl) {
-    return res.status(200).json({ url: streamUrl, subtitle: subtitleUrl });
+    // Wrap through our HLS proxy so browser never hits ravenflix directly (CORS bypass)
+    const proxied = `/api/hls-proxy?url=${encodeURIComponent(streamUrl)}`;
+    return res.status(200).json({ url: proxied, subtitle: subtitleUrl });
   }
 
   return res.status(404).json({ error: 'No HLS stream found', subtitle: subtitleUrl });
