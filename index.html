@@ -6035,14 +6035,6 @@
     </div>
   </section>
 
-  <!-- WHERE TO WATCH -->
-  <section id="wheretowatch">
-    <div class="section-header">
-      <h2 class="section-title">📡 Where to <span>Watch</span></h2>
-    </div>
-    <div class="platform-grid" id="platformGrid"></div>
-  </section>
-
   <div class="featured-wrap" style="padding:0 3rem">
     <div class="featured-banner" id="featuredBanner">
       <img id="featuredImg" src="" alt="">
@@ -6749,13 +6741,14 @@
     }
 
     function buildPlatformGrid(allItems) {
+      const grid = document.getElementById('platformGrid');
+      if (!grid) return;
       const counts = {};
       allItems.forEach(item => {
         const ids = (item.dataset && item.dataset.providers ? item.dataset.providers : '').split(',').filter(Boolean);
         ids.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
       });
       const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 8);
-      const grid = document.getElementById('platformGrid');
       grid.innerHTML = sorted.map(([id, count]) => {
         const info = getProviderInfo(+id);
         const logoPath = providerLogos[id] || providerLogos[+id];
