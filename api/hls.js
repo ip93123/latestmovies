@@ -4,8 +4,6 @@
 const SUBTITLE_MAP = {
   // DC (2026)
   '1479832': '/Subtitle/1479832.srt',
-  // Hitler (2024/2026)
-  '1185591': '/Subtitle/1185591.srt',
   // Dude (2025)
   '1321108': '/Subtitle/1321108.srt',
   // Kara (2026)
@@ -20,6 +18,10 @@ const SUBTITLE_MAP = {
   '1149791': '/Subtitle/1149791.srt',
   // Bethlehem Kudumba Unit (2026)
   '1508168': '/Subtitle/1508168.srt',
+  // Hi (2026)
+  '1314279': '/Subtitle/1314279.srt',
+  // Pradhama Drishtiya Kuttakkar (2026)
+  '1544847': '/Subtitle/1544847.srt',
 };
 
 const VIDLOVE_HEADERS = {
