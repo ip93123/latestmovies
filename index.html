@@ -9197,6 +9197,7 @@
             if (e.track) try { e.track.mode = 'disabled'; } catch (_) {}
           });
         }
+        _maxVideo.preload = 'auto';
         _maxVideo.src = streamUrl;
         _maxVideo.playbackRate = _mxsSettings.speed;
         _maxVideo.play().catch(() => {
@@ -9224,11 +9225,51 @@
         _maxVideo.addEventListener('waiting', () => _maxWrap.classList.add('buffering'));
         _maxVideo.addEventListener('playing', () => { _suppressNativeTracks(); _maxWrap.classList.remove('buffering'); });
         _maxVideo.addEventListener('canplay', () => _maxWrap.classList.remove('buffering'));
+
+        // ── MP4 stall-recovery watchdog ──────────────────────────────────────
+        let _mp4StallTimer = null, _mp4LastStall = -1;
+        _maxVideo.addEventListener('waiting', () => {
+          if (_mp4StallTimer) return;
+          _mp4LastStall = _maxVideo.currentTime;
+          _mp4StallTimer = setTimeout(() => {
+            _mp4StallTimer = null;
+            if (!_maxVideo || _maxVideo.paused) return;
+            if (Math.abs(_maxVideo.currentTime - _mp4LastStall) < 0.1 && _maxVideo.readyState < 3) {
+              _maxVideo.currentTime = _mp4LastStall + 1.0;
+            }
+          }, 5000);
+        });
+        _maxVideo.addEventListener('playing', () => {
+          if (_mp4StallTimer) { clearTimeout(_mp4StallTimer); _mp4StallTimer = null; }
+        });
+        // ─────────────────────────────────────────────────────────────────────
       } else if (Hls.isSupported()) {
         _maxHls = new Hls({
           enableWorker: true,
           lowLatencyMode: false,
-          backBufferLength: 90,
+          // ── Buffer tuning: pre-load as much as possible to survive proxy slowdowns ──
+          maxBufferLength: 120,          // try to keep 120s ahead in buffer (default 30s)
+          maxMaxBufferLength: 600,       // allow up to 600s if bandwidth allows
+          backBufferLength: 30,          // only keep 30s behind (saves memory, was 90)
+          maxBufferSize: 200 * 1000 * 1000, // 200MB max buffer size
+          startFragPrefetch: true,       // start fetching next segment early
+          // ── Retry tuning: proxy can be slow, retry aggressively ──
+          fragLoadingMaxRetry: 8,
+          fragLoadingRetryDelay: 500,
+          fragLoadingMaxRetryTimeout: 4000,
+          fragLoadingTimeOut: 25000,     // 25s per segment (6MB via slow proxy ~8.5s, headroom)
+          levelLoadingMaxRetry: 6,
+          levelLoadingRetryDelay: 500,
+          levelLoadingTimeOut: 15000,
+          manifestLoadingMaxRetry: 6,
+          manifestLoadingRetryDelay: 500,
+          manifestLoadingTimeOut: 15000,
+          // ── ABR: lock to highest quality, don't auto-downgrade ──
+          abrEwmaFastLive: 4,
+          abrEwmaSlowLive: 15,
+          abrBandWidthFactor: 0.8,
+          abrBandWidthUpFactor: 0.7,
+          startLevel: -1,               // auto-pick best level initially
         });
         _maxHls.loadSource(streamUrl);
         _maxHls.attachMedia(_maxVideo);
@@ -9267,6 +9308,28 @@
         _maxVideo.addEventListener('playing', () => _maxWrap.classList.remove('buffering'));
         _maxVideo.addEventListener('canplay', () => _maxWrap.classList.remove('buffering'));
         _maxVideo.addEventListener('loadedmetadata', () => _mxsRefreshQualityGrid(), { once: true });
+
+        // ── Stall recovery watchdog ──────────────────────────────────────────
+        // If video freezes for >5s while proxy is slow, nudge 1s forward to escape the stall
+        let _stallWatchdogTimer = null;
+        let _lastStallTime = -1;
+        _maxVideo.addEventListener('waiting', () => {
+          if (_stallWatchdogTimer) return;
+          _stallWatchdogTimer = setTimeout(() => {
+            _stallWatchdogTimer = null;
+            if (!_maxVideo || _maxVideo.paused) return;
+            const ct = _maxVideo.currentTime;
+            // Only nudge if we're actually stuck (same position as when stall started)
+            if (Math.abs(ct - _lastStallTime) < 0.1 && _maxVideo.readyState < 3) {
+              _maxVideo.currentTime = ct + 1.0;
+            }
+          }, 5000);
+          _lastStallTime = _maxVideo.currentTime;
+        });
+        _maxVideo.addEventListener('playing', () => {
+          if (_stallWatchdogTimer) { clearTimeout(_stallWatchdogTimer); _stallWatchdogTimer = null; }
+        });
+        // ─────────────────────────────────────────────────────────────────────
         _maxVideo.addEventListener('seeked', () => {
           if (_maxMode && _subCues.length) {
             const ms = _maxVideo.currentTime * 1000 + _subOffset;
