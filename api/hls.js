@@ -28,8 +28,10 @@ const SUBTITLE_MAP = {
   '155518': '/Subtitle/155518.srt',
   '154983': '/Subtitle/154983.srt',
   // Premam (2015)
+  '341895': '/Subtitle/341895.srt',
   '337375': '/Subtitle/337375.srt',
   // Home (2021)
+  '863675': '/Subtitle/863675.srt',
   '854291': '/Subtitle/854291.srt',
   // Ennu Ninte Moideen (2015)
   '349479': '/Subtitle/349479.srt',
