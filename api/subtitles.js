@@ -23,10 +23,14 @@ const SUBTITLE_MAP = {
   '349479': '/Subtitle/349479.srt', // Ennu Ninte Moideen (2015) (alt)
   '618435': '/Subtitle/618435.srt', // Thanneer Mathan Dinangal (2019)
   '609503': '/Subtitle/609503.srt', // Thanneer Mathan Dinangal (2019) (alt)
-  '371900': '/Subtitle/371900.srt', // Charlie (2015)
-  '109012': '/Subtitle/109012.srt', // Ustad Hotel (2012)
-  '274092': '/Subtitle/274092.srt', // Bangalore Days (2014)
-  '574465': '/Subtitle/574465.srt', // Kumbalangi Nights (2019)
+  '372297': '/Subtitle/372297.srt', // Charlie (2015)
+  '371900': '/Subtitle/371900.srt', // Charlie (2015) (alt)
+  '117751': '/Subtitle/117751.srt', // Ustad Hotel (2012)
+  '109012': '/Subtitle/109012.srt', // Ustad Hotel (2012) (alt)
+  '268660': '/Subtitle/268660.srt', // Bangalore Days (2014)
+  '274092': '/Subtitle/274092.srt', // Bangalore Days (2014) (alt)
+  '575351': '/Subtitle/575351.srt', // Kumbalangi Nights (2019)
+  '574465': '/Subtitle/574465.srt', // Kumbalangi Nights (2019) (alt)
 };
 
 const LANG_MAP = {

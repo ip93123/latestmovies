@@ -41,12 +41,16 @@ const SUBTITLE_MAP = {
   '618435': '/Subtitle/618435.srt',
   '609503': '/Subtitle/609503.srt',
   // Charlie (2015)
+  '372297': '/Subtitle/372297.srt',
   '371900': '/Subtitle/371900.srt',
   // Ustad Hotel (2012)
+  '117751': '/Subtitle/117751.srt',
   '109012': '/Subtitle/109012.srt',
   // Bangalore Days (2014)
+  '268660': '/Subtitle/268660.srt',
   '274092': '/Subtitle/274092.srt',
   // Kumbalangi Nights (2019)
+  '575351': '/Subtitle/575351.srt',
   '574465': '/Subtitle/574465.srt',
 };
 
