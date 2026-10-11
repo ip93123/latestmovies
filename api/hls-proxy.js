@@ -45,9 +45,6 @@ export default async function handler(req, res) {
         } else {
           upstreamHeaders['Range'] = clientRange;
         }
-      } else {
-        // No client range: probe first chunk so browser enters 206 Partial Content range streaming
-        upstreamHeaders['Range'] = `bytes=0-${MAX_CHUNK_BYTES - 1}`;
       }
     }
 

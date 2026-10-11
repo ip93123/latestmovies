@@ -9878,6 +9878,49 @@
       _mxsRenderTracks();
     }
 
+    async function _ensurePlayerServerBar(tmdbId, mediaType, season, episode, activeEngine) {
+      const bar = document.getElementById('playerServerBar');
+      if (!bar) return;
+      const existingBtns = bar.querySelectorAll('.player-server-btn');
+      if (existingBtns.length > 0) {
+        existingBtns.forEach(b => {
+          const isTarget = (activeEngine === 'hackymax' && b.classList.contains('hackymax-btn')) ||
+                           (activeEngine === 'sinmax' && b.classList.contains('sinmax-btn')) ||
+                           (activeEngine === 'zeemax' && (b.classList.contains('zeemax-btn') || b.classList.contains('max-btn')));
+          b.classList.toggle('active', isTarget);
+        });
+        return;
+      }
+      try {
+        const data = await getModalServerUrls(tmdbId, mediaType, season || 1, episode || 1);
+        if (data && data.urls && data.urls.length) {
+          const allUrls = data.urls;
+          const labels = data.labels || [];
+          bar.innerHTML = allUrls.map((u, i) => {
+            const lbl = labels[i] || `Server ${i + 1}`;
+            const isHackyMax = u.startsWith('hackymax://');
+            const isSinMax   = u.startsWith('sinmax://');
+            const isZeeMax   = u.startsWith('zeemax://') || u.startsWith('max://');
+            const extraClass = isHackyMax ? ' hackymax-btn' : (isSinMax ? ' sinmax-btn' : (isZeeMax ? ' zeemax-btn' : ''));
+            const hackyStyle = isHackyMax ? ' style="background:linear-gradient(135deg,#00C6FF,#0072FF);color:#fff;font-weight:800;border-color:transparent"' : '';
+            const sinMaxStyle = isSinMax ? ' style="background:linear-gradient(135deg,#FF4B2B,#FF416C);color:#fff;font-weight:800;border-color:transparent"' : '';
+            const zeeMaxStyle = isZeeMax ? ' style="background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;font-weight:800;border-color:transparent"' : '';
+            const isTarget = (activeEngine === 'hackymax' && isHackyMax) ||
+                             (activeEngine === 'sinmax' && isSinMax) ||
+                             (activeEngine === 'zeemax' && isZeeMax);
+            const activeClass = isTarget ? ' active' : '';
+            return `<button class="player-server-btn${extraClass}${activeClass}"${hackyStyle || sinMaxStyle || zeeMaxStyle} data-server-index="${i}">${lbl}</button>`;
+          }).join('');
+          bar.querySelectorAll('.player-server-btn').forEach((btn, i) => {
+            btn.addEventListener('click', () => {
+              _activeServerIndex = i;
+              switchServer(allUrls[i], btn);
+            });
+          });
+        }
+      } catch (_) {}
+    }
+
     async function initMaxPlayer(tmdbId, mediaType, season, episode, engine = 'hackymax') {
       // ── Reset UI ──────────────────────────────────────────────────────
       _destroyMax();
@@ -9889,6 +9932,9 @@
       window._currentPlayingEngine = engine;
       _currentModalId = tmdbId;
       _currentModalType = mediaType || 'movie';
+
+      // Always populate the server bar so servers are visible and clickable
+      _ensurePlayerServerBar(tmdbId, mediaType, season, episode, engine);
 
       if (typeof window.setWatchPartyTheme === 'function') window.setWatchPartyTheme(engine);
 
@@ -9990,7 +10036,38 @@
           if (nextBtn) {
             console.log(`[Auto-Failover] ${engine} failed, switching to:`, nextBtn.textContent.trim());
             nextBtn.click();
+            return;
           }
+
+          // Direct engine fallback if DOM button is absent
+          const key = `${tmdbId}_${mediaType}_${season || 1}_${episode || 1}`;
+          if (!window._engineAttempts) window._engineAttempts = {};
+          if (!window._engineAttempts[key]) window._engineAttempts[key] = new Set();
+          window._engineAttempts[key].add(engine);
+          const tried = window._engineAttempts[key];
+
+          let candidateOrder = [];
+          if (engine === 'hackymax') candidateOrder = ['sinmax', 'zeemax'];
+          else if (engine === 'sinmax') candidateOrder = ['zeemax', 'hackymax'];
+          else candidateOrder = ['hackymax', 'sinmax'];
+
+          let nextEng = null;
+          for (const cand of candidateOrder) {
+            if (!tried.has(cand)) { nextEng = cand; break; }
+          }
+          if (nextEng) {
+            console.log(`[Auto-Failover] Direct switch from ${engine} to ${nextEng}`);
+            initMaxPlayer(tmdbId, mediaType, season, episode, nextEng);
+            return;
+          }
+
+          // If all 3 custom engines exhausted, switch to first external embed
+          getModalServerUrls(tmdbId, mediaType, season || 1, episode || 1).then(data => {
+            if (data && data.urls && data.urls.length) {
+              const extUrl = data.urls.find(u => !u.startsWith('hackymax://') && !u.startsWith('sinmax://') && !u.startsWith('zeemax://') && !u.startsWith('max://'));
+              if (extUrl) playStream(extUrl, data.urls, data.labels);
+            }
+          }).catch(() => {});
         }, 1100);
       }
 
@@ -9999,7 +10076,16 @@
         fbBtn._wired = true;
         fbBtn.onclick = () => {
           const nextBtn = _getNextFallbackBtn() || document.querySelector('.player-server-btn:not(.active)');
-          if (nextBtn) nextBtn.click();
+          if (nextBtn) {
+            nextBtn.click();
+            return;
+          }
+          getModalServerUrls(tmdbId, mediaType, season || 1, episode || 1).then(data => {
+            if (data && data.urls && data.urls.length) {
+              const extUrl = data.urls.find(u => !u.startsWith('hackymax://') && !u.startsWith('sinmax://') && !u.startsWith('zeemax://') && !u.startsWith('max://'));
+              if (extUrl) playStream(extUrl, data.urls, data.labels);
+            }
+          }).catch(() => {});
         };
       }
 
