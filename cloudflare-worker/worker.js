@@ -102,7 +102,28 @@ export default {
 
       const rewritten = text.split('\n').map(line => {
         const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith('#')) return line;
+        if (!trimmed) return line;
+
+        // Filter and rewrite #EXT-X-MEDIA:TYPE=SUBTITLES
+        if (trimmed.startsWith('#EXT-X-MEDIA:') && /TYPE=SUBTITLES/i.test(trimmed)) {
+          const isAllowedLang = /LANGUAGE=["']?(en|eng|si|sin)["']?/i.test(trimmed) ||
+                                /NAME=["']?(English|Sinhala)["']?/i.test(trimmed);
+          if (!isAllowedLang) {
+            // Strip out non-English, non-Sinhala subtitle tracks (e.g. Arabic, Persian, etc.)
+            return null;
+          }
+          // Rewrite URI if present for allowed subtitles
+          return trimmed.replace(/URI=["']([^"']+)["']/i, (match, subUri) => {
+            try {
+              const absSub = new URL(subUri, targetUrl.href).href;
+              return `URI="${proxyBase}?url=${encodeURIComponent(absSub)}"`;
+            } catch {
+              return match;
+            }
+          });
+        }
+
+        if (trimmed.startsWith('#')) return line;
 
         // Resolve relative segment URLs against the manifest's URL
         let absUrl;
@@ -113,7 +134,7 @@ export default {
         }
 
         return `${proxyBase}?url=${encodeURIComponent(absUrl)}`;
-      }).join('\n');
+      }).filter(line => line !== null).join('\n');
 
       return new Response(rewritten, {
         headers: {

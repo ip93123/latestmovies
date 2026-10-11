@@ -2286,11 +2286,21 @@
     }
 
     /* Suppress any browser native/in-band stream cues so they never clash with custom sub overlay */
-    #maxVideo::cue, video::cue {
+    ::cue,
+    video::cue,
+    #maxVideo::cue,
+    #playerContainer ::cue,
+    #maxPlayerWrap ::cue {
       display: none !important;
       opacity: 0 !important;
       visibility: hidden !important;
-      font-size: 0 !important;
+      font-size: 0px !important;
+      line-height: 0px !important;
+      height: 0px !important;
+      width: 0px !important;
+      color: transparent !important;
+      background: transparent !important;
+      text-shadow: none !important;
     }
 
 
@@ -3005,12 +3015,16 @@
     #maxPlayerWrap.playing  #maxBuffering { display: none  !important; }
     #maxPlayerWrap.ready:not(.buffering) #maxBuffering { display: none  !important; }
     #maxPlayerWrap.error    #maxError     { display: flex !important; }
-    /* Cue reset: prevent native duplicate subtitles and black background in windowed mode */
-    video:not(:fullscreen)::cue {
+    /* Cue reset: prevent native duplicate subtitles and black background in windowed or fullscreen mode */
+    video::cue,
+    video:not(:fullscreen)::cue,
+    video:fullscreen::cue {
       display: none !important;
       opacity: 0 !important;
       visibility: hidden !important;
       background: transparent !important;
+      color: transparent !important;
+      font-size: 0px !important;
     }
 
     /* ── Max Player Settings Panel ───────────────────────────────────── */
@@ -7762,7 +7776,21 @@
 
       const modal = document.getElementById('modal');
       modal.classList.add('open');
-      history.pushState({ ui: 'modal', id: id, type: type }, '', location.href);
+      _currentModalId = id;
+      _currentModalType = type;
+      try {
+        const u = new URL(window.location.href);
+        if (type === 'tv') {
+          u.searchParams.delete('m');
+          u.searchParams.set('s', id);
+        } else {
+          u.searchParams.delete('s');
+          u.searchParams.set('m', id);
+        }
+        history.pushState({ ui: 'modal', id: id, type: type }, '', u.toString());
+      } catch (_) {
+        history.pushState({ ui: 'modal', id: id, type: type }, '', location.href);
+      }
       document.getElementById('modalTitle').textContent = 'Loading…';
       document.getElementById('modalPlot').textContent = '';
       document.getElementById('modalStreams').innerHTML = '<div class="no-stream">Checking platforms…</div>';
@@ -8072,7 +8100,10 @@
       try {
         const st = history.state || {};
         if (st.ui === 'player' || st._hackyMaxPlayer || st.ui === 'modal') {
-          history.replaceState({ ui: 'page' }, '', location.href);
+          const u = new URL(window.location.href);
+          u.searchParams.delete('m');
+          u.searchParams.delete('s');
+          history.replaceState({ ui: 'page' }, '', u.toString());
         }
       } catch (e) { }
       // 4. Scroll to top smoothly
@@ -9810,7 +9841,9 @@
           const d = await r.json();
           if (Array.isArray(d.tracks)) {
             d.tracks.forEach(tr => {
-              if (!_mxsTracks.some(e => e.lang === tr.lang || e.url === tr.url)) {
+              const l = (tr.lang || '').toLowerCase();
+              const isAllowed = l === 'si' || l === 'sin' || l === 'sinhala' || l === 'en' || l === 'eng' || l === 'english';
+              if (isAllowed && !_mxsTracks.some(e => e.lang === tr.lang || e.url === tr.url)) {
                 _mxsTracks.push(tr);
               }
             });
@@ -9818,12 +9851,13 @@
         }
       } catch (_) {}
 
-      // If no subtitle was active, auto-play English subtitle from OpenSubtitles!
+      // If no subtitle was active, auto-play Sinhala or English subtitle ONLY!
       if (!_subLoaded && !_subCues.length && _mxsTracks.length) {
-        const enTrack = _mxsTracks.find(t => t.lang === 'en') || _mxsTracks[0];
-        if (enTrack && enTrack.url) {
-          _mxsActiveTrackId = enTrack.id;
-          await _loadMaxSubtitleFromUrl(enTrack.url);
+        const targetTrack = _mxsTracks.find(t => t.lang === 'si' || t.lang === 'sin')
+                         || _mxsTracks.find(t => t.lang === 'en' || t.lang === 'eng');
+        if (targetTrack && targetTrack.url) {
+          _mxsActiveTrackId = targetTrack.id;
+          await _loadMaxSubtitleFromUrl(targetTrack.url);
         }
       } else if (localSub && activeSubUrl === localSub) {
         _mxsActiveTrackId = 'sinhala';
@@ -9996,22 +10030,38 @@
       _setupMaxFullscreenHandlers();
       _initMaxCustomControls();
 
+      // ── Clean Subtitle Gatekeeper: suppress native tracks, especially in-band Arabic/yellow tracks ──
+      const _suppressNativeTracks = () => {
+        if (_maxVideo && _maxVideo.textTracks) {
+          for (let i = 0; i < _maxVideo.textTracks.length; i++) {
+            const tr = _maxVideo.textTracks[i];
+            const lang = ((tr.language || '') + ' ' + (tr.label || '')).toLowerCase();
+            const isEnOrSi = lang.includes('en') || lang.includes('eng') || lang.includes('si') || lang.includes('sin');
+            // If custom overlay has loaded cues, OR track is NOT English/Sinhala: disable it!
+            if ((_subLoaded && _subCues.length) || !isEnOrSi) {
+              try { tr.mode = 'disabled'; } catch (_) {}
+            }
+          }
+        }
+      };
+      _suppressNativeTracks();
+      if (_maxVideo && _maxVideo.textTracks && !_maxVideo._subTrackWatcherAttached) {
+        _maxVideo._subTrackWatcherAttached = true;
+        _maxVideo.textTracks.addEventListener('addtrack', (e) => {
+          if (e.track) {
+            const lang = ((e.track.language || '') + ' ' + (e.track.label || '')).toLowerCase();
+            const isEnOrSi = lang.includes('en') || lang.includes('eng') || lang.includes('si') || lang.includes('sin');
+            if ((_subLoaded && _subCues.length) || !isEnOrSi) {
+              try { e.track.mode = 'disabled'; } catch (_) {}
+            }
+          }
+        });
+      }
+
       if (streamFormat === 'mp4') {
         // Direct clean 1080p MP4 stream (No burned-in Arabic/Persian subtitles)
         if (_maxHls) { _maxHls.destroy(); _maxHls = null; }
-        const _suppressNativeTracks = () => {
-          if (_maxVideo && _maxVideo.textTracks) {
-            for (let i = 0; i < _maxVideo.textTracks.length; i++) {
-              try { _maxVideo.textTracks[i].mode = 'disabled'; } catch (_) {}
-            }
-          }
-        };
         _suppressNativeTracks();
-        if (_maxVideo && _maxVideo.textTracks) {
-          _maxVideo.textTracks.addEventListener('addtrack', (e) => {
-            if (e.track) try { e.track.mode = 'disabled'; } catch (_) {}
-          });
-        }
         _maxVideo.preload = 'auto';
         _maxVideo.src = streamUrl;
         _maxVideo.playbackRate = _mxsSettings.speed;
@@ -10041,7 +10091,7 @@
             _fallbackFromMax();
           }
         }, { once: true });
-        _maxVideo.addEventListener('waiting', () => _maxWrap.classList.add('buffering'));
+        _maxVideo.addEventListener('waiting', () => { _suppressNativeTracks(); _maxWrap.classList.add('buffering'); });
         _maxVideo.addEventListener('playing', () => { _suppressNativeTracks(); _maxWrap.classList.remove('buffering'); });
         _maxVideo.addEventListener('canplay', () => _maxWrap.classList.remove('buffering'));
 
@@ -10066,6 +10116,8 @@
         _maxHls = new Hls({
           enableWorker: true,
           lowLatencyMode: false,
+          enableCEA708Captions: false, // Turn off in-stream closed captions (often Arabic/Persian yellow text)
+          subtitleDisplay: false,      // Prevent Hls.js native subtitle rendering
           // ── Buffer tuning: pre-load as much as possible to survive proxy slowdowns ──
           maxBufferLength: 120,          // try to keep 120s ahead in buffer (default 30s)
           maxMaxBufferLength: 600,       // allow up to 600s if bandwidth allows
@@ -10092,9 +10144,29 @@
         });
         _maxHls.loadSource(streamUrl);
         _maxHls.attachMedia(_maxVideo);
+        _maxHls.subtitleTrack = -1;     // Keep native subtitle tracks disabled by default
+
+        _maxHls.on(Hls.Events.SUBTITLE_TRACKS_UPDATED, () => {
+          if (_maxHls && _maxHls.subtitleTracks && _maxHls.subtitleTracks.length) {
+            let allowedIdx = -1;
+            _maxHls.subtitleTracks.forEach((t, idx) => {
+              const lang = ((t.lang || '') + ' ' + (t.name || '')).toLowerCase();
+              if (lang.includes('en') || lang.includes('eng') || lang.includes('si') || lang.includes('sin')) {
+                if (allowedIdx === -1) allowedIdx = idx;
+              }
+            });
+            if ((_subLoaded && _subCues.length) || allowedIdx === -1) {
+              _maxHls.subtitleTrack = -1;
+            } else {
+              _maxHls.subtitleTrack = allowedIdx;
+            }
+          }
+          _suppressNativeTracks();
+        });
 
         _maxHls.on(Hls.Events.MANIFEST_PARSED, () => {
           if (_loadTimeoutTimer) { clearTimeout(_loadTimeoutTimer); _loadTimeoutTimer = null; }
+          _suppressNativeTracks();
           _maxWrap.classList.remove('buffering');
           _maxWrap.classList.add('ready');
           _updateMaxQuality();
@@ -10111,7 +10183,7 @@
           _mxsRefreshQualityGrid();
         });
 
-        _maxHls.on(Hls.Events.LEVEL_SWITCHED, () => { _updateMaxQuality(); _mxsRefreshQualityGrid(); });
+        _maxHls.on(Hls.Events.LEVEL_SWITCHED, () => { _suppressNativeTracks(); _updateMaxQuality(); _mxsRefreshQualityGrid(); });
 
         _maxHls.on(Hls.Events.ERROR, (event, data) => {
           if (data.fatal) {
@@ -10127,10 +10199,11 @@
         });
 
         // Show/hide buffering spinner
-        _maxVideo.addEventListener('waiting', () => _maxWrap.classList.add('buffering'));
-        _maxVideo.addEventListener('playing', () => _maxWrap.classList.remove('buffering'));
+        _maxVideo.addEventListener('waiting', () => { _suppressNativeTracks(); _maxWrap.classList.add('buffering'); });
+        _maxVideo.addEventListener('playing', () => { _suppressNativeTracks(); _maxWrap.classList.remove('buffering'); });
         _maxVideo.addEventListener('canplay', () => _maxWrap.classList.remove('buffering'));
-        _maxVideo.addEventListener('loadedmetadata', () => _mxsRefreshQualityGrid(), { once: true });
+        _maxVideo.addEventListener('loadeddata', () => _suppressNativeTracks());
+        _maxVideo.addEventListener('loadedmetadata', () => { _suppressNativeTracks(); _mxsRefreshQualityGrid(); }, { once: true });
 
         // ── Stall recovery watchdog ──────────────────────────────────────────
         // If video freezes for >5s while proxy is slow, nudge 1s forward to escape the stall
@@ -10154,6 +10227,7 @@
         });
         // ─────────────────────────────────────────────────────────────────────
         _maxVideo.addEventListener('seeked', () => {
+          _suppressNativeTracks();
           if (_maxMode && _subCues.length) {
             const ms = _maxVideo.currentTime * 1000 + _subOffset;
             const cue = _subCues.find(c => ms >= c.start && ms < c.end);
@@ -10182,8 +10256,10 @@
 
       } else if (_maxVideo.canPlayType('application/vnd.apple.mpegurl')) {
         // Safari native HLS
+        _suppressNativeTracks();
         _maxVideo.src = streamUrl;
         _maxVideo.addEventListener('loadedmetadata', () => {
+          _suppressNativeTracks();
           _maxWrap.classList.remove('buffering');
           _maxWrap.classList.add('ready');
           _maxVideo.play().catch(() => {});
@@ -10192,6 +10268,7 @@
             _maxSubRaf = requestAnimationFrame(_maxSubLoop);
           }
         }, { once: true });
+        _maxVideo.addEventListener('playing', () => _suppressNativeTracks());
       } else {
         _maxWrap.classList.remove('buffering');
         _maxWrap.classList.add('error');
@@ -11806,51 +11883,60 @@
           window.setWatchPartyTheme(data.engine);
         }
 
-        const curParams = new URLSearchParams(window.location.search);
-        const curM = curParams.get('m');
-        const curS = curParams.get('s');
+        const rawId = data.mId || data.mParam || data.sParam;
+        const id = rawId ? parseInt(String(rawId).split('-')[0], 10) : null;
+        const type = data.mType || (data.sParam ? 'tv' : 'movie');
+        const season = parseInt(data.season || 1, 10);
+        const episode = parseInt(data.episode || 1, 10);
+        const activeEngine = data.engine || window._currentMaxEngine || 'hackymax';
 
-        const needOpenMovie = data.mParam && curM !== data.mParam;
-        const needOpenTv    = data.sParam && curS !== data.sParam;
+        if (id) {
+          try {
+            const u = new URL(window.location.href);
+            if (type === 'tv') {
+              u.searchParams.delete('m');
+              u.searchParams.set('s', id);
+              if (season) u.searchParams.set('season', season);
+              if (episode) u.searchParams.set('episode', episode);
+            } else {
+              u.searchParams.delete('s');
+              u.searchParams.set('m', id);
+            }
+            if (WP.code) u.searchParams.set('party', WP.code);
+            history.replaceState(null, '', u.toString());
+          } catch (_) {}
 
-        if (needOpenMovie) {
-          const id = parseInt(data.mParam, 10);
-          if (typeof openModal === 'function') openModal(id, 'movie');
-          history.replaceState(null, '', `?m=${data.mParam}&party=${WP.code}`);
-        } else if (needOpenTv) {
-          const id = parseInt(data.sParam, 10);
-          if (typeof openModal === 'function') openModal(id, 'tv');
-          history.replaceState(null, '', `?s=${data.sParam}&party=${WP.code}`);
-        }
-
-        // Auto launch corresponding player engine
-        setTimeout(() => {
-          const activeEngine = data.engine || 'hackymax';
-          const btns = document.querySelectorAll('.player-server-btn, .modal-play-btn');
-          const targetBtn = Array.from(btns).find(b => {
-            if (activeEngine === 'hackymax') return b.classList.contains('hackymax-btn');
-            if (activeEngine === 'sinmax') return b.classList.contains('sinmax-btn');
-            return b.classList.contains('zeemax-btn') || b.classList.contains('max-btn');
-          });
-          if (targetBtn && !targetBtn.classList.contains('active')) {
-            targetBtn.click();
+          // 1. Ensure modal is open for title & metadata
+          if (!_currentModalId || String(_currentModalId) !== String(id)) {
+            if (typeof openModal === 'function') openModal(id, type);
           }
 
-          // Sync video position
+          // 2. Open player overlay & launch player immediately!
+          const overlay = document.getElementById('playerOverlay');
+          if (overlay) overlay.classList.add('open');
+
+          if (typeof initMaxPlayer === 'function') {
+            initMaxPlayer(id, type, season, episode, activeEngine);
+          }
+
+          // 3. Sync video position once metadata is loaded
+          let syncAttempts = 0;
           const checkVid = () => {
+            syncAttempts++;
             const vidEl = _vid();
-            if (vidEl) {
-              const lag = (Date.now() - data.ts) / 1000;
-              vidEl.currentTime = data.ct + (data.playing ? lag : 0);
-              document.getElementById('wpGuestLock').classList.toggle('active', !data.playing);
+            if (vidEl && vidEl.readyState >= 1) {
+              const lag = (Date.now() - (data.ts || Date.now())) / 1000;
+              vidEl.currentTime = (data.ct || 0) + (data.playing ? Math.max(0, lag) : 0);
+              const lockEl = document.getElementById('wpGuestLock');
+              if (lockEl) lockEl.classList.toggle('active', !data.playing);
               if (data.playing) vidEl.play().catch(() => {});
               else vidEl.pause();
-            } else {
-              setTimeout(checkVid, 300);
+            } else if (syncAttempts < 50) {
+              setTimeout(checkVid, 200);
             }
           };
           checkVid();
-        }, 1200);
+        }
 
       } else if (data.type === 'meta') {
         WP.guestNames = data.names || [];
@@ -11922,21 +12008,31 @@
     }
 
     /* ── Host: listener for incoming guest connections ───────── */
+    function _hostGetState() {
+      const v = _vid();
+      const p = new URLSearchParams(window.location.search);
+      const movieId = _currentModalId || p.get('m') || p.get('s');
+      const mediaType = _currentModalType || (p.get('s') ? 'tv' : 'movie');
+      return {
+        type: 'state',
+        engine: window._currentMaxEngine || p.get('engine') || 'hackymax',
+        ct: v ? v.currentTime : 0,
+        playing: v ? !v.paused : false,
+        ts: Date.now(),
+        mId: movieId,
+        mType: mediaType,
+        mParam: p.get('m') || (mediaType === 'movie' ? movieId : null),
+        sParam: p.get('s') || (mediaType === 'tv' ? movieId : null),
+        season: (typeof _selectedSeason !== 'undefined' && _selectedSeason) || p.get('season') || 1,
+        episode: (typeof _selectedEpisode !== 'undefined' && _selectedEpisode) || p.get('episode') || 1
+      };
+    }
+
     function _hostListen() {
       WP.peer.on('connection', conn => {
         conn.on('open', () => {
           WP.conns.push(conn);
-          const v = _vid();
-          const p = new URLSearchParams(window.location.search);
-          conn.send({
-            type: 'state',
-            engine: window._currentMaxEngine || 'hackymax',
-            ct: v ? v.currentTime : 0,
-            playing: v ? !v.paused : false,
-            ts: Date.now(),
-            mParam: p.get('m'),
-            sParam: p.get('s')
-          });
+          conn.send(_hostGetState());
           _broadcastMeta();
           _refreshGuestList();
           _refreshHud(WP.conns.length + 1);
@@ -11944,17 +12040,7 @@
         });
         conn.on('data', data => {
           if (data && data.type === 'request-state') {
-            const v = _vid();
-            const p = new URLSearchParams(window.location.search);
-            conn.send({
-              type: 'state',
-              engine: window._currentMaxEngine || 'hackymax',
-              ct: v ? v.currentTime : 0,
-              playing: v ? !v.paused : false,
-              ts: Date.now(),
-              mParam: p.get('m'),
-              sParam: p.get('s')
-            });
+            conn.send(_hostGetState());
           }
         });
         conn.on('close', () => {
@@ -12204,10 +12290,26 @@
       try {
         const code = await _createRoom();
         const shareUrl = (() => {
-          const u = new URL(window.location.href);
+          const u = new URL(window.location.origin + window.location.pathname);
+          const currentId = _currentModalId || new URLSearchParams(window.location.search).get('m') || new URLSearchParams(window.location.search).get('s');
+          const currentType = _currentModalType || (new URLSearchParams(window.location.search).get('s') ? 'tv' : 'movie');
+          if (currentId) {
+            if (currentType === 'tv') {
+              u.searchParams.set('s', currentId);
+              if (typeof _selectedSeason !== 'undefined' && _selectedSeason) u.searchParams.set('season', _selectedSeason);
+              if (typeof _selectedEpisode !== 'undefined' && _selectedEpisode) u.searchParams.set('episode', _selectedEpisode);
+            } else {
+              u.searchParams.set('m', currentId);
+            }
+          }
+          if (window._currentMaxEngine) {
+            u.searchParams.set('engine', window._currentMaxEngine);
+          }
           u.searchParams.set('party', code);
           return u.toString();
         })();
+
+        try { history.replaceState(null, '', shareUrl); } catch (_) {}
 
         document.getElementById('wpRoomCode').textContent   = code;
         document.getElementById('wpShareUrl').textContent   = shareUrl;
@@ -12300,7 +12402,17 @@
       const partyCode = params.get('party');
       if (!partyCode) return;
 
-      await new Promise(r => setTimeout(r, 2000));
+      const mParam = params.get('m');
+      const tvParam = params.get('s');
+      const paramVal = mParam || tvParam;
+      if (paramVal) {
+        const id = parseInt(paramVal, 10);
+        if (typeof openModal === 'function') {
+          openModal(id, tvParam ? 'tv' : 'movie');
+        }
+      }
+
+      await new Promise(r => setTimeout(r, 600));
 
       _wpToast('🎬 Joining Watch Party...');
       try {

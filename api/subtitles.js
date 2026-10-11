@@ -35,33 +35,9 @@ const SUBTITLE_MAP = {
 
 const LANG_MAP = {
   eng: { label: 'English', flag: '🇬🇧' },
-  ben: { label: 'Bengali', flag: '🇧🇩' },
-  spa: { label: 'Spanish', flag: '🇪🇸' },
-  fre: { label: 'French', flag: '🇫🇷' },
-  fra: { label: 'French', flag: '🇫🇷' },
-  ger: { label: 'German', flag: '🇩🇪' },
-  deu: { label: 'German', flag: '🇩🇪' },
-  ita: { label: 'Italian', flag: '🇮🇹' },
-  por: { label: 'Portuguese', flag: '🇵🇹' },
-  pob: { label: 'Portuguese (BR)', flag: '🇧🇷' },
-  rus: { label: 'Russian', flag: '🇷🇺' },
-  hin: { label: 'Hindi', flag: '🇮🇳' },
-  tam: { label: 'Tamil', flag: '🇮🇳' },
-  mal: { label: 'Malayalam', flag: '🇮🇳' },
-  tel: { label: 'Telugu', flag: '🇮🇳' },
-  kan: { label: 'Kannada', flag: '🇮🇳' },
-  ara: { label: 'Arabic', flag: '🇸🇦' },
-  kor: { label: 'Korean', flag: '🇰🇷' },
-  chi: { label: 'Chinese', flag: '🇨🇳' },
-  zho: { label: 'Chinese', flag: '🇨🇳' },
-  jpn: { label: 'Japanese', flag: '🇯🇵' },
-  tur: { label: 'Turkish', flag: '🇹🇷' },
-  ind: { label: 'Indonesian', flag: '🇮🇩' },
-  vie: { label: 'Vietnamese', flag: '🇻🇳' },
-  tha: { label: 'Thai', flag: '🇹🇭' },
-  pol: { label: 'Polish', flag: '🇵🇱' },
-  nld: { label: 'Dutch', flag: '🇳🇱' },
+  en: { label: 'English', flag: '🇬🇧' },
   sin: { label: 'Sinhala', flag: '🇱🇰' },
+  si: { label: 'Sinhala', flag: '🇱🇰' },
 };
 
 export default async function handler(req, res) {
@@ -139,7 +115,7 @@ export default async function handler(req, res) {
     } catch (_) {}
   }
 
-  // Priority 2: Query OpenSubtitles for English and other language tracks
+  // Priority 2: Query OpenSubtitles for English and Sinhala tracks ONLY
   if (resolvedImdb) {
     try {
       const openSubPath = type === 'tv'
@@ -151,38 +127,35 @@ export default async function handler(req, res) {
       if (osRes.ok) {
         const osData = await osRes.json();
         const rawSubs = osData.subtitles || [];
-        const seenLangs = new Set();
 
-        // Add English track first
-        const enSubs = rawSubs.filter(s => s.lang === 'eng');
+        // Check for Sinhala from OpenSubtitles if no local Sinhala sub exists
+        if (!localSinhalaSub) {
+          const sinSubs = rawSubs.filter(s => s.lang === 'sin' || s.lang === 'si');
+          if (sinSubs.length > 0) {
+            tracks.push({
+              id: 'sinhala',
+              lang: 'si',
+              label: 'Sinhala 🇱🇰',
+              url: sinSubs[0].url,
+              isDefault: true,
+              source: 'opensubtitles'
+            });
+          }
+        }
+
+        // Add English track
+        const enSubs = rawSubs.filter(s => s.lang === 'eng' || s.lang === 'en');
         if (enSubs.length > 0) {
           tracks.push({
             id: 'english',
             lang: 'en',
             label: 'English 🇬🇧',
             url: enSubs[0].url,
-            isDefault: !localSinhalaSub, // Defaults to English if no Sinhala subtitle exists!
+            isDefault: !tracks.some(t => t.lang === 'si'), // Default to English only if no Sinhala subtitle
             source: 'opensubtitles'
           });
-          seenLangs.add('eng');
         }
-
-        // Add top remaining languages
-        for (const s of rawSubs) {
-          const l = (s.lang || '').toLowerCase();
-          if (seenLangs.has(l) || l === 'eng') continue;
-          seenLangs.add(l);
-          const meta = LANG_MAP[l] || { label: l.toUpperCase(), flag: '🌐' };
-          tracks.push({
-            id: `os_${l}`,
-            lang: l,
-            label: `${meta.label} ${meta.flag}`,
-            url: s.url,
-            isDefault: false,
-            source: 'opensubtitles'
-          });
-          if (tracks.length >= 14) break; // Limit to 14 clean choices
-        }
+        // Strictly NO other languages (Arabic, French, Spanish, etc. are eliminated)
       }
     } catch (_) {}
   }

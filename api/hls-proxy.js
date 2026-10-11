@@ -70,7 +70,28 @@ export default async function handler(req, res) {
 
       const rewritten = text.split('\n').map(line => {
         const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith('#')) return line;
+        if (!trimmed) return line;
+
+        // Filter and rewrite #EXT-X-MEDIA:TYPE=SUBTITLES
+        if (trimmed.startsWith('#EXT-X-MEDIA:') && /TYPE=SUBTITLES/i.test(trimmed)) {
+          const isAllowedLang = /LANGUAGE=["']?(en|eng|si|sin)["']?/i.test(trimmed) ||
+                                /NAME=["']?(English|Sinhala)["']?/i.test(trimmed);
+          if (!isAllowedLang) {
+            // Strip out non-English, non-Sinhala subtitle tracks (e.g. Arabic, Persian, etc.)
+            return null;
+          }
+          // Rewrite URI if present for allowed subtitles
+          return trimmed.replace(/URI=["']([^"']+)["']/i, (match, subUri) => {
+            try {
+              const absSub = new URL(subUri, base).href;
+              return `URI="/api/hls-proxy?url=${encodeURIComponent(absSub)}"`;
+            } catch {
+              return match;
+            }
+          });
+        }
+
+        if (trimmed.startsWith('#')) return line;
 
         // Resolve relative URLs against the base m3u8 URL
         let absUrl;
@@ -81,7 +102,7 @@ export default async function handler(req, res) {
         }
 
         return `/api/hls-proxy?url=${encodeURIComponent(absUrl)}`;
-      }).join('\n');
+      }).filter(line => line !== null).join('\n');
 
       res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
       res.setHeader('Access-Control-Allow-Origin', '*');

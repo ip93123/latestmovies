@@ -156,7 +156,7 @@ export default async function handler(req, res) {
 
   const effectiveImdb = (streamInfo && streamInfo.imdbId) || imdb || null;
 
-  // ── Auto fallback to OpenSubtitles English subtitle if no Sinhala subtitle ──
+  // ── Auto fallback to OpenSubtitles Sinhala or English subtitle ONLY ──
   if (!subtitleUrl && effectiveImdb) {
     try {
       const openSubPath = type === 'tv'
@@ -167,10 +167,17 @@ export default async function handler(req, res) {
       });
       if (osRes.ok) {
         const osData = await osRes.json();
-        const enSub = (osData.subtitles || []).find(s => s.lang === 'eng');
-        if (enSub && enSub.url) {
-          subtitleUrl = enSub.url;
-          subtitleLang = 'en';
+        const raw = osData.subtitles || [];
+        const sinSub = raw.find(s => s.lang === 'sin' || s.lang === 'si');
+        if (sinSub && sinSub.url) {
+          subtitleUrl = sinSub.url;
+          subtitleLang = 'si';
+        } else {
+          const enSub = raw.find(s => s.lang === 'eng' || s.lang === 'en');
+          if (enSub && enSub.url) {
+            subtitleUrl = enSub.url;
+            subtitleLang = 'en';
+          }
         }
       }
     } catch (_) {}
