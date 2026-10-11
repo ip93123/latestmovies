@@ -2290,8 +2290,12 @@
       50%       { box-shadow: 0 0 28px rgba(232,201,122,0.85); }
     }
 
-    /* Max video element — show native controls styled to dark theme */
-    #maxVideo::-webkit-media-controls-panel { background: rgba(7,9,15,0.92); }
+    /* Max video element — controls panel transparent so moving cursor never blacks out the movie */
+    #maxVideo::-webkit-media-controls-panel,
+    #maxVideo::-webkit-media-controls-enclosure,
+    #maxVideo::-webkit-media-controls {
+      background: transparent !important;
+    }
     #maxVideo { outline: none; }
 
     /* Buffering — hide when video plays */
@@ -4295,6 +4299,8 @@
         <video id="maxVideo" controls playsinline style="width:100%;height:100%;display:block;background:#000;"></video>
         <!-- Quality badge top-left -->
         <div id="maxQualityBadge" style="display:none; position:absolute; top:1rem; left:1rem; background:rgba(232,201,122,0.15); border:1px solid rgba(232,201,122,0.4); color:#E8C97A; font-size:0.7rem; font-weight:700; letter-spacing:1px; padding:3px 10px; border-radius:20px; backdrop-filter:blur(8px); pointer-events:none; z-index:12; font-family:'Inter',sans-serif; text-transform:uppercase;"></div>
+        <!-- Subtitle status badge top-right -->
+        <div id="maxSubBadge" style="display:none; position:absolute; top:1rem; right:1rem; background:rgba(39,174,96,0.25); border:1px solid rgba(46,204,113,0.6); color:#2ECC71; font-size:0.7rem; font-weight:700; letter-spacing:0.5px; padding:3px 12px; border-radius:20px; backdrop-filter:blur(8px); pointer-events:none; z-index:12; font-family:'Inter',sans-serif; text-transform:uppercase;">🇱🇰 SUBTITLES SYNCED</div>
         <!-- Buffering spinner -->
         <div id="maxBuffering" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.6); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem; z-index:11;">
           <div style="width:48px;height:48px;border:4px solid rgba(232,201,122,0.2);border-top-color:#E8C97A;border-radius:50%;animation:spin 1s linear infinite;"></div>
@@ -7060,9 +7066,16 @@
       _maxVideo.load();
       _maxWrap.className = '';
       _maxWrap.style.display = 'none';
+      const subBadge = document.getElementById('maxSubBadge');
+      if (subBadge) subBadge.style.display = 'none';
       if (_subText) _subText.classList.remove('active');
       _subCues = [];
       _subLoaded = false;
+      if (_maxVideo.textTracks) {
+        for (let i = 0; i < _maxVideo.textTracks.length; i++) {
+          try { _maxVideo.textTracks[i].mode = 'disabled'; } catch (_) {}
+        }
+      }
     }
 
     // Update quality badge from current hls level
@@ -7124,6 +7137,20 @@
             if (_maxSubRaf) cancelAnimationFrame(_maxSubRaf);
             _maxSubRaf = requestAnimationFrame(_maxSubLoop);
           }
+          const subBadge = document.getElementById('maxSubBadge');
+          if (subBadge) {
+            subBadge.style.display = 'block';
+            subBadge.textContent = `🇱🇰 SUBTITLES SYNCED (${cues.length})`;
+          }
+          try {
+            const track = _maxVideo.addTextTrack('subtitles', 'Sinhala', 'si');
+            track.mode = 'showing';
+            for (const c of cues) {
+              if (window.VTTCue) {
+                track.addCue(new VTTCue(c.start / 1000, c.end / 1000, c.text));
+              }
+            }
+          } catch (_) {}
           console.log(`[Max Subtitles] Auto-loaded ${cues.length} cues from:`, subUrl);
         }
       } catch (err) {

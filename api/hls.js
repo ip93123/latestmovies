@@ -4,6 +4,8 @@
 const SUBTITLE_MAP = {
   // DC (2026) — Sinhala dubbed from Tamil HQ HDRip
   '1479832': '/Subtitle/DC%20%282026%29%20Tamil%20HQ%20HDRip.srt',
+  // Hitler (2024/2026) — Sinhala Subtitle by Dasun Sandaruwan
+  '1185591': '/Subtitle/Hi%5B2026%5Dsinhala_sub.srt',
 };
 
 const VIDLOVE_HEADERS = {
