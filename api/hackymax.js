@@ -31,9 +31,11 @@ const SUBTITLE_MAP = {
   '341895': '/Subtitle/341895.srt',
   '337375': '/Subtitle/337375.srt',
   // Home (2021)
+  '859987': '/Subtitle/859987.srt',
   '863675': '/Subtitle/863675.srt',
   '854291': '/Subtitle/854291.srt',
   // Ennu Ninte Moideen (2015)
+  '360648': '/Subtitle/360648.srt',
   '349479': '/Subtitle/349479.srt',
   // Thanneer Mathan Dinangal (2019)
   '618435': '/Subtitle/618435.srt',
