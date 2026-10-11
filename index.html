@@ -5545,7 +5545,7 @@
       <!-- ══ MAX PLAYER ══ Custom HLS player — shown instead of iframe when Max server selected -->
       <div id="maxPlayerWrap" style="display:none; position:absolute; inset:0; background:#000; z-index:5; border-radius:inherit; overflow:hidden;">
         <!-- Video element -->
-        <video id="maxVideo" playsinline style="width:100%;height:100%;display:block;background:#000;cursor:pointer;"></video>
+        <video id="maxVideo" playsinline referrerpolicy="no-referrer" style="width:100%;height:100%;display:block;background:#000;cursor:pointer;"></video>
 
         <!-- Big Center Click Flash (Play/Pause) -->
         <div id="maxCenterFlash">
@@ -10334,6 +10334,7 @@
         if (_maxHls) { _maxHls.destroy(); _maxHls = null; }
         _suppressNativeTracks();
         _maxVideo.preload = 'auto';
+        _maxVideo.referrerPolicy = 'no-referrer';
         _maxVideo.src = streamUrl;
         _maxVideo.playbackRate = _mxsSettings.speed;
         _maxVideo.play().catch(() => {

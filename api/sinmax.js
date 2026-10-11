@@ -177,10 +177,13 @@ export default async function handler(req, res) {
   }
 
   if (streamInfo && streamInfo.streamUrl) {
-    const PROXY_BASE = process.env.CF_PROXY_URL || '/api/hls-proxy';
-    const proxied = `${PROXY_BASE}?url=${encodeURIComponent(streamInfo.streamUrl)}`;
+    let finalUrl = streamInfo.streamUrl;
+    if (streamInfo.format === 'hls' || streamInfo.streamUrl.includes('.m3u8')) {
+      const PROXY_BASE = process.env.CF_PROXY_URL || '/api/hls-proxy';
+      finalUrl = `${PROXY_BASE}?url=${encodeURIComponent(streamInfo.streamUrl)}`;
+    }
     return res.status(200).json({
-      url: proxied,
+      url: finalUrl,
       format: streamInfo.format,
       source: streamInfo.label || 'SinMax',
       subtitle: subtitleUrl,

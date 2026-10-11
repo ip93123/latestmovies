@@ -28,9 +28,17 @@ export default async function handler(req, res) {
   try {
     const upstreamHeaders = { ...PROXY_HEADERS };
     const clean = targetUrl.toLowerCase().split('?')[0];
-    const isM3U8 = clean.endsWith('.m3u8');
+    const isM3U8 = clean.endsWith('.m3u8') || targetUrl.includes('.m3u8');
 
-    // For binary/MP4 streams: chunk open-ended ranges to prevent Vercel Serverless timeouts & hangs
+    // For direct MP4 streams (e.g. ravenflix/moviebox), redirect directly to upstream Cloudflare CDN
+    // to bypass Vercel serverless payload limits, QUIC timeouts, and socket drops
+    if (!isM3U8 && (clean.endsWith('.mp4') || targetUrl.includes('ravenflix.st'))) {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      return res.redirect(302, targetUrl);
+    }
+
+    // For binary streams/segments: chunk open-ended ranges to prevent Vercel Serverless timeouts & hangs
     if (!isM3U8) {
       const clientRange = req.headers && req.headers['range'];
       if (clientRange) {
@@ -50,7 +58,7 @@ export default async function handler(req, res) {
 
     const upstream = await fetch(targetUrl, {
       headers: upstreamHeaders,
-      signal: AbortSignal.timeout(8000)  // 8s: fail cleanly before Vercel's 10s hard kill
+      signal: AbortSignal.timeout(15000)
     });
 
     if (!upstream.ok && upstream.status !== 206) {
