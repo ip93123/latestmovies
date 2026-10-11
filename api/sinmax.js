@@ -207,9 +207,9 @@ export default async function handler(req, res) {
 
   if (streamInfo && streamInfo.streamUrl) {
     const rawProxy = process.env.CF_PROXY_URL || '';
-    const PROXY_BASE = (rawProxy && !rawProxy.includes('onrender.com') && !rawProxy.includes('workers.dev'))
+    const PROXY_BASE = (rawProxy && !rawProxy.includes('onrender.com') && !rawProxy.includes('workers.dev') && !rawProxy.includes('deno.net'))
       ? rawProxy
-      : 'https://quiet-dog-9101.ip93123.deno.net';
+      : 'https://funny-sfogliatella-4e51f6.netlify.app/proxy';
     const finalUrl = `${PROXY_BASE}?url=${encodeURIComponent(streamInfo.streamUrl)}`;
 
     let proxiedQualities = null;
