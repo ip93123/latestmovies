@@ -2266,31 +2266,7 @@
     }
     #subText.active { display: block; }
 
-    /* Subtitle button in player toolbar */
-    #subToggleBtn {
-      position: absolute;
-      top: 1.7rem;
-      right: 11rem;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      cursor: pointer;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.18);
-      border-radius: 20px;
-      height: 36px;
-      padding: 0 0.9rem;
-      color: var(--text);
-      z-index: 710;
-      display: none; /* subtitle auto-load disabled */
-      align-items: center;
-      gap: 0.4rem;
-      backdrop-filter: blur(8px);
-      transition: all 0.2s;
-    }
-    #subToggleBtn:hover { background: rgba(232,201,122,0.18); border-color: var(--gold); color: var(--gold); }
-    #subToggleBtn.active { background: rgba(232,201,122,0.25); border-color: var(--gold); color: var(--gold); }
-    #subToggleBtn .sub-flag { font-size: 1rem; }
+
 
     /* ── Max Player server button ─────────────────────────────────────── */
     .player-server-btn.max-btn {
@@ -4284,9 +4260,7 @@
         style="position: absolute; top: 1.7rem; right: 7rem; font-size: 1.4rem; cursor: pointer; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 36px; height: 36px; color: var(--text); z-index: 710; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); transition: all 0.2s;">⛶</button>
       <!-- Subtitle File Loader (always visible) -->
       <input type="file" id="subFileInput" accept=".srt,.vtt,.ass,.ssa" style="display:none">
-      <button id="subToggleBtn" title="Load subtitle file (.srt / .vtt from Baiscope or any source)">
-        <span class="sub-flag">📁</span> LOAD SUB
-      </button>
+
       <button class="player-close" id="playerClose">&#10005;</button>
       <div id="playerLoading"
         style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#000;z-index:10;pointer-events:none;transition:opacity 0.3s;opacity:0;">
@@ -4318,7 +4292,7 @@
       <!-- ══ MAX PLAYER ══ Custom HLS player — shown instead of iframe when Max server selected -->
       <div id="maxPlayerWrap" style="display:none; position:absolute; inset:0; background:#000; z-index:5; border-radius:inherit; overflow:hidden;">
         <!-- Video element -->
-        <video id="maxVideo" playsinline style="width:100%;height:100%;display:block;background:#000;"></video>
+        <video id="maxVideo" controls playsinline style="width:100%;height:100%;display:block;background:#000;"></video>
         <!-- Quality badge top-left -->
         <div id="maxQualityBadge" style="display:none; position:absolute; top:1rem; left:1rem; background:rgba(232,201,122,0.15); border:1px solid rgba(232,201,122,0.4); color:#E8C97A; font-size:0.7rem; font-weight:700; letter-spacing:1px; padding:3px 10px; border-radius:20px; backdrop-filter:blur(8px); pointer-events:none; z-index:12; font-family:'Inter',sans-serif; text-transform:uppercase;"></div>
         <!-- Buffering spinner -->
@@ -6831,10 +6805,12 @@
       _subOffset = 0;
 
       // Update button state
-      _subToggleBtn.querySelector('.sub-flag').textContent = '🇱🇰';
-      _subToggleBtn.classList.add('active');
-      _subToggleBtn.style.opacity = '1';
-      _subToggleBtn.title = `Subtitles loaded: ${_subFileName} (${cues.length} cues) — Click to hide`;
+      if (_subToggleBtn) {
+        _subToggleBtn.querySelector('.sub-flag')?.textContent = '🇱🇰';
+        _subToggleBtn.classList.add('active');
+        _subToggleBtn.style.opacity = '1';
+        _subToggleBtn.title = `Subtitles loaded: ${_subFileName} (${cues.length} cues) — Click to hide`;
+      }
 
       const msg = document.getElementById('subPanelMsg');
 
@@ -6898,12 +6874,14 @@
       _stopSubLoop();
 
       // Show button immediately with loading state
-      _subToggleBtn.style.display = 'flex';
-      _subToggleBtn.style.opacity = '0.5';
-      _subToggleBtn.style.cursor = 'wait';
-      _subToggleBtn.title = 'Loading Sinhala subtitles...';
-      _subToggleBtn.querySelector('.sub-flag').textContent = '⏳';
-      _subToggleBtn.classList.remove('active');
+      if (_subToggleBtn) {
+        _subToggleBtn.style.display = 'flex';
+        _subToggleBtn.style.opacity = '0.5';
+        _subToggleBtn.style.cursor = 'wait';
+        _subToggleBtn.title = 'Loading Sinhala subtitles...';
+        _subToggleBtn.querySelector('.sub-flag')?.textContent = '⏳';
+        _subToggleBtn.classList.remove('active');
+      }
       _subSyncPanel.classList.remove('visible');
       _subActive = false;
 
@@ -6916,54 +6894,62 @@
         const res = await fetch(`/api/subtitles?${params}`);
         if (!res.ok) {
           // Not found — show greyed out button so user knows we checked
-          _subToggleBtn.querySelector('.sub-flag').textContent = '🇱🇰';
-          _subToggleBtn.style.opacity = '0.3';
-          _subToggleBtn.style.cursor = 'default';
-          _subToggleBtn.title = 'No Sinhala subtitles found on Baiscope for this title';
+          if (_subToggleBtn) {
+            _subToggleBtn.querySelector('.sub-flag')?.textContent = '🇱🇰';
+            _subToggleBtn.style.opacity = '0.3';
+            _subToggleBtn.style.cursor = 'default';
+            _subToggleBtn.title = 'No Sinhala subtitles found on Baiscope for this title';
+          }
           return;
         }
         const vtt = await res.text();
         _subCues = parseVtt(vtt);
         if (!_subCues.length) {
-          _subToggleBtn.querySelector('.sub-flag').textContent = '🇱🇰';
-          _subToggleBtn.style.opacity = '0.3';
-          _subToggleBtn.style.cursor = 'default';
-          _subToggleBtn.title = 'No Sinhala subtitles found on Baiscope for this title';
+          if (_subToggleBtn) {
+            _subToggleBtn.querySelector('.sub-flag')?.textContent = '🇱🇰';
+            _subToggleBtn.style.opacity = '0.3';
+            _subToggleBtn.style.cursor = 'default';
+            _subToggleBtn.title = 'No Sinhala subtitles found on Baiscope for this title';
+          }
           return;
         }
         // Subtitles ready!
         _subLoaded = true;
-        _subToggleBtn.querySelector('.sub-flag').textContent = '🇱🇰';
-        _subToggleBtn.style.opacity = '1';
-        _subToggleBtn.style.cursor = 'pointer';
-        _subToggleBtn.title = 'Click to enable Sinhala subtitles';
+        if (_subToggleBtn) {
+          _subToggleBtn.querySelector('.sub-flag')?.textContent = '🇱🇰';
+          _subToggleBtn.style.opacity = '1';
+          _subToggleBtn.style.cursor = 'pointer';
+          _subToggleBtn.title = 'Click to enable Sinhala subtitles';
+        }
         console.log(`[Subtitles] Loaded ${_subCues.length} cues for "${title}"`);
       } catch (e) {
         // Network error — hide the button entirely
-        _subToggleBtn.style.display = 'none';
+        if (_subToggleBtn) _subToggleBtn.style.display = 'none';
         console.warn('[Subtitles] Failed to load:', e);
       }
     }
 
     // ── LOAD SUB button → open file picker ────────────────────────────────
-    _subToggleBtn.addEventListener('click', () => {
-      if (_subLoaded) {
-        // Already loaded: toggle panel visibility
-        _subActive = !_subActive;
-        _subToggleBtn.classList.toggle('active', _subActive);
-        if (_subActive) {
-          _subSyncPanel.classList.add('visible');
-        } else {
-          _subSyncPanel.classList.remove('visible');
-          _stopSubLoop();
-          _subStartTime = null;
+    if (_subToggleBtn) {
+      _subToggleBtn.addEventListener('click', () => {
+        if (_subLoaded) {
+          // Already loaded: toggle panel visibility
+          _subActive = !_subActive;
+          _subToggleBtn.classList.toggle('active', _subActive);
+          if (_subActive) {
+            _subSyncPanel.classList.add('visible');
+          } else {
+            _subSyncPanel.classList.remove('visible');
+            _stopSubLoop();
+            _subStartTime = null;
+          }
+          return;
         }
-        return;
-      }
-      // No sub loaded yet → open file picker
-      _subFileInput.value = ''; // reset so same file can be re-picked
-      _subFileInput.click();
-    });
+        // No sub loaded yet → open file picker
+        _subFileInput.value = ''; // reset so same file can be re-picked
+        _subFileInput.click();
+      });
+    }
 
     // ── File picker → read & parse ─────────────────────────────────────────
     _subFileInput.addEventListener('change', () => {
@@ -7018,11 +7004,13 @@
       _subOffset = 0;
       _subFileName = '';
       _subActive = false;
-      _subToggleBtn.style.opacity = '1';
-      _subToggleBtn.style.cursor = 'pointer';
-      _subToggleBtn.querySelector('.sub-flag').textContent = '📁';
-      _subToggleBtn.classList.remove('active');
-      _subToggleBtn.title = 'Load subtitle file (.srt / .vtt / .ass from Baiscope or any source)';
+      if (_subToggleBtn) {
+        _subToggleBtn.style.opacity = '1';
+        _subToggleBtn.style.cursor = 'pointer';
+        _subToggleBtn.querySelector('.sub-flag')?.textContent = '📁';
+        _subToggleBtn.classList.remove('active');
+        _subToggleBtn.title = 'Load subtitle file (.srt / .vtt / .ass from Baiscope or any source)';
+      }
       _subSyncPanel.classList.remove('visible');
       _subStartBtn.textContent = '▶ Start Subtitles';
       if (_subStatusLine) _subStatusLine.textContent = 'No file loaded';
@@ -7066,6 +7054,9 @@
       _maxVideo.load();
       _maxWrap.className = '';
       _maxWrap.style.display = 'none';
+      if (_subText) _subText.classList.remove('active');
+      _subCues = [];
+      _subLoaded = false;
     }
 
     // Update quality badge from current hls level
@@ -7089,6 +7080,49 @@
         _subText.classList.remove('active');
       }
       _maxSubRaf = requestAnimationFrame(_maxSubLoop);
+    }
+
+    // Automatically load & parse subtitle file from URL into Max Player
+    async function _loadMaxSubtitleFromUrl(subUrl) {
+      if (!subUrl) return;
+      try {
+        let res = null;
+        try {
+          res = await fetch(subUrl);
+        } catch (_) {}
+        if (!res || !res.ok) {
+          // Fallback to local proxy if CORS prevented direct fetch
+          res = await fetch(`/api/subtitles?url=${encodeURIComponent(subUrl)}`);
+        }
+        if (!res.ok) return;
+
+        const text = await res.text();
+        let cues = [];
+        const clean = subUrl.toLowerCase().split('?')[0];
+        if (clean.endsWith('.srt')) {
+          cues = parseSrt(text);
+        } else if (clean.endsWith('.vtt')) {
+          cues = parseVtt(text);
+        } else if (clean.endsWith('.ass') || clean.endsWith('.ssa')) {
+          cues = parseAss(text);
+        } else {
+          cues = text.includes('WEBVTT') ? parseVtt(text) : parseSrt(text);
+          if (!cues.length) cues = parseAss(text);
+        }
+
+        if (cues && cues.length) {
+          _subCues = cues;
+          _subLoaded = true;
+          _subOffset = 0;
+          if (_maxMode) {
+            if (_maxSubRaf) cancelAnimationFrame(_maxSubRaf);
+            _maxSubRaf = requestAnimationFrame(_maxSubLoop);
+          }
+          console.log(`[Max Subtitles] Auto-loaded ${cues.length} cues from:`, subUrl);
+        }
+      } catch (err) {
+        console.warn('[Max Subtitles] Failed to load subtitle from URL:', err);
+      }
     }
 
     async function initMaxPlayer(tmdbId, mediaType, season, episode) {
@@ -7128,8 +7162,9 @@
         };
       }
 
-      // ── Fetch HLS stream URL from /api/hls ────────────────────────────
+      // ── Fetch HLS stream URL & Subtitle from /api/hls ──────────────────
       let streamUrl = null;
+      let subtitleUrl = null;
       try {
         const params = new URLSearchParams({ id: tmdbId, type: mediaType });
         if (season)  params.set('season',  season);
@@ -7137,6 +7172,7 @@
         const resp = await fetch(`/api/hls?${params}`);
         const data = await resp.json();
         if (data.url) streamUrl = data.url;
+        if (data.subtitle) subtitleUrl = data.subtitle;
       } catch (_) {}
 
       if (!streamUrl) {
@@ -7147,6 +7183,11 @@
         }
         _fallbackFromMax();
         return;
+      }
+
+      // Auto-load subtitle if provided
+      if (subtitleUrl) {
+        _loadMaxSubtitleFromUrl(subtitleUrl);
       }
 
       // ── Initialise hls.js ─────────────────────────────────────────────
@@ -7189,6 +7230,18 @@
         _maxVideo.addEventListener('waiting', () => _maxWrap.classList.add('buffering'));
         _maxVideo.addEventListener('playing', () => _maxWrap.classList.remove('buffering'));
         _maxVideo.addEventListener('canplay', () => _maxWrap.classList.remove('buffering'));
+        _maxVideo.addEventListener('seeked', () => {
+          if (_maxMode && _subCues.length) {
+            const ms = _maxVideo.currentTime * 1000 + _subOffset;
+            const cue = _subCues.find(c => ms >= c.start && ms < c.end);
+            if (cue) {
+              _subText.innerHTML = cue.text.replace(/\n/g, '<br>');
+              _subText.classList.add('active');
+            } else {
+              _subText.classList.remove('active');
+            }
+          }
+        });
 
       } else if (_maxVideo.canPlayType('application/vnd.apple.mpegurl')) {
         // Safari native HLS
@@ -7285,15 +7338,7 @@
       //   const subEpisode = _currentModalType === 'tv' ? (_selectedEpisode || 1) : null;
       //   loadSubtitles(subTitle, subSeason, subEpisode, subYear);
       // }
-      // Show the LOAD SUB button whenever the player opens
-      if (_subToggleBtn) {
-        _subToggleBtn.style.display = 'flex';
-        if (!_subLoaded) {
-          _subToggleBtn.querySelector('.sub-flag').textContent = '📁';
-          _subToggleBtn.title = 'Load subtitle file (.srt / .vtt / .ass)';
-          _subToggleBtn.classList.remove('active');
-        }
-      }
+
 
       // ── Skip Intro — TV only, load + start wall-clock timer ──────────────
       if (_currentModalType === 'tv' && _currentModalId && typeof window._loadSkipIntro === 'function') {
