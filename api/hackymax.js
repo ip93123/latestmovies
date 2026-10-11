@@ -25,6 +25,7 @@ const SUBTITLE_MAP = {
   // Sarvam Maya (2025)
   '1473354': '/Subtitle/1473354.srt',
   // Annayum Rasoolum (2013)
+  '155518': '/Subtitle/155518.srt',
   '154983': '/Subtitle/154983.srt',
   // Premam (2015)
   '337375': '/Subtitle/337375.srt',
@@ -33,6 +34,7 @@ const SUBTITLE_MAP = {
   // Ennu Ninte Moideen (2015)
   '349479': '/Subtitle/349479.srt',
   // Thanneer Mathan Dinangal (2019)
+  '618435': '/Subtitle/618435.srt',
   '609503': '/Subtitle/609503.srt',
   // Charlie (2015)
   '371900': '/Subtitle/371900.srt',
