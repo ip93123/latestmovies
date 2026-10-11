@@ -2341,6 +2341,334 @@
       50%       { box-shadow: 0 0 32px rgba(0, 198, 255, 0.95); }
     }
 
+    /* ── Mobile Hamburger & Navigation Drawer Styles ──────────────────── */
+    .nav-mobile-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 38px;
+      height: 38px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 10px;
+      cursor: pointer;
+      gap: 5px;
+      padding: 0;
+      transition: all 0.25s ease;
+      z-index: 210;
+      flex-shrink: 0;
+    }
+    .nav-mobile-toggle span {
+      display: block;
+      width: 20px;
+      height: 2px;
+      background: #EEF0F7;
+      border-radius: 2px;
+      transition: all 0.25s ease;
+    }
+    .nav-mobile-toggle.open span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+    .nav-mobile-toggle.open span:nth-child(2) {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+    .nav-mobile-toggle.open span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+
+    .mobile-nav-drawer {
+      position: fixed;
+      inset: 0;
+      z-index: 30000;
+      pointer-events: none;
+      visibility: hidden;
+      transition: visibility 0.3s ease;
+    }
+    .mobile-nav-drawer.open {
+      pointer-events: auto;
+      visibility: visible;
+    }
+    .mobile-nav-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .mobile-nav-drawer.open .mobile-nav-backdrop {
+      opacity: 1;
+    }
+    .mobile-nav-content {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(320px, 86vw);
+      background: linear-gradient(180deg, #0D1117 0%, #131A26 100%);
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: -10px 0 40px rgba(0, 0, 0, 0.85);
+      display: flex;
+      flex-direction: column;
+      padding: 1.2rem 1.3rem;
+      transform: translateX(100%);
+      transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow-y: auto;
+      z-index: 2;
+    }
+    .mobile-nav-drawer.open .mobile-nav-content {
+      transform: translateX(0);
+    }
+    .mobile-nav-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 0.9rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 1.1rem;
+    }
+    .mobile-nav-close {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .mobile-nav-close:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+    .mobile-nav-quick {
+      margin-bottom: 1.1rem;
+    }
+    .mobile-wp-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 12px 14px;
+      background: var(--wp-theme-grad, linear-gradient(135deg, #0072FF, #00C6FF));
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 16px var(--wp-theme-glow, rgba(0, 198, 255, 0.4));
+      transition: transform 0.2s;
+    }
+    .mobile-wp-btn:active {
+      transform: scale(0.98);
+    }
+    .mobile-nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      padding: 0;
+      margin: 0;
+    }
+    .mobile-nav-list li a {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      color: rgba(255, 255, 255, 0.82);
+      text-decoration: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 600;
+      border-radius: 10px;
+      transition: all 0.2s;
+    }
+    .mobile-nav-list li a:hover,
+    .mobile-nav-list li a:active {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      transform: translateX(4px);
+    }
+    .mobile-sub-tag {
+      background: rgba(46, 204, 113, 0.2);
+      border: 1px solid #2ECC71;
+      color: #2ECC71;
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-weight: 800;
+    }
+
+    /* ── Responsive Server Bar & Watch Party Touch Tuning ─────────────── */
+    .player-server-bar {
+      max-width: 96vw;
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding: 4px 6px;
+      gap: 0.45rem;
+      flex-shrink: 0;
+    }
+    .player-server-bar::-webkit-scrollbar {
+      display: none;
+    }
+    .player-server-btn {
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    /* ── Mobile & Small Screen Media Queries (All Displays) ─────────────── */
+    @media (max-width: 900px) {
+      .nav-links {
+        display: none !important;
+      }
+      .nav-mobile-toggle {
+        display: flex !important;
+      }
+      nav {
+        padding: 0.85rem 1.4rem !important;
+      }
+    }
+
+    @media (max-width: 600px) {
+      nav {
+        padding: 0.65rem 0.9rem !important;
+      }
+      .nav-logo {
+        font-size: 1.45rem !important;
+        gap: 0.45rem !important;
+        letter-spacing: 2px !important;
+      }
+      .nav-logo img {
+        width: 34px !important;
+        height: 28px !important;
+      }
+      #navWpQuickBtn {
+        padding: 6px 9px !important;
+        font-size: 0.75rem !important;
+      }
+      #navWpQuickBtn span {
+        display: none;
+      }
+      .nav-search {
+        padding: 0.35rem 0.65rem !important;
+      }
+      .nav-search input {
+        width: 80px !important;
+        font-size: 0.78rem !important;
+      }
+
+      /* Watch Party Modal on Mobile */
+      #wpModalBox {
+        width: 94vw !important;
+        max-width: 420px !important;
+        padding: 1.15rem !important;
+        border-radius: 16px !important;
+        margin: auto;
+      }
+      .wp-tabs {
+        margin-bottom: 0.9rem !important;
+        padding: 3px !important;
+        gap: 4px !important;
+      }
+      .wp-tab-btn {
+        padding: 8px 10px !important;
+        font-size: 0.76rem !important;
+      }
+      .wp-input-field {
+        font-size: 1.6rem !important;
+        letter-spacing: 5px !important;
+        padding: 9px !important;
+      }
+      #wpRoomCode {
+        font-size: 1.8rem !important;
+        letter-spacing: 6px !important;
+      }
+      #wpShareUrl {
+        max-width: 140px !important;
+        font-size: 0.65rem !important;
+      }
+      #wpGuestList {
+        max-height: 120px !important;
+      }
+      #wpHud {
+        top: 10px !important;
+        left: 10px !important;
+        padding: 4px 10px !important;
+        font-size: 0.7rem !important;
+      }
+
+      /* Player Controls on Mobile */
+      .player-server-btn {
+        font-size: 0.72rem !important;
+        padding: 0.3rem 0.65rem !important;
+      }
+      .player-close {
+        top: 0.6rem !important;
+        right: 0.8rem !important;
+        font-size: 1.5rem !important;
+      }
+      #playerFullscreenBtn {
+        top: 0.6rem !important;
+        right: 2.8rem !important;
+        width: 30px !important;
+        height: 30px !important;
+        font-size: 1rem !important;
+      }
+      #playerHome {
+        top: 0.6rem !important;
+        left: 0.8rem !important;
+        width: 30px !important;
+        height: 30px !important;
+      }
+      #maxControlsBar {
+        padding: 0 0.6rem 0.4rem !important;
+      }
+      .max-ctrl-btn {
+        width: 32px !important;
+        height: 32px !important;
+      }
+      .max-ctrl-btn svg {
+        width: 18px !important;
+        height: 18px !important;
+      }
+      #maxTimeDisplay {
+        font-size: 0.7rem !important;
+        padding: 0 2px !important;
+      }
+      #maxVolGroup .max-volume-slider-wrap {
+        display: none !important;
+      }
+      #subOverlay {
+        padding-bottom: max(60px, 14%) !important;
+      }
+      #subText {
+        font-size: clamp(14px, 4vw, 22px) !important;
+      }
+
+      /* Sin Sub & Sections on Mobile */
+      #sinsub {
+        padding: 2rem 0.9rem !important;
+      }
+      #sinsub .section-title {
+        font-size: 1.5rem !important;
+      }
+      .trending-row {
+        gap: 0.85rem !important;
+      }
+    }
+
     /* ── Dynamic Watch Party Theme CSS Variables ──────────────────────── */
     :root {
       --wp-theme: #00C6FF;
@@ -5510,8 +5838,48 @@
         <line x1="21" y1="21" x2="16.65" y2="16.65" />
       </svg>
       <input type="text" placeholder="Search..." id="navSearchInput" readonly>
+      </div>
+      <!-- Mobile Navigation Hamburger Button -->
+      <button id="navMobileToggle" class="nav-mobile-toggle" aria-label="Toggle navigation menu" onclick="window.toggleMobileNav()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
     </div>
   </nav>
+
+  <!-- MOBILE NAVIGATION DRAWER -->
+  <div id="mobileNavDrawer" class="mobile-nav-drawer">
+    <div class="mobile-nav-backdrop" onclick="window.toggleMobileNav(false)"></div>
+    <div class="mobile-nav-content">
+      <div class="mobile-nav-header">
+        <div class="nav-logo" style="font-size:1.6rem;">
+          <img src="logo.png" alt="Logo" style="width:36px;height:30px;">
+          <span>Hacky Max</span>
+        </div>
+        <button class="mobile-nav-close" onclick="window.toggleMobileNav(false)" aria-label="Close menu">✕</button>
+      </div>
+
+      <div class="mobile-nav-quick">
+        <button class="mobile-wp-btn" onclick="window.toggleMobileNav(false); window.openWatchPartyModal('join')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="19" cy="9" r="3"/><path d="M23 21v-2a3 3 0 0 0-3-3h-1"/></svg>
+          <span>Watch Party (Join / Host)</span>
+        </button>
+      </div>
+
+      <ul class="mobile-nav-list">
+        <li><a href="#trending" onclick="window.toggleMobileNav(false)"><span>🔥 Trending</span><span style="opacity:0.4;">›</span></a></li>
+        <li><a href="#sinsub" onclick="window.toggleMobileNav(false)" style="color:#2ECC71;"><span>🇱🇰 Sin Sub (Sinhala)</span><span class="mobile-sub-tag">SUB</span></a></li>
+        <li><a href="#movies" onclick="window.toggleMobileNav(false)"><span>🎬 Latest Movies</span><span style="opacity:0.4;">›</span></a></li>
+        <li><a href="#trailers" onclick="window.toggleMobileNav(false)"><span>🎞️ Trailers</span><span style="opacity:0.4;">›</span></a></li>
+        <li><a href="#tvshows" onclick="window.toggleMobileNav(false)"><span>📺 TV Shows</span><span style="opacity:0.4;">›</span></a></li>
+        <li><a href="#wheretowatch" onclick="window.toggleMobileNav(false)"><span>📡 Streaming</span><span style="opacity:0.4;">›</span></a></li>
+        <li><a href="#toprated" onclick="window.toggleMobileNav(false)"><span>🌟 Top Rated</span><span style="opacity:0.4;">›</span></a></li>
+        <li><a href="#fourk" onclick="window.toggleMobileNav(false)"><span>💎 4K Ultra HD</span><span style="opacity:0.4;">›</span></a></li>
+        <li><a href="javascript:void(0)" onclick="window.toggleMobileNav(false); openWishlist();"><span>💖 WishList</span><span style="opacity:0.4;">›</span></a></li>
+      </ul>
+    </div>
+  </div>
 
   <section id="hero">
     <div class="hero-bg" id="heroBg">
@@ -11326,6 +11694,25 @@
   <script>
   (function () {
     'use strict';
+
+    /* ── Mobile Navigation Drawer Toggle ───────────────────────── */
+    window.toggleMobileNav = function (forceState) {
+      const drawer = document.getElementById('mobileNavDrawer');
+      const toggleBtn = document.getElementById('navMobileToggle');
+      if (!drawer) return;
+      const isOpen = drawer.classList.contains('open');
+      const targetState = typeof forceState === 'boolean' ? forceState : !isOpen;
+
+      if (targetState) {
+        drawer.classList.add('open');
+        if (toggleBtn) toggleBtn.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      } else {
+        drawer.classList.remove('open');
+        if (toggleBtn) toggleBtn.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    };
 
     /* ── Theme Color Sync ────────────────────────────────────── */
     window.setWatchPartyTheme = function (engine) {
