@@ -2196,6 +2196,45 @@
       animation: wpPulse 1.8s infinite;
     }
 
+    .topbar-sub-btn {
+      position: absolute;
+      top: 1.7rem;
+      right: 17.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0 0.85rem;
+      height: 36px;
+      border-radius: 50px;
+      background: rgba(232, 201, 122, 0.14);
+      border: 1px solid rgba(232, 201, 122, 0.45);
+      color: var(--gold);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      z-index: 710;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 16px rgba(232, 201, 122, 0.2);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .topbar-sub-btn:hover {
+      background: rgba(232, 201, 122, 0.25);
+      border-color: var(--gold);
+      color: #ffffff;
+      transform: translateY(-1px) scale(1.03);
+      box-shadow: 0 0 22px rgba(232, 201, 122, 0.45);
+    }
+
+    .topbar-sub-btn.active {
+      background: linear-gradient(135deg, #E8C97A, #c9a227);
+      border-color: #E8C97A;
+      color: #07090F;
+      box-shadow: 0 0 20px rgba(232, 201, 122, 0.65);
+    }
+
     .player-newtab-btn {
       display: inline-flex;
       align-items: center;
@@ -2690,13 +2729,24 @@
       }
       #topbarWatchPartyBtn {
         top: 0.6rem !important;
-        right: 5rem !important;
+        right: 4.8rem !important;
         width: 30px !important;
         height: 30px !important;
         padding: 0 !important;
         justify-content: center !important;
       }
       #topbarWatchPartyBtn span:not(.topbar-wp-dot) {
+        display: none !important;
+      }
+      #subToggleBtn {
+        top: 0.6rem !important;
+        right: 6.8rem !important;
+        width: 30px !important;
+        height: 30px !important;
+        padding: 0 !important;
+        justify-content: center !important;
+      }
+      #subToggleBtn span:not(.sub-flag) {
         display: none !important;
       }
       #playerHome {
@@ -5573,6 +5623,10 @@
           <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" />
           <path d="M9 21V12h6v9" />
         </svg></button>
+      <button class="topbar-sub-btn" id="subToggleBtn" title="Sinhala Subtitles — Toggle / Sync">
+        <span class="sub-flag">🇱🇰</span>
+        <span>Sinhala Sub</span>
+      </button>
       <button class="topbar-wp-btn" id="topbarWatchPartyBtn" title="Watch Party — Watch together with friends">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
           <circle cx="9" cy="7" r="4"/>
@@ -5603,6 +5657,10 @@
       <div id="subOverlay"><span id="subText"></span></div>
       <!-- Sync Panel -->
       <div id="subSyncPanel">
+        <div style="display:flex;width:100%;justify-content:space-between;align-items:center;margin-bottom:0.2rem;">
+          <span style="font-size:0.8rem;font-weight:700;color:var(--gold);">🇱🇰 Sinhala Subtitle Sync</span>
+          <button type="button" onclick="document.getElementById('subSyncPanel').classList.remove('visible')" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:1.1rem;line-height:1;">✕</button>
+        </div>
         <p id="subPanelMsg">Download .srt from <strong><a id="baiscopeLink" href="https://www.baiscope.lk" target="_blank" style="color:var(--gold)">Baiscope</a></strong>, then click <strong>📁 LOAD SUB</strong> again</p>
         <div class="sub-sync-btns">
           <button class="sub-sync-btn primary" id="subStartBtn">▶ Start Subtitles</button>
@@ -8724,20 +8782,12 @@
       }
     }
 
-    // ── LOAD SUB button → open file picker ────────────────────────────────
+    // ── LOAD SUB button → open file picker or toggle panel ───────────────
     if (_subToggleBtn) {
       _subToggleBtn.addEventListener('click', () => {
         if (_subLoaded) {
-          // Already loaded: toggle panel visibility
-          _subActive = !_subActive;
-          _subToggleBtn.classList.toggle('active', _subActive);
-          if (_subActive) {
-            _subSyncPanel.classList.add('visible');
-          } else {
-            _subSyncPanel.classList.remove('visible');
-            _stopSubLoop();
-            _subStartTime = null;
-          }
+          // Already loaded: toggle panel visibility (keeps subtitles running)
+          _subSyncPanel.classList.toggle('visible');
           return;
         }
         // No sub loaded yet → open file picker
@@ -10849,22 +10899,86 @@
       const wasAlreadyOpen = overlay.classList.contains('open');
       overlay.classList.add('open');
 
-      // ── Auto-load Sinhala subtitle from SUBTITLE_MAP if available ────────
-      if (!isHackyMaxUrl && !isSinMaxUrl && !isZeeMaxUrl && _currentModalId && typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(_currentModalId)]) {
-        const subFile = SUBTITLE_MAP[String(_currentModalId)];
-        fetch(subFile).then(r => r.text()).then(text => {
-          const cues = parseSrt(text);
-          if (cues && cues.length) {
-            _subCues = cues;
-            _subLoaded = true;
-            _subOffset = 0;
-            if (_subToggleBtn) {
-              _subToggleBtn.style.opacity = '1';
-              _subToggleBtn.style.cursor = 'pointer';
-              _subToggleBtn.title = 'Sinhala subtitles ready (Click to toggle sync)';
+      // ── Auto-load & auto-start Sinhala subtitle for iframe (Infinity, etc.) ────────
+      if (!isHackyMaxUrl && !isSinMaxUrl && !isZeeMaxUrl && _currentModalId) {
+        _attachSubOverlayToActiveWrap();
+        const localSub = typeof SUBTITLE_MAP !== 'undefined' ? SUBTITLE_MAP[String(_currentModalId)] : null;
+        
+        (async function _autoLoadIframeSinhalaSub() {
+          let srtText = null;
+          let subLabel = 'Sinhala 🇱🇰';
+
+          if (localSub) {
+            try {
+              const r = await fetch(localSub);
+              if (r.ok) srtText = await r.text();
+            } catch (_) {}
+          }
+
+          // If not in local SUBTITLE_MAP, query /api/subtitles for Sinhala track
+          if (!srtText) {
+            try {
+              const p = new URLSearchParams({ id: _currentModalId, type: _currentModalType || 'movie' });
+              if (_selectedSeason) p.set('season', _selectedSeason);
+              if (_selectedEpisode) p.set('episode', _selectedEpisode);
+              const r = await fetch(`/api/subtitles?${p}`, { signal: AbortSignal.timeout(4500) });
+              if (r.ok) {
+                const d = await r.json();
+                if (Array.isArray(d.tracks)) {
+                  const sinTr = d.tracks.find(t => {
+                    const l = (t.lang || '').toLowerCase();
+                    const lbl = (t.label || '').toLowerCase();
+                    return l === 'si' || l === 'sin' || l === 'sinhala' || lbl.includes('sinhala');
+                  });
+                  if (sinTr && sinTr.url) {
+                    let subRes = null;
+                    try { subRes = await fetch(sinTr.url); } catch (_) {}
+                    if (!subRes || !subRes.ok) {
+                      try { subRes = await fetch(`/api/subtitles?url=${encodeURIComponent(sinTr.url)}`); } catch (_) {}
+                    }
+                    if (subRes && subRes.ok) {
+                      srtText = await subRes.text();
+                      subLabel = sinTr.label || 'Sinhala 🇱🇰';
+                    }
+                  }
+                }
+              }
+            } catch (_) {}
+          }
+
+          if (srtText) {
+            // Strict Arabic elimination
+            if (!/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(srtText)) {
+              let parsedCues = [];
+              if (srtText.includes('WEBVTT')) parsedCues = parseVtt(srtText);
+              else parsedCues = parseSrt(srtText);
+              if (!parsedCues.length) parsedCues = parseVtt(srtText);
+
+              if (parsedCues.length) {
+                _loadSubCues(parsedCues, subLabel);
+                // Auto-start wall-clock sync for iframe player
+                _subStartTime = Date.now();
+                _subOffset = 0;
+                _stopSubLoop();
+                _subRaf = requestAnimationFrame(_subLoop);
+                if (_subStartBtn) _subStartBtn.textContent = '⟳ Restart';
+                if (_subToggleBtn) {
+                  _subToggleBtn.style.opacity = '1';
+                  _subToggleBtn.style.cursor = 'pointer';
+                  _subToggleBtn.classList.add('active');
+                  _subToggleBtn.title = `Sinhala subtitles active (${parsedCues.length} cues) — Click to sync`;
+                }
+                const msg = document.getElementById('subPanelMsg');
+                if (msg) msg.innerHTML = `✅ <strong style="color:var(--gold)">${_escHtml(subLabel)}</strong> active — <em>${parsedCues.length} cues</em>.<br><span style="color:#27AE60;font-size:0.8em;">⚡ Wall-clock auto-sync active</span>`;
+                // Keep sync panel visible briefly, then dismiss so video is unobstructed
+                setTimeout(() => {
+                  if (_subSyncPanel) _subSyncPanel.classList.remove('visible');
+                }, 3500);
+                console.log(`[Infinity Subtitles] Auto-started ${parsedCues.length} Sinhala cues`);
+              }
             }
           }
-        }).catch(() => {});
+        })();
       }
 
 
