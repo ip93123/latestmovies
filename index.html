@@ -2351,7 +2351,11 @@
       position: absolute;
       bottom: 4.4rem;
       right: 1.25rem;
-      width: 320px;
+      width: 325px;
+      max-height: 440px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(232,201,122,0.3) transparent;
       background: rgba(5,7,14,0.97);
       border: 1px solid rgba(232,201,122,0.18);
       border-radius: 16px;
@@ -4907,6 +4911,16 @@
 
           <!-- ── SUBTITLES TAB ── -->
           <div class="mxs-pane active" id="mxs-pane-sub">
+            <!-- Subtitle Track Selector -->
+            <div class="mxs-section">Subtitle Track</div>
+            <div class="mxs-row" style="flex-direction:column;align-items:stretch;gap:0.45rem;">
+              <div class="mxs-ctrl" id="mxsTrackList" style="display:flex;flex-wrap:wrap;gap:0.35rem;justify-content:flex-start;">
+                <button class="mxs-pill on" id="mxsTrackOff">Off</button>
+              </div>
+              <div id="mxsTrackHint" style="font-size:0.68rem;color:rgba(255,255,255,0.55);line-height:1.35;"></div>
+            </div>
+            <div class="mxs-divider"></div>
+
             <div class="mxs-section">Text Color</div>
             <div class="mxs-row">
               <span class="mxs-label">Color</span>
@@ -7772,6 +7786,7 @@
       '1508168': '/Subtitle/1508168.srt', // Bethlehem Kudumba Unit (2026)
       '1314279': '/Subtitle/1314279.srt', // Hi (2026)
       '1544847': '/Subtitle/1544847.srt', // Pradhama Drishtiya Kuttakkar (2026)
+      '1473354': '/Subtitle/1473354.srt', // Sarvam Maya (2025)
     };
 
     // ════════════════════════════════════════════════════════════════════════
@@ -8661,6 +8676,12 @@
       if (_subText) _subText.classList.remove('active');
       _subCues = [];
       _subLoaded = false;
+      _mxsTracks = [];
+      _mxsActiveTrackId = 'off';
+      const _trkCont = document.getElementById('mxsTrackList');
+      if (_trkCont) _trkCont.innerHTML = '<button class="mxs-pill on">Off</button>';
+      const _trkHint = document.getElementById('mxsTrackHint');
+      if (_trkHint) _trkHint.innerHTML = '';
       if (_maxVideo.textTracks) {
         for (let i = 0; i < _maxVideo.textTracks.length; i++) {
           try { _maxVideo.textTracks[i].mode = 'disabled'; } catch (_) {}
@@ -8699,7 +8720,7 @@
 
     // Automatically load & parse subtitle file from URL into Max Player
     async function _loadMaxSubtitleFromUrl(subUrl) {
-      if (!subUrl) return;
+      if (!subUrl) return false;
       try {
         let res = null;
         try {
@@ -8709,7 +8730,7 @@
           // Fallback to local proxy if CORS prevented direct fetch
           res = await fetch(`/api/subtitles?url=${encodeURIComponent(subUrl)}`);
         }
-        if (!res.ok) return;
+        if (!res.ok) return false;
 
         const text = await res.text();
         let cues = [];
@@ -8740,11 +8761,118 @@
               try { _maxVideo.textTracks[i].mode = 'disabled'; } catch (_) {}
             }
           }
-          console.log(`[Max Subtitles] Auto-loaded ${cues.length} cues from:`, subUrl);
+          console.log(`[Max Subtitles] Loaded ${cues.length} cues from:`, subUrl);
+          return true;
         }
       } catch (err) {
         console.warn('[Max Subtitles] Failed to load subtitle from URL:', err);
       }
+      return false;
+    }
+
+    let _mxsTracks = [];
+    let _mxsActiveTrackId = 'off';
+
+    function _mxsRenderTracks() {
+      const container = document.getElementById('mxsTrackList');
+      const hint = document.getElementById('mxsTrackHint');
+      if (!container) return;
+      container.innerHTML = '';
+
+      // Off button
+      const offBtn = document.createElement('button');
+      const isOff = _mxsActiveTrackId === 'off' || !_subLoaded || !_subCues.length;
+      offBtn.className = 'mxs-pill' + (isOff ? ' on' : '');
+      offBtn.textContent = 'Off';
+      offBtn.addEventListener('click', () => {
+        _mxsActiveTrackId = 'off';
+        _subCues = [];
+        _subLoaded = false;
+        if (_subText) _subText.classList.remove('active');
+        _showMaxToast('Subtitles: Off');
+        _mxsRenderTracks();
+      });
+      container.appendChild(offBtn);
+
+      _mxsTracks.forEach(tr => {
+        const btn = document.createElement('button');
+        const isActive = _mxsActiveTrackId === tr.id && _subLoaded && _subCues.length > 0;
+        btn.className = 'mxs-pill' + (isActive ? ' on' : '');
+        btn.textContent = tr.label;
+        btn.title = tr.source === 'master' ? 'Master Sinhala Subtitle' : 'OpenSubtitles Track';
+        btn.addEventListener('click', async () => {
+          _mxsActiveTrackId = tr.id;
+          _mxsRenderTracks();
+          _showMaxToast(`Loading ${tr.label}...`);
+          const ok = await _loadMaxSubtitleFromUrl(tr.url);
+          if (ok) {
+            _showMaxToast(`Subtitles: ${tr.label}`);
+          } else {
+            _showMaxToast(`Failed to load ${tr.label}`);
+          }
+          _mxsRenderTracks();
+        });
+        container.appendChild(btn);
+      });
+
+      if (hint) {
+        const cur = _mxsTracks.find(t => t.id === _mxsActiveTrackId);
+        if (cur && _subLoaded && _subCues.length) {
+          hint.innerHTML = `<span style="color:#E8C97A;">●</span> Active: <b>${cur.label}</b> (${_subCues.length} cues) • ${cur.source === 'master' ? 'Master Sync' : 'OpenSubtitles'}`;
+        } else {
+          hint.innerHTML = `<span style="color:rgba(255,255,255,0.4);">● Subtitles disabled</span>`;
+        }
+      }
+    }
+
+    async function _loadMaxSubtitleTracks(tmdbId, imdbId, type, season, episode, activeSubUrl) {
+      _mxsTracks = [];
+      const localSub = typeof SUBTITLE_MAP !== 'undefined' ? SUBTITLE_MAP[String(tmdbId)] : null;
+      if (localSub) {
+        _mxsTracks.push({
+          id: 'sinhala',
+          lang: 'si',
+          label: 'Sinhala 🇱🇰',
+          url: localSub,
+          source: 'master'
+        });
+      }
+
+      try {
+        const p = new URLSearchParams({ id: tmdbId, type: type || 'movie' });
+        if (imdbId) p.set('imdb', imdbId);
+        if (season) p.set('season', season);
+        if (episode) p.set('episode', episode);
+        const r = await fetch(`/api/subtitles?${p}`, { signal: AbortSignal.timeout(4500) });
+        if (r.ok) {
+          const d = await r.json();
+          if (Array.isArray(d.tracks)) {
+            d.tracks.forEach(tr => {
+              if (!_mxsTracks.some(e => e.lang === tr.lang || e.url === tr.url)) {
+                _mxsTracks.push(tr);
+              }
+            });
+          }
+        }
+      } catch (_) {}
+
+      // If no subtitle was active, auto-play English subtitle from OpenSubtitles!
+      if (!_subLoaded && !_subCues.length && _mxsTracks.length) {
+        const enTrack = _mxsTracks.find(t => t.lang === 'en') || _mxsTracks[0];
+        if (enTrack && enTrack.url) {
+          _mxsActiveTrackId = enTrack.id;
+          await _loadMaxSubtitleFromUrl(enTrack.url);
+        }
+      } else if (localSub && activeSubUrl === localSub) {
+        _mxsActiveTrackId = 'sinhala';
+      } else if (activeSubUrl) {
+        const matching = _mxsTracks.find(t => t.url === activeSubUrl);
+        _mxsActiveTrackId = matching ? matching.id : (localSub ? 'sinhala' : 'english');
+      } else {
+        _mxsActiveTrackId = _subLoaded ? 'custom' : 'off';
+      }
+
+      _mxsRenderTracks();
     }
 
     async function initMaxPlayer(tmdbId, mediaType, season, episode) {
@@ -8788,10 +8916,16 @@
       let streamUrl = null;
       let streamFormat = 'hls';
       let subtitleUrl = null;
+      let imdbId = null;
+      try {
+        imdbId = await getImdbId(tmdbId, mediaType);
+      } catch (_) {}
+
       try {
         const params = new URLSearchParams({ id: tmdbId, type: mediaType });
         if (season)  params.set('season',  season);
         if (episode) params.set('episode', episode);
+        if (imdbId)  params.set('imdb', imdbId);
         const resp = await fetch(`/api/hls?${params}`, { signal: AbortSignal.timeout(6000) });
         const data = await resp.json();
         if (data.url) streamUrl = data.url;
@@ -8809,11 +8943,14 @@
         return;
       }
 
-      // Auto-load subtitle if provided or from SUBTITLE_MAP
-      const finalSub = subtitleUrl || (typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(tmdbId)]);
+      // Auto-load subtitle: Sinhala if mapped, or subtitle returned by /api/hls (OpenSubtitles English fallback)
+      const finalSub = (typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(tmdbId)]) || subtitleUrl;
       if (finalSub) {
-        _loadMaxSubtitleFromUrl(finalSub);
+        await _loadMaxSubtitleFromUrl(finalSub);
       }
+
+      // Populate subtitle track catalog and auto-play OpenSubtitles English if no sub yet
+      _loadMaxSubtitleTracks(tmdbId, imdbId, mediaType, season, episode, finalSub);
 
       // ── Initialise player controls ────────────────────────────────────
       _maxMode = true;

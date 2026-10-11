@@ -22,6 +22,8 @@ const SUBTITLE_MAP = {
   '1314279': '/Subtitle/1314279.srt',
   // Pradhama Drishtiya Kuttakkar (2026)
   '1544847': '/Subtitle/1544847.srt',
+  // Sarvam Maya (2025)
+  '1473354': '/Subtitle/1473354.srt',
 };
 
 const VIDLOVE_HEADERS = {
@@ -73,14 +75,34 @@ async function getVidloveStream(id, type, season, episode) {
 }
 
 export default async function handler(req, res) {
-  const { id, type = 'movie', season = 1, episode = 1 } = req.query;
-
+  const { id, type = 'movie', season = 1, episode = 1, imdb } = req.query;
   if (!id) return res.status(400).json({ error: 'Missing id parameter' });
 
   res.setHeader('Cache-Control', 'no-store');
 
   const subKey = type === 'tv' ? `${id}_S${season}_E${episode}` : `${id}`;
-  const subtitleUrl = SUBTITLE_MAP[subKey] || SUBTITLE_MAP[id] || null;
+  let subtitleUrl = SUBTITLE_MAP[subKey] || SUBTITLE_MAP[id] || null;
+  let subtitleLang = subtitleUrl ? 'si' : null;
+
+  // ── Auto fallback to OpenSubtitles English subtitle if no Sinhala subtitle ──
+  if (!subtitleUrl && imdb) {
+    try {
+      const openSubPath = type === 'tv'
+        ? `series/${imdb}:${season}:${episode}`
+        : `movie/${imdb}`;
+      const osRes = await fetch(`https://opensubtitles-v3.strem.io/subtitles/${openSubPath}.json`, {
+        signal: AbortSignal.timeout(3000)
+      });
+      if (osRes.ok) {
+        const osData = await osRes.json();
+        const enSub = (osData.subtitles || []).find(s => s.lang === 'eng');
+        if (enSub && enSub.url) {
+          subtitleUrl = enSub.url;
+          subtitleLang = 'en';
+        }
+      }
+    } catch (_) {}
+  }
 
   // ── 1. Try vidlove API for stream (MovieBox clean master prioritized) ───
   let streamInfo = await getVidloveStream(id, type, season, episode);
@@ -130,9 +152,10 @@ export default async function handler(req, res) {
       url: proxied,
       format: streamInfo.format,
       source: streamInfo.label,
-      subtitle: subtitleUrl
+      subtitle: subtitleUrl,
+      subtitleLang: subtitleLang
     });
   }
 
-  return res.status(404).json({ error: 'No stream found', subtitle: subtitleUrl });
+  return res.status(404).json({ error: 'No stream found', subtitle: subtitleUrl, subtitleLang: subtitleLang });
 }
