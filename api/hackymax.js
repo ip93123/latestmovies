@@ -61,7 +61,7 @@ const VIDLOVE_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
 };
 
-// HackyMax stream priority: DCloud (Adaptive HLS) first, then MovieBox, then embed scrapers
+// HackyMax stream priority: DCloud (Adaptive HLS) first, then MovieBox, then Auto, then embed scrapers
 async function getHackyMaxStream(id, type, season, episode) {
   const isTv = type === 'tv';
   const sources = ['dcloud', 'moviebox'];
@@ -88,12 +88,40 @@ async function getHackyMaxStream(id, type, season, episode) {
         streamUrl,
         format,
         label: `HackyMax (${data.source.label || src})`,
+        qualities: (data.source && data.source.qualities) || null,
         imdbId: (data.meta && data.meta.imdb_id) || null
       };
     } catch (_) {
       // Try next
     }
   }
+
+  // Fallback: query without explicit sources parameter to grab best available
+  try {
+    const autoUrl = isTv
+      ? `https://api.vidlove.cc/tv?id=${id}&season=${season}&episode=${episode}&mode=json`
+      : `https://api.vidlove.cc/movie?id=${id}&mode=json`;
+    const res = await fetch(autoUrl, {
+      headers: VIDLOVE_HEADERS,
+      signal: AbortSignal.timeout(4500)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const streamUrl = data && data.source && data.source.url;
+      if (streamUrl) {
+        const isDcloud = (data.source && (data.source.label === 'DCloud' || data.source.source === 'dcloud')) || streamUrl.includes('dcloud');
+        const format = (streamUrl.includes('.m3u8') || isDcloud) ? 'hls' : 'mp4';
+        return {
+          streamUrl,
+          format,
+          label: `HackyMax (${data.source.label || data.source.source || 'Auto'})`,
+          qualities: (data.source && data.source.qualities) || null,
+          imdbId: (data.meta && data.meta.imdb_id) || null
+        };
+      }
+    }
+  } catch (_) {}
+
   return null;
 }
 
@@ -178,14 +206,20 @@ export default async function handler(req, res) {
   }
 
   if (streamInfo && streamInfo.streamUrl) {
-    let finalUrl = streamInfo.streamUrl;
-    if (streamInfo.format === 'hls' || streamInfo.streamUrl.includes('.m3u8')) {
-      const PROXY_BASE = process.env.CF_PROXY_URL || '/api/hls-proxy';
-      finalUrl = `${PROXY_BASE}?url=${encodeURIComponent(streamInfo.streamUrl)}`;
+    const PROXY_BASE = process.env.CF_PROXY_URL || 'https://tight-rain-5c22.hackyirl.workers.dev';
+    const finalUrl = `${PROXY_BASE}?url=${encodeURIComponent(streamInfo.streamUrl)}`;
+
+    let proxiedQualities = null;
+    if (Array.isArray(streamInfo.qualities)) {
+      proxiedQualities = streamInfo.qualities.map(q => ({
+        ...q,
+        url: `${PROXY_BASE}?url=${encodeURIComponent(q.url)}`
+      }));
     }
 
     return res.status(200).json({
       url: finalUrl,
+      qualities: proxiedQualities,
       format: streamInfo.format,
       source: streamInfo.label || 'HackyMax',
       subtitle: subtitleUrl,
