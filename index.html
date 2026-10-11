@@ -2365,7 +2365,153 @@
       50%       { box-shadow: 0 0 28px rgba(0, 198, 255, 0.95); }
     }
 
-    /* Max video element — controls panel transparent so moving cursor never blacks out the movie */
+    /* ─────────────────────────────────────────────────────────────
+       WATCH PARTY
+    ───────────────────────────────────────────────────────────── */
+    @keyframes wpPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(1.4); }
+    }
+    /* Party active dot on the button */
+    .wp-dot {
+      position: absolute;
+      top: 3px; right: 3px;
+      width: 8px; height: 8px;
+      background: #00ff88;
+      border-radius: 50%;
+      display: none;
+      animation: wpPulse 1.5s infinite;
+      box-shadow: 0 0 6px #00ff88;
+    }
+    #maxWatchPartyBtn { position: relative; }
+    #maxWatchPartyBtn.active { color: #A855F7 !important; }
+    #maxWatchPartyBtn.active svg { stroke: #A855F7; }
+
+    /* ── Watch Party Invite Modal ── */
+    #wpModal {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      z-index: 100000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    #wpModal.active { display: flex; }
+    #wpModalBox {
+      background: linear-gradient(160deg, #0D1117 0%, #161B24 60%, #1a1040 100%);
+      border: 1px solid rgba(168,85,247,0.25);
+      border-radius: 20px;
+      padding: 2rem;
+      width: min(480px, 92vw);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(168,85,247,0.1);
+      animation: wpModalIn 0.35s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes wpModalIn {
+      from { opacity: 0; transform: scale(0.88) translateY(20px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .wp-member-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .wp-member-row:last-child { border-bottom: none; }
+    .wp-member-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+    .wp-member-name {
+      flex: 1;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.85);
+    }
+    .wp-member-status {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+    }
+    /* ── HUD badge (top-right while in party) ── */
+    #wpHud {
+      position: fixed;
+      top: 72px; right: 18px;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+    #wpHud.active { display: flex; }
+    .wp-hud-badge {
+      background: rgba(10,7,25,0.82);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(168,85,247,0.35);
+      border-radius: 30px;
+      padding: 6px 14px 6px 10px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-family: 'Inter', sans-serif;
+      box-shadow: 0 4px 20px rgba(168,85,247,0.25);
+    }
+    /* ── Host action toast ── */
+    #wpNotif {
+      position: fixed;
+      bottom: 90px;
+      left: 50%; transform: translateX(-50%);
+      background: rgba(10,7,25,0.92);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(168,85,247,0.3);
+      border-radius: 30px;
+      padding: 10px 22px;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      z-index: 999999;
+      display: none;
+      pointer-events: none;
+      white-space: nowrap;
+      box-shadow: 0 8px 32px rgba(168,85,247,0.3);
+      animation: wpNotifIn 0.25s ease both;
+    }
+    @keyframes wpNotifIn {
+      from { opacity:0; transform:translateX(-50%) translateY(10px); }
+      to   { opacity:1; transform:translateX(-50%) translateY(0); }
+    }
+    /* ── Guest locked overlay when host pauses ── */
+    #wpGuestLock {
+      position: fixed; inset: 0;
+      z-index: 99998;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    #wpGuestLock.active { display: flex; }
+    .wp-guest-lock-badge {
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(168,85,247,0.4);
+      border-radius: 16px;
+      padding: 14px 28px;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+
     #maxVideo::-webkit-media-controls-panel,
     #maxVideo::-webkit-media-controls-enclosure,
     #maxVideo::-webkit-media-controls {
@@ -4926,6 +5072,17 @@
                 </svg>
               </button>
 
+              <!-- Watch Party Button -->
+              <button class="max-ctrl-btn" id="maxWatchPartyBtn" title="Watch Party — watch together with friends">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
+                  <circle cx="19" cy="9" r="3"/>
+                  <path d="M23 21v-2a3 3 0 0 0-3-3h-1"/>
+                </svg>
+                <span class="wp-dot" id="wpActiveDot"></span>
+              </button>
+
               <button class="max-ctrl-btn" id="maxFullscreenBtn" title="Full Screen (F)">
                 <svg class="max-fs-enter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="15 3 21 3 21 9"/>
@@ -5405,6 +5562,7 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <script>
     gsap.registerPlugin(ScrollTrigger);
 
@@ -10864,9 +11022,351 @@
       toggleWishlist(item.id, item.type, item, btn);
     }
   </script>
+
+  <!-- ══════════════════════════════════════════════════════════
+       WATCH PARTY — PeerJS P2P Sync Engine
+       Host controls playback → broadcast to all guests via WebRTC
+  ══════════════════════════════════════════════════════════ -->
+  <script>
+  (function () {
+    'use strict';
+
+    /* ── Helpers ─────────────────────────────────────────────── */
+    function _fmtTime(s) {
+      s = Math.floor(s || 0);
+      const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60;
+      return h ? `${h}:${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`
+               : `${m}:${String(ss).padStart(2,'0')}`;
+    }
+
+    function _wpToast(msg) {
+      const el = document.getElementById('wpNotif');
+      if (!el) return;
+      el.textContent = msg;
+      el.style.display = 'block';
+      el.style.animation = 'none';
+      void el.offsetWidth;                // reflow to restart animation
+      el.style.animation = '';
+      clearTimeout(el._t);
+      el._t = setTimeout(() => { el.style.display = 'none'; }, 2800);
+    }
+
+    /* ── Watch Party State ───────────────────────────────────── */
+    const WP = {
+      peer:        null,
+      conns:       [],        // host: guest DataConnection[]
+      hostConn:    null,      // guest: connection to host
+      code:        null,
+      isHost:      false,
+      guestNames:  [],        // for UI display
+    };
+
+    /* ── Video element accessor ──────────────────────────────── */
+    function _vid() { return document.getElementById('maxVideo'); }
+
+    /* ── Broadcast from host to all guests ──────────────────── */
+    function _broadcast(data) {
+      WP.conns = WP.conns.filter(c => c.open);
+      WP.conns.forEach(c => { try { c.send(data); } catch (_) {} });
+    }
+
+    /* ── Apply sync event on guest side ─────────────────────── */
+    function _applySync(data) {
+      const v = _vid();
+      if (!v) return;
+
+      if (data.type === 'play') {
+        // Compensate for network delay
+        const lag = (Date.now() - data.ts) / 1000;
+        const target = data.ct + lag;
+        if (Math.abs(v.currentTime - target) > 1.5) v.currentTime = target;
+        document.getElementById('wpGuestLock').classList.remove('active');
+        v.play().catch(() => {});
+        _wpToast('▶ Host resumed');
+
+      } else if (data.type === 'pause') {
+        v.pause();
+        if (Math.abs(v.currentTime - data.ct) > 1.5) v.currentTime = data.ct;
+        document.getElementById('wpGuestLock').classList.add('active');
+        document.getElementById('wpGuestLockMsg').textContent = 'Host paused';
+        _wpToast('⏸ Host paused');
+
+      } else if (data.type === 'seek') {
+        v.currentTime = data.ct;
+        _wpToast(`⏩ Host seeked to ${_fmtTime(data.ct)}`);
+
+      } else if (data.type === 'state') {
+        // Initial state when guest joins
+        const lag = (Date.now() - data.ts) / 1000;
+        v.currentTime = data.ct + (data.playing ? lag : 0);
+        document.getElementById('wpGuestLock').classList.toggle('active', !data.playing);
+        if (data.playing) v.play().catch(() => {});
+        else v.pause();
+
+      } else if (data.type === 'meta') {
+        // Guest count update from host
+        WP.guestNames = data.names || [];
+        _refreshHud(data.total);
+        _refreshGuestList();
+      }
+    }
+
+    /* ── Hook video events (host side) ──────────────────────── */
+    function _hookVideo() {
+      const v = _vid();
+      if (!v || v._wpHooked) return;
+      v._wpHooked = true;
+
+      let _seekDebounce = 0;
+
+      v.addEventListener('play', () => {
+        if (!WP.isHost || !WP.code) return;
+        _broadcast({ type: 'play', ct: v.currentTime, ts: Date.now() });
+      });
+      v.addEventListener('pause', () => {
+        if (!WP.isHost || !WP.code) return;
+        _broadcast({ type: 'pause', ct: v.currentTime, ts: Date.now() });
+      });
+      v.addEventListener('seeked', () => {
+        if (!WP.isHost || !WP.code) return;
+        const now = Date.now();
+        if (now - _seekDebounce < 400) return;
+        _seekDebounce = now;
+        _broadcast({ type: 'seek', ct: v.currentTime, ts: now });
+      });
+    }
+
+    /* ── UI Helpers ──────────────────────────────────────────── */
+    function _refreshHud(total) {
+      const count = total || (WP.isHost ? WP.conns.length + 1 : (WP.guestNames.length + 2));
+      document.getElementById('wpHudRole').textContent  = WP.isHost ? 'HOST' : 'GUEST';
+      document.getElementById('wpHudCount').textContent = `${count} watching`;
+      document.getElementById('wpHud').classList.add('active');
+      document.getElementById('wpActiveDot').style.display = 'block';
+      document.getElementById('maxWatchPartyBtn').classList.add('active');
+    }
+
+    function _refreshGuestList() {
+      const list = document.getElementById('wpGuestList');
+      list.querySelectorAll('.wp-guest-entry').forEach(e => e.remove());
+      const count = WP.isHost ? WP.conns.length : WP.guestNames.length;
+      for (let i = 0; i < count; i++) {
+        const name = WP.guestNames[i] || `Guest ${i + 1}`;
+        const row = document.createElement('div');
+        row.className = 'wp-member-row wp-guest-entry';
+        row.innerHTML = `
+          <div class="wp-member-avatar" style="background:linear-gradient(135deg,#4ade80,#22c55e);">👤</div>
+          <div class="wp-member-name">${name}</div>
+          <div class="wp-member-status" style="color:#00ff88;">● Connected</div>`;
+        list.appendChild(row);
+      }
+      const c = WP.isHost ? WP.conns.length : count;
+      document.getElementById('wpStatusLine').textContent =
+        c === 0 ? 'Share the link or room code with friends'
+                : `${c} friend${c > 1 ? 's' : ''} in the room`;
+    }
+
+    function _broadcastMeta() {
+      // Host broadcasts guest count to all guests so their HUDs update
+      const names = WP.conns.map((_, i) => `Guest ${i + 1}`);
+      _broadcast({ type: 'meta', names, total: WP.conns.length + 1 });
+    }
+
+    /* ── Host: setup listener for incoming guest connections ─── */
+    function _hostListen() {
+      WP.peer.on('connection', conn => {
+        conn.on('open', () => {
+          WP.conns.push(conn);
+          // Send current video state to the new guest
+          const v = _vid();
+          if (v) {
+            conn.send({ type: 'state', ct: v.currentTime, playing: !v.paused, ts: Date.now() });
+          }
+          _broadcastMeta();
+          _refreshGuestList();
+          _refreshHud(WP.conns.length + 1);
+          _wpToast(`👤 Guest ${WP.conns.length} joined!`);
+        });
+        conn.on('close', () => {
+          WP.conns = WP.conns.filter(c => c !== conn);
+          _broadcastMeta();
+          _refreshGuestList();
+          _refreshHud(WP.conns.length + 1);
+          _wpToast(`👤 A guest left`);
+        });
+        conn.on('error', () => {
+          WP.conns = WP.conns.filter(c => c !== conn);
+        });
+      });
+      WP.peer.on('error', e => {
+        console.warn('WP peer error:', e);
+        _wpToast('⚠ Party connection error');
+      });
+    }
+
+    /* ── Create room (host) ──────────────────────────────────── */
+    async function _createRoom() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      const code = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+      WP.code = code;
+      WP.isHost = true;
+
+      return new Promise((resolve, reject) => {
+        try {
+          WP.peer = new Peer('hkyw-' + code, { debug: 0 });
+          WP.peer.on('open', () => { _hostListen(); resolve(code); });
+          WP.peer.on('error', err => { WP.peer = null; WP.code = null; WP.isHost = false; reject(err); });
+          setTimeout(() => reject(new Error('timeout')), 12000);
+        } catch (e) { reject(e); }
+      });
+    }
+
+    /* ── Join room (guest) ───────────────────────────────────── */
+    async function _joinRoom(code) {
+      WP.code = code.toUpperCase();
+      WP.isHost = false;
+
+      return new Promise((resolve, reject) => {
+        try {
+          WP.peer = new Peer(undefined, { debug: 0 });
+          WP.peer.on('open', () => {
+            WP.hostConn = WP.peer.connect('hkyw-' + WP.code, { reliable: true });
+            WP.hostConn.on('open', () => resolve());
+            WP.hostConn.on('data', _applySync);
+            WP.hostConn.on('close', () => {
+              _wpToast('⚠ Host disconnected from party');
+              document.getElementById('wpGuestLock').classList.remove('active');
+            });
+            WP.hostConn.on('error', reject);
+          });
+          WP.peer.on('error', reject);
+          setTimeout(() => reject(new Error('timeout')), 15000);
+        } catch (e) { reject(e); }
+      });
+    }
+
+    /* ── Leave / cleanup ─────────────────────────────────────── */
+    function _leave() {
+      if (WP.peer) { try { WP.peer.destroy(); } catch (_) {} WP.peer = null; }
+      WP.conns = []; WP.hostConn = null;
+      WP.code = null; WP.isHost = false;
+      document.getElementById('wpHud').classList.remove('active');
+      document.getElementById('wpActiveDot').style.display = 'none';
+      document.getElementById('maxWatchPartyBtn').classList.remove('active');
+      document.getElementById('wpGuestLock').classList.remove('active');
+      // Reset modal state
+      document.getElementById('wpRoomCode').textContent = '------';
+      document.getElementById('wpShareUrl').textContent  = '';
+      document.getElementById('wpHostEntry').querySelector('.wp-member-name').textContent = 'You (Host)';
+      document.getElementById('wpGuestList').querySelectorAll('.wp-guest-entry').forEach(e => e.remove());
+      document.getElementById('wpStatusLine').textContent = 'Share the link or room code with friends';
+      document.getElementById('wpModal').classList.remove('active');
+    }
+
+    /* ── Watch party button click ────────────────────────────── */
+    async function _onWpClick() {
+      if (WP.code) { document.getElementById('wpModal').classList.add('active'); return; }
+
+      const v = _vid();
+      if (!v || (!v.src && !v.currentSrc)) {
+        _wpToast('🎬 Start playing a movie first!');
+        return;
+      }
+
+      _wpToast('🎬 Creating room...');
+      try {
+        const code = await _createRoom();
+        const shareUrl = (() => {
+          const u = new URL(window.location.href);
+          u.searchParams.set('party', code);
+          return u.toString();
+        })();
+
+        document.getElementById('wpRoomCode').textContent   = code;
+        document.getElementById('wpShareUrl').textContent   = shareUrl;
+        document.getElementById('wpRoleLabel').textContent  = 'You are the Host 👑';
+        document.getElementById('wpEndPartyBtn').textContent = 'End Party';
+        document.getElementById('wpHostEntry').querySelector('.wp-member-name').textContent = 'You (Host)';
+
+        _hookVideo();
+        _refreshHud(1);
+        _refreshGuestList();
+        document.getElementById('wpModal').classList.add('active');
+      } catch (e) {
+        _wpToast('⚠ Could not create room — try again');
+        console.error('[WatchParty] create error:', e);
+        WP.code = null; WP.isHost = false;
+        if (WP.peer) { WP.peer.destroy(); WP.peer = null; }
+      }
+    }
+
+    /* ── Wire up UI buttons ──────────────────────────────────── */
+    document.addEventListener('DOMContentLoaded', () => {
+      const wpBtn = document.getElementById('maxWatchPartyBtn');
+      if (wpBtn) wpBtn.addEventListener('click', _onWpClick);
+
+      document.getElementById('wpCloseBtn').onclick = () =>
+        document.getElementById('wpModal').classList.remove('active');
+
+      document.getElementById('wpModal').onclick = e => {
+        if (e.target === document.getElementById('wpModal'))
+          document.getElementById('wpModal').classList.remove('active');
+      };
+
+      document.getElementById('wpEndPartyBtn').onclick = _leave;
+
+      document.getElementById('wpCopyCode').onclick = () => {
+        if (!WP.code) return;
+        navigator.clipboard.writeText(WP.code).then(() => _wpToast('✓ Room code copied!'));
+      };
+
+      document.getElementById('wpCopyLink').onclick = () => {
+        const u = document.getElementById('wpShareUrl').textContent;
+        if (!u) return;
+        navigator.clipboard.writeText(u).then(() => _wpToast('✓ Invite link copied!'));
+      };
+    });
+
+    /* ── Auto-join when page loads with ?party=CODE in URL ───── */
+    (async function _autoJoin() {
+      const params = new URLSearchParams(window.location.search);
+      const partyCode = params.get('party');
+      if (!partyCode) return;
+
+      // Wait for the movie modal to open (triggered by ?m= param) + player to load
+      await new Promise(r => setTimeout(r, 2000));
+
+      _wpToast('🎬 Joining Watch Party...');
+      try {
+        await _joinRoom(partyCode);
+        document.getElementById('wpRoomCode').textContent   = WP.code;
+        document.getElementById('wpRoleLabel').textContent  = 'You are a Guest 👤';
+        document.getElementById('wpEndPartyBtn').textContent = 'Leave Party';
+        // Show guest entry instead of host entry
+        document.getElementById('wpHostEntry').querySelector('.wp-member-name').textContent = 'Host';
+
+        // Build share URL too
+        document.getElementById('wpShareUrl').textContent = window.location.href;
+
+        _refreshHud(2);
+        _wpToast('✅ Joined! Host controls playback.');
+      } catch (e) {
+        _wpToast('⚠ Could not join room — check the code');
+        console.error('[WatchParty] join error:', e);
+        WP.code = null; WP.isHost = false;
+        if (WP.peer) { WP.peer.destroy(); WP.peer = null; }
+      }
+    })();
+
+    // Expose for debugging
+    window._WP = WP;
+  })();
+  </script>
+
   <script>
     // Anti-Inspect / Anti-DevTools Script
     document.addEventListener('contextmenu', e => e.preventDefault());
+
 
     document.addEventListener('keydown', e => {
       // F12
@@ -10886,6 +11386,82 @@
       }
     });
   </script>
+  <!-- ════════════════════════════════════════════════════════
+       WATCH PARTY — Invite Modal + HUD + Notif overlay
+  ═════════════════════════════════════════════════════════ -->
+
+  <!-- Main modal -->
+  <div id="wpModal">
+    <div id="wpModalBox">
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:46px;height:46px;background:linear-gradient(135deg,#7C3AED,#A855F7);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:0 4px 16px rgba(168,85,247,0.5);">🎬</div>
+          <div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:3px;color:#fff;">WATCH PARTY</div>
+            <div id="wpRoleLabel" style="font-size:0.72rem;color:rgba(255,255,255,0.45);font-family:'Inter',sans-serif;letter-spacing:0.5px;">Setting up...</div>
+          </div>
+        </div>
+        <button id="wpCloseBtn" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.14)'" onmouseout="this.style.background='rgba(255,255,255,0.07)'">✕</button>
+      </div>
+
+      <!-- Room Code -->
+      <div style="background:rgba(168,85,247,0.07);border:1px solid rgba(168,85,247,0.2);border-radius:14px;padding:1rem 1.2rem;margin-bottom:1rem;">
+        <div style="font-size:0.65rem;color:rgba(255,255,255,0.4);font-family:'Inter',sans-serif;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">Room Code · Share with friends</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div id="wpRoomCode" style="font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:10px;color:#A855F7;text-shadow:0 0 20px rgba(168,85,247,0.5);">------</div>
+          <button id="wpCopyCode" style="margin-left:auto;background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.4);color:#A855F7;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:0.75rem;font-family:'Inter',sans-serif;font-weight:600;transition:all 0.2s;" onmouseover="this.style.background='rgba(168,85,247,0.3)'" onmouseout="this.style.background='rgba(168,85,247,0.15)'">Copy</button>
+        </div>
+      </div>
+
+      <!-- Share link -->
+      <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:0.75rem 1rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:8px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        <div id="wpShareUrl" style="font-size:0.7rem;color:rgba(255,255,255,0.4);font-family:'Inter',sans-serif;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+        <button id="wpCopyLink" style="background:linear-gradient(135deg,#7C3AED,#A855F7);border:none;color:#fff;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:0.75rem;font-family:'Inter',sans-serif;font-weight:700;white-space:nowrap;box-shadow:0 4px 14px rgba(168,85,247,0.4);transition:all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='none'">Copy Link</button>
+      </div>
+
+      <!-- Guest list -->
+      <div style="font-size:0.65rem;color:rgba(255,255,255,0.35);font-family:'Inter',sans-serif;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">In the Room</div>
+      <div id="wpGuestList" style="display:flex;flex-direction:column;max-height:150px;overflow-y:auto;">
+        <div class="wp-member-row" id="wpHostEntry">
+          <div class="wp-member-avatar" style="background:linear-gradient(135deg,#7C3AED,#A855F7);">👑</div>
+          <div class="wp-member-name">You (Host)</div>
+          <div class="wp-member-status" style="color:#00ff88;">● Connected</div>
+        </div>
+      </div>
+
+      <!-- Status line -->
+      <div id="wpStatusLine" style="margin-top:1rem;font-size:0.73rem;color:rgba(255,255,255,0.35);font-family:'Inter',sans-serif;text-align:center;">Share the link or room code with friends</div>
+
+      <!-- Leave/End button -->
+      <button id="wpEndPartyBtn" style="width:100%;margin-top:1rem;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#ef4444;border-radius:10px;padding:10px;cursor:pointer;font-family:'Inter',sans-serif;font-size:0.85rem;font-weight:600;transition:all 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.2)'" onmouseout="this.style.background='rgba(239,68,68,0.1)'">Leave Party</button>
+    </div>
+  </div>
+
+  <!-- Party HUD badge (always visible while in party) -->
+  <div id="wpHud">
+    <div class="wp-hud-badge">
+      <div style="width:28px;height:28px;background:linear-gradient(135deg,#7C3AED,#A855F7);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;">🎬</div>
+      <div>
+        <div id="wpHudRole" style="font-size:0.62rem;color:rgba(255,255,255,0.45);letter-spacing:1px;text-transform:uppercase;">HOST</div>
+        <div id="wpHudCount" style="font-size:0.78rem;font-weight:600;color:#fff;">1 watching</div>
+      </div>
+      <div id="wpHudDot" style="width:8px;height:8px;background:#00ff88;border-radius:50%;animation:wpPulse 1.5s infinite;box-shadow:0 0 6px #00ff88;"></div>
+    </div>
+  </div>
+
+  <!-- Notification toast -->
+  <div id="wpNotif"></div>
+
+  <!-- Guest locked overlay -->
+  <div id="wpGuestLock">
+    <div class="wp-guest-lock-badge">
+      <span style="font-size:1.4rem;">⏸</span>
+      <span id="wpGuestLockMsg">Host paused</span>
+    </div>
+  </div>
+
 </body>
 
 </html>

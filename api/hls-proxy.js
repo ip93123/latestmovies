@@ -9,10 +9,9 @@ const PROXY_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
 };
 
-// Safe chunk size for Vercel Serverless
-// 6MB per chunk = fewer round-trips per minute of video (reduces stall frequency)
-// Vercel Hobby timeout ~10s; 6MB at slowest CDN speed (0.7 MB/s) = ~8.5s — safe
-const MAX_CHUNK_BYTES = 6 * 1024 * 1024;
+// Safe chunk size for Vercel Serverless (Hobby plan = 10s max execution)
+// 4MB at slowest CDN speed (0.77 MB/s) = 5.2s + ~1s latency = ~6.2s — comfortably within 10s
+const MAX_CHUNK_BYTES = 4 * 1024 * 1024;
 
 export default async function handler(req, res) {
   const { url } = req.query;
@@ -54,7 +53,7 @@ export default async function handler(req, res) {
 
     const upstream = await fetch(targetUrl, {
       headers: upstreamHeaders,
-      signal: AbortSignal.timeout(20000)  // 20s — enough for a 6MB chunk at slow speeds
+      signal: AbortSignal.timeout(8000)  // 8s: fail cleanly before Vercel's 10s hard kill
     });
 
     if (!upstream.ok && upstream.status !== 206) {
