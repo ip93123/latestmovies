@@ -2251,18 +2251,18 @@
     #subText {
       max-width: 85%;
       text-align: center;
-      padding: 0.45rem 1.1rem;
-      background: rgba(0,0,0,0.75);
+      padding: 0.4rem 1rem;
+      background: var(--sub-bg, transparent);
       border-radius: 6px;
-      font-size: clamp(1rem, 2.2vw, 1.4rem);
-      font-weight: 500;
-      color: #fff;
-      text-shadow: 0 2px 6px rgba(0,0,0,0.9), 1px 1px 0 #000;
+      font-size: var(--sub-size, clamp(1rem, 2.2vw, 1.35rem));
+      font-weight: 600;
+      color: var(--sub-color, #fff);
+      text-shadow: var(--sub-shadow, 0 2px 8px rgba(0,0,0,1), 1px 1px 0 #000, -1px -1px 0 rgba(0,0,0,0.8));
       line-height: 1.45;
       letter-spacing: 0.01em;
-      /* Sinhala font support */
       font-family: 'Noto Sans Sinhala', 'Iskoola Pota', 'Inter', sans-serif;
       display: none;
+      transition: color 0.2s, font-size 0.2s, background 0.2s;
     }
     #subText.active { display: block; }
 
@@ -2303,6 +2303,117 @@
     #maxPlayerWrap.ready    #maxBuffering { display: none  !important; }
     #maxPlayerWrap.error    #maxError     { display: flex !important; }
     #maxPlayerWrap.ready    #maxQualityBadge { display: block !important; }
+
+    /* ── Max Player Settings Panel ───────────────────────────────────── */
+    #maxSettingsBtn {
+      position: absolute; top: 1rem; right: 4rem;
+      width: 34px; height: 34px;
+      background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 50%; color: rgba(255,255,255,0.8); font-size: 1rem;
+      display: none; align-items: center; justify-content: center;
+      cursor: pointer; z-index: 20; backdrop-filter: blur(8px);
+      transition: all 0.25s; user-select: none;
+    }
+    #maxPlayerWrap.ready #maxSettingsBtn { display: flex; }
+    #maxSettingsBtn:hover { background: rgba(232,201,122,0.25); color: #E8C97A; border-color: rgba(232,201,122,0.5); transform: rotate(60deg); }
+    #maxSettingsBtn.open  { background: rgba(232,201,122,0.2);  color: #E8C97A; border-color: rgba(232,201,122,0.6); transform: rotate(45deg); }
+
+    #maxSettingsPanel {
+      display: none; position: absolute; top: 3.6rem; right: 1rem;
+      width: 320px; background: rgba(5,7,14,0.97);
+      border: 1px solid rgba(232,201,122,0.18); border-radius: 16px;
+      z-index: 25; font-family: 'Inter', sans-serif;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.85); backdrop-filter: blur(24px);
+      animation: mxsFadeIn 0.18s ease;
+    }
+    @keyframes mxsFadeIn {
+      from { opacity:0; transform: translateY(-8px) scale(0.97); }
+      to   { opacity:1; transform: translateY(0)  scale(1); }
+    }
+    #maxSettingsPanel.open { display: block; }
+
+    .mxs-tabs {
+      display: flex; border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .mxs-tab {
+      flex: 1; padding: 0.65rem 0.3rem; background: none; border: none;
+      color: rgba(255,255,255,0.4); font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.6px; text-transform: uppercase; cursor: pointer;
+      border-bottom: 2px solid transparent; transition: all 0.15s;
+      font-family: 'Inter', sans-serif;
+    }
+    .mxs-tab.active { color: #E8C97A; border-bottom-color: #E8C97A; background: rgba(232,201,122,0.04); }
+    .mxs-tab:hover:not(.active) { color: rgba(255,255,255,0.75); }
+
+    .mxs-pane { display: none; padding: 0.9rem 1.1rem 1.1rem; }
+    .mxs-pane.active { display: block; }
+
+    .mxs-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 0.8rem; gap: 0.6rem;
+    }
+    .mxs-label {
+      font-size: 0.74rem; color: rgba(255,255,255,0.55);
+      white-space: nowrap; min-width: 80px; flex-shrink: 0;
+    }
+    .mxs-ctrl { display: flex; gap: 0.35rem; flex-wrap: wrap; justify-content: flex-end; align-items: center; }
+
+    .mxs-slider-wrap { display: flex; align-items: center; gap: 0.5rem; flex: 1; }
+    .mxs-slider {
+      flex: 1; height: 4px; appearance: none; background: rgba(255,255,255,0.12);
+      border-radius: 4px; outline: none; cursor: pointer;
+    }
+    .mxs-slider::-webkit-slider-thumb {
+      appearance: none; width: 13px; height: 13px; border-radius: 50%;
+      background: #E8C97A; cursor: pointer; box-shadow: 0 0 5px rgba(232,201,122,0.5);
+    }
+    .mxs-val { font-size: 0.7rem; color: #E8C97A; min-width: 30px; text-align: right; }
+
+    .mxs-swatch {
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 2px solid transparent; cursor: pointer;
+      transition: all 0.15s; flex-shrink: 0;
+    }
+    .mxs-swatch.on { border-color: #E8C97A; transform: scale(1.18); box-shadow: 0 0 6px rgba(232,201,122,0.5); }
+
+    .mxs-pill {
+      padding: 0.25rem 0.6rem; border-radius: 20px; font-size: 0.7rem;
+      font-weight: 700; border: 1px solid rgba(255,255,255,0.13); cursor: pointer;
+      background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.55);
+      transition: all 0.15s; font-family: 'Inter', sans-serif; white-space: nowrap;
+    }
+    .mxs-pill.on { background: #E8C97A; color: #07090F; border-color: transparent; }
+    .mxs-pill:hover:not(.on) { border-color: rgba(232,201,122,0.45); color: #E8C97A; }
+
+    .mxs-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 0.5rem 0 0.8rem; }
+    .mxs-section { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 1px;
+      color: rgba(255,255,255,0.22); margin-bottom: 0.65rem; }
+
+    .mxs-toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .mxs-toggle-row:last-child { border-bottom: none; }
+    .mxs-toggle-info { flex: 1; }
+    .mxs-toggle-label { font-size: 0.8rem; color: rgba(255,255,255,0.8); }
+    .mxs-toggle-hint  { font-size: 0.68rem; color: rgba(255,255,255,0.3); margin-top: 2px; }
+
+    .mxs-switch { position: relative; width: 36px; height: 19px; flex-shrink: 0; margin-left: 0.6rem; }
+    .mxs-switch input { opacity:0; width:0; height:0; position:absolute; }
+    .mxs-switch-track {
+      position: absolute; inset: 0; background: rgba(255,255,255,0.1);
+      border-radius: 20px; cursor: pointer; transition: 0.2s;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .mxs-switch-track:before {
+      content: ''; position: absolute; width: 13px; height: 13px;
+      left: 2px; top: 2px; background: rgba(255,255,255,0.45);
+      border-radius: 50%; transition: 0.2s;
+    }
+    .mxs-switch input:checked ~ .mxs-switch-track { background: rgba(232,201,122,0.25); border-color: rgba(232,201,122,0.45); }
+    .mxs-switch input:checked ~ .mxs-switch-track:before { transform: translateX(17px); background: #E8C97A; }
+
+    #mxsQualityGrid { display: flex; flex-wrap: wrap; gap: 0.35rem; }
 
     /* Sync panel */
     #subSyncPanel {
@@ -4317,6 +4428,147 @@
         </div>
         <!-- Max branding watermark -->
         <div style="position:absolute;bottom:1rem;left:50%;transform:translateX(-50%);font-family:'Bebas Neue',sans-serif;font-size:0.85rem;letter-spacing:4px;color:rgba(232,201,122,0.2);pointer-events:none;z-index:6;">MAX</div>
+
+        <!-- ⚙ Settings Button -->
+        <button id="maxSettingsBtn" title="Player Settings">⚙</button>
+
+        <!-- ⚙ Settings Panel -->
+        <div id="maxSettingsPanel">
+          <div class="mxs-tabs">
+            <button class="mxs-tab active" data-mxs-tab="sub">🇱🇰 Subtitles</button>
+            <button class="mxs-tab" data-mxs-tab="quality">📺 Quality</button>
+            <button class="mxs-tab" data-mxs-tab="playback">▶ Playback</button>
+          </div>
+
+          <!-- ── SUBTITLES TAB ── -->
+          <div class="mxs-pane active" id="mxs-pane-sub">
+            <div class="mxs-section">Text Color</div>
+            <div class="mxs-row">
+              <span class="mxs-label">Color</span>
+              <div class="mxs-ctrl" id="mxsColorSwatches">
+                <span class="mxs-swatch on" data-color="#ffffff" style="background:#fff" title="White"></span>
+                <span class="mxs-swatch" data-color="#FFE55C" style="background:#FFE55C" title="Yellow"></span>
+                <span class="mxs-swatch" data-color="#7DF9FF" style="background:#7DF9FF" title="Cyan"></span>
+                <span class="mxs-swatch" data-color="#FF6B6B" style="background:#FF6B6B" title="Red"></span>
+                <span class="mxs-swatch" data-color="#A8FF78" style="background:#A8FF78" title="Green"></span>
+                <span class="mxs-swatch" data-color="#E8C97A" style="background:#E8C97A" title="Gold"></span>
+                <span class="mxs-swatch" data-color="#FFB347" style="background:#FFB347" title="Orange"></span>
+                <span class="mxs-swatch" data-color="#C39BD3" style="background:#C39BD3" title="Purple"></span>
+              </div>
+            </div>
+            <div class="mxs-row">
+              <span class="mxs-label">Size</span>
+              <div class="mxs-ctrl mxs-slider-wrap">
+                <input type="range" class="mxs-slider" id="mxsSizeSlider" min="60" max="180" value="100" step="5">
+                <span class="mxs-val" id="mxsSizeVal">100%</span>
+              </div>
+            </div>
+            <div class="mxs-divider"></div>
+            <div class="mxs-section">Background</div>
+            <div class="mxs-row">
+              <span class="mxs-label">BG Opacity</span>
+              <div class="mxs-ctrl mxs-slider-wrap">
+                <input type="range" class="mxs-slider" id="mxsBgSlider" min="0" max="100" value="0" step="5">
+                <span class="mxs-val" id="mxsBgVal">0%</span>
+              </div>
+            </div>
+            <div class="mxs-row">
+              <span class="mxs-label">BG Color</span>
+              <div class="mxs-ctrl" id="mxsBgSwatches">
+                <span class="mxs-swatch on" data-bgc="#000000" style="background:#000" title="Black"></span>
+                <span class="mxs-swatch" data-bgc="#0a0a3a" style="background:#0a0a3a" title="Navy"></span>
+                <span class="mxs-swatch" data-bgc="#1a0a00" style="background:#1a0a00" title="Dark Brown"></span>
+                <span class="mxs-swatch" data-bgc="#002200" style="background:#002200" title="Dark Green"></span>
+              </div>
+            </div>
+            <div class="mxs-divider"></div>
+            <div class="mxs-section">Position &amp; Shadow</div>
+            <div class="mxs-row">
+              <span class="mxs-label">Position</span>
+              <div class="mxs-ctrl">
+                <button class="mxs-pill on" id="mxsPosBottom">Bottom</button>
+                <button class="mxs-pill" id="mxsPosTop">Top</button>
+              </div>
+            </div>
+            <div class="mxs-row">
+              <span class="mxs-label">Text Shadow</span>
+              <div class="mxs-ctrl">
+                <button class="mxs-pill on" id="mxsShadowOn">On</button>
+                <button class="mxs-pill" id="mxsShadowOff">Off</button>
+              </div>
+            </div>
+            <div class="mxs-row">
+              <span class="mxs-label">Offset</span>
+              <div class="mxs-ctrl mxs-slider-wrap">
+                <input type="range" class="mxs-slider" id="mxsSubOffsetSlider" min="-10000" max="10000" value="0" step="500">
+                <span class="mxs-val" id="mxsSubOffsetVal">0s</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── QUALITY TAB ── -->
+          <div class="mxs-pane" id="mxs-pane-quality">
+            <div class="mxs-section">Stream Quality</div>
+            <div id="mxsQualityGrid">
+              <button class="mxs-pill on" data-level="-1">Auto</button>
+            </div>
+            <div class="mxs-divider" style="margin-top:1rem"></div>
+            <div class="mxs-section">Playback Speed</div>
+            <div class="mxs-ctrl" id="mxsSpeedBtns" style="flex-wrap:wrap;gap:0.35rem;justify-content:flex-start">
+              <button class="mxs-pill" data-speed="0.5">0.5×</button>
+              <button class="mxs-pill" data-speed="0.75">0.75×</button>
+              <button class="mxs-pill on" data-speed="1">1×</button>
+              <button class="mxs-pill" data-speed="1.25">1.25×</button>
+              <button class="mxs-pill" data-speed="1.5">1.5×</button>
+              <button class="mxs-pill" data-speed="1.75">1.75×</button>
+              <button class="mxs-pill" data-speed="2">2×</button>
+            </div>
+          </div>
+
+          <!-- ── PLAYBACK TAB ── -->
+          <div class="mxs-pane" id="mxs-pane-playback">
+            <div class="mxs-toggle-row">
+              <div class="mxs-toggle-info">
+                <div class="mxs-toggle-label">Auto-play Next Episode</div>
+                <div class="mxs-toggle-hint">Plays next episode automatically when current ends</div>
+              </div>
+              <label class="mxs-switch">
+                <input type="checkbox" id="mxsAutoNext" checked>
+                <span class="mxs-switch-track"></span>
+              </label>
+            </div>
+            <div class="mxs-toggle-row">
+              <div class="mxs-toggle-info">
+                <div class="mxs-toggle-label">Show Countdown</div>
+                <div class="mxs-toggle-hint">10s countdown before auto-playing next episode</div>
+              </div>
+              <label class="mxs-switch">
+                <input type="checkbox" id="mxsAutoNextCountdown" checked>
+                <span class="mxs-switch-track"></span>
+              </label>
+            </div>
+            <div class="mxs-toggle-row">
+              <div class="mxs-toggle-info">
+                <div class="mxs-toggle-label">Auto-load Subtitles</div>
+                <div class="mxs-toggle-hint">Auto-fetch subtitles when available</div>
+              </div>
+              <label class="mxs-switch">
+                <input type="checkbox" id="mxsAutoSub" checked>
+                <span class="mxs-switch-track"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Auto-next countdown overlay -->
+        <div id="maxAutoNextOverlay" style="display:none;position:absolute;bottom:4rem;right:1.5rem;z-index:30;background:rgba(5,7,14,0.92);border:1px solid rgba(232,201,122,0.3);border-radius:14px;padding:0.9rem 1.3rem;font-family:'Inter',sans-serif;text-align:center;backdrop-filter:blur(16px);box-shadow:0 8px 32px rgba(0,0,0,0.6);">
+          <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.4);margin-bottom:0.3rem;">Next Episode in</div>
+          <div id="maxAutoNextCount" style="font-size:2rem;font-weight:800;color:#E8C97A;line-height:1;font-family:'Bebas Neue',sans-serif;">10</div>
+          <div style="display:flex;gap:0.5rem;margin-top:0.6rem;">
+            <button id="maxAutoNextPlay" style="flex:1;padding:0.35rem 0;background:#E8C97A;color:#07090F;border:none;border-radius:8px;font-weight:700;font-size:0.75rem;cursor:pointer;">▶ Play Now</button>
+            <button id="maxAutoNextCancel" style="flex:1;padding:0.35rem 0;background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.15);border-radius:8px;font-size:0.75rem;cursor:pointer;">✕ Cancel</button>
+          </div>
+        </div>
       </div>
       <iframe id="playerFrame" src="about:blank"
         allow="autoplay; encrypted-media; fullscreen; picture-in-picture; web-share"
@@ -7044,6 +7296,271 @@
     const _maxErrMsg   = document.getElementById('maxErrorMsg');
     const _maxQBadge   = document.getElementById('maxQualityBadge');
 
+    // ════════════════════════════════════════════════════════════════════════
+    //  MAX PLAYER SETTINGS — subtitle style, quality, playback, auto-next
+    // ════════════════════════════════════════════════════════════════════════
+    const MXS_KEY = 'hacky_mxs_v1';
+    let _mxsSettings = {
+      subColor: '#ffffff', subSize: 100, subBg: '#000000', subBgOp: 0,
+      subPos: 'bottom', subShadow: true, speed: 1,
+      autoNext: true, autoNextCountdown: true, autoSub: true
+    };
+    try {
+      const saved = JSON.parse(localStorage.getItem(MXS_KEY) || '{}');
+      Object.assign(_mxsSettings, saved);
+    } catch (_) {}
+
+    function _mxsSave() {
+      try { localStorage.setItem(MXS_KEY, JSON.stringify(_mxsSettings)); } catch (_) {}
+    }
+
+    function _mxsApplySubStyle() {
+      const el = document.getElementById('playerContainer') || document.body;
+      const r = parseInt(_mxsSettings.subBgOp / 100 * 255).toString(16).padStart(2, '0');
+      const bgHex = _mxsSettings.subBg.replace('#', '');
+      const bgR = parseInt(bgHex.slice(0,2),16), bgG = parseInt(bgHex.slice(2,4),16), bgB = parseInt(bgHex.slice(4,6),16);
+      const bgVal = _mxsSettings.subBgOp > 0
+        ? `rgba(${bgR},${bgG},${bgB},${(_mxsSettings.subBgOp/100).toFixed(2)})`
+        : 'transparent';
+      const shadow = _mxsSettings.subShadow
+        ? '0 2px 8px rgba(0,0,0,1), 1px 1px 0 #000, -1px -1px 0 rgba(0,0,0,0.8)'
+        : 'none';
+      el.style.setProperty('--sub-color', _mxsSettings.subColor);
+      el.style.setProperty('--sub-size', `${_mxsSettings.subSize}%`);
+      el.style.setProperty('--sub-bg', bgVal);
+      el.style.setProperty('--sub-shadow', shadow);
+      // Position
+      const overlay = document.getElementById('subOverlay');
+      if (overlay) {
+        overlay.style.justifyContent = _mxsSettings.subPos === 'top' ? 'flex-start' : 'flex-end';
+        overlay.style.paddingTop = _mxsSettings.subPos === 'top' ? '5%' : '0';
+        overlay.style.paddingBottom = _mxsSettings.subPos === 'bottom' ? '5%' : '0';
+      }
+    }
+
+    function _mxsInitUI() {
+      // ── Settings button toggle ──
+      const btn = document.getElementById('maxSettingsBtn');
+      const panel = document.getElementById('maxSettingsPanel');
+      if (!btn || !panel) return;
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const open = panel.classList.toggle('open');
+        btn.classList.toggle('open', open);
+        if (open) _mxsRefreshQualityGrid();
+      });
+      document.addEventListener('click', (e) => {
+        if (!panel.contains(e.target) && e.target !== btn) {
+          panel.classList.remove('open'); btn.classList.remove('open');
+        }
+      });
+
+      // ── Tab switching ──
+      panel.querySelectorAll('.mxs-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          panel.querySelectorAll('.mxs-tab').forEach(t => t.classList.remove('active'));
+          panel.querySelectorAll('.mxs-pane').forEach(p => p.classList.remove('active'));
+          tab.classList.add('active');
+          const pane = document.getElementById('mxs-pane-' + tab.dataset.mxsTab);
+          if (pane) pane.classList.add('active');
+          if (tab.dataset.mxsTab === 'quality') _mxsRefreshQualityGrid();
+        });
+      });
+
+      // ── Subtitle color swatches ──
+      document.querySelectorAll('#mxsColorSwatches .mxs-swatch').forEach(sw => {
+        if (sw.dataset.color === _mxsSettings.subColor) sw.classList.add('on');
+        else sw.classList.remove('on');
+        sw.addEventListener('click', () => {
+          document.querySelectorAll('#mxsColorSwatches .mxs-swatch').forEach(s => s.classList.remove('on'));
+          sw.classList.add('on');
+          _mxsSettings.subColor = sw.dataset.color;
+          _mxsApplySubStyle(); _mxsSave();
+        });
+      });
+
+      // ── Size slider ──
+      const sizeSlider = document.getElementById('mxsSizeSlider');
+      const sizeVal = document.getElementById('mxsSizeVal');
+      if (sizeSlider) {
+        sizeSlider.value = _mxsSettings.subSize;
+        if (sizeVal) sizeVal.textContent = _mxsSettings.subSize + '%';
+        sizeSlider.addEventListener('input', () => {
+          _mxsSettings.subSize = +sizeSlider.value;
+          if (sizeVal) sizeVal.textContent = _mxsSettings.subSize + '%';
+          _mxsApplySubStyle(); _mxsSave();
+        });
+      }
+
+      // ── BG opacity slider ──
+      const bgSlider = document.getElementById('mxsBgSlider');
+      const bgVal = document.getElementById('mxsBgVal');
+      if (bgSlider) {
+        bgSlider.value = _mxsSettings.subBgOp;
+        if (bgVal) bgVal.textContent = _mxsSettings.subBgOp + '%';
+        bgSlider.addEventListener('input', () => {
+          _mxsSettings.subBgOp = +bgSlider.value;
+          if (bgVal) bgVal.textContent = _mxsSettings.subBgOp + '%';
+          _mxsApplySubStyle(); _mxsSave();
+        });
+      }
+
+      // ── BG color swatches ──
+      document.querySelectorAll('#mxsBgSwatches .mxs-swatch').forEach(sw => {
+        if (sw.dataset.bgc === _mxsSettings.subBg) sw.classList.add('on');
+        else sw.classList.remove('on');
+        sw.addEventListener('click', () => {
+          document.querySelectorAll('#mxsBgSwatches .mxs-swatch').forEach(s => s.classList.remove('on'));
+          sw.classList.add('on');
+          _mxsSettings.subBg = sw.dataset.bgc;
+          _mxsApplySubStyle(); _mxsSave();
+        });
+      });
+
+      // ── Position ──
+      const posBot = document.getElementById('mxsPosBottom');
+      const posTop = document.getElementById('mxsPosTop');
+      function _setPos(p) {
+        _mxsSettings.subPos = p;
+        posBot.classList.toggle('on', p === 'bottom');
+        posTop.classList.toggle('on', p === 'top');
+        _mxsApplySubStyle(); _mxsSave();
+      }
+      if (posBot) posBot.addEventListener('click', () => _setPos('bottom'));
+      if (posTop) posTop.addEventListener('click', () => _setPos('top'));
+      _setPos(_mxsSettings.subPos);
+
+      // ── Shadow ──
+      const shadOn  = document.getElementById('mxsShadowOn');
+      const shadOff = document.getElementById('mxsShadowOff');
+      function _setShadow(on) {
+        _mxsSettings.subShadow = on;
+        if (shadOn)  shadOn.classList.toggle('on', on);
+        if (shadOff) shadOff.classList.toggle('on', !on);
+        _mxsApplySubStyle(); _mxsSave();
+      }
+      if (shadOn)  shadOn.addEventListener('click',  () => _setShadow(true));
+      if (shadOff) shadOff.addEventListener('click', () => _setShadow(false));
+      _setShadow(_mxsSettings.subShadow);
+
+      // ── Sub offset slider ──
+      const offSlider = document.getElementById('mxsSubOffsetSlider');
+      const offVal    = document.getElementById('mxsSubOffsetVal');
+      if (offSlider) {
+        offSlider.value = _subOffset;
+        offSlider.addEventListener('input', () => {
+          _subOffset = +offSlider.value;
+          if (offVal) offVal.textContent = (_subOffset/1000).toFixed(1) + 's';
+        });
+      }
+
+      // ── Speed buttons ──
+      document.querySelectorAll('#mxsSpeedBtns .mxs-pill').forEach(btn => {
+        const sp = +btn.dataset.speed;
+        if (sp === _mxsSettings.speed) btn.classList.add('on');
+        else btn.classList.remove('on');
+        btn.addEventListener('click', () => {
+          _mxsSettings.speed = sp;
+          _maxVideo.playbackRate = sp;
+          document.querySelectorAll('#mxsSpeedBtns .mxs-pill').forEach(b => b.classList.remove('on'));
+          btn.classList.add('on');
+          _mxsSave();
+        });
+      });
+
+      // ── Playback toggles ──
+      const chkAutoNext = document.getElementById('mxsAutoNext');
+      const chkCountdown = document.getElementById('mxsAutoNextCountdown');
+      const chkAutoSub = document.getElementById('mxsAutoSub');
+      if (chkAutoNext) {
+        chkAutoNext.checked = _mxsSettings.autoNext;
+        chkAutoNext.addEventListener('change', () => { _mxsSettings.autoNext = chkAutoNext.checked; _mxsSave(); });
+      }
+      if (chkCountdown) {
+        chkCountdown.checked = _mxsSettings.autoNextCountdown;
+        chkCountdown.addEventListener('change', () => { _mxsSettings.autoNextCountdown = chkCountdown.checked; _mxsSave(); });
+      }
+      if (chkAutoSub) {
+        chkAutoSub.checked = _mxsSettings.autoSub;
+        chkAutoSub.addEventListener('change', () => { _mxsSettings.autoSub = chkAutoSub.checked; _mxsSave(); });
+      }
+
+      // ── Auto-next overlay buttons ──
+      const nextOverlay   = document.getElementById('maxAutoNextOverlay');
+      const nextPlayBtn   = document.getElementById('maxAutoNextPlay');
+      const nextCancelBtn = document.getElementById('maxAutoNextCancel');
+      if (nextPlayBtn)   nextPlayBtn.addEventListener('click',   () => { _mxsCancelCountdown(); playNextEpisode(); });
+      if (nextCancelBtn) nextCancelBtn.addEventListener('click', () => { _mxsCancelCountdown(); });
+
+      // Apply saved sub style immediately
+      _mxsApplySubStyle();
+    }
+
+    function _mxsRefreshQualityGrid() {
+      const grid = document.getElementById('mxsQualityGrid');
+      if (!grid || !_maxHls) return;
+      const levels = _maxHls.levels || [];
+      const cur = _maxHls.currentLevel; // -1 = auto
+      grid.innerHTML = '';
+      // Auto button
+      const autoBtn = document.createElement('button');
+      autoBtn.className = 'mxs-pill' + (cur === -1 ? ' on' : '');
+      autoBtn.dataset.level = -1;
+      autoBtn.textContent = 'Auto';
+      autoBtn.addEventListener('click', () => _mxsSetQuality(-1, grid));
+      grid.appendChild(autoBtn);
+      // Per-level buttons (highest first)
+      const sorted = levels.map((l, i) => ({ i, h: l.height || 0, bitrate: l.bitrate || 0 }));
+      sorted.sort((a, b) => b.h - a.h);
+      sorted.forEach(({ i, h }) => {
+        const qBtn = document.createElement('button');
+        qBtn.className = 'mxs-pill' + (i === cur && cur !== -1 ? ' on' : '');
+        qBtn.dataset.level = i;
+        qBtn.textContent = h >= 2160 ? '4K' : h >= 1440 ? '1440p' : h >= 1080 ? '1080p' : h >= 720 ? '720p' : h >= 480 ? '480p' : h >= 360 ? '360p' : h > 0 ? h + 'p' : `Q${i+1}`;
+        qBtn.addEventListener('click', () => _mxsSetQuality(i, grid));
+        grid.appendChild(qBtn);
+      });
+    }
+
+    function _mxsSetQuality(level, grid) {
+      if (!_maxHls) return;
+      _maxHls.currentLevel = level;
+      if (grid) grid.querySelectorAll('.mxs-pill').forEach(b => b.classList.toggle('on', +b.dataset.level === level));
+      _updateMaxQuality();
+    }
+
+    // Auto-next countdown
+    let _mxsCountdownTimer = null;
+    let _mxsCountdownSec   = 10;
+
+    function _mxsStartCountdown() {
+      const overlay = document.getElementById('maxAutoNextOverlay');
+      const countEl = document.getElementById('maxAutoNextCount');
+      if (!overlay) return;
+      _mxsCountdownSec = 10;
+      overlay.style.display = 'block';
+      if (countEl) countEl.textContent = _mxsCountdownSec;
+      clearInterval(_mxsCountdownTimer);
+      _mxsCountdownTimer = setInterval(() => {
+        _mxsCountdownSec--;
+        if (countEl) countEl.textContent = _mxsCountdownSec;
+        if (_mxsCountdownSec <= 0) {
+          _mxsCancelCountdown();
+          playNextEpisode();
+        }
+      }, 1000);
+    }
+
+    function _mxsCancelCountdown() {
+      clearInterval(_mxsCountdownTimer); _mxsCountdownTimer = null;
+      const overlay = document.getElementById('maxAutoNextOverlay');
+      if (overlay) overlay.style.display = 'none';
+    }
+
+    // Initialise settings UI once DOM is ready
+    _mxsInitUI();
+
     // Lazy-load hls.js from CDN (only once, only when Max is selected)
     function _loadHlsJs() {
       return new Promise((resolve, reject) => {
@@ -7059,6 +7576,7 @@
     // Destroy any existing hls.js instance and reset UI
     function _destroyMax() {
       _maxMode = false;
+      if (typeof _mxsCancelCountdown === 'function') _mxsCancelCountdown();
       if (_maxSubRaf) { cancelAnimationFrame(_maxSubRaf); _maxSubRaf = null; }
       if (_maxHls)    { _maxHls.destroy(); _maxHls = null; }
       _maxVideo.pause();
@@ -7239,15 +7757,18 @@
           _maxWrap.classList.remove('buffering');
           _maxWrap.classList.add('ready');
           _updateMaxQuality();
+          _maxVideo.playbackRate = _mxsSettings.speed;
           _maxVideo.play().catch(() => {});
           // Start subtitle loop if cues are already loaded
           if (_subCues.length) {
             if (_maxSubRaf) cancelAnimationFrame(_maxSubRaf);
             _maxSubRaf = requestAnimationFrame(_maxSubLoop);
           }
+          // Populate quality grid
+          _mxsRefreshQualityGrid();
         });
 
-        _maxHls.on(Hls.Events.LEVEL_SWITCHED, () => _updateMaxQuality());
+        _maxHls.on(Hls.Events.LEVEL_SWITCHED, () => { _updateMaxQuality(); _mxsRefreshQualityGrid(); });
 
         _maxHls.on(Hls.Events.ERROR, (event, data) => {
           if (data.fatal) {
@@ -7272,6 +7793,20 @@
               _subText.classList.add('active');
             } else {
               _subText.classList.remove('active');
+            }
+          }
+        });
+
+        // Auto-next episode when video ends
+        _maxVideo.addEventListener('ended', () => {
+          if (!_maxMode || _currentModalType !== 'tv') return;
+          const next = getNextEpInfo();
+          if (!next) return;
+          if (_mxsSettings.autoNext) {
+            if (_mxsSettings.autoNextCountdown) {
+              _mxsStartCountdown();
+            } else {
+              playNextEpisode();
             }
           }
         });
