@@ -7882,7 +7882,7 @@
 
     // MODAL
     async function openModal(id, type = 'movie') {
-      window._engineAttempts = {};
+      if (!window._engineAttempts || _currentModalId !== id) window._engineAttempts = {};
       // Auto-focus close button when in TV mode so remote navigation works immediately
       setTimeout(() => {
         if (_tvMode) {
@@ -10221,6 +10221,8 @@
           }
           if (nextEng) {
             console.log(`[Auto-Failover] ${engine} failed, directly switching to: ${nextEng}`);
+            window._currentMaxEngine = nextEng;
+            window._currentPlayingEngine = nextEng;
             _maxWrap.classList.remove('error');
             initMaxPlayer(tmdbId, mediaType, season, episode, nextEng);
             return;
@@ -10554,14 +10556,28 @@
 
         _maxHls.on(Hls.Events.LEVEL_SWITCHED, () => { _suppressNativeTracks(); _updateMaxQuality(); _mxsRefreshQualityGrid(); });
 
+        let _hlsNetRecoveries = 0, _hlsMediaRecoveries = 0;
         _maxHls.on(Hls.Events.ERROR, (event, data) => {
           if (data.fatal) {
+            console.warn(`[HLS Error] ${engineLabel}: ${data.type} (${data.details})`);
+            if (data.type === Hls.ErrorTypes.NETWORK_ERROR && _hlsNetRecoveries < 2) {
+              _hlsNetRecoveries++;
+              console.log(`[HLS] Attempting network recovery #${_hlsNetRecoveries}...`);
+              _maxHls.startLoad();
+              return;
+            }
+            if (data.type === Hls.ErrorTypes.MEDIA_ERROR && _hlsMediaRecoveries < 2) {
+              _hlsMediaRecoveries++;
+              console.log(`[HLS] Attempting media error recovery #${_hlsMediaRecoveries}...`);
+              _maxHls.recoverMediaError();
+              return;
+            }
             if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
             _maxWrap.classList.remove('buffering', 'ready');
             _maxWrap.classList.add('error');
             const candidate = _getNextFallbackBtn();
             const targetName = candidate ? candidate.textContent.trim() : (engine === 'hackymax' ? 'SinMax' : (engine === 'sinmax' ? 'ZeeMax' : 'Infinity'));
-            if (_maxErrMsg) _maxErrMsg.innerHTML = `${engineLabel} stream error (${data.type})<br><span style="color:${accentCol};font-weight:600;">Auto-switching to ${targetName}...</span>`;
+            if (_maxErrMsg) _maxErrMsg.innerHTML = `${engineLabel} stream error (${data.details || data.type})<br><span style="color:${accentCol};font-weight:600;">Auto-switching to ${targetName}...</span>`;
             _maxHls.destroy(); _maxHls = null;
             _fallbackFromMax();
           }
@@ -12302,18 +12318,19 @@
         const activeEngine = data.engine || window._currentMaxEngine || 'hackymax';
 
         const isCurrentLoadingOrPlaying = (
+          window._currentPlayingId &&
           String(window._currentPlayingId) === String(id) &&
-          window._currentPlayingEngine === activeEngine &&
           (type !== 'tv' || (window._currentPlayingSeason === season && window._currentPlayingEpisode === episode)) &&
           (window._maxMode || (window._maxLoading && String(window._maxLoadingId) === String(id)))
         );
 
-        if (id && !isCurrentLoadingOrPlaying) {
+        if (id && !isCurrentLoadingOrPlaying && (data.type === 'state' || data.type === 'play' || data.type === 'heartbeat')) {
+          const targetEngine = data.engine || window._currentMaxEngine || 'hackymax';
           window._currentPlayingId = id;
           window._currentPlayingType = type;
           window._currentPlayingSeason = season;
           window._currentPlayingEpisode = episode;
-          window._currentPlayingEngine = activeEngine;
+          window._currentPlayingEngine = targetEngine;
 
           try {
             const u = new URL(window.location.origin + window.location.pathname);
@@ -12339,7 +12356,7 @@
           if (overlay) overlay.classList.add('open');
 
           if (typeof initMaxPlayer === 'function') {
-            initMaxPlayer(id, type, season, episode, activeEngine);
+            initMaxPlayer(id, type, season, episode, targetEngine);
           }
         }
       }
