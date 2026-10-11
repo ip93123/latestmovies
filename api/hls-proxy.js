@@ -9,6 +9,9 @@ const PROXY_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
 };
 
+// Safe chunk size for Vercel Serverless (2.5MB per chunk prevents Vercel 4.5MB limit and execution timeouts)
+const MAX_CHUNK_BYTES = 2.5 * 1024 * 1024;
+
 export default async function handler(req, res) {
   const { url } = req.query;
   if (!url) return res.status(400).send('Missing url parameter');
@@ -23,13 +26,33 @@ export default async function handler(req, res) {
 
   try {
     const upstreamHeaders = { ...PROXY_HEADERS };
-    if (req.headers && req.headers['range']) {
-      upstreamHeaders['Range'] = req.headers['range'];
+    const clean = targetUrl.toLowerCase().split('?')[0];
+    const isM3U8 = clean.endsWith('.m3u8');
+
+    // For binary/MP4 streams: chunk open-ended ranges to prevent Vercel Serverless timeouts & hangs
+    if (!isM3U8) {
+      const clientRange = req.headers && req.headers['range'];
+      if (clientRange) {
+        const match = clientRange.match(/bytes=(\d+)-(\d*)/);
+        if (match) {
+          const start = parseInt(match[1], 10);
+          let end = match[2] ? parseInt(match[2], 10) : start + MAX_CHUNK_BYTES - 1;
+          if (end - start + 1 > MAX_CHUNK_BYTES) {
+            end = start + MAX_CHUNK_BYTES - 1;
+          }
+          upstreamHeaders['Range'] = `bytes=${start}-${end}`;
+        } else {
+          upstreamHeaders['Range'] = clientRange;
+        }
+      } else {
+        // No client range: probe first chunk so browser enters 206 Partial Content range streaming
+        upstreamHeaders['Range'] = `bytes=0-${MAX_CHUNK_BYTES - 1}`;
+      }
     }
 
     const upstream = await fetch(targetUrl, {
       headers: upstreamHeaders,
-      signal: AbortSignal.timeout(12000)
+      signal: AbortSignal.timeout(10000)
     });
 
     if (!upstream.ok && upstream.status !== 206) {
@@ -37,9 +60,9 @@ export default async function handler(req, res) {
     }
 
     const contentType = upstream.headers.get('content-type') || '';
-    const isM3U8 = contentType.includes('mpegurl') || targetUrl.includes('.m3u8');
+    const isPlaylistManifest = isM3U8 || contentType.includes('mpegurl') || targetUrl.includes('.m3u8');
 
-    if (isM3U8) {
+    if (isPlaylistManifest) {
       // Rewrite manifest — proxy all segment and child playlist URLs
       const text = await upstream.text();
       const base = new URL(targetUrl);

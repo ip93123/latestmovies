@@ -6890,7 +6890,7 @@
 
       if (type === 'tv') {
         urls = [
-          `https://vidlove.cc/embed/tv/${id}/${s}/${e}?primarycolor=E8C97A&secondarycolor=07090F&iconcolor=E8C97A&autoplay=1&mute=0&showNextEpisode=1`,
+          `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=1&mute=0&showNextEpisode=1`,
           `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&muted=false&nextEpisode=true&episodeSelector=true`,
           `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
           `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`,
@@ -6902,7 +6902,7 @@
         labels = ['Infinity', 'Nova', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
       } else {
         urls = [
-          `https://vidlove.cc/embed/movie/${id}?primarycolor=E8C97A&secondarycolor=07090F&iconcolor=E8C97A&autoplay=1&mute=0`,
+          `https://vidlove.cc/embed/movie/${id}?autoplay=1&mute=0`,
           `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&muted=false`,
           `https://vidnest.fun/movie/${id}?autoplay=1`,
           `https://vixsrc.to/movie/${id}?autoplay=1`,
@@ -6924,8 +6924,8 @@
       const data = await getModalServerUrls(id, type, s, e);
       const allUrls = data.urls || [];
       const allLabels = data.labels || [];
-      const colors = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#F97316', '#A855F7', '#14B8A6', 'linear-gradient(135deg,#E8C97A,#c9a227)', '#FF4D6D'];
-      const textColors = ['#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#07090F', '#fff'];
+      const colors = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#F97316', '#A855F7', '#14B8A6', '#6366F1', '#FF4D6D'];
+      const textColors = ['#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff'];
       const btns = document.querySelectorAll('.modal-play-btn');
       btns.forEach((btn, i) => {
         if (allUrls[i]) btn.onclick = () => playStream(allUrls[i], allUrls, allLabels);
@@ -7191,8 +7191,8 @@
           const data = await getModalServerUrls(id, type, 1, 1);
           const allUrls = data.urls || [];
           const allLabels = data.labels || [];
-          const colors = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#F97316', '#A855F7', '#14B8A6', 'linear-gradient(135deg,#E8C97A,#c9a227)', '#FF4D6D'];
-          const textColors = ['#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#07090F', '#fff'];
+          const colors = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#F97316', '#A855F7', '#14B8A6', '#6366F1', '#FF4D6D'];
+          const textColors = ['#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff'];
 
           let playBtnsHtml = '';
           const maxVisible = 5;
@@ -7202,15 +7202,12 @@
           playBtnsHtml += visibleUrls.map((u, i) => {
             const isMax     = u.startsWith('max://');
             const isSinMax  = u.startsWith('sinmax://');
-            const isVidLove = !isMax && !isSinMax && allLabels[i] && (allLabels[i] === 'VidLove' || allLabels[i] === 'Infinity');
             const style = isMax
               ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(232,201,122,.45);letter-spacing:.5px`
               : isSinMax
               ? `background:linear-gradient(135deg,#FF4B2B,#FF416C);color:#fff;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(255,65,108,.45);letter-spacing:.5px`
-              : isVidLove
-              ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 2px 12px rgba(232,201,122,.4);letter-spacing:.3px`
               : `background:${colors[i] || '#6B7280'};color:${textColors[i] || '#fff'};border:none;cursor:pointer`;
-            return `<button class="modal-stream-pill modal-play-btn${isMax ? ' max-btn' : isSinMax ? ' sinmax-btn' : isVidLove ? ' vidlove-server-btn' : ''}" data-server="${i}" style="${style}">${allLabels[i]}</button>`;
+            return `<button class="modal-stream-pill modal-play-btn${isMax ? ' max-btn' : isSinMax ? ' sinmax-btn' : ''}" data-server="${i}" style="${style}">${allLabels[i]}</button>`;
           }).join('');
 
           if (hiddenUrls.length > 0) {
@@ -7219,15 +7216,12 @@
               const idx = i + maxVisible;
               const isMax     = u.startsWith('max://');
               const isSinMax  = u.startsWith('sinmax://');
-              const isVidLove = !isMax && !isSinMax && allLabels[idx] && (allLabels[idx] === 'VidLove' || allLabels[idx] === 'Infinity');
               const style = isMax
                 ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(232,201,122,.45);display:none`
                 : isSinMax
                 ? `background:linear-gradient(135deg,#FF4B2B,#FF416C);color:#fff;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(255,65,108,.45);display:none`
-                : isVidLove
-                ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 2px 12px rgba(232,201,122,.4);display:none`
                 : `background:${colors[idx] || '#6B7280'};color:${textColors[idx] || '#fff'};border:none;cursor:pointer;display:none`;
-              return `<button class="modal-stream-pill modal-play-btn extra-server-btn${isMax ? ' max-btn' : isSinMax ? ' sinmax-btn' : isVidLove ? ' vidlove-server-btn' : ''}" data-server="${idx}" style="${style}">${allLabels[idx]}</button>`;
+              return `<button class="modal-stream-pill modal-play-btn extra-server-btn${isMax ? ' max-btn' : isSinMax ? ' sinmax-btn' : ''}" data-server="${idx}" style="${style}">${allLabels[idx]}</button>`;
             }).join('');
           }
 
@@ -9327,12 +9321,10 @@
           const lbl = labels ? labels[i] : `Server ${i + 1}`;
           const isMax     = u.startsWith('max://');
           const isSinMax  = u.startsWith('sinmax://');
-          const isVidLove = !isMax && !isSinMax && (lbl === 'VidLove' || lbl === 'Infinity');
           const extraClass = isMax ? ' max-btn' : (isSinMax ? ' sinmax-btn' : '');
           const sinMaxStyle = isSinMax ? ' style="background:linear-gradient(135deg,#FF4B2B,#FF416C);color:#fff;font-weight:800;border-color:transparent"' : '';
-          const vidLoveStyle = (!isMax && !isSinMax && isVidLove) ? ' style="background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;font-weight:800;border-color:transparent"' : '';
           const activeClass = u === url ? ' active' : '';
-          return `<button class="player-server-btn${extraClass}${activeClass}"${sinMaxStyle || vidLoveStyle} data-server-index="${i}">${lbl}</button>`;
+          return `<button class="player-server-btn${extraClass}${activeClass}"${sinMaxStyle} data-server-index="${i}">${lbl}</button>`;
         }).join('');
         bar.querySelectorAll('.player-server-btn').forEach((btn, i) => {
           btn.addEventListener('click', () => {
