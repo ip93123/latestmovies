@@ -4585,6 +4585,7 @@
               </div>
               <input type="file" id="mxsSubFileInput" accept=".srt,.vtt,.ass,.ssa" style="display:none">
             </div>
+          </div>
 
           <!-- ── QUALITY TAB ── -->
           <div class="mxs-pane" id="mxs-pane-quality">
@@ -7640,11 +7641,11 @@
       // Per-level buttons (highest first)
       const sorted = levels.map((l, i) => ({ i, h: l.height || 0, bitrate: l.bitrate || 0 }));
       sorted.sort((a, b) => b.h - a.h);
-      sorted.forEach(({ i, h }) => {
+      sorted.forEach(({ i, h, bitrate }) => {
         const qBtn = document.createElement('button');
         qBtn.className = 'mxs-pill' + (i === cur && cur !== -1 ? ' on' : '');
         qBtn.dataset.level = i;
-        qBtn.textContent = h >= 2160 ? '4K' : h >= 1440 ? '1440p' : h >= 1080 ? '1080p' : h >= 720 ? '720p' : h >= 480 ? '480p' : h >= 360 ? '360p' : h >= 240 ? '240p' : h > 0 ? h + 'p' : (l.bitrate ? Math.round(l.bitrate/1000) + 'kbps' : `Stream ${i+1}`);
+        qBtn.textContent = h >= 2160 ? '4K' : h >= 1440 ? '1440p' : h >= 1080 ? '1080p' : h >= 720 ? '720p' : h >= 480 ? '480p' : h >= 360 ? '360p' : h >= 240 ? '240p' : h > 0 ? h + 'p' : (bitrate ? Math.round(bitrate/1000) + 'kbps' : `Stream ${i+1}`);
         qBtn.addEventListener('click', () => _mxsSetQuality(i, grid));
         grid.appendChild(qBtn);
       });
