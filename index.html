@@ -7394,6 +7394,7 @@
 
     // MODAL
     async function openModal(id, type = 'movie') {
+      window._engineAttempts = {};
       // Auto-focus close button when in TV mode so remote navigation works immediately
       setTimeout(() => {
         if (_tvMode) {
@@ -9498,33 +9499,80 @@
         return;
       }
 
-      function _fallbackFromMax() {
-        setTimeout(() => {
-          if (_maxWrap.classList.contains('error')) {
-            const btns = document.querySelectorAll('.player-server-btn');
-            const fallbackBtn = Array.from(btns).find(b => {
-              if (engine === 'zeemax') return b.classList.contains('sinmax-btn') || b.classList.contains('max-btn') || (!b.classList.contains('zeemax-btn'));
-              if (engine === 'sinmax') return b.classList.contains('max-btn') || (!b.classList.contains('sinmax-btn'));
-              return !b.classList.contains('max-btn') && !b.classList.contains('sinmax-btn') && !b.classList.contains('zeemax-btn');
-            });
-            if (fallbackBtn) fallbackBtn.click();
+      // Helper to compute next player in the seamless failover ring:
+      // HackyMax -> SinMax -> ZeeMax -> Infinity (external iframe)
+      function _getNextFallbackBtn() {
+        const btns = Array.from(document.querySelectorAll('.player-server-btn'));
+        if (!btns.length) return null;
+
+        const key = `${tmdbId}_${mediaType}_${season || 1}_${episode || 1}`;
+        if (!window._engineAttempts) window._engineAttempts = {};
+        if (!window._engineAttempts[key]) window._engineAttempts[key] = new Set();
+        window._engineAttempts[key].add(engine);
+        const tried = window._engineAttempts[key];
+
+        // Priority failover ring among the 3 custom players:
+        let candidateOrder = [];
+        if (engine === 'hackymax') candidateOrder = ['sinmax', 'zeemax'];
+        else if (engine === 'sinmax') candidateOrder = ['zeemax', 'hackymax'];
+        else candidateOrder = ['hackymax', 'sinmax'];
+
+        let nextBtn = null;
+        for (const nextEng of candidateOrder) {
+          if (!tried.has(nextEng)) {
+            nextBtn = btns.find(b => b.classList.contains(`${nextEng}-btn`) || (nextEng === 'zeemax' && b.classList.contains('max-btn')));
+            if (nextBtn) break;
           }
-        }, 1600);
+        }
+
+        // If all 3 custom engines failed, fallback to first external server (Infinity, Nova, etc.)
+        if (!nextBtn) {
+          nextBtn = btns.find(b =>
+            !b.classList.contains('hackymax-btn') &&
+            !b.classList.contains('sinmax-btn') &&
+            !b.classList.contains('zeemax-btn') &&
+            !b.classList.contains('max-btn')
+          );
+        }
+
+        return nextBtn;
+      }
+
+      function _fallbackFromMax() {
+        if (_loadTimeoutTimer) { clearTimeout(_loadTimeoutTimer); _loadTimeoutTimer = null; }
+        setTimeout(() => {
+          if (!_maxWrap.classList.contains('error')) return;
+          const nextBtn = _getNextFallbackBtn();
+          if (nextBtn) {
+            console.log(`[Auto-Failover] ${engine} failed, switching to:`, nextBtn.textContent.trim());
+            nextBtn.click();
+          }
+        }, 1100);
       }
 
       const fbBtn = document.getElementById('maxFallbackBtn');
       if (fbBtn && !fbBtn._wired) {
         fbBtn._wired = true;
         fbBtn.onclick = () => {
-          const btns = document.querySelectorAll('.player-server-btn');
-          const fallbackBtn = Array.from(btns).find(b => {
-            if (engine === 'zeemax') return b.classList.contains('sinmax-btn') || b.classList.contains('max-btn') || (!b.classList.contains('zeemax-btn'));
-            if (engine === 'sinmax') return b.classList.contains('max-btn') || (!b.classList.contains('sinmax-btn'));
-            return !b.classList.contains('max-btn') && !b.classList.contains('sinmax-btn') && !b.classList.contains('zeemax-btn');
-          });
-          if (fallbackBtn) fallbackBtn.click();
+          const nextBtn = _getNextFallbackBtn() || document.querySelector('.player-server-btn:not(.active)');
+          if (nextBtn) nextBtn.click();
         };
       }
+
+      // Initial loading watchdog: if buffering takes >10s without becoming ready, auto-failover
+      let _loadTimeoutTimer = setTimeout(() => {
+        if (_maxWrap.classList.contains('buffering') && !_maxWrap.classList.contains('ready') && _maxMode) {
+          console.warn(`[Auto-Failover] ${engine} initial load timeout (>10s), switching...`);
+          _maxWrap.classList.remove('buffering');
+          _maxWrap.classList.add('error');
+          if (_maxHls) { try { _maxHls.destroy(); } catch (_) {} _maxHls = null; }
+          const candidate = _getNextFallbackBtn();
+          const targetName = candidate ? candidate.textContent.trim() : 'next player';
+          const accentCol  = engine === 'hackymax' ? '#00C6FF' : (engine === 'sinmax' ? '#FF416C' : '#E8C97A');
+          if (_maxErrMsg) _maxErrMsg.innerHTML = `${engineLabel} stream timed out.<br><span style="color:${accentCol};font-weight:600;">Auto-switching to ${targetName}...</span>`;
+          _fallbackFromMax();
+        }
+      }, 10000);
 
       // ── Fetch stream URL & Subtitle from /api/hls or /api/sinmax ──────
       let streamUrl = null;
@@ -9550,13 +9598,13 @@
       } catch (_) {}
 
       if (!streamUrl) {
+        if (_loadTimeoutTimer) { clearTimeout(_loadTimeoutTimer); _loadTimeoutTimer = null; }
         _maxWrap.classList.remove('buffering');
         _maxWrap.classList.add('error');
         if (_maxErrMsg) {
-          const nextTarget = engine === 'zeemax' ? 'SinMax...' : (engine === 'sinmax' ? 'Max...' : 'Infinity...');
-          const engineLabel = engine === 'zeemax' ? 'ZeeMax' : (engine === 'sinmax' ? 'SinMax' : 'HLS');
-          const accentCol = engine === 'zeemax' ? '#00C6FF' : (engine === 'sinmax' ? '#FF416C' : '#E8C97A');
-          _maxErrMsg.innerHTML = `${engineLabel} stream unavailable for this title.<br><span style="color:${accentCol};font-weight:600;">Switching to ${nextTarget}</span>`;
+          const candidate = _getNextFallbackBtn();
+          const targetName = candidate ? candidate.textContent.trim() : (engine === 'hackymax' ? 'SinMax' : (engine === 'sinmax' ? 'ZeeMax' : 'Infinity'));
+          _maxErrMsg.innerHTML = `${engineLabel} stream unavailable for this title.<br><span style="color:${accentCol};font-weight:600;">Auto-switching to ${targetName}...</span>`;
         }
         _fallbackFromMax();
         return;
@@ -9600,6 +9648,7 @@
           _maxWrap.classList.remove('buffering');
         });
         _maxVideo.addEventListener('loadeddata', () => {
+          if (_loadTimeoutTimer) { clearTimeout(_loadTimeoutTimer); _loadTimeoutTimer = null; }
           _suppressNativeTracks();
           _maxWrap.classList.remove('buffering');
           _maxWrap.classList.add('ready');
@@ -9612,9 +9661,12 @@
         }, { once: true });
         _maxVideo.addEventListener('error', () => {
           if (_maxMode && streamFormat === 'mp4') {
+            if (_loadTimeoutTimer) { clearTimeout(_loadTimeoutTimer); _loadTimeoutTimer = null; }
             _maxWrap.classList.remove('buffering', 'ready');
             _maxWrap.classList.add('error');
-            if (_maxErrMsg) _maxErrMsg.innerHTML = `Stream error<br><span style="color:#E8C97A;font-weight:600;">Switching to Infinity...</span>`;
+            const candidate = _getNextFallbackBtn();
+            const targetName = candidate ? candidate.textContent.trim() : (engine === 'hackymax' ? 'SinMax' : (engine === 'sinmax' ? 'ZeeMax' : 'Infinity'));
+            if (_maxErrMsg) _maxErrMsg.innerHTML = `${engineLabel} playback error<br><span style="color:${accentCol};font-weight:600;">Auto-switching to ${targetName}...</span>`;
             _fallbackFromMax();
           }
         }, { once: true });
@@ -9671,6 +9723,7 @@
         _maxHls.attachMedia(_maxVideo);
 
         _maxHls.on(Hls.Events.MANIFEST_PARSED, () => {
+          if (_loadTimeoutTimer) { clearTimeout(_loadTimeoutTimer); _loadTimeoutTimer = null; }
           _maxWrap.classList.remove('buffering');
           _maxWrap.classList.add('ready');
           _updateMaxQuality();
@@ -9691,9 +9744,12 @@
 
         _maxHls.on(Hls.Events.ERROR, (event, data) => {
           if (data.fatal) {
+            if (_loadTimeoutTimer) { clearTimeout(_loadTimeoutTimer); _loadTimeoutTimer = null; }
             _maxWrap.classList.remove('buffering', 'ready');
             _maxWrap.classList.add('error');
-            if (_maxErrMsg) _maxErrMsg.innerHTML = `Stream error: ${data.type}<br><span style="color:#E8C97A;font-weight:600;">Switching to Infinity...</span>`;
+            const candidate = _getNextFallbackBtn();
+            const targetName = candidate ? candidate.textContent.trim() : (engine === 'hackymax' ? 'SinMax' : (engine === 'sinmax' ? 'ZeeMax' : 'Infinity'));
+            if (_maxErrMsg) _maxErrMsg.innerHTML = `${engineLabel} stream error (${data.type})<br><span style="color:${accentCol};font-weight:600;">Auto-switching to ${targetName}...</span>`;
             _maxHls.destroy(); _maxHls = null;
             _fallbackFromMax();
           }
