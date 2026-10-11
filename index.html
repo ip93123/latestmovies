@@ -2306,10 +2306,10 @@
 
     /* ── Max Player Settings Panel ───────────────────────────────────── */
     #maxSettingsBtn {
-      position: absolute; top: 1rem; right: 4rem;
-      width: 34px; height: 34px;
-      background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.18);
-      border-radius: 50%; color: rgba(255,255,255,0.8); font-size: 1rem;
+      position: absolute; bottom: 3.5rem; right: 1rem;
+      width: 36px; height: 36px;
+      background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 50%; color: rgba(255,255,255,0.85); font-size: 1rem;
       display: none; align-items: center; justify-content: center;
       cursor: pointer; z-index: 20; backdrop-filter: blur(8px);
       transition: all 0.25s; user-select: none;
@@ -2319,11 +2319,11 @@
     #maxSettingsBtn.open  { background: rgba(232,201,122,0.2);  color: #E8C97A; border-color: rgba(232,201,122,0.6); transform: rotate(45deg); }
 
     #maxSettingsPanel {
-      display: none; position: absolute; top: 3.6rem; right: 1rem;
+      display: none; position: absolute; bottom: 5.5rem; right: 1rem;
       width: 320px; background: rgba(5,7,14,0.97);
       border: 1px solid rgba(232,201,122,0.18); border-radius: 16px;
       z-index: 25; font-family: 'Inter', sans-serif;
-      box-shadow: 0 24px 60px rgba(0,0,0,0.85); backdrop-filter: blur(24px);
+      box-shadow: 0 -16px 60px rgba(0,0,0,0.85); backdrop-filter: blur(24px);
       animation: mxsFadeIn 0.18s ease;
     }
     @keyframes mxsFadeIn {
@@ -4435,7 +4435,7 @@
         <!-- ⚙ Settings Panel -->
         <div id="maxSettingsPanel">
           <div class="mxs-tabs">
-            <button class="mxs-tab active" data-mxs-tab="sub">🇱🇰 Subtitles</button>
+            <button class="mxs-tab active" data-mxs-tab="sub">Subtitles</button>
             <button class="mxs-tab" data-mxs-tab="quality">📺 Quality</button>
             <button class="mxs-tab" data-mxs-tab="playback">▶ Playback</button>
           </div>
@@ -4504,7 +4504,16 @@
                 <span class="mxs-val" id="mxsSubOffsetVal">0s</span>
               </div>
             </div>
-          </div>
+            <div class="mxs-divider"></div>
+            <div class="mxs-section">Upload Subtitle File</div>
+            <div class="mxs-row" style="flex-direction:column;align-items:stretch;gap:0.4rem">
+              <div id="mxsSubDropZone" style="border:1.5px dashed rgba(232,201,122,0.35);border-radius:10px;padding:0.8rem 0.6rem;text-align:center;cursor:pointer;transition:all 0.2s;">
+                <div style="font-size:1.3rem;margin-bottom:0.2rem;">📁</div>
+                <div style="font-size:0.72rem;color:rgba(255,255,255,0.5);">Click or drag &amp; drop a .srt / .vtt / .ass file</div>
+                <div id="mxsSubFileName" style="font-size:0.7rem;color:#E8C97A;margin-top:0.3rem;display:none;"></div>
+              </div>
+              <input type="file" id="mxsSubFileInput" accept=".srt,.vtt,.ass,.ssa" style="display:none">
+            </div>
 
           <!-- ── QUALITY TAB ── -->
           <div class="mxs-pane" id="mxs-pane-quality">
@@ -7493,6 +7502,53 @@
       if (nextPlayBtn)   nextPlayBtn.addEventListener('click',   () => { _mxsCancelCountdown(); playNextEpisode(); });
       if (nextCancelBtn) nextCancelBtn.addEventListener('click', () => { _mxsCancelCountdown(); });
 
+      // ── Upload subtitle (drop zone + file input) ──
+      const dropZone    = document.getElementById('mxsSubDropZone');
+      const mxsFileInp  = document.getElementById('mxsSubFileInput');
+      const mxsFileName = document.getElementById('mxsSubFileName');
+
+      function _mxsLoadFile(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const text = e.target.result;
+          const name = file.name.toLowerCase();
+          let cues = [];
+          if (name.endsWith('.srt'))            cues = parseSrt(text);
+          else if (name.endsWith('.vtt'))        cues = parseVtt(text);
+          else if (name.endsWith('.ass') || name.endsWith('.ssa')) cues = parseAss(text);
+          else { cues = text.includes('WEBVTT') ? parseVtt(text) : parseSrt(text); }
+          if (cues && cues.length) {
+            _subCues = cues; _subLoaded = true; _subOffset = 0;
+            if (mxsFileName) { mxsFileName.textContent = `✅ ${file.name} (${cues.length} cues)`; mxsFileName.style.display = 'block'; }
+            if (dropZone) dropZone.style.borderColor = 'rgba(46,204,113,0.6)';
+            if (_maxMode) {
+              if (_maxSubRaf) cancelAnimationFrame(_maxSubRaf);
+              _maxSubRaf = requestAnimationFrame(_maxSubLoop);
+            }
+            const subBadge = document.getElementById('maxSubBadge');
+            if (subBadge) { subBadge.style.display = 'block'; subBadge.textContent = `\uD83C\uDDF1\uD83C\uDDF0 SUBTITLES (${cues.length})`; }
+            console.log('[MXS Upload] Loaded', cues.length, 'cues from', file.name);
+          } else {
+            if (mxsFileName) { mxsFileName.textContent = '❌ No cues found in file'; mxsFileName.style.display = 'block'; }
+          }
+        };
+        reader.readAsText(file, 'utf-8');
+      }
+
+      if (dropZone) {
+        dropZone.addEventListener('click', () => mxsFileInp && mxsFileInp.click());
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = 'rgba(232,201,122,0.7)'; dropZone.style.background = 'rgba(232,201,122,0.06)'; });
+        dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = 'rgba(232,201,122,0.35)'; dropZone.style.background = ''; });
+        dropZone.addEventListener('drop', (e) => {
+          e.preventDefault(); dropZone.style.borderColor = 'rgba(232,201,122,0.35)'; dropZone.style.background = '';
+          _mxsLoadFile(e.dataTransfer.files[0]);
+        });
+      }
+      if (mxsFileInp) {
+        mxsFileInp.addEventListener('change', () => { _mxsLoadFile(mxsFileInp.files[0]); mxsFileInp.value = ''; });
+      }
+
       // Apply saved sub style immediately
       _mxsApplySubStyle();
     }
@@ -7517,7 +7573,7 @@
         const qBtn = document.createElement('button');
         qBtn.className = 'mxs-pill' + (i === cur && cur !== -1 ? ' on' : '');
         qBtn.dataset.level = i;
-        qBtn.textContent = h >= 2160 ? '4K' : h >= 1440 ? '1440p' : h >= 1080 ? '1080p' : h >= 720 ? '720p' : h >= 480 ? '480p' : h >= 360 ? '360p' : h > 0 ? h + 'p' : `Q${i+1}`;
+        qBtn.textContent = h >= 2160 ? '4K' : h >= 1440 ? '1440p' : h >= 1080 ? '1080p' : h >= 720 ? '720p' : h >= 480 ? '480p' : h >= 360 ? '360p' : h >= 240 ? '240p' : h > 0 ? h + 'p' : (l.bitrate ? Math.round(l.bitrate/1000) + 'kbps' : `Stream ${i+1}`);
         qBtn.addEventListener('click', () => _mxsSetQuality(i, grid));
         grid.appendChild(qBtn);
       });
@@ -7602,7 +7658,7 @@
       const lvl = _maxHls.levels[_maxHls.currentLevel];
       if (!lvl) return;
       const h = lvl.height || 0;
-      _maxQBadge.textContent = h >= 2160 ? '4K ✦' : h >= 1080 ? '1080p ✦' : h >= 720 ? '720p' : h >= 480 ? '480p' : h > 0 ? `${h}p` : 'HLS ✦';
+      _maxQBadge.textContent = h >= 2160 ? '4K ✦' : h >= 1080 ? '1080p ✦' : h >= 720 ? '720p' : h >= 480 ? '480p' : h > 0 ? `${h}p` : '';
     }
 
     // RAF loop — subtitle cues driven by video.currentTime (perfect seek/pause sync)
