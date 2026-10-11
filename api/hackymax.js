@@ -206,7 +206,10 @@ export default async function handler(req, res) {
   }
 
   if (streamInfo && streamInfo.streamUrl) {
-    const PROXY_BASE = process.env.CF_PROXY_URL || 'https://tight-rain-5c22.hackyirl.workers.dev';
+    const rawProxy = process.env.CF_PROXY_URL || '';
+    const PROXY_BASE = (rawProxy && !rawProxy.includes('onrender.com'))
+      ? rawProxy
+      : 'https://tight-rain-5c22.hackyirl.workers.dev';
     const finalUrl = `${PROXY_BASE}?url=${encodeURIComponent(streamInfo.streamUrl)}`;
 
     let proxiedQualities = null;

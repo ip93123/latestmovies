@@ -8558,6 +8558,28 @@
       _subText.classList.remove('active');
     }
 
+    // ── External Player PostMessage Sync (VidLink / Nova auto-sync) ────────
+    window.addEventListener('message', (event) => {
+      if (!event || !event.data) return;
+      const d = event.data;
+      if (d.type === 'PLAYER_EVENT' || typeof d.currentTime === 'number') {
+        const ct = typeof d.currentTime === 'number' ? d.currentTime : (d.data && d.data.currentTime);
+        if (typeof ct === 'number') {
+          window._externalCurrentTime = ct;
+          if (!_maxMode && _subLoaded && _subCues && _subCues.length) {
+            const ms = ct * 1000 + _subOffset;
+            const cue = _subCues.find(c => ms >= c.start && ms < c.end);
+            if (cue) {
+              _subText.innerHTML = cue.text.replace(/\n/g, '<br>');
+              _subText.classList.add('active');
+            } else {
+              _subText.classList.remove('active');
+            }
+          }
+        }
+      }
+    });
+
     function subShift(ms) {
       _subOffset += ms;
     }
