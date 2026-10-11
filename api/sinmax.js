@@ -209,7 +209,7 @@ export default async function handler(req, res) {
     const rawProxy = process.env.CF_PROXY_URL || '';
     const PROXY_BASE = (rawProxy && !rawProxy.includes('onrender.com'))
       ? rawProxy
-      : 'https://tight-rain-5c22.hackyirl.workers.dev';
+      : 'https://latestmovies.ip93123.deno.net';
     const finalUrl = `${PROXY_BASE}?url=${encodeURIComponent(streamInfo.streamUrl)}`;
 
     let proxiedQualities = null;
