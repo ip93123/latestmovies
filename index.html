@@ -5824,13 +5824,9 @@
       <li><a href="#fourk">4K</a></li>
       <li><a href="#sinsub" style="color:#2ECC71;font-weight:700;" title="Sinhala Subtitled Movies">🇱🇰 Sin Sub</a></li>
       <li><a href="javascript:void(0)" id="navWishlistLink" onclick="openWishlist()" title="WishList">WishList</a></li>
-      <li><a href="javascript:void(0)" id="navWatchPartyLink" onclick="window.openWatchPartyModal('join')" title="Join or Host Watch Party" style="color:var(--wp-theme,#00C6FF);display:flex;align-items:center;gap:5px;font-weight:600;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Party</a></li>
+
     </ul>
     <div style="display:flex;align-items:center;gap:10px;">
-      <button id="navWpQuickBtn" onclick="window.openWatchPartyModal('join')" title="Watch Party — Join with Code or Host" aria-label="Watch Party">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="19" cy="9" r="3"/><path d="M23 21v-2a3 3 0 0 0-3-3h-1"/></svg>
-        <span>Watch Party</span>
-      </button>
       <div class="nav-search" id="navSearch">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
         stroke-linecap="round">
@@ -6446,19 +6442,20 @@
     async function tmdb(path) {
       try {
         const r = await fetch(`/api/tmdb?target=${encodeURIComponent(path)}`);
-        if (!r.ok) return {};
+        if (!r.ok) return null;  // Return null (not {}) so filter(Boolean) correctly excludes 404s
         const text = await r.text();
-        return text ? JSON.parse(text) : {};
+        return text ? JSON.parse(text) : null;
       } catch (e) {
-        return {};
+        return null;
       }
     }
     async function getWatch(id, type = 'movie') {
+      if (!id && id !== 0) return null;  // Guard: skip undefined/null ids
       const key = `${type}-${id}`;
       if (watchCache[key]) return watchCache[key];
       try {
         const d = await tmdb(`/${type}/${id}/watch/providers`);
-        const res = (d.results && d.results[COUNTRY]) || null;
+        const res = (d?.results?.[COUNTRY]) || null;
         watchCache[key] = res;
         if (res) { ['flatrate', 'rent', 'buy'].forEach(c => { if (res[c]) res[c].forEach(p => { if (p.logo_path) providerLogos[p.provider_id] = p.logo_path; }); }); }
         return res;
@@ -7015,7 +7012,7 @@
       const row = document.getElementById('trendingRow');
       row.innerHTML = Array.from({ length: isTV ? 8 : 15 }, () => `<div class="trending-card" style="flex:0 0 160px"><div style="aspect-ratio:2/3;background:var(--dark3)" class="sk"></div><div style="padding:.75rem"><div style="height:12px;margin-bottom:6px" class="sk"></div></div></div>`).join('');
       const [md, tvd] = await Promise.all([tmdb('/trending/movie/week?language=en-US'), tmdb('/trending/tv/week?language=en-US')]);
-      const allRaw = [...(md.results || []).slice(0, cardLimit / 2).map(x => ({ ...x, _type: 'movie' })), ...(tvd.results || []).slice(0, cardLimit / 2).map(x => ({ ...x, _type: 'tv' }))].slice(0, cardLimit);
+      const allRaw = [...(md?.results || []).slice(0, cardLimit / 2).map(x => ({ ...x, _type: 'movie' })), ...(tvd?.results || []).slice(0, cardLimit / 2).map(x => ({ ...x, _type: 'tv' }))].slice(0, cardLimit);
 
       let all = allRaw;
       if (!isTV) {
@@ -7083,7 +7080,8 @@
         const fetchResults = await Promise.all(
           SINSUB_MOVIE_IDS.map(id => tmdb(`/movie/${id}?language=en-US`).catch(() => null))
         );
-        const validMovies = fetchResults.filter(Boolean).map(m => ({ ...m, _type: 'movie' }));
+        // Filter: remove null results AND empty objects ({}) from failed/invalid IDs
+        const validMovies = fetchResults.filter(m => m && m.id).map(m => ({ ...m, _type: 'movie' }));
         const watchDatas = await Promise.all(validMovies.map(item => getWatch(item.id, 'movie')));
         
         row.innerHTML = validMovies.map((item, i) => buildTrendingCard(item, i + 1, 'movie', watchDatas[i])).join('');
@@ -7799,6 +7797,11 @@
           getCredits(id, type),
           tmdb(`/${type}/${id}/videos?language=en-US`)
         ]);
+        if (!details || !details.id) {
+          document.getElementById('modalTitle').textContent = 'Not Found';
+          document.getElementById('modalPlot').textContent = 'Movie information could not be loaded.';
+          return;
+        }
         _currentModalItem = details;
         const title = details.title || details.name || '';
         const year = (details.release_date || details.first_air_date || '').slice(0, 4);
@@ -11401,7 +11404,7 @@
 
       const [nowPlaying] = await Promise.all([tmdb('/movie/now_playing?language=en-US&page=1')]);
 
-      const heroPool = (nowPlaying.results || []).filter(m => m.backdrop_path).slice(0, 6);
+      const heroPool = (nowPlaying?.results || []).filter(m => m.backdrop_path).slice(0, 6);
       await loadHero(heroPool);
       await loadRecentWatch();
 
