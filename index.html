@@ -2341,6 +2341,30 @@
       50%       { box-shadow: 0 0 28px rgba(255, 65, 108, 0.9); }
     }
 
+    /* ── ZeeMax Player server button (Electric Blue theme) ───────────────── */
+    .player-server-btn.zeemax-btn,
+    .modal-stream-pill.zeemax-btn {
+      background: linear-gradient(135deg, #00C6FF 0%, #0072FF 100%) !important;
+      color: #ffffff !important;
+      font-weight: 800 !important;
+      border-color: transparent !important;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 14px rgba(0, 198, 255, 0.45);
+    }
+    .player-server-btn.zeemax-btn:hover,
+    .modal-stream-pill.zeemax-btn:hover {
+      box-shadow: 0 0 22px rgba(0, 198, 255, 0.75);
+      transform: translateY(-1px);
+    }
+    .player-server-btn.zeemax-btn.active {
+      box-shadow: 0 0 28px rgba(0, 198, 255, 0.9);
+      animation: zeemaxPulse 2.5s ease-in-out infinite;
+    }
+    @keyframes zeemaxPulse {
+      0%, 100% { box-shadow: 0 0 14px rgba(0, 198, 255, 0.5); }
+      50%       { box-shadow: 0 0 28px rgba(0, 198, 255, 0.95); }
+    }
+
     /* Max video element — controls panel transparent so moving cursor never blacks out the movie */
     #maxVideo::-webkit-media-controls-panel,
     #maxVideo::-webkit-media-controls-enclosure,
@@ -7202,12 +7226,15 @@
           playBtnsHtml += visibleUrls.map((u, i) => {
             const isMax     = u.startsWith('max://');
             const isSinMax  = u.startsWith('sinmax://');
+            const isZeeMax  = u.startsWith('zeemax://');
             const style = isMax
               ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(232,201,122,.45);letter-spacing:.5px`
               : isSinMax
               ? `background:linear-gradient(135deg,#FF4B2B,#FF416C);color:#fff;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(255,65,108,.45);letter-spacing:.5px`
+              : isZeeMax
+              ? `background:linear-gradient(135deg,#00C6FF,#0072FF);color:#fff;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(0,198,255,.45);letter-spacing:.5px`
               : `background:${colors[i] || '#6B7280'};color:${textColors[i] || '#fff'};border:none;cursor:pointer`;
-            return `<button class="modal-stream-pill modal-play-btn${isMax ? ' max-btn' : isSinMax ? ' sinmax-btn' : ''}" data-server="${i}" style="${style}">${allLabels[i]}</button>`;
+            return `<button class="modal-stream-pill modal-play-btn${isMax ? ' max-btn' : isSinMax ? ' sinmax-btn' : isZeeMax ? ' zeemax-btn' : ''}" data-server="${i}" style="${style}">${allLabels[i]}</button>`;
           }).join('');
 
           if (hiddenUrls.length > 0) {
@@ -7216,12 +7243,15 @@
               const idx = i + maxVisible;
               const isMax     = u.startsWith('max://');
               const isSinMax  = u.startsWith('sinmax://');
+              const isZeeMax  = u.startsWith('zeemax://');
               const style = isMax
                 ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(232,201,122,.45);display:none`
                 : isSinMax
                 ? `background:linear-gradient(135deg,#FF4B2B,#FF416C);color:#fff;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(255,65,108,.45);display:none`
+                : isZeeMax
+                ? `background:linear-gradient(135deg,#00C6FF,#0072FF);color:#fff;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(0,198,255,.45);display:none`
                 : `background:${colors[idx] || '#6B7280'};color:${textColors[idx] || '#fff'};border:none;cursor:pointer;display:none`;
-              return `<button class="modal-stream-pill modal-play-btn extra-server-btn${isMax ? ' max-btn' : isSinMax ? ' sinmax-btn' : ''}" data-server="${idx}" style="${style}">${allLabels[idx]}</button>`;
+              return `<button class="modal-stream-pill modal-play-btn extra-server-btn${isMax ? ' max-btn' : isSinMax ? ' sinmax-btn' : isZeeMax ? ' zeemax-btn' : ''}" data-server="${idx}" style="${style}">${allLabels[idx]}</button>`;
             }).join('');
           }
 
@@ -9054,7 +9084,14 @@
       _maxWrap.classList.add('buffering');
 
       const bufText = document.querySelector('#maxBuffering span');
-      if (bufText) bufText.textContent = engine === 'sinmax' ? 'SINMAX · LOADING' : 'MAX · LOADING';
+      if (bufText) {
+        bufText.textContent = engine === 'zeemax' ? 'ZEEMAX · LOADING' : (engine === 'sinmax' ? 'SINMAX · LOADING' : 'MAX · LOADING');
+        bufText.style.color = engine === 'zeemax' ? '#00C6FF' : (engine === 'sinmax' ? '#FF416C' : '#E8C97A');
+      }
+      const bufSpinner = document.querySelector('#maxBuffering div');
+      if (bufSpinner) {
+        bufSpinner.style.borderTopColor = engine === 'zeemax' ? '#00C6FF' : (engine === 'sinmax' ? '#FF416C' : '#E8C97A');
+      }
 
       // ── Load hls.js lazily ────────────────────────────────────────────
       try { await _loadHlsJs(); }
@@ -9070,8 +9107,9 @@
           if (_maxWrap.classList.contains('error')) {
             const btns = document.querySelectorAll('.player-server-btn');
             const fallbackBtn = Array.from(btns).find(b => {
+              if (engine === 'zeemax') return b.classList.contains('sinmax-btn') || b.classList.contains('max-btn') || (!b.classList.contains('zeemax-btn'));
               if (engine === 'sinmax') return b.classList.contains('max-btn') || (!b.classList.contains('sinmax-btn'));
-              return !b.classList.contains('max-btn') && !b.classList.contains('sinmax-btn');
+              return !b.classList.contains('max-btn') && !b.classList.contains('sinmax-btn') && !b.classList.contains('zeemax-btn');
             });
             if (fallbackBtn) fallbackBtn.click();
           }
@@ -9084,8 +9122,9 @@
         fbBtn.onclick = () => {
           const btns = document.querySelectorAll('.player-server-btn');
           const fallbackBtn = Array.from(btns).find(b => {
+            if (engine === 'zeemax') return b.classList.contains('sinmax-btn') || b.classList.contains('max-btn') || (!b.classList.contains('zeemax-btn'));
             if (engine === 'sinmax') return b.classList.contains('max-btn') || (!b.classList.contains('sinmax-btn'));
-            return !b.classList.contains('max-btn') && !b.classList.contains('sinmax-btn');
+            return !b.classList.contains('max-btn') && !b.classList.contains('sinmax-btn') && !b.classList.contains('zeemax-btn');
           });
           if (fallbackBtn) fallbackBtn.click();
         };
@@ -9105,7 +9144,7 @@
         if (season)  params.set('season',  season);
         if (episode) params.set('episode', episode);
         if (imdbId)  params.set('imdb', imdbId);
-        const apiPath = engine === 'sinmax' ? '/api/sinmax' : '/api/hls';
+        const apiPath = engine === 'zeemax' ? '/api/zeemax' : (engine === 'sinmax' ? '/api/sinmax' : '/api/hls');
         const resp = await fetch(`${apiPath}?${params}`, { signal: AbortSignal.timeout(6500) });
         const data = await resp.json();
         if (data.url) streamUrl = data.url;
@@ -9118,8 +9157,10 @@
         _maxWrap.classList.remove('buffering');
         _maxWrap.classList.add('error');
         if (_maxErrMsg) {
-          const nextTarget = engine === 'sinmax' ? 'Max...' : 'Infinity...';
-          _maxErrMsg.innerHTML = `${engine === 'sinmax' ? 'SinMax' : 'HLS'} stream unavailable for this title.<br><span style="color:#E8C97A;font-weight:600;">Switching to ${nextTarget}</span>`;
+          const nextTarget = engine === 'zeemax' ? 'SinMax...' : (engine === 'sinmax' ? 'Max...' : 'Infinity...');
+          const engineLabel = engine === 'zeemax' ? 'ZeeMax' : (engine === 'sinmax' ? 'SinMax' : 'HLS');
+          const accentCol = engine === 'zeemax' ? '#00C6FF' : (engine === 'sinmax' ? '#FF416C' : '#E8C97A');
+          _maxErrMsg.innerHTML = `${engineLabel} stream unavailable for this title.<br><span style="color:${accentCol};font-weight:600;">Switching to ${nextTarget}</span>`;
         }
         _fallbackFromMax();
         return;
@@ -9289,20 +9330,22 @@
         else { epBar.classList.remove('visible'); }
       }
 
-      // ── If Max or SinMax player selected, skip iframe and launch HLS player ──────
+      // ── If Max, SinMax or ZeeMax player selected, skip iframe and launch HLS player ──────
       const isMaxUrl = url.startsWith('max://');
       const isSinMaxUrl = url.startsWith('sinmax://');
-      if (isMaxUrl || isSinMaxUrl) {
+      const isZeeMaxUrl = url.startsWith('zeemax://');
+      if (isMaxUrl || isSinMaxUrl || isZeeMaxUrl) {
         if (loader) loader.style.opacity = '0';
         frame.style.display = 'none';
         frame.src = 'about:blank';
-        const prefix = isMaxUrl ? 'max://' : 'sinmax://';
+        const prefix = isZeeMaxUrl ? 'zeemax://' : (isSinMaxUrl ? 'sinmax://' : 'max://');
+        const engine = isZeeMaxUrl ? 'zeemax' : (isSinMaxUrl ? 'sinmax' : 'max');
         const parts = url.replace(prefix, '').split('/');
         const mType = parts[0] || _currentModalType;
         const mId   = parts[1] || _currentModalId;
         const mSeas = parts[2] || _selectedSeason  || null;
         const mEp   = parts[3] || _selectedEpisode || null;
-        initMaxPlayer(mId, mType, mSeas, mEp, isSinMaxUrl ? 'sinmax' : 'max');
+        initMaxPlayer(mId, mType, mSeas, mEp, engine);
       } else {
         // ── Regular iframe player ───────────────────────────────────────
         _destroyMax(); // Tear down Max if switching away from it
@@ -9321,10 +9364,12 @@
           const lbl = labels ? labels[i] : `Server ${i + 1}`;
           const isMax     = u.startsWith('max://');
           const isSinMax  = u.startsWith('sinmax://');
-          const extraClass = isMax ? ' max-btn' : (isSinMax ? ' sinmax-btn' : '');
+          const isZeeMax  = u.startsWith('zeemax://');
+          const extraClass = isMax ? ' max-btn' : (isSinMax ? ' sinmax-btn' : (isZeeMax ? ' zeemax-btn' : ''));
           const sinMaxStyle = isSinMax ? ' style="background:linear-gradient(135deg,#FF4B2B,#FF416C);color:#fff;font-weight:800;border-color:transparent"' : '';
+          const zeeMaxStyle = isZeeMax ? ' style="background:linear-gradient(135deg,#00C6FF,#0072FF);color:#fff;font-weight:800;border-color:transparent"' : '';
           const activeClass = u === url ? ' active' : '';
-          return `<button class="player-server-btn${extraClass}${activeClass}"${sinMaxStyle} data-server-index="${i}">${lbl}</button>`;
+          return `<button class="player-server-btn${extraClass}${activeClass}"${sinMaxStyle || zeeMaxStyle} data-server-index="${i}">${lbl}</button>`;
         }).join('');
         bar.querySelectorAll('.player-server-btn').forEach((btn, i) => {
           btn.addEventListener('click', () => {
@@ -9341,7 +9386,7 @@
       overlay.classList.add('open');
 
       // ── Auto-load Sinhala subtitle from SUBTITLE_MAP if available ────────
-      if (!isMaxUrl && !isSinMaxUrl && _currentModalId && typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(_currentModalId)]) {
+      if (!isMaxUrl && !isSinMaxUrl && !isZeeMaxUrl && _currentModalId && typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(_currentModalId)]) {
         const subFile = SUBTITLE_MAP[String(_currentModalId)];
         fetch(subFile).then(r => r.text()).then(text => {
           const cues = parseSrt(text);
@@ -9407,19 +9452,21 @@
 
       const isMaxUrl = url.startsWith('max://');
       const isSinMaxUrl = url.startsWith('sinmax://');
-      if (isMaxUrl || isSinMaxUrl) {
-        // Switch TO Max or SinMax player
+      const isZeeMaxUrl = url.startsWith('zeemax://');
+      if (isMaxUrl || isSinMaxUrl || isZeeMaxUrl) {
+        // Switch TO Max, SinMax or ZeeMax player
         _destroyMax();
         if (loader) loader.style.opacity = '0';
         frame.style.display = 'none';
         frame.src = 'about:blank';
-        const prefix = isMaxUrl ? 'max://' : 'sinmax://';
+        const prefix = isZeeMaxUrl ? 'zeemax://' : (isSinMaxUrl ? 'sinmax://' : 'max://');
+        const engine = isZeeMaxUrl ? 'zeemax' : (isSinMaxUrl ? 'sinmax' : 'max');
         const parts = url.replace(prefix, '').split('/');
         const mType = parts[0] || _currentModalType;
         const mId   = parts[1] || _currentModalId;
         const mSeas = parts[2] || _selectedSeason  || null;
         const mEp   = parts[3] || _selectedEpisode || null;
-        initMaxPlayer(mId, mType, mSeas, mEp, isSinMaxUrl ? 'sinmax' : 'max');
+        initMaxPlayer(mId, mType, mSeas, mEp, engine);
       } else {
         // Switch FROM Max (or between regular servers)
         _destroyMax();
