@@ -9280,6 +9280,8 @@
         if (_maxVideo.paused) {
           if (typeof _safePlay === 'function') _safePlay(_maxVideo);
           else _maxVideo.play().catch(() => {});
+        } else {
+          if (typeof _wpToast === 'function') _wpToast('🔒 Playback is synchronized to the Host');
         }
         return;
       }
@@ -10546,10 +10548,10 @@
           if (!_maxVideo) return;
           if (typeof _maxVideo._wpPendingSeek === 'number' && _maxVideo._wpPendingSeek >= 0) {
             if (_maxVideo.readyState >= 1) {
-              if (Math.abs(_maxVideo.currentTime - _maxVideo._wpPendingSeek) > 1.0) {
+              if (Math.abs(_maxVideo.currentTime - _maxVideo._wpPendingSeek) > 1.2) {
                 try { _maxVideo.currentTime = _maxVideo._wpPendingSeek; } catch (_) {}
               }
-              if (_maxVideo.readyState >= 2) {
+              if (_maxVideo.readyState >= 2 && !_maxVideo.seeking) {
                 delete _maxVideo._wpPendingSeek;
               }
             }
@@ -12269,7 +12271,7 @@
       _wpHeartbeatInterval = setInterval(() => {
         if (!WP.isHost || !WP.code || !WP.peer || !WP.conns.length) return;
         const v = _vid();
-        if (!v) return;
+        if (!v || v.seeking) return;
         const p = new URLSearchParams(window.location.search);
         const movieId = window._currentPlayingId || _currentModalId || (window._currentModalItem && window._currentModalItem.id) || p.get('m') || p.get('s');
         if (!movieId) return;
@@ -12302,12 +12304,16 @@
 
     /* ── Watch Party State ───────────────────────────────────── */
     const WP = {
-      peer:        null,
-      conns:       [],
-      hostConn:    null,
-      code:        null,
-      isHost:      false,
-      guestNames:  [],
+      peer:         null,
+      conns:        [],
+      hostConn:     null,
+      code:         null,
+      isHost:       false,
+      guestNames:   [],
+      _clockOffset: 0,
+      _rtt:         0,
+      _lastHardSeek: 0,
+      _pingTimer:   null,
     };
 
     function _vid() { return document.getElementById('maxVideo'); }
@@ -12315,6 +12321,38 @@
     function _broadcast(data) {
       WP.conns = WP.conns.filter(c => c.open);
       WP.conns.forEach(c => { try { c.send(data); } catch (_) {} });
+    }
+
+    function _startGuestPing() {
+      _stopGuestPing();
+      WP._pingTimer = setInterval(() => {
+        if (!WP.isHost && WP.hostConn && WP.hostConn.open) {
+          try {
+            WP.hostConn.send({ type: 'wp-ping', t0: Date.now() });
+          } catch (_) {}
+        }
+      }, 10000);
+    }
+
+    function _stopGuestPing() {
+      if (WP._pingTimer) {
+        clearInterval(WP._pingTimer);
+        WP._pingTimer = null;
+      }
+    }
+
+    function _calcTargetTime(data, isPlaying) {
+      const baseCt = typeof data.ct === 'number' ? data.ct : 0;
+      if (!isPlaying) return baseCt;
+      let flightSec = 0;
+      if (data.ts) {
+        const offset = WP._clockOffset || 0;
+        const hostTsInGuestClock = data.ts - offset;
+        const elapsedMs = Date.now() - hostTsInGuestClock;
+        flightSec = Math.max(0, Math.min(1.5, elapsedMs / 1000));
+      }
+      const speed = data.speed || 1;
+      return baseCt + (flightSec * speed);
     }
 
     // Expose helpers globally for player & modal integrations
@@ -12333,24 +12371,38 @@
       if (!data) return;
       const v = _vid();
 
-      // If any playback packet contains movie ID and guest has not loaded this movie yet, launch it immediately!
+      // 0. Handle Ping / Pong for clock synchronization
+      if (data.type === 'wp-pong') {
+        const t1 = Date.now();
+        const rtt = Math.max(0, t1 - (data.t0 || t1));
+        const oneWay = rtt / 2;
+        WP._clockOffset = (data.tHost || t1) - ((data.t0 || t1) + oneWay);
+        WP._rtt = rtt;
+        return;
+      }
+
+      // If host sends movie metadata, ensure guest has loaded the right movie/engine
       if (data.type === 'play' || data.type === 'seek' || data.type === 'pause' || data.type === 'heartbeat' || data.type === 'state') {
         const rawId = data.mId || data.mParam || data.sParam;
         const id = rawId ? parseInt(String(rawId).split('-')[0], 10) : null;
         const type = data.mType || (data.sParam ? 'tv' : 'movie');
         const season = parseInt(data.season || 1, 10);
         const episode = parseInt(data.episode || 1, 10);
-        const activeEngine = data.engine || window._currentMaxEngine || 'hackymax';
+        const targetEngine = data.engine || window._currentMaxEngine || 'hackymax';
 
-        const isCurrentLoadingOrPlaying = (
+        const isSameMedia = (
           window._currentPlayingId &&
           String(window._currentPlayingId) === String(id) &&
-          (type !== 'tv' || (window._currentPlayingSeason === season && window._currentPlayingEpisode === episode)) &&
-          (window._maxMode || (window._maxLoading && String(window._maxLoadingId) === String(id)))
+          (type !== 'tv' || (parseInt(window._currentPlayingSeason || 1, 10) === season && parseInt(window._currentPlayingEpisode || 1, 10) === episode))
         );
+        const isSameEngine = (
+          !data.engine ||
+          !window._currentPlayingEngine ||
+          String(data.engine) === String(window._currentPlayingEngine)
+        );
+        const isAlreadyLoadingOrPlaying = isSameMedia && isSameEngine && (window._maxMode || (window._maxLoading && String(window._maxLoadingId) === String(id)));
 
-        if (id && !isCurrentLoadingOrPlaying && (data.type === 'state' || data.type === 'play' || data.type === 'heartbeat')) {
-          const targetEngine = data.engine || window._currentMaxEngine || 'hackymax';
+        if (id && !isAlreadyLoadingOrPlaying && (data.type === 'state' || data.type === 'play' || data.type === 'heartbeat')) {
           window._currentPlayingId = id;
           window._currentPlayingType = type;
           window._currentPlayingSeason = season;
@@ -12369,6 +12421,7 @@
               u.searchParams.delete('s');
               u.searchParams.set('m', id);
             }
+            if (targetEngine) u.searchParams.set('engine', targetEngine);
             if (WP.code) u.searchParams.set('party', WP.code);
             history.replaceState(null, '', u.toString());
           } catch (_) {}
@@ -12388,8 +12441,10 @@
 
       if (data.type === 'heartbeat') {
         const isPlaying = !!data.playing;
-        const lag = Math.max(0, (Date.now() - (data.ts || Date.now())) / 1000);
-        const target = (typeof data.ct === 'number' ? data.ct : 0) + (isPlaying ? lag : 0);
+        const target = _calcTargetTime(data, isPlaying);
+        const lockEl = document.getElementById('wpGuestLock');
+        const lockMsg = document.getElementById('wpGuestLockMsg');
+        const baseRate = (_mxsSettings && _mxsSettings.speed) || 1.0;
 
         if (!v || (!v.src && !v.currentSrc) || v.readyState < 2) {
           if (v) {
@@ -12399,44 +12454,57 @@
           return;
         }
 
-        const drift = Math.abs(v.currentTime - target);
-        const lockEl = document.getElementById('wpGuestLock');
-        const lockMsg = document.getElementById('wpGuestLockMsg');
+        const drift = target - v.currentTime;
+        const absDrift = Math.abs(drift);
 
         if (!isPlaying) {
           if (!v.paused) v.pause();
           if (lockEl) lockEl.classList.add('active');
           if (lockMsg) lockMsg.textContent = 'Host paused';
-          if (drift > 1.2) v.currentTime = target;
+          if (absDrift > 0.8) v.currentTime = target;
+          if (v.playbackRate !== baseRate) v.playbackRate = baseRate;
           return;
         }
 
         // Host is playing
         if (lockEl) lockEl.classList.remove('active');
         if (v.paused) {
-          if (drift > 1.2) v.currentTime = target;
+          if (absDrift > 1.2) {
+            v.currentTime = target;
+            WP._lastHardSeek = Date.now();
+          }
           _safePlay(v);
+          v.playbackRate = baseRate;
           return;
         }
 
-        // Both are playing: drift correction
-        if (drift > 1.5) {
-          v.currentTime = target;
-        } else if (drift > 0.4) {
-          const baseRate = (_mxsSettings && _mxsSettings.speed) || 1.0;
-          v.playbackRate = v.currentTime < target ? (baseRate * 1.08) : (baseRate * 0.92);
-        } else {
-          const baseRate = (_mxsSettings && _mxsSettings.speed) || 1.0;
-          if (v.playbackRate !== baseRate) {
-            v.playbackRate = baseRate;
+        // Both are playing: check if guest is buffering or recently seeked
+        if (v.seeking || v.readyState < 3) return;
+        if (Date.now() - (WP._lastHardSeek || 0) < 3500) return;
+
+        // 3-Tier drift synchronization
+        if (absDrift <= 0.45) {
+          // Tier 1: In sync - standard speed
+          if (v.playbackRate !== baseRate) v.playbackRate = baseRate;
+        } else if (absDrift <= 3.0) {
+          // Tier 2: Dynamic smooth rate steering without buffering/stuttering
+          if (drift > 0) {
+            v.playbackRate = Math.min(1.25, baseRate * 1.08);
+          } else {
+            v.playbackRate = Math.max(0.75, baseRate * 0.92);
           }
+        } else {
+          // Tier 3: Hard seek for large drift (>3s)
+          v.currentTime = target;
+          WP._lastHardSeek = Date.now();
+          v.playbackRate = baseRate;
         }
 
       } else if (data.type === 'play') {
-        const lag = Math.max(0, (Date.now() - (data.ts || Date.now())) / 1000);
-        const target = (data.ct || 0) + lag;
+        const target = _calcTargetTime(data, true);
         const lockEl = document.getElementById('wpGuestLock');
         if (lockEl) lockEl.classList.remove('active');
+        const baseRate = (_mxsSettings && _mxsSettings.speed) || 1.0;
 
         if (!v || (!v.src && !v.currentSrc) || v.readyState < 2) {
           if (v) {
@@ -12445,16 +12513,21 @@
           }
           return;
         }
-        if (Math.abs(v.currentTime - target) > 1.2) v.currentTime = target;
+        if (Math.abs(v.currentTime - target) > 1.5) {
+          v.currentTime = target;
+          WP._lastHardSeek = Date.now();
+        }
+        v.playbackRate = baseRate;
         _safePlay(v);
         _wpToast('▶ Host resumed');
 
       } else if (data.type === 'pause') {
-        const target = data.ct || 0;
+        const target = typeof data.ct === 'number' ? data.ct : (v ? v.currentTime : 0);
         const lockEl = document.getElementById('wpGuestLock');
         const lockMsg = document.getElementById('wpGuestLockMsg');
         if (lockEl) lockEl.classList.add('active');
         if (lockMsg) lockMsg.textContent = 'Host paused';
+        const baseRate = (_mxsSettings && _mxsSettings.speed) || 1.0;
 
         if (!v || (!v.src && !v.currentSrc) || v.readyState < 2) {
           if (v) {
@@ -12464,16 +12537,22 @@
           return;
         }
         v.pause();
-        if (Math.abs(v.currentTime - target) > 1.2) v.currentTime = target;
+        if (Math.abs(v.currentTime - target) > 0.8) {
+          v.currentTime = target;
+        }
+        v.playbackRate = baseRate;
         _wpToast('⏸ Host paused');
 
       } else if (data.type === 'seek') {
-        const target = data.ct || 0;
+        const target = typeof data.ct === 'number' ? data.ct : 0;
+        const baseRate = (_mxsSettings && _mxsSettings.speed) || 1.0;
         if (!v || (!v.src && !v.currentSrc) || v.readyState < 2) {
           if (v) v._wpPendingSeek = target;
           return;
         }
         v.currentTime = target;
+        WP._lastHardSeek = Date.now();
+        v.playbackRate = baseRate;
         _wpToast(`⏩ Host seeked to ${_fmtTime(data.ct)}`);
 
       } else if (data.type === 'state') {
@@ -12484,8 +12563,8 @@
         const rawId = data.mId || data.mParam || data.sParam;
         const id = rawId ? parseInt(String(rawId).split('-')[0], 10) : null;
         const isPlaying = !!data.playing;
-        const lag = Math.max(0, (Date.now() - (data.ts || Date.now())) / 1000);
-        const targetCt = (typeof data.ct === 'number' ? data.ct : 0) + (isPlaying ? lag : 0);
+        const targetCt = _calcTargetTime(data, isPlaying);
+        const baseRate = (_mxsSettings && _mxsSettings.speed) || 1.0;
 
         if (id) {
           if (window._wpPollInterval) {
@@ -12499,7 +12578,11 @@
           }
 
           if (v && v.readyState >= 2) {
-            v.currentTime = targetCt;
+            if (Math.abs(v.currentTime - targetCt) > 1.2) {
+              v.currentTime = targetCt;
+              WP._lastHardSeek = Date.now();
+            }
+            v.playbackRate = baseRate;
             const lockEl = document.getElementById('wpGuestLock');
             if (lockEl) lockEl.classList.toggle('active', !isPlaying);
             if (isPlaying) _safePlay(v);
@@ -12567,7 +12650,7 @@
       v.addEventListener('seeked', () => {
         if (!WP.isHost || !WP.code) return;
         const now = Date.now();
-        if (now - _seekDebounce < 350) return;
+        if (now - _seekDebounce < 250) return;
         _seekDebounce = now;
         _broadcast({
           type: 'seek',
@@ -12639,6 +12722,7 @@
         engine: engine,
         ct: v ? v.currentTime : 0,
         playing: v ? !v.paused : false,
+        speed: v ? (v.playbackRate || 1) : 1,
         ts: Date.now(),
         mId: movieId,
         mType: mediaType,
@@ -12662,8 +12746,13 @@
           _wpToast('👤 A friend joined your Watch Party!');
         });
         conn.on('data', data => {
-          if (data && data.type === 'request-state') {
+          if (!data) return;
+          if (data.type === 'request-state') {
             conn.send(_hostGetState());
+          } else if (data.type === 'wp-ping') {
+            try {
+              conn.send({ type: 'wp-pong', t0: data.t0, tHost: Date.now() });
+            } catch (_) {}
           }
         });
         conn.on('close', () => {
@@ -12715,12 +12804,14 @@
             hostConn.on('open', () => {
               opened = true;
               try { hostConn.send({ type: 'request-state' }); } catch (_) {}
+              try { hostConn.send({ type: 'wp-ping', t0: Date.now() }); } catch (_) {}
+              _startGuestPing();
               const v = _vid();
               if (v && !v._wpGuestHooked) {
                 v._wpGuestHooked = true;
                 v.addEventListener('loadedmetadata', () => {
                   if (WP.hostConn && !WP.isHost && WP.hostConn.open) {
-                    WP.hostConn.send({ type: 'request-state' });
+                    try { WP.hostConn.send({ type: 'request-state' }); } catch (_) {}
                   }
                 });
               }
@@ -12729,6 +12820,7 @@
             hostConn.on('data', _applySync);
             hostConn.on('close', () => {
               _wpToast('⚠ Host disconnected from party');
+              _stopGuestPing();
               document.getElementById('wpGuestLock').classList.remove('active');
             });
             hostConn.on('error', err => {
@@ -12744,6 +12836,7 @@
     /* ── Leave / cleanup ─────────────────────────────────────── */
     function _leave() {
       _stopHostHeartbeat();
+      _stopGuestPing();
       if (window._wpPollInterval) {
         clearInterval(window._wpPollInterval);
         window._wpPollInterval = null;
@@ -12751,6 +12844,13 @@
       if (WP.peer) { try { WP.peer.destroy(); } catch (_) {} WP.peer = null; }
       WP.conns = []; WP.hostConn = null;
       WP.code = null; WP.isHost = false;
+      WP._clockOffset = 0;
+      WP._rtt = 0;
+      WP._lastHardSeek = 0;
+      const v = _vid();
+      if (v) {
+        try { v.playbackRate = (_mxsSettings && _mxsSettings.speed) || 1.0; } catch (_) {}
+      }
       document.getElementById('wpHud').classList.remove('active');
       const hudMenu = document.getElementById('wpHudMenu');
       if (hudMenu) hudMenu.classList.remove('open');
