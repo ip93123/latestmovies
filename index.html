@@ -13090,22 +13090,31 @@
 
       const mParam = params.get('m');
       const tvParam = params.get('s');
-      const engParam = params.get('engine') || 'hackymax';
+      const engParam = params.get('engine');
       const paramVal = mParam || tvParam;
       if (paramVal) {
         const id = parseInt(paramVal, 10);
+        const mType = tvParam ? 'tv' : 'movie';
         window._currentPlayingId = id;
-        window._currentPlayingType = tvParam ? 'tv' : 'movie';
+        window._currentPlayingType = mType;
         window._currentPlayingSeason = 1;
         window._currentPlayingEpisode = 1;
-        window._currentPlayingEngine = engParam;
         if (typeof openModal === 'function') {
-          openModal(id, tvParam ? 'tv' : 'movie');
+          openModal(id, mType);
         }
         const overlay = document.getElementById('playerOverlay');
         if (overlay) overlay.classList.add('open');
-        if (typeof initMaxPlayer === 'function') {
-          initMaxPlayer(id, tvParam ? 'tv' : 'movie', 1, 1, engParam);
+        if (engParam && (engParam === 'hackymax' || engParam === 'sinmax' || engParam === 'zeemax')) {
+          window._currentPlayingEngine = engParam;
+          if (typeof initMaxPlayer === 'function') {
+            initMaxPlayer(id, mType, 1, 1, engParam);
+          }
+        } else {
+          getModalServerUrls(id, mType, 1, 1).then(data => {
+            if (data && data.urls && data.urls.length) {
+              playStream(data.urls[0], data.urls, data.labels);
+            }
+          }).catch(() => {});
         }
       }
 
