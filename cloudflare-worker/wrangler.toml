@@ -1,0 +1,15 @@
+name = "hacky-proxy"
+main = "worker.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Workers free plan limits:
+#   • 100,000 requests/day
+#   • 10ms CPU per request (I/O time not counted — streaming is fine)
+#   • Unlimited bandwidth
+#
+# No routes configured here — the worker is accessed via its workers.dev URL.
+# If you add a custom domain later, add a route:
+# [[routes]]
+# pattern = "proxy.yourdomain.com/*"
+# zone_name = "yourdomain.com"

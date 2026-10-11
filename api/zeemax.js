@@ -142,7 +142,9 @@ export default async function handler(req, res) {
   }
 
   if (streamInfo && streamInfo.streamUrl) {
-    const proxied = `/api/hls-proxy?url=${encodeURIComponent(streamInfo.streamUrl)}`;
+    const PROXY_BASE = process.env.CF_PROXY_URL || '/api/hls-proxy';
+    const proxied = `${PROXY_BASE}?url=${encodeURIComponent(streamInfo.streamUrl)}`;
+
     return res.status(200).json({
       url: proxied,
       format: streamInfo.format,

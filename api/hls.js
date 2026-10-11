@@ -148,9 +148,13 @@ export default async function handler(req, res) {
     } catch (_) {}
   }
 
+  // Route stream through the fastest available proxy:
+  //   CF_PROXY_URL = Cloudflare Worker (edge, no timeout, no chunking)
+  //   fallback     = /api/hls-proxy   (Vercel serverless, 4MB chunks, 10s limit)
+  const PROXY_BASE = process.env.CF_PROXY_URL || '/api/hls-proxy';
+
   if (streamInfo && streamInfo.streamUrl) {
-    // Wrap through our stream proxy
-    const proxied = `/api/hls-proxy?url=${encodeURIComponent(streamInfo.streamUrl)}`;
+    const proxied = `${PROXY_BASE}?url=${encodeURIComponent(streamInfo.streamUrl)}`;
     return res.status(200).json({
       url: proxied,
       format: streamInfo.format,
