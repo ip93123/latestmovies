@@ -2241,30 +2241,60 @@
       position: absolute;
       inset: 0;
       pointer-events: none;
-      z-index: 50;
+      z-index: 55;
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
       align-items: center;
-      padding-bottom: 5%;
+      padding-bottom: 6%;
+      box-sizing: border-box;
     }
     #subText {
-      max-width: 85%;
+      max-width: 90%;
       text-align: center;
-      padding: 0.4rem 1rem;
+      padding: 0.35rem 1.2rem;
       background: var(--sub-bg, transparent);
       border-radius: 6px;
-      font-size: var(--sub-size, clamp(1rem, 2.2vw, 1.35rem));
-      font-weight: 600;
-      color: var(--sub-color, #fff);
-      text-shadow: var(--sub-shadow, 0 2px 8px rgba(0,0,0,1), 1px 1px 0 #000, -1px -1px 0 rgba(0,0,0,0.8));
+      font-size: var(--sub-size, clamp(1.6rem, 3.4vw, 2.85rem));
+      font-weight: 700;
+      color: var(--sub-color, #ffffff);
+      text-shadow: var(--sub-shadow, 0 2px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.95), 1px 1px 2px #000, -1px -1px 2px #000);
       line-height: 1.45;
-      letter-spacing: 0.01em;
-      font-family: 'Noto Sans Sinhala', 'Iskoola Pota', 'Inter', sans-serif;
+      letter-spacing: 0.015em;
+      font-family: 'Noto Sans Sinhala', 'Iskoola Pota', 'Inter', -apple-system, sans-serif;
       display: none;
-      transition: color 0.2s, font-size 0.2s, background 0.2s;
+      transition: color 0.15s, font-size 0.15s, background 0.15s;
+      user-select: none;
     }
-    #subText.active { display: block; }
+    #subText.active { display: inline-block; }
+
+    /* When in fullscreen, ensure font scales nicely and overlay stays on top */
+    #playerContainer:fullscreen #subOverlay,
+    #playerContainer:-webkit-full-screen #subOverlay,
+    #maxPlayerWrap:fullscreen #subOverlay,
+    #maxPlayerWrap:-webkit-full-screen #subOverlay {
+      z-index: 1000 !important;
+      padding-bottom: 7% !important;
+    }
+
+    #playerContainer:fullscreen #subText,
+    #playerContainer:-webkit-full-screen #subText,
+    #maxPlayerWrap:fullscreen #subText,
+    #maxPlayerWrap:-webkit-full-screen #subText {
+      font-size: var(--sub-size, clamp(1.9rem, 3.8vw, 3.2rem)) !important;
+      font-weight: 700 !important;
+    }
+
+    /* Fallback native WebVTT cue styling for direct video fullscreen */
+    video::cue {
+      background: transparent !important;
+      color: var(--sub-color, #ffffff) !important;
+      font-family: 'Noto Sans Sinhala', 'Iskoola Pota', 'Inter', sans-serif !important;
+      font-size: clamp(1.8rem, 3.6vw, 3rem) !important;
+      font-weight: 700 !important;
+      text-shadow: 0 2px 4px #000, 0 0 12px #000, 1px 1px 2px #000, -1px -1px 2px #000 !important;
+      line-height: 1.45 !important;
+    }
 
 
 
@@ -2302,13 +2332,12 @@
     #maxPlayerWrap.buffering #maxBuffering { display: flex !important; }
     #maxPlayerWrap.ready    #maxBuffering { display: none  !important; }
     #maxPlayerWrap.error    #maxError     { display: flex !important; }
-    /* Cue reset: prevent native video subtitles and black background */
-    ::cue, video::cue {
+    /* Cue reset: prevent native duplicate subtitles and black background in windowed mode */
+    video:not(:fullscreen)::cue {
       display: none !important;
       opacity: 0 !important;
       visibility: hidden !important;
       background: transparent !important;
-      color: transparent !important;
     }
 
     /* ── Max Player Settings Panel ───────────────────────────────────── */
@@ -7415,6 +7444,7 @@
 
     function _mxsApplySubStyle() {
       const el = document.getElementById('playerContainer') || document.body;
+      const wrap = document.getElementById('maxPlayerWrap');
       const bgHex = (_mxsSettings.subBg || '#000000').replace('#', '');
       const bgR = parseInt(bgHex.slice(0,2),16) || 0, bgG = parseInt(bgHex.slice(2,4),16) || 0, bgB = parseInt(bgHex.slice(4,6),16) || 0;
       const op = Math.max(0, Math.min(100, +_mxsSettings.subBgOp || 0));
@@ -7422,18 +7452,26 @@
         ? `rgba(${bgR},${bgG},${bgB},${(op/100).toFixed(2)})`
         : 'transparent';
       const shadow = _mxsSettings.subShadow !== false
-        ? '0 2px 8px rgba(0,0,0,1), 1px 1px 0 #000, -1px -1px 0 rgba(0,0,0,0.8)'
+        ? '0 2px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.95), 1px 1px 2px #000, -1px -1px 2px #000'
         : 'none';
-      el.style.setProperty('--sub-color', _mxsSettings.subColor || '#ffffff');
-      el.style.setProperty('--sub-size', `${_mxsSettings.subSize || 100}%`);
-      el.style.setProperty('--sub-bg', bgVal);
-      el.style.setProperty('--sub-shadow', shadow);
+
+      const scale = Math.max(50, Math.min(200, +_mxsSettings.subSize || 100)) / 100;
+      const sizeVal = `calc(clamp(1.6rem, 3.4vw, 2.85rem) * ${scale})`;
+
+      const targets = [el, wrap, document.documentElement].filter(Boolean);
+      targets.forEach(t => {
+        t.style.setProperty('--sub-color', _mxsSettings.subColor || '#ffffff');
+        t.style.setProperty('--sub-size', sizeVal);
+        t.style.setProperty('--sub-bg', bgVal);
+        t.style.setProperty('--sub-shadow', shadow);
+      });
+
       // Position
       const overlay = document.getElementById('subOverlay');
       if (overlay) {
         overlay.style.justifyContent = _mxsSettings.subPos === 'top' ? 'flex-start' : 'flex-end';
         overlay.style.paddingTop = _mxsSettings.subPos === 'top' ? '5%' : '0';
-        overlay.style.paddingBottom = _mxsSettings.subPos === 'bottom' ? '5%' : '0';
+        overlay.style.paddingBottom = _mxsSettings.subPos === 'bottom' ? '6%' : '0';
       }
     }
 
@@ -7610,6 +7648,7 @@
           else { cues = text.includes('WEBVTT') ? parseVtt(text) : parseSrt(text); }
           if (cues && cues.length) {
             _subCues = cues; _subLoaded = true; _subOffset = 0;
+            _attachSubOverlayToActiveWrap();
             if (mxsFileName) { mxsFileName.textContent = `✅ ${file.name} (${cues.length} cues)`; mxsFileName.style.display = 'block'; }
             if (dropZone) dropZone.style.borderColor = 'rgba(46,204,113,0.6)';
             if (_maxMode) {
@@ -7830,12 +7869,77 @@
     if (_skipBackBtn) _skipBackBtn.addEventListener('click', () => _maxSkip(-10));
     if (_skipFwdBtn)  _skipFwdBtn.addEventListener('click',  () => _maxSkip(10));
 
-    // Keyboard shortcuts: Left arrow = −10s, Right arrow = +10s (when Max active)
+    // ── Fullscreen & Subtitle Overlay Helpers ──
+    function _attachSubOverlayToActiveWrap() {
+      const overlay = document.getElementById('subOverlay');
+      const maxWrap = document.getElementById('maxPlayerWrap');
+      const pContainer = document.getElementById('playerContainer');
+      if (!overlay) return;
+      if (_maxMode && maxWrap) {
+        if (overlay.parentElement !== maxWrap) maxWrap.appendChild(overlay);
+      } else if (pContainer) {
+        if (overlay.parentElement !== pContainer) pContainer.appendChild(overlay);
+      }
+    }
+
+    function _togglePlayerFullscreen() {
+      const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+      if (!fsEl) {
+        const wrap = (_maxMode && document.getElementById('maxPlayerWrap')) || document.getElementById('playerContainer');
+        if (wrap && wrap.requestFullscreen) wrap.requestFullscreen().catch(() => {});
+        else if (wrap && wrap.webkitRequestFullscreen) wrap.webkitRequestFullscreen();
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      }
+    }
+
+    let _fsHandlersSetup = false;
+    function _setupMaxFullscreenHandlers() {
+      if (!_maxVideo || _fsHandlersSetup) return;
+      _fsHandlersSetup = true;
+      const wrap = document.getElementById('maxPlayerWrap') || document.getElementById('playerContainer');
+      const origRequestFullscreen = _maxVideo.requestFullscreen || _maxVideo.webkitRequestFullscreen;
+
+      _maxVideo.requestFullscreen = function(options) {
+        const target = document.getElementById('maxPlayerWrap') || document.getElementById('playerContainer');
+        if (target && target.requestFullscreen) return target.requestFullscreen(options);
+        if (target && target.webkitRequestFullscreen) return target.webkitRequestFullscreen(options);
+        if (origRequestFullscreen) return origRequestFullscreen.call(_maxVideo, options);
+      };
+      if (_maxVideo.webkitRequestFullscreen) {
+        _maxVideo.webkitRequestFullscreen = _maxVideo.requestFullscreen;
+      }
+      if (_maxVideo.webkitEnterFullscreen) {
+        _maxVideo.webkitEnterFullscreen = function() {
+          const target = document.getElementById('maxPlayerWrap') || document.getElementById('playerContainer');
+          if (target && target.requestFullscreen) return target.requestFullscreen();
+          if (target && target.webkitRequestFullscreen) return target.webkitRequestFullscreen();
+        };
+      }
+
+      _maxVideo.addEventListener('dblclick', (e) => {
+        e.preventDefault();
+        _togglePlayerFullscreen();
+      });
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+      _attachSubOverlayToActiveWrap();
+      _mxsApplySubStyle();
+    });
+    document.addEventListener('webkitfullscreenchange', () => {
+      _attachSubOverlayToActiveWrap();
+      _mxsApplySubStyle();
+    });
+
+    // Keyboard shortcuts: Left arrow = −10s, Right arrow = +10s, F = Fullscreen (when Max active)
     document.addEventListener('keydown', (e) => {
       if (!_maxMode) return;
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       if (e.key === 'ArrowLeft')  { e.preventDefault(); _maxSkip(-10); }
       if (e.key === 'ArrowRight') { e.preventDefault(); _maxSkip(10); }
+      if (e.key === 'f' || e.key === 'F') { e.preventDefault(); _togglePlayerFullscreen(); }
     });
 
     // Lazy-load hls.js from CDN (only once, only when Max is selected)
@@ -7853,6 +7957,7 @@
     // Destroy any existing hls.js instance and reset UI
     function _destroyMax() {
       _maxMode = false;
+      _attachSubOverlayToActiveWrap();
       if (typeof _mxsCancelCountdown === 'function') _mxsCancelCountdown();
       if (_maxSubRaf) { cancelAnimationFrame(_maxSubRaf); _maxSubRaf = null; }
       if (_maxHls)    { _maxHls.destroy(); _maxHls = null; }
@@ -7922,6 +8027,7 @@
           _subCues = cues;
           _subLoaded = true;
           _subOffset = 0;
+          _attachSubOverlayToActiveWrap();
           if (_maxMode) {
             if (_maxSubRaf) cancelAnimationFrame(_maxSubRaf);
             _maxSubRaf = requestAnimationFrame(_maxSubLoop);
@@ -8007,6 +8113,8 @@
 
       // ── Initialise hls.js ─────────────────────────────────────────────
       _maxMode = true;
+      _attachSubOverlayToActiveWrap();
+      _setupMaxFullscreenHandlers();
 
       if (Hls.isSupported()) {
         _maxHls = new Hls({
@@ -8287,20 +8395,7 @@
     }
 
     document.getElementById('playerFullscreenBtn').addEventListener('click', () => {
-      const pContainer = document.getElementById('playerContainer');
-      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        if (pContainer.requestFullscreen) {
-          pContainer.requestFullscreen().catch(() => { });
-        } else if (pContainer.webkitRequestFullscreen) {
-          pContainer.webkitRequestFullscreen();
-        }
-      } else {
-        if (document.exitFullscreen) {
-          document.exitFullscreen().catch(() => { });
-        } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen();
-        }
-      }
+      _togglePlayerFullscreen();
     });
 
     document.getElementById('playerOverlay').addEventListener('click', e => {

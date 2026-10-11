@@ -38,7 +38,7 @@ const M3U8_HEADERS = {
 // Try to get direct HLS stream URL via vidlove API (server-side only, no CORS issue)
 async function getVidloveStream(id, type, season, episode) {
   const isTv = type === 'tv';
-  const sources = ['dcloud', 'moviebox2', 'moviebox'];
+  const sources = ['moviebox', 'moviebox2', 'dcloud'];
 
   for (const src of sources) {
     try {
