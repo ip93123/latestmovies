@@ -1,5 +1,7 @@
-// HLS stream proxy — rewrites manifest so all segment URLs also route through this proxy
-// This sidesteps CORS restrictions on external CDN (ravenflix, etc.)
+// Stream proxy — handles HLS playlists, TS segments, and direct MP4 streams
+// Sidesteps ravenflix referer check and CORS restrictions
+
+import { Readable } from 'stream';
 
 const PROXY_HEADERS = {
   'Referer': 'https://vidlove.cc/',
@@ -20,8 +22,17 @@ export default async function handler(req, res) {
   }
 
   try {
-    const upstream = await fetch(targetUrl, { headers: PROXY_HEADERS, signal: AbortSignal.timeout(8000) });
-    if (!upstream.ok) {
+    const upstreamHeaders = { ...PROXY_HEADERS };
+    if (req.headers && req.headers['range']) {
+      upstreamHeaders['Range'] = req.headers['range'];
+    }
+
+    const upstream = await fetch(targetUrl, {
+      headers: upstreamHeaders,
+      signal: AbortSignal.timeout(12000)
+    });
+
+    if (!upstream.ok && upstream.status !== 206) {
       return res.status(upstream.status).send(`Upstream error: ${upstream.status}`);
     }
 
@@ -54,14 +65,26 @@ export default async function handler(req, res) {
       return res.status(200).send(rewritten);
     }
 
-    // For TS segments / key files — stream bytes through
+    // Direct MP4 or TS segment streaming with Range support
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Cache-Control', 'public, max-age=3600');
-    res.setHeader('Content-Type', contentType || 'video/MP2T');
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Range, Accept-Ranges, Content-Length, Content-Type');
+    res.setHeader('Accept-Ranges', 'bytes');
+    res.setHeader('Content-Type', contentType || 'video/mp4');
 
-    const buffer = await upstream.arrayBuffer();
-    return res.status(200).send(Buffer.from(buffer));
+    if (upstream.headers.has('content-range')) {
+      res.setHeader('Content-Range', upstream.headers.get('content-range'));
+    }
+    if (upstream.headers.has('content-length')) {
+      res.setHeader('Content-Length', upstream.headers.get('content-length'));
+    }
+
+    res.status(upstream.status);
+
+    const nodeStream = Readable.fromWeb(upstream.body);
+    nodeStream.pipe(res);
   } catch (err) {
-    return res.status(502).send('Proxy error: ' + err.message);
+    if (!res.headersSent) {
+      return res.status(502).send('Proxy error: ' + err.message);
+    }
   }
 }

@@ -2285,15 +2285,12 @@
       font-weight: 700 !important;
     }
 
-    /* Fallback native WebVTT cue styling for direct video fullscreen */
-    video::cue {
-      background: transparent !important;
-      color: var(--sub-color, #ffffff) !important;
-      font-family: 'Noto Sans Sinhala', 'Iskoola Pota', 'Inter', sans-serif !important;
-      font-size: clamp(1.8rem, 3.6vw, 3rem) !important;
-      font-weight: 700 !important;
-      text-shadow: 0 2px 4px #000, 0 0 12px #000, 1px 1px 2px #000, -1px -1px 2px #000 !important;
-      line-height: 1.45 !important;
+    /* Suppress any browser native/in-band stream cues so they never clash with custom sub overlay */
+    #maxVideo::cue, video::cue {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      font-size: 0 !important;
     }
 
 
@@ -8808,8 +8805,9 @@
         };
       }
 
-      // ── Fetch HLS stream URL & Subtitle from /api/hls ──────────────────
+      // ── Fetch stream URL & Subtitle from /api/hls ──────────────────
       let streamUrl = null;
+      let streamFormat = 'hls';
       let subtitleUrl = null;
       try {
         const params = new URLSearchParams({ id: tmdbId, type: mediaType });
@@ -8818,6 +8816,7 @@
         const resp = await fetch(`/api/hls?${params}`, { signal: AbortSignal.timeout(6000) });
         const data = await resp.json();
         if (data.url) streamUrl = data.url;
+        if (data.format) streamFormat = data.format;
         if (data.subtitle) subtitleUrl = data.subtitle;
       } catch (_) {}
 
@@ -8837,13 +8836,56 @@
         _loadMaxSubtitleFromUrl(finalSub);
       }
 
-      // ── Initialise hls.js ─────────────────────────────────────────────
+      // ── Initialise player controls ────────────────────────────────────
       _maxMode = true;
       _attachSubOverlayToActiveWrap();
       _setupMaxFullscreenHandlers();
       _initMaxCustomControls();
 
-      if (Hls.isSupported()) {
+      if (streamFormat === 'mp4') {
+        // Direct clean 1080p MP4 stream (No burned-in Arabic/Persian subtitles)
+        if (_maxHls) { _maxHls.destroy(); _maxHls = null; }
+        const _suppressNativeTracks = () => {
+          if (_maxVideo && _maxVideo.textTracks) {
+            for (let i = 0; i < _maxVideo.textTracks.length; i++) {
+              try { _maxVideo.textTracks[i].mode = 'disabled'; } catch (_) {}
+            }
+          }
+        };
+        _suppressNativeTracks();
+        if (_maxVideo && _maxVideo.textTracks) {
+          _maxVideo.textTracks.addEventListener('addtrack', (e) => {
+            if (e.track) try { e.track.mode = 'disabled'; } catch (_) {}
+          });
+        }
+        _maxVideo.src = streamUrl;
+        _maxVideo.playbackRate = _mxsSettings.speed;
+        _maxVideo.play().catch(() => {
+          _maxWrap.classList.remove('buffering');
+        });
+        _maxVideo.addEventListener('loadeddata', () => {
+          _suppressNativeTracks();
+          _maxWrap.classList.remove('buffering');
+          _maxWrap.classList.add('ready');
+          _updateMaxQuality();
+          if (_subCues.length) {
+            if (_maxSubRaf) cancelAnimationFrame(_maxSubRaf);
+            _maxSubRaf = requestAnimationFrame(_maxSubLoop);
+          }
+          _mxsRefreshQualityGrid();
+        }, { once: true });
+        _maxVideo.addEventListener('error', () => {
+          if (_maxMode && streamFormat === 'mp4') {
+            _maxWrap.classList.remove('buffering', 'ready');
+            _maxWrap.classList.add('error');
+            if (_maxErrMsg) _maxErrMsg.innerHTML = `Stream error<br><span style="color:#E8C97A;font-weight:600;">Switching to Infinity...</span>`;
+            _fallbackFromMax();
+          }
+        }, { once: true });
+        _maxVideo.addEventListener('waiting', () => _maxWrap.classList.add('buffering'));
+        _maxVideo.addEventListener('playing', () => { _suppressNativeTracks(); _maxWrap.classList.remove('buffering'); });
+        _maxVideo.addEventListener('canplay', () => _maxWrap.classList.remove('buffering'));
+      } else if (Hls.isSupported()) {
         _maxHls = new Hls({
           enableWorker: true,
           lowLatencyMode: false,

@@ -35,10 +35,11 @@ const M3U8_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
 };
 
-// Get direct HLS (.m3u8) stream URL via vidlove API with fast timeouts
+// Prioritize MovieBox (pure clean 1080p, no burned-in Persian/Arabic subs)
+// Falls back to DCloud only if MovieBox is unavailable
 async function getVidloveStream(id, type, season, episode) {
   const isTv = type === 'tv';
-  const sources = ['dcloud'];
+  const sources = ['moviebox', 'dcloud'];
 
   for (const src of sources) {
     try {
@@ -56,17 +57,14 @@ async function getVidloveStream(id, type, season, episode) {
       const streamUrl = data && data.source && data.source.url;
       if (!streamUrl) continue;
 
-      // Fast HEAD probe to verify the stream URL is responsive
-      const probe = await fetch(streamUrl, {
-        method: 'HEAD',
-        headers: M3U8_HEADERS,
-        signal: AbortSignal.timeout(3000)
-      });
-      if (probe.ok) {
-        return streamUrl;
-      }
+      const format = (streamUrl.includes('.m3u8') || (data.source && data.source.label === 'DCloud')) ? 'hls' : 'mp4';
+      return {
+        streamUrl,
+        format,
+        label: data.source.label || src
+      };
     } catch (_) {
-      // Try next
+      // Try next source
     }
   }
   return null;
@@ -82,11 +80,11 @@ export default async function handler(req, res) {
   const subKey = type === 'tv' ? `${id}_S${season}_E${episode}` : `${id}`;
   const subtitleUrl = SUBTITLE_MAP[subKey] || SUBTITLE_MAP[id] || null;
 
-  // ── 1. Try vidlove API for direct HLS stream (fast, resolves in ~1s) ───
-  let streamUrl = await getVidloveStream(id, type, season, episode);
+  // ── 1. Try vidlove API for stream (MovieBox clean master prioritized) ───
+  let streamInfo = await getVidloveStream(id, type, season, episode);
 
   // ── 2. Fallback: scrape .m3u8 link from embed providers with short timeout ──
-  if (!streamUrl) {
+  if (!streamInfo) {
     const legacyHeaders = {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -116,18 +114,23 @@ export default async function handler(req, res) {
         const html = await resp.text();
         const match = html.match(M3U8_RE);
         if (match) {
-          streamUrl = match[1];
+          streamInfo = { streamUrl: match[1], format: 'hls', label: 'Legacy' };
           break;
         }
       } catch (_) {}
     }
   }
 
-  if (streamUrl) {
-    // Wrap through our HLS proxy so browser bypasses ravenflix referer/CORS check
-    const proxied = `/api/hls-proxy?url=${encodeURIComponent(streamUrl)}`;
-    return res.status(200).json({ url: proxied, subtitle: subtitleUrl });
+  if (streamInfo && streamInfo.streamUrl) {
+    // Wrap through our stream proxy
+    const proxied = `/api/hls-proxy?url=${encodeURIComponent(streamInfo.streamUrl)}`;
+    return res.status(200).json({
+      url: proxied,
+      format: streamInfo.format,
+      source: streamInfo.label,
+      subtitle: subtitleUrl
+    });
   }
 
-  return res.status(404).json({ error: 'No HLS stream found', subtitle: subtitleUrl });
+  return res.status(404).json({ error: 'No stream found', subtitle: subtitleUrl });
 }
