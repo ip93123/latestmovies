@@ -2317,6 +2317,158 @@
       50%       { box-shadow: 0 0 28px rgba(232,201,122,0.85); }
     }
 
+    /* ── HackyMax player server button (Default - Electric Blue theme) ─── */
+    .player-server-btn.hackymax-btn,
+    .modal-stream-pill.hackymax-btn {
+      background: linear-gradient(135deg, #00C6FF 0%, #0072FF 100%) !important;
+      color: #ffffff !important;
+      font-weight: 800 !important;
+      border-color: transparent !important;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 14px rgba(0, 198, 255, 0.45);
+    }
+    .player-server-btn.hackymax-btn:hover,
+    .modal-stream-pill.hackymax-btn:hover {
+      box-shadow: 0 0 22px rgba(0, 198, 255, 0.75);
+      transform: translateY(-1px);
+    }
+    .player-server-btn.hackymax-btn.active {
+      box-shadow: 0 0 28px rgba(0, 198, 255, 0.9);
+      animation: hackymaxPulse 2.5s ease-in-out infinite;
+    }
+    @keyframes hackymaxPulse {
+      0%, 100% { box-shadow: 0 0 14px rgba(0, 198, 255, 0.5); }
+      50%       { box-shadow: 0 0 32px rgba(0, 198, 255, 0.95); }
+    }
+
+    /* ── Dynamic Watch Party Theme CSS Variables ──────────────────────── */
+    :root {
+      --wp-theme: #00C6FF;
+      --wp-theme-grad: linear-gradient(135deg, #0072FF, #00C6FF);
+      --wp-theme-glow: rgba(0, 198, 255, 0.45);
+    }
+    /* Theme variants applied dynamically */
+    body.wp-theme-hackymax {
+      --wp-theme: #00C6FF;
+      --wp-theme-grad: linear-gradient(135deg, #0072FF, #00C6FF);
+      --wp-theme-glow: rgba(0, 198, 255, 0.45);
+    }
+    body.wp-theme-sinmax {
+      --wp-theme: #FF416C;
+      --wp-theme-grad: linear-gradient(135deg, #FF4B2B, #FF416C);
+      --wp-theme-glow: rgba(255, 65, 108, 0.45);
+    }
+    body.wp-theme-zeemax {
+      --wp-theme: #E8C97A;
+      --wp-theme-grad: linear-gradient(135deg, #D4AF37, #E8C97A);
+      --wp-theme-glow: rgba(232, 201, 122, 0.45);
+    }
+
+    /* Watch Party Setup Tabs & Join Input */
+    .wp-tabs {
+      display: flex;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 1.3rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      gap: 6px;
+    }
+    .wp-tab-btn {
+      flex: 1;
+      padding: 9px 12px;
+      border: none;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.6);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .wp-tab-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .wp-tab-btn.active {
+      background: var(--wp-theme-grad);
+      color: #fff;
+      box-shadow: 0 4px 14px var(--wp-theme-glow);
+    }
+    .wp-input-field {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1.5px solid var(--wp-theme);
+      border-radius: 12px;
+      padding: 12px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.2rem;
+      letter-spacing: 8px;
+      text-align: center;
+      color: #fff;
+      outline: none;
+      transition: all 0.25s ease;
+      text-transform: uppercase;
+      box-sizing: border-box;
+    }
+    .wp-input-field:focus {
+      box-shadow: 0 0 20px var(--wp-theme-glow);
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .wp-action-btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      background: var(--wp-theme-grad);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 16px var(--wp-theme-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .wp-action-btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+    }
+    .wp-action-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    #navWpQuickBtn {
+      background: rgba(0, 198, 255, 0.12);
+      border: 1px solid rgba(0, 198, 255, 0.35);
+      color: #00C6FF;
+      border-radius: 10px;
+      padding: 7px 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    #navWpQuickBtn:hover {
+      background: rgba(0, 198, 255, 0.25);
+      border-color: #00C6FF;
+      color: #fff;
+      box-shadow: 0 0 14px rgba(0, 198, 255, 0.4);
+    }
+
     /* ── SinMax Player server button ──────────────────────────────────── */
     .player-server-btn.sinmax-btn,
     .modal-stream-pill.sinmax-btn {
@@ -5342,9 +5494,16 @@
       <li><a href="#wheretowatch">Streaming</a></li>
       <li><a href="#toprated">Top Rated</a></li>
       <li><a href="#fourk">4K</a></li>
+      <li><a href="#sinsub" style="color:#2ECC71;font-weight:700;" title="Sinhala Subtitled Movies">🇱🇰 Sin Sub</a></li>
       <li><a href="javascript:void(0)" id="navWishlistLink" onclick="openWishlist()" title="WishList">WishList</a></li>
+      <li><a href="javascript:void(0)" id="navWatchPartyLink" onclick="window.openWatchPartyModal('join')" title="Join or Host Watch Party" style="color:var(--wp-theme,#00C6FF);display:flex;align-items:center;gap:5px;font-weight:600;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Party</a></li>
     </ul>
-    <div class="nav-search" id="navSearch">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button id="navWpQuickBtn" onclick="window.openWatchPartyModal('join')" title="Watch Party — Join with Code or Host" aria-label="Watch Party">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="19" cy="9" r="3"/><path d="M23 21v-2a3 3 0 0 0-3-3h-1"/></svg>
+        <span>Watch Party</span>
+      </button>
+      <div class="nav-search" id="navSearch">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
         stroke-linecap="round">
         <circle cx="11" cy="11" r="8" />
@@ -5415,6 +5574,25 @@
       <button class="scroll-btn scroll-left" onclick="scrollRow('trendingRow', -1)">❮</button>
       <div class="trending-row" id="trendingRow"></div>
       <button class="scroll-btn scroll-right" onclick="scrollRow('trendingRow', 1)">❯</button>
+    </div>
+  </section>
+
+  <!-- SIN SUB (SINHALA SUBTITLES) SECTION -->
+  <section id="sinsub" style="background:var(--dark1);border-top:1px solid rgba(46,204,113,0.15);border-bottom:1px solid rgba(46,204,113,0.15);">
+    <div class="section-header">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:1.6rem;">🇱🇰</span>
+        <div>
+          <h2 class="section-title" style="margin:0;"><span style="color:#2ECC71;">Sin Sub</span> Movies</h2>
+          <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);font-family:'Inter',sans-serif;letter-spacing:0.5px;">සිංහල උපසිරැසි සහිත චිත්‍රපට (Sinhala Subtitled Movies)</div>
+        </div>
+      </div>
+      <span class="see-all" onclick="toggleExpand('sinsubRow', this)">View all →</span>
+    </div>
+    <div class="scroll-wrapper">
+      <button class="scroll-btn scroll-left" onclick="scrollRow('sinsubRow', -1)">❮</button>
+      <div class="trending-row" id="sinsubRow"></div>
+      <button class="scroll-btn scroll-right" onclick="scrollRow('sinsubRow', 1)">❯</button>
     </div>
   </section>
 
@@ -6073,6 +6251,7 @@
       return `<div class="trending-card" tabindex="0" role="button" aria-label="${title}" data-id="${item.id}" data-type="${type}">
       <div class="trending-poster" style="position:relative">
         ${poster ? `<img src="${poster}" alt="${title}" loading="lazy">` : ''}
+        ${(typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(item.id)]) ? `<div class="card-sub-tag" style="position:absolute;top:8px;right:8px;background:rgba(5,7,14,0.85);border:1px solid rgba(46,204,113,0.7);color:#2ECC71;font-size:0.62rem;font-weight:800;padding:2px 6px;border-radius:10px;backdrop-filter:blur(6px);z-index:4;letter-spacing:0.4px;pointer-events:none;box-shadow:0 2px 8px rgba(46,204,113,0.3);">🇱🇰 SUB</div>` : ''}
       </div>
       <div class="trending-info">
         ${metaParts ? `<div class="trending-meta">${metaParts}</div>` : ''}
@@ -6500,6 +6679,50 @@
       }
       addCardListeners(row, '.trending-card');
       return all;
+    }
+
+
+    /* ── SIN SUB (Sinhala Subtitles) CATALOG ───────────────────────── */
+    const SINSUB_MOVIE_IDS = [
+      '1508168', // Bethlehem Kudumba Unit (2026)
+      '1321108', // Dude (2025)
+      '1473354', // Sarvam Maya (2025)
+      '1149791', // Premalu (2024)
+      '337375',  // Premam (2015)
+      '274092',  // Bangalore Days (2014)
+      '574465',  // Kumbalangi Nights (2019)
+      '371900',  // Charlie (2015)
+      '854291',  // Home (2021)
+      '609503',  // Thanneer Mathan Dinangal (2019)
+      '349479',  // Ennu Ninte Moideen (2015)
+      '109012',  // Ustad Hotel (2012)
+      '154983',  // Annayum Rasoolum (2013)
+      '1069945', // Manjummel Boys (2024)
+      '1544847', // Pradhama Drishtiya Kuttakkar (2026)
+      '1479832', // DC (2026)
+      '1433117', // Kara (2026)
+      '1408162', // Vishwanath & Sons (2026)
+      '1508564', // With Love (2026)
+      '1314279'  // Hi (2026)
+    ];
+
+    async function loadSinSubMovies() {
+      const row = document.getElementById('sinsubRow');
+      if (!row) return;
+      row.innerHTML = Array.from({ length: 8 }, () => `<div class="trending-card" style="flex:0 0 160px"><div style="aspect-ratio:2/3;background:var(--dark3)" class="sk"></div><div style="padding:.75rem"><div style="height:12px;margin-bottom:6px" class="sk"></div></div></div>`).join('');
+
+      try {
+        const fetchResults = await Promise.all(
+          SINSUB_MOVIE_IDS.map(id => tmdb(`/movie/${id}?language=en-US`).catch(() => null))
+        );
+        const validMovies = fetchResults.filter(Boolean).map(m => ({ ...m, _type: 'movie' }));
+        const watchDatas = await Promise.all(validMovies.map(item => getWatch(item.id, 'movie')));
+        
+        row.innerHTML = validMovies.map((item, i) => buildTrendingCard(item, i + 1, 'movie', watchDatas[i])).join('');
+        addCardListeners(row, '.trending-card');
+      } catch (e) {
+        console.warn('loadSinSubMovies failed:', e);
+      }
     }
 
     // ── GENRE DATA ────────────────────────────────────────────────────────────
@@ -7382,9 +7605,9 @@
           const hiddenUrls = allUrls.slice(maxVisible);
 
           playBtnsHtml += visibleUrls.map((u, i) => {
-            const isMax     = u.startsWith('max://');
-            const isSinMax  = u.startsWith('sinmax://');
-            const isZeeMax  = u.startsWith('zeemax://');
+            const isHackyMax = u.startsWith('hackymax://');
+            const isSinMax   = u.startsWith('sinmax://');
+            const isZeeMax   = u.startsWith('zeemax://') || u.startsWith('max://');
             const style = isMax
               ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(232,201,122,.45);letter-spacing:.5px`
               : isSinMax
@@ -7392,7 +7615,7 @@
               : isZeeMax
               ? `background:linear-gradient(135deg,#00C6FF,#0072FF);color:#fff;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(0,198,255,.45);letter-spacing:.5px`
               : `background:${colors[i] || '#6B7280'};color:${textColors[i] || '#fff'};border:none;cursor:pointer`;
-            return `<button class="modal-stream-pill modal-play-btn${isMax ? ' max-btn' : isSinMax ? ' sinmax-btn' : isZeeMax ? ' zeemax-btn' : ''}" data-server="${i}" style="${style}">${allLabels[i]}</button>`;
+            return `<button class="modal-stream-pill modal-play-btn${isHackyMax ? ' hackymax-btn' : isSinMax ? ' sinmax-btn' : isZeeMax ? ' zeemax-btn' : ''}" data-server="${i}" style="${style}">${allLabels[i]}</button>`;
           }).join('');
 
           if (hiddenUrls.length > 0) {
@@ -7409,7 +7632,7 @@
                 : isZeeMax
                 ? `background:linear-gradient(135deg,#00C6FF,#0072FF);color:#fff;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(0,198,255,.45);display:none`
                 : `background:${colors[idx] || '#6B7280'};color:${textColors[idx] || '#fff'};border:none;cursor:pointer;display:none`;
-              return `<button class="modal-stream-pill modal-play-btn extra-server-btn${isMax ? ' max-btn' : isSinMax ? ' sinmax-btn' : isZeeMax ? ' zeemax-btn' : ''}" data-server="${idx}" style="${style}">${allLabels[idx]}</button>`;
+              return `<button class="modal-stream-pill modal-play-btn extra-server-btn${isHackyMax ? ' hackymax-btn' : isSinMax ? ' sinmax-btn' : isZeeMax ? ' zeemax-btn' : ''}" data-server="${idx}" style="${style}">${allLabels[idx]}</button>`;
             }).join('');
           }
 
@@ -8000,6 +8223,15 @@
       '1314279': '/Subtitle/1314279.srt', // Hi (2026)
       '1544847': '/Subtitle/1544847.srt', // Pradhama Drishtiya Kuttakkar (2026)
       '1473354': '/Subtitle/1473354.srt', // Sarvam Maya (2025)
+      '154983':  '/Subtitle/154983.srt',  // Annayum Rasoolum (2013)
+      '337375':  '/Subtitle/337375.srt',  // Premam (2015)
+      '854291':  '/Subtitle/854291.srt',  // Home (2021)
+      '349479':  '/Subtitle/349479.srt',  // Ennu Ninte Moideen (2015)
+      '609503':  '/Subtitle/609503.srt',  // Thanneer Mathan Dinangal (2019)
+      '371900':  '/Subtitle/371900.srt',  // Charlie (2015)
+      '109012':  '/Subtitle/109012.srt',  // Ustad Hotel (2012)
+      '274092':  '/Subtitle/274092.srt',  // Bangalore Days (2014)
+      '574465':  '/Subtitle/574465.srt',  // Kumbalangi Nights (2019)
     };
 
     // ════════════════════════════════════════════════════════════════════════
@@ -9233,22 +9465,28 @@
       _mxsRenderTracks();
     }
 
-    async function initMaxPlayer(tmdbId, mediaType, season, episode, engine = 'max') {
+    async function initMaxPlayer(tmdbId, mediaType, season, episode, engine = 'hackymax') {
       // ── Reset UI ──────────────────────────────────────────────────────
       _destroyMax();
+      window._currentMaxEngine = engine;
+      if (typeof window.setWatchPartyTheme === 'function') window.setWatchPartyTheme(engine);
+
       const frame = document.getElementById('playerFrame');
       frame.style.display  = 'none';
       _maxWrap.style.display = 'block';
       _maxWrap.classList.add('buffering');
 
+      const engineLabel = engine === 'hackymax' ? 'HACKYMAX' : (engine === 'sinmax' ? 'SINMAX' : 'ZEEMAX');
+      const accentCol   = engine === 'hackymax' ? '#00C6FF' : (engine === 'sinmax' ? '#FF416C' : '#E8C97A');
+
       const bufText = document.querySelector('#maxBuffering span');
       if (bufText) {
-        bufText.textContent = engine === 'zeemax' ? 'ZEEMAX · LOADING' : (engine === 'sinmax' ? 'SINMAX · LOADING' : 'MAX · LOADING');
-        bufText.style.color = engine === 'zeemax' ? '#00C6FF' : (engine === 'sinmax' ? '#FF416C' : '#E8C97A');
+        bufText.textContent = `${engineLabel} · LOADING`;
+        bufText.style.color = accentCol;
       }
       const bufSpinner = document.querySelector('#maxBuffering div');
       if (bufSpinner) {
-        bufSpinner.style.borderTopColor = engine === 'zeemax' ? '#00C6FF' : (engine === 'sinmax' ? '#FF416C' : '#E8C97A');
+        bufSpinner.style.borderTopColor = accentCol;
       }
 
       // ── Load hls.js lazily ────────────────────────────────────────────
@@ -9302,7 +9540,7 @@
         if (season)  params.set('season',  season);
         if (episode) params.set('episode', episode);
         if (imdbId)  params.set('imdb', imdbId);
-        const apiPath = engine === 'zeemax' ? '/api/zeemax' : (engine === 'sinmax' ? '/api/sinmax' : '/api/hls');
+        const apiPath = engine === 'hackymax' ? '/api/hackymax' : (engine === 'sinmax' ? '/api/sinmax' : '/api/zeemax');
         const resp = await fetch(`${apiPath}?${params}`, { signal: AbortSignal.timeout(6500) });
         const data = await resp.json();
         if (data.url) streamUrl = data.url;
@@ -9551,16 +9789,16 @@
         else { epBar.classList.remove('visible'); }
       }
 
-      // ── If Max, SinMax or ZeeMax player selected, skip iframe and launch HLS player ──────
-      const isMaxUrl = url.startsWith('max://');
-      const isSinMaxUrl = url.startsWith('sinmax://');
-      const isZeeMaxUrl = url.startsWith('zeemax://');
-      if (isMaxUrl || isSinMaxUrl || isZeeMaxUrl) {
+      // ── If HackyMax, SinMax, ZeeMax or Max player selected, skip iframe and launch HLS player ──────
+      const isHackyMaxUrl = url.startsWith('hackymax://');
+      const isSinMaxUrl   = url.startsWith('sinmax://');
+      const isZeeMaxUrl   = url.startsWith('zeemax://') || url.startsWith('max://');
+      if (isHackyMaxUrl || isSinMaxUrl || isZeeMaxUrl) {
         if (loader) loader.style.opacity = '0';
         frame.style.display = 'none';
         frame.src = 'about:blank';
-        const prefix = isZeeMaxUrl ? 'zeemax://' : (isSinMaxUrl ? 'sinmax://' : 'max://');
-        const engine = isZeeMaxUrl ? 'zeemax' : (isSinMaxUrl ? 'sinmax' : 'max');
+        const prefix = isHackyMaxUrl ? 'hackymax://' : (isSinMaxUrl ? 'sinmax://' : (url.startsWith('zeemax://') ? 'zeemax://' : 'max://'));
+        const engine = isHackyMaxUrl ? 'hackymax' : (isSinMaxUrl ? 'sinmax' : 'zeemax');
         const parts = url.replace(prefix, '').split('/');
         const mType = parts[0] || _currentModalType;
         const mId   = parts[1] || _currentModalId;
@@ -9583,14 +9821,15 @@
       if (allUrls && allUrls.length) {
         bar.innerHTML = allUrls.map((u, i) => {
           const lbl = labels ? labels[i] : `Server ${i + 1}`;
-          const isMax     = u.startsWith('max://');
-          const isSinMax  = u.startsWith('sinmax://');
-          const isZeeMax  = u.startsWith('zeemax://');
-          const extraClass = isMax ? ' max-btn' : (isSinMax ? ' sinmax-btn' : (isZeeMax ? ' zeemax-btn' : ''));
+          const isHackyMax = u.startsWith('hackymax://');
+          const isSinMax   = u.startsWith('sinmax://');
+          const isZeeMax   = u.startsWith('zeemax://') || u.startsWith('max://');
+          const extraClass = isHackyMax ? ' hackymax-btn' : (isSinMax ? ' sinmax-btn' : (isZeeMax ? ' zeemax-btn' : ''));
+          const hackyStyle = isHackyMax ? ' style="background:linear-gradient(135deg,#00C6FF,#0072FF);color:#fff;font-weight:800;border-color:transparent"' : '';
           const sinMaxStyle = isSinMax ? ' style="background:linear-gradient(135deg,#FF4B2B,#FF416C);color:#fff;font-weight:800;border-color:transparent"' : '';
-          const zeeMaxStyle = isZeeMax ? ' style="background:linear-gradient(135deg,#00C6FF,#0072FF);color:#fff;font-weight:800;border-color:transparent"' : '';
+          const zeeMaxStyle = isZeeMax ? ' style="background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;font-weight:800;border-color:transparent"' : '';
           const activeClass = u === url ? ' active' : '';
-          return `<button class="player-server-btn${extraClass}${activeClass}"${sinMaxStyle || zeeMaxStyle} data-server-index="${i}">${lbl}</button>`;
+          return `<button class="player-server-btn${extraClass}${activeClass}"${hackyStyle || sinMaxStyle || zeeMaxStyle} data-server-index="${i}">${lbl}</button>`;
         }).join('');
         bar.querySelectorAll('.player-server-btn').forEach((btn, i) => {
           btn.addEventListener('click', () => {
@@ -10742,6 +10981,7 @@
             const id = section.id;
 
             if (id === 'trending') await loadTrending();
+            else if (id === 'sinsub') await loadSinSubMovies();
             else if (id === 'movies') await loadMovies('now_playing');
             else if (id === 'tvshows') await loadTV('on_the_air');
             else if (id === 'toprated') {
@@ -10772,7 +11012,7 @@
         trailerObs.observe(document.getElementById('trailers'));
       }
 
-      const sectionsToObserve = ['trending', 'movies', 'tvshows', 'toprated'];
+      const sectionsToObserve = ['trending', 'sinsub', 'movies', 'tvshows', 'toprated'];
       sectionsToObserve.forEach(id => {
         const el = document.getElementById(id);
         if (el) observer.observe(el);
@@ -11031,6 +11271,26 @@
   (function () {
     'use strict';
 
+    /* ── Theme Color Sync ────────────────────────────────────── */
+    window.setWatchPartyTheme = function (engine) {
+      document.body.classList.remove('wp-theme-hackymax', 'wp-theme-sinmax', 'wp-theme-zeemax');
+      const themeClass = engine === 'sinmax' ? 'wp-theme-sinmax' : (engine === 'zeemax' ? 'wp-theme-zeemax' : 'wp-theme-hackymax');
+      document.body.classList.add(themeClass);
+
+      const color = engine === 'sinmax' ? '#FF416C' : (engine === 'zeemax' ? '#E8C97A' : '#00C6FF');
+      const glow  = engine === 'sinmax' ? 'rgba(255,65,108,0.45)' : (engine === 'zeemax' ? 'rgba(232,201,122,0.45)' : 'rgba(0,198,255,0.45)');
+      
+      const hudBadge = document.getElementById('wpHudRole');
+      if (hudBadge) {
+        hudBadge.style.color = color;
+      }
+      const roomCodeEl = document.getElementById('wpRoomCode');
+      if (roomCodeEl) {
+        roomCodeEl.style.color = color;
+        roomCodeEl.style.textShadow = `0 0 20px ${glow}`;
+      }
+    };
+
     /* ── Helpers ─────────────────────────────────────────────── */
     function _fmtTime(s) {
       s = Math.floor(s || 0);
@@ -11045,7 +11305,7 @@
       el.textContent = msg;
       el.style.display = 'block';
       el.style.animation = 'none';
-      void el.offsetWidth;                // reflow to restart animation
+      void el.offsetWidth;
       el.style.animation = '';
       clearTimeout(el._t);
       el._t = setTimeout(() => { el.style.display = 'none'; }, 2800);
@@ -11054,17 +11314,15 @@
     /* ── Watch Party State ───────────────────────────────────── */
     const WP = {
       peer:        null,
-      conns:       [],        // host: guest DataConnection[]
-      hostConn:    null,      // guest: connection to host
+      conns:       [],
+      hostConn:    null,
       code:        null,
       isHost:      false,
-      guestNames:  [],        // for UI display
+      guestNames:  [],
     };
 
-    /* ── Video element accessor ──────────────────────────────── */
     function _vid() { return document.getElementById('maxVideo'); }
 
-    /* ── Broadcast from host to all guests ──────────────────── */
     function _broadcast(data) {
       WP.conns = WP.conns.filter(c => c.open);
       WP.conns.forEach(c => { try { c.send(data); } catch (_) {} });
@@ -11073,10 +11331,9 @@
     /* ── Apply sync event on guest side ─────────────────────── */
     function _applySync(data) {
       const v = _vid();
-      if (!v) return;
 
       if (data.type === 'play') {
-        // Compensate for network delay
+        if (!v) return;
         const lag = (Date.now() - data.ts) / 1000;
         const target = data.ct + lag;
         if (Math.abs(v.currentTime - target) > 1.5) v.currentTime = target;
@@ -11085,6 +11342,7 @@
         _wpToast('▶ Host resumed');
 
       } else if (data.type === 'pause') {
+        if (!v) return;
         v.pause();
         if (Math.abs(v.currentTime - data.ct) > 1.5) v.currentTime = data.ct;
         document.getElementById('wpGuestLock').classList.add('active');
@@ -11092,19 +11350,63 @@
         _wpToast('⏸ Host paused');
 
       } else if (data.type === 'seek') {
+        if (!v) return;
         v.currentTime = data.ct;
         _wpToast(`⏩ Host seeked to ${_fmtTime(data.ct)}`);
 
       } else if (data.type === 'state') {
-        // Initial state when guest joins
-        const lag = (Date.now() - data.ts) / 1000;
-        v.currentTime = data.ct + (data.playing ? lag : 0);
-        document.getElementById('wpGuestLock').classList.toggle('active', !data.playing);
-        if (data.playing) v.play().catch(() => {});
-        else v.pause();
+        // Initial state sync when guest joins
+        if (data.engine) {
+          window.setWatchPartyTheme(data.engine);
+        }
+
+        const curParams = new URLSearchParams(window.location.search);
+        const curM = curParams.get('m');
+        const curS = curParams.get('s');
+
+        const needOpenMovie = data.mParam && curM !== data.mParam;
+        const needOpenTv    = data.sParam && curS !== data.sParam;
+
+        if (needOpenMovie) {
+          const id = parseInt(data.mParam, 10);
+          if (typeof openModal === 'function') openModal(id, 'movie');
+          history.replaceState(null, '', `?m=${data.mParam}&party=${WP.code}`);
+        } else if (needOpenTv) {
+          const id = parseInt(data.sParam, 10);
+          if (typeof openModal === 'function') openModal(id, 'tv');
+          history.replaceState(null, '', `?s=${data.sParam}&party=${WP.code}`);
+        }
+
+        // Auto launch corresponding player engine
+        setTimeout(() => {
+          const activeEngine = data.engine || 'hackymax';
+          const btns = document.querySelectorAll('.player-server-btn, .modal-play-btn');
+          const targetBtn = Array.from(btns).find(b => {
+            if (activeEngine === 'hackymax') return b.classList.contains('hackymax-btn');
+            if (activeEngine === 'sinmax') return b.classList.contains('sinmax-btn');
+            return b.classList.contains('zeemax-btn') || b.classList.contains('max-btn');
+          });
+          if (targetBtn && !targetBtn.classList.contains('active')) {
+            targetBtn.click();
+          }
+
+          // Sync video position
+          const checkVid = () => {
+            const vidEl = _vid();
+            if (vidEl) {
+              const lag = (Date.now() - data.ts) / 1000;
+              vidEl.currentTime = data.ct + (data.playing ? lag : 0);
+              document.getElementById('wpGuestLock').classList.toggle('active', !data.playing);
+              if (data.playing) vidEl.play().catch(() => {});
+              else vidEl.pause();
+            } else {
+              setTimeout(checkVid, 300);
+            }
+          };
+          checkVid();
+        }, 1200);
 
       } else if (data.type === 'meta') {
-        // Guest count update from host
         WP.guestNames = data.names || [];
         _refreshHud(data.total);
         _refreshGuestList();
@@ -11143,11 +11445,13 @@
       document.getElementById('wpHudCount').textContent = `${count} watching`;
       document.getElementById('wpHud').classList.add('active');
       document.getElementById('wpActiveDot').style.display = 'block';
-      document.getElementById('maxWatchPartyBtn').classList.add('active');
+      const maxWp = document.getElementById('maxWatchPartyBtn');
+      if (maxWp) maxWp.classList.add('active');
     }
 
     function _refreshGuestList() {
       const list = document.getElementById('wpGuestList');
+      if (!list) return;
       list.querySelectorAll('.wp-guest-entry').forEach(e => e.remove());
       const count = WP.isHost ? WP.conns.length : WP.guestNames.length;
       for (let i = 0; i < count; i++) {
@@ -11167,32 +11471,52 @@
     }
 
     function _broadcastMeta() {
-      // Host broadcasts guest count to all guests so their HUDs update
       const names = WP.conns.map((_, i) => `Guest ${i + 1}`);
       _broadcast({ type: 'meta', names, total: WP.conns.length + 1 });
     }
 
-    /* ── Host: setup listener for incoming guest connections ─── */
+    /* ── Host: listener for incoming guest connections ───────── */
     function _hostListen() {
       WP.peer.on('connection', conn => {
         conn.on('open', () => {
           WP.conns.push(conn);
-          // Send current video state to the new guest
           const v = _vid();
-          if (v) {
-            conn.send({ type: 'state', ct: v.currentTime, playing: !v.paused, ts: Date.now() });
-          }
+          const p = new URLSearchParams(window.location.search);
+          conn.send({
+            type: 'state',
+            engine: window._currentMaxEngine || 'hackymax',
+            ct: v ? v.currentTime : 0,
+            playing: v ? !v.paused : false,
+            ts: Date.now(),
+            mParam: p.get('m'),
+            sParam: p.get('s')
+          });
           _broadcastMeta();
           _refreshGuestList();
           _refreshHud(WP.conns.length + 1);
-          _wpToast(`👤 Guest ${WP.conns.length} joined!`);
+          _wpToast('👤 A friend joined your Watch Party!');
+        });
+        conn.on('data', data => {
+          if (data && data.type === 'request-state') {
+            const v = _vid();
+            const p = new URLSearchParams(window.location.search);
+            conn.send({
+              type: 'state',
+              engine: window._currentMaxEngine || 'hackymax',
+              ct: v ? v.currentTime : 0,
+              playing: v ? !v.paused : false,
+              ts: Date.now(),
+              mParam: p.get('m'),
+              sParam: p.get('s')
+            });
+          }
         });
         conn.on('close', () => {
           WP.conns = WP.conns.filter(c => c !== conn);
           _broadcastMeta();
           _refreshGuestList();
           _refreshHud(WP.conns.length + 1);
-          _wpToast(`👤 A guest left`);
+          _wpToast('👤 A guest left the party');
         });
         conn.on('error', () => {
           WP.conns = WP.conns.filter(c => c !== conn);
@@ -11230,17 +11554,33 @@
         try {
           WP.peer = new Peer(undefined, { debug: 0 });
           WP.peer.on('open', () => {
-            WP.hostConn = WP.peer.connect('hkyw-' + WP.code, { reliable: true });
-            WP.hostConn.on('open', () => resolve());
-            WP.hostConn.on('data', _applySync);
-            WP.hostConn.on('close', () => {
+            const hostConn = WP.peer.connect('hkyw-' + WP.code, { reliable: true });
+            WP.hostConn = hostConn;
+            let opened = false;
+            hostConn.on('open', () => {
+              opened = true;
+              const v = _vid();
+              if (v && !v._wpGuestHooked) {
+                v._wpGuestHooked = true;
+                v.addEventListener('loadedmetadata', () => {
+                  if (WP.hostConn && !WP.isHost && WP.hostConn.open) {
+                    WP.hostConn.send({ type: 'request-state' });
+                  }
+                });
+              }
+              resolve();
+            });
+            hostConn.on('data', _applySync);
+            hostConn.on('close', () => {
               _wpToast('⚠ Host disconnected from party');
               document.getElementById('wpGuestLock').classList.remove('active');
             });
-            WP.hostConn.on('error', reject);
+            hostConn.on('error', err => {
+              if (!opened) reject(err);
+            });
           });
           WP.peer.on('error', reject);
-          setTimeout(() => reject(new Error('timeout')), 15000);
+          setTimeout(() => reject(new Error('Connection timed out')), 14000);
         } catch (e) { reject(e); }
       });
     }
@@ -11252,28 +11592,169 @@
       WP.code = null; WP.isHost = false;
       document.getElementById('wpHud').classList.remove('active');
       document.getElementById('wpActiveDot').style.display = 'none';
-      document.getElementById('maxWatchPartyBtn').classList.remove('active');
+      const maxWp = document.getElementById('maxWatchPartyBtn');
+      if (maxWp) maxWp.classList.remove('active');
       document.getElementById('wpGuestLock').classList.remove('active');
-      // Reset modal state
+
       document.getElementById('wpRoomCode').textContent = '------';
       document.getElementById('wpShareUrl').textContent  = '';
       document.getElementById('wpHostEntry').querySelector('.wp-member-name').textContent = 'You (Host)';
       document.getElementById('wpGuestList').querySelectorAll('.wp-guest-entry').forEach(e => e.remove());
       document.getElementById('wpStatusLine').textContent = 'Share the link or room code with friends';
+
+      document.getElementById('wpSetupView').style.display = 'block';
+      document.getElementById('wpActiveView').style.display = 'none';
       document.getElementById('wpModal').classList.remove('active');
+
+      const u = new URL(window.location.href);
+      if (u.searchParams.has('party')) {
+        u.searchParams.delete('party');
+        history.replaceState(null, '', u.toString());
+      }
+      _wpToast('Left Watch Party');
     }
 
-    /* ── Watch party button click ────────────────────────────── */
-    async function _onWpClick() {
-      if (WP.code) { document.getElementById('wpModal').classList.add('active'); return; }
+    /* ── Tab Switcher ────────────────────────────────────────── */
+    window.switchWpTab = function(tab) {
+      const tabJoin = document.getElementById('wpTabJoin');
+      const tabHost = document.getElementById('wpTabHost');
+      const contentJoin = document.getElementById('wpJoinTabContent');
+      const contentHost = document.getElementById('wpHostTabContent');
+      const statusEl = document.getElementById('wpJoinStatus');
+      if (statusEl) statusEl.style.display = 'none';
 
-      const v = _vid();
-      if (!v || (!v.src && !v.currentSrc)) {
-        _wpToast('🎬 Start playing a movie first!');
+      if (tab === 'host') {
+        if (tabJoin) tabJoin.classList.remove('active');
+        if (tabHost) tabHost.classList.add('active');
+        if (contentJoin) contentJoin.style.display = 'none';
+        if (contentHost) contentHost.style.display = 'block';
+      } else {
+        if (tabHost) tabHost.classList.remove('active');
+        if (tabJoin) tabJoin.classList.add('active');
+        if (contentHost) contentHost.style.display = 'none';
+        if (contentJoin) contentJoin.style.display = 'block';
+        const inp = document.getElementById('wpJoinCodeInput');
+        if (inp) setTimeout(() => inp.focus(), 100);
+      }
+    };
+
+    /* ── Open Watch Party Modal (Join or Host) ────────────────── */
+    window.openWatchPartyModal = function(defaultTab = 'join') {
+      const modal = document.getElementById('wpModal');
+      const setupView = document.getElementById('wpSetupView');
+      const activeView = document.getElementById('wpActiveView');
+      if (!modal) return;
+
+      if (WP.code) {
+        if (setupView) setupView.style.display = 'none';
+        if (activeView) activeView.style.display = 'block';
+      } else {
+        if (setupView) setupView.style.display = 'block';
+        if (activeView) activeView.style.display = 'none';
+        window.switchWpTab(defaultTab);
+      }
+      modal.classList.add('active');
+    };
+
+    /* ── Submit Join with Code ───────────────────────────────── */
+    window.submitJoinWatchParty = async function() {
+      const inp = document.getElementById('wpJoinCodeInput');
+      const statusEl = document.getElementById('wpJoinStatus');
+      const joinBtn = document.getElementById('wpDoJoinBtn');
+      if (!inp) return;
+
+      let val = inp.value.trim();
+      if (!val) {
+        if (statusEl) {
+          statusEl.style.display = 'block';
+          statusEl.style.background = 'rgba(239,68,68,0.15)';
+          statusEl.style.color = '#ef4444';
+          statusEl.style.border = '1px solid rgba(239,68,68,0.3)';
+          statusEl.textContent = 'Please enter a 6-character room code.';
+        }
         return;
       }
 
-      _wpToast('🎬 Creating room...');
+      if (val.includes('party=')) {
+        try {
+          const u = new URL(val, window.location.origin);
+          val = u.searchParams.get('party') || val;
+        } catch (_) {
+          const m = val.match(/party=([A-Za-z0-9]+)/);
+          if (m) val = m[1];
+        }
+      }
+      val = val.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+
+      if (val.length < 5 || val.length > 8) {
+        if (statusEl) {
+          statusEl.style.display = 'block';
+          statusEl.style.background = 'rgba(239,68,68,0.15)';
+          statusEl.style.color = '#ef4444';
+          statusEl.style.border = '1px solid rgba(239,68,68,0.3)';
+          statusEl.textContent = 'Room code should be 6 characters (e.g. KJ84D2).';
+        }
+        return;
+      }
+
+      if (statusEl) {
+        statusEl.style.display = 'block';
+        statusEl.style.background = 'rgba(0,198,255,0.15)';
+        statusEl.style.color = '#00C6FF';
+        statusEl.style.border = '1px solid rgba(0,198,255,0.3)';
+        statusEl.textContent = `⏳ Connecting to room ${val}...`;
+      }
+      if (joinBtn) {
+        joinBtn.disabled = true;
+        joinBtn.innerHTML = '<span>⏳</span> Connecting...';
+      }
+
+      try {
+        await _joinRoom(val);
+        document.getElementById('wpRoomCode').textContent   = WP.code;
+        document.getElementById('wpRoleLabel').textContent  = 'You are a Guest 👤';
+        document.getElementById('wpEndPartyBtn').textContent = 'Leave Party';
+        document.getElementById('wpHostEntry').querySelector('.wp-member-name').textContent = 'Host';
+        document.getElementById('wpShareUrl').textContent   = window.location.href;
+
+        _refreshHud(2);
+        document.getElementById('wpSetupView').style.display = 'none';
+        document.getElementById('wpActiveView').style.display = 'block';
+        _wpToast('✅ Joined Watch Party! Playback synced with host.');
+        if (statusEl) statusEl.style.display = 'none';
+      } catch (err) {
+        console.error('[WatchParty] join error:', err);
+        WP.code = null; WP.isHost = false;
+        if (WP.peer) { try { WP.peer.destroy(); } catch (_) {} WP.peer = null; }
+        if (statusEl) {
+          statusEl.style.display = 'block';
+          statusEl.style.background = 'rgba(239,68,68,0.15)';
+          statusEl.style.color = '#ef4444';
+          statusEl.style.border = '1px solid rgba(239,68,68,0.3)';
+          statusEl.textContent = 'Room not found or host is offline. Please check the code.';
+        }
+      } finally {
+        if (joinBtn) {
+          joinBtn.disabled = false;
+          joinBtn.innerHTML = '<span>🚀</span> Join Watch Party';
+        }
+      }
+    };
+
+    /* ── Host Party Button Action ────────────────────────────── */
+    window.startHostWatchParty = async function() {
+      const v = _vid();
+      if (!v || (!v.src && !v.currentSrc)) {
+        _wpToast('🎬 Tip: Start playing a movie first so friends can sync!');
+      }
+
+      const hostBtn = document.getElementById('wpDoHostBtn');
+      if (hostBtn) {
+        hostBtn.disabled = true;
+        hostBtn.innerHTML = '<span>⏳</span> Creating Room...';
+      }
+
+      _wpToast('🎬 Creating party room...');
       try {
         const code = await _createRoom();
         const shareUrl = (() => {
@@ -11291,12 +11772,34 @@
         _hookVideo();
         _refreshHud(1);
         _refreshGuestList();
-        document.getElementById('wpModal').classList.add('active');
+
+        document.getElementById('wpSetupView').style.display = 'none';
+        document.getElementById('wpActiveView').style.display = 'block';
+        _wpToast(`👑 Room ${code} created! Share the code with friends.`);
       } catch (e) {
         _wpToast('⚠ Could not create room — try again');
         console.error('[WatchParty] create error:', e);
         WP.code = null; WP.isHost = false;
-        if (WP.peer) { WP.peer.destroy(); WP.peer = null; }
+        if (WP.peer) { try { WP.peer.destroy(); } catch (_) {} WP.peer = null; }
+      } finally {
+        if (hostBtn) {
+          hostBtn.disabled = false;
+          hostBtn.innerHTML = '<span>✨</span> Create Party Room & Invite';
+        }
+      }
+    };
+
+    /* ── Watch party player button click ─────────────────────── */
+    async function _onWpClick() {
+      if (WP.code) {
+        window.openWatchPartyModal('host');
+        return;
+      }
+      const v = _vid();
+      if (v && (v.src || v.currentSrc)) {
+        window.openWatchPartyModal('host');
+      } else {
+        window.openWatchPartyModal('join');
       }
     }
 
@@ -11305,26 +11808,44 @@
       const wpBtn = document.getElementById('maxWatchPartyBtn');
       if (wpBtn) wpBtn.addEventListener('click', _onWpClick);
 
-      document.getElementById('wpCloseBtn').onclick = () =>
-        document.getElementById('wpModal').classList.remove('active');
+      const closeBtn = document.getElementById('wpCloseBtn');
+      if (closeBtn) closeBtn.onclick = () => document.getElementById('wpModal').classList.remove('active');
 
-      document.getElementById('wpModal').onclick = e => {
-        if (e.target === document.getElementById('wpModal'))
-          document.getElementById('wpModal').classList.remove('active');
+      const modalEl = document.getElementById('wpModal');
+      if (modalEl) modalEl.onclick = e => {
+        if (e.target === modalEl) modalEl.classList.remove('active');
       };
 
-      document.getElementById('wpEndPartyBtn').onclick = _leave;
+      const endBtn = document.getElementById('wpEndPartyBtn');
+      if (endBtn) endBtn.onclick = _leave;
 
-      document.getElementById('wpCopyCode').onclick = () => {
+      const copyCodeBtn = document.getElementById('wpCopyCode');
+      if (copyCodeBtn) copyCodeBtn.onclick = () => {
         if (!WP.code) return;
         navigator.clipboard.writeText(WP.code).then(() => _wpToast('✓ Room code copied!'));
       };
 
-      document.getElementById('wpCopyLink').onclick = () => {
+      const copyLinkBtn = document.getElementById('wpCopyLink');
+      if (copyLinkBtn) copyLinkBtn.onclick = () => {
         const u = document.getElementById('wpShareUrl').textContent;
         if (!u) return;
         navigator.clipboard.writeText(u).then(() => _wpToast('✓ Invite link copied!'));
       };
+
+      const joinInp = document.getElementById('wpJoinCodeInput');
+      if (joinInp) {
+        joinInp.addEventListener('input', () => {
+          if (!joinInp.value.includes('http') && !joinInp.value.includes('?')) {
+            joinInp.value = joinInp.value.toUpperCase();
+          }
+        });
+        joinInp.addEventListener('keydown', e => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            window.submitJoinWatchParty();
+          }
+        });
+      }
     });
 
     /* ── Auto-join when page loads with ?party=CODE in URL ───── */
@@ -11333,7 +11854,6 @@
       const partyCode = params.get('party');
       if (!partyCode) return;
 
-      // Wait for the movie modal to open (triggered by ?m= param) + player to load
       await new Promise(r => setTimeout(r, 2000));
 
       _wpToast('🎬 Joining Watch Party...');
@@ -11342,14 +11862,14 @@
         document.getElementById('wpRoomCode').textContent   = WP.code;
         document.getElementById('wpRoleLabel').textContent  = 'You are a Guest 👤';
         document.getElementById('wpEndPartyBtn').textContent = 'Leave Party';
-        // Show guest entry instead of host entry
         document.getElementById('wpHostEntry').querySelector('.wp-member-name').textContent = 'Host';
+        document.getElementById('wpShareUrl').textContent   = window.location.href;
 
-        // Build share URL too
-        document.getElementById('wpShareUrl').textContent = window.location.href;
+        document.getElementById('wpSetupView').style.display = 'none';
+        document.getElementById('wpActiveView').style.display = 'block';
 
         _refreshHud(2);
-        _wpToast('✅ Joined! Host controls playback.');
+        _wpToast('✅ Joined! Playback synced with host.');
       } catch (e) {
         _wpToast('⚠ Could not join room — check the code');
         console.error('[WatchParty] join error:', e);
@@ -11392,50 +11912,96 @@
 
   <!-- Main modal -->
   <div id="wpModal">
-    <div id="wpModalBox">
+    <div id="wpModalBox" style="border: 1px solid var(--wp-theme-glow); box-shadow: 0 24px 60px rgba(0,0,0,0.8), 0 0 40px var(--wp-theme-glow);">
       <!-- Header -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.3rem;">
         <div style="display:flex;align-items:center;gap:12px;">
-          <div style="width:46px;height:46px;background:linear-gradient(135deg,#7C3AED,#A855F7);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:0 4px 16px rgba(168,85,247,0.5);">🎬</div>
+          <div id="wpModalIcon" style="width:44px;height:44px;background:var(--wp-theme-grad);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;box-shadow:0 4px 16px var(--wp-theme-glow);">🎬</div>
           <div>
             <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:3px;color:#fff;">WATCH PARTY</div>
-            <div id="wpRoleLabel" style="font-size:0.72rem;color:rgba(255,255,255,0.45);font-family:'Inter',sans-serif;letter-spacing:0.5px;">Setting up...</div>
+            <div id="wpRoleLabel" style="font-size:0.72rem;color:rgba(255,255,255,0.45);font-family:'Inter',sans-serif;letter-spacing:0.5px;">Stream synchronously with friends</div>
           </div>
         </div>
         <button id="wpCloseBtn" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.14)'" onmouseout="this.style.background='rgba(255,255,255,0.07)'">✕</button>
       </div>
 
-      <!-- Room Code -->
-      <div style="background:rgba(168,85,247,0.07);border:1px solid rgba(168,85,247,0.2);border-radius:14px;padding:1rem 1.2rem;margin-bottom:1rem;">
-        <div style="font-size:0.65rem;color:rgba(255,255,255,0.4);font-family:'Inter',sans-serif;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">Room Code · Share with friends</div>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div id="wpRoomCode" style="font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:10px;color:#A855F7;text-shadow:0 0 20px rgba(168,85,247,0.5);">------</div>
-          <button id="wpCopyCode" style="margin-left:auto;background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.4);color:#A855F7;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:0.75rem;font-family:'Inter',sans-serif;font-weight:600;transition:all 0.2s;" onmouseover="this.style.background='rgba(168,85,247,0.3)'" onmouseout="this.style.background='rgba(168,85,247,0.15)'">Copy</button>
+      <!-- VIEW A: Setup / Join / Host (when not in a party) -->
+      <div id="wpSetupView">
+        <div class="wp-tabs">
+          <button class="wp-tab-btn active" id="wpTabJoin" onclick="window.switchWpTab('join')">
+            <span>👥</span> Join with Code
+          </button>
+          <button class="wp-tab-btn" id="wpTabHost" onclick="window.switchWpTab('host')">
+            <span>👑</span> Host a Party
+          </button>
+        </div>
+
+        <!-- Join Tab Content -->
+        <div id="wpJoinTabContent">
+          <div style="margin-bottom:1.1rem;">
+            <label style="font-size:0.68rem;color:rgba(255,255,255,0.45);font-family:'Inter',sans-serif;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:8px;">Enter 6-Character Room Code or Invite Link</label>
+            <input type="text" id="wpJoinCodeInput" class="wp-input-field" placeholder="KJ84D2" maxlength="100" autocomplete="off" spellcheck="false" autofocus>
+          </div>
+          <div id="wpJoinStatus" style="display:none;font-size:0.78rem;font-family:'Inter',sans-serif;margin-bottom:1rem;text-align:center;padding:9px;border-radius:10px;"></div>
+          <button id="wpDoJoinBtn" class="wp-action-btn" onclick="window.submitJoinWatchParty()">
+            <span>🚀</span> Join Watch Party
+          </button>
+          <div style="margin-top:0.9rem;font-size:0.72rem;color:rgba(255,255,255,0.38);font-family:'Inter',sans-serif;text-align:center;line-height:1.45;">
+            Once joined, the movie, play/pause, and seeking will sync in real-time with the host!
+          </div>
+        </div>
+
+        <!-- Host Tab Content -->
+        <div id="wpHostTabContent" style="display:none;">
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:1.1rem;margin-bottom:1.2rem;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <span style="font-size:1.2rem;">👑</span>
+              <span style="font-weight:600;font-size:0.9rem;color:#fff;font-family:'Inter',sans-serif;">Host Controls the Experience</span>
+            </div>
+            <p style="font-size:0.75rem;color:rgba(255,255,255,0.65);line-height:1.55;margin:0;font-family:'Inter',sans-serif;">
+              Start a party room to share with friends. When you play, pause, or seek, everyone in your room stays perfectly synchronized!
+            </p>
+          </div>
+          <button id="wpDoHostBtn" class="wp-action-btn" onclick="window.startHostWatchParty()">
+            <span>✨</span> Create Party Room & Invite
+          </button>
         </div>
       </div>
 
-      <!-- Share link -->
-      <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:0.75rem 1rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:8px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        <div id="wpShareUrl" style="font-size:0.7rem;color:rgba(255,255,255,0.4);font-family:'Inter',sans-serif;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
-        <button id="wpCopyLink" style="background:linear-gradient(135deg,#7C3AED,#A855F7);border:none;color:#fff;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:0.75rem;font-family:'Inter',sans-serif;font-weight:700;white-space:nowrap;box-shadow:0 4px 14px rgba(168,85,247,0.4);transition:all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='none'">Copy Link</button>
-      </div>
-
-      <!-- Guest list -->
-      <div style="font-size:0.65rem;color:rgba(255,255,255,0.35);font-family:'Inter',sans-serif;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">In the Room</div>
-      <div id="wpGuestList" style="display:flex;flex-direction:column;max-height:150px;overflow-y:auto;">
-        <div class="wp-member-row" id="wpHostEntry">
-          <div class="wp-member-avatar" style="background:linear-gradient(135deg,#7C3AED,#A855F7);">👑</div>
-          <div class="wp-member-name">You (Host)</div>
-          <div class="wp-member-status" style="color:#00ff88;">● Connected</div>
+      <!-- VIEW B: Active Party (when connected to a room) -->
+      <div id="wpActiveView" style="display:none;">
+        <!-- Room Code -->
+        <div style="background:rgba(255,255,255,0.04);border:1px solid var(--wp-theme-glow);border-radius:14px;padding:1rem 1.2rem;margin-bottom:1rem;">
+          <div style="font-size:0.65rem;color:rgba(255,255,255,0.4);font-family:'Inter',sans-serif;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">Room Code · Share with friends</div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div id="wpRoomCode" style="font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:10px;color:var(--wp-theme);text-shadow:0 0 20px var(--wp-theme-glow);">------</div>
+            <button id="wpCopyCode" style="margin-left:auto;background:rgba(255,255,255,0.1);border:1px solid var(--wp-theme);color:var(--wp-theme);border-radius:8px;padding:5px 12px;cursor:pointer;font-size:0.75rem;font-family:'Inter',sans-serif;font-weight:600;transition:all 0.2s;">Copy</button>
+          </div>
         </div>
+
+        <!-- Share link -->
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:0.75rem 1rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:8px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <div id="wpShareUrl" style="font-size:0.7rem;color:rgba(255,255,255,0.4);font-family:'Inter',sans-serif;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+          <button id="wpCopyLink" style="background:var(--wp-theme-grad);border:none;color:#fff;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:0.75rem;font-family:'Inter',sans-serif;font-weight:700;white-space:nowrap;box-shadow:0 4px 14px var(--wp-theme-glow);transition:all 0.2s;">Copy Link</button>
+        </div>
+
+        <!-- Guest list -->
+        <div style="font-size:0.65rem;color:rgba(255,255,255,0.35);font-family:'Inter',sans-serif;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">In the Room</div>
+        <div id="wpGuestList" style="display:flex;flex-direction:column;max-height:150px;overflow-y:auto;">
+          <div class="wp-member-row" id="wpHostEntry">
+            <div class="wp-member-avatar" style="background:var(--wp-theme-grad);">👑</div>
+            <div class="wp-member-name">You (Host)</div>
+            <div class="wp-member-status" style="color:#00ff88;">● Connected</div>
+          </div>
+        </div>
+
+        <!-- Status line -->
+        <div id="wpStatusLine" style="margin-top:1rem;font-size:0.73rem;color:rgba(255,255,255,0.35);font-family:'Inter',sans-serif;text-align:center;">Share the link or room code with friends</div>
+
+        <!-- Leave/End button -->
+        <button id="wpEndPartyBtn" style="width:100%;margin-top:1rem;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#ef4444;border-radius:10px;padding:10px;cursor:pointer;font-family:'Inter',sans-serif;font-size:0.85rem;font-weight:600;transition:all 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.2)'" onmouseout="this.style.background='rgba(239,68,68,0.1)'">Leave Party</button>
       </div>
-
-      <!-- Status line -->
-      <div id="wpStatusLine" style="margin-top:1rem;font-size:0.73rem;color:rgba(255,255,255,0.35);font-family:'Inter',sans-serif;text-align:center;">Share the link or room code with friends</div>
-
-      <!-- Leave/End button -->
-      <button id="wpEndPartyBtn" style="width:100%;margin-top:1rem;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#ef4444;border-radius:10px;padding:10px;cursor:pointer;font-family:'Inter',sans-serif;font-size:0.85rem;font-weight:600;transition:all 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.2)'" onmouseout="this.style.background='rgba(239,68,68,0.1)'">Leave Party</button>
     </div>
   </div>
 

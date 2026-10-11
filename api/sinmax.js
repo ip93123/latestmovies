@@ -24,6 +24,24 @@ const SUBTITLE_MAP = {
   '1544847': '/Subtitle/1544847.srt',
   // Sarvam Maya (2025)
   '1473354': '/Subtitle/1473354.srt',
+  // Annayum Rasoolum (2013)
+  '154983': '/Subtitle/154983.srt',
+  // Premam (2015)
+  '337375': '/Subtitle/337375.srt',
+  // Home (2021)
+  '854291': '/Subtitle/854291.srt',
+  // Ennu Ninte Moideen (2015)
+  '349479': '/Subtitle/349479.srt',
+  // Thanneer Mathan Dinangal (2019)
+  '609503': '/Subtitle/609503.srt',
+  // Charlie (2015)
+  '371900': '/Subtitle/371900.srt',
+  // Ustad Hotel (2012)
+  '109012': '/Subtitle/109012.srt',
+  // Bangalore Days (2014)
+  '274092': '/Subtitle/274092.srt',
+  // Kumbalangi Nights (2019)
+  '574465': '/Subtitle/574465.srt',
 };
 
 const VIDLOVE_HEADERS = {

@@ -13,6 +13,15 @@ const SUBTITLE_MAP = {
   '1314279': '/Subtitle/1314279.srt', // Hi (2026)
   '1544847': '/Subtitle/1544847.srt', // Pradhama Drishtiya Kuttakkar (2026)
   '1473354': '/Subtitle/1473354.srt', // Sarvam Maya (2025)
+  '154983': '/Subtitle/154983.srt', // Annayum Rasoolum (2013)
+  '337375': '/Subtitle/337375.srt', // Premam (2015)
+  '854291': '/Subtitle/854291.srt', // Home (2021)
+  '349479': '/Subtitle/349479.srt', // Ennu Ninte Moideen (2015)
+  '609503': '/Subtitle/609503.srt', // Thanneer Mathan Dinangal (2019)
+  '371900': '/Subtitle/371900.srt', // Charlie (2015)
+  '109012': '/Subtitle/109012.srt', // Ustad Hotel (2012)
+  '274092': '/Subtitle/274092.srt', // Bangalore Days (2014)
+  '574465': '/Subtitle/574465.srt', // Kumbalangi Nights (2019)
 };
 
 const LANG_MAP = {
