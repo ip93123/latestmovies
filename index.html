@@ -8687,22 +8687,30 @@
       return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
-    // RAF loop — renders current cue
+    // RAF loop — renders current cue with zero redundant DOM writes
+    let _lastIframeSubCueText = null;
     function _subLoop() {
       if (!_subStartTime || !_subCues.length) return;
       const elapsed = (Date.now() - _subStartTime) + _subOffset;
       const cue = _subCues.find(c => elapsed >= c.start && elapsed < c.end);
-      if (cue) {
-        _subText.innerHTML = cue.text.replace(/\n/g, '<br>');
-        _subText.classList.add('active');
-      } else {
-        _subText.classList.remove('active');
+      const newText = cue ? cue.text : '';
+      if (newText !== _lastIframeSubCueText) {
+        _lastIframeSubCueText = newText;
+        if (newText) {
+          _subText.innerHTML = newText.replace(/\n/g, '<br>');
+          _subText.classList.add('active');
+        } else {
+          _subText.classList.remove('active');
+        }
       }
-      // Update status
+      // Update status line throttled to once per second
       const secs = Math.floor(elapsed / 1000);
-      const mm = String(Math.floor(secs / 60)).padStart(2, '0');
-      const ss = String(secs % 60).padStart(2, '0');
-      if (_subStatusLine) _subStatusLine.textContent = `${mm}:${ss}`;
+      if (_subStatusLine && _subStatusLine._lastSec !== secs) {
+        _subStatusLine._lastSec = secs;
+        const mm = String(Math.floor(secs / 60)).padStart(2, '0');
+        const ss = String(secs % 60).padStart(2, '0');
+        _subStatusLine.textContent = `${mm}:${ss}`;
+      }
       _subRaf = requestAnimationFrame(_subLoop);
     }
 
@@ -9891,16 +9899,21 @@
       _mxsRefreshQualityGrid();
     }
 
-    // RAF loop — subtitle cues driven by video.currentTime (perfect seek/pause sync)
+    // RAF loop — subtitle cues driven by video.currentTime with zero redundant DOM updates
+    let _lastMaxSubCueText = null;
     function _maxSubLoop() {
       if (!_maxMode || !_maxVideo || !_subCues.length) return;
       const ms = _maxVideo.currentTime * 1000 + _subOffset;
       const cue = _subCues.find(c => ms >= c.start && ms < c.end);
-      if (cue) {
-        _subText.innerHTML = cue.text.replace(/\n/g, '<br>');
-        _subText.classList.add('active');
-      } else {
-        _subText.classList.remove('active');
+      const newText = cue ? cue.text : '';
+      if (newText !== _lastMaxSubCueText) {
+        _lastMaxSubCueText = newText;
+        if (newText) {
+          _subText.innerHTML = newText.replace(/\n/g, '<br>');
+          _subText.classList.add('active');
+        } else {
+          _subText.classList.remove('active');
+        }
       }
       _maxSubRaf = requestAnimationFrame(_maxSubLoop);
     }
@@ -10615,17 +10628,22 @@
         const _hlsStartPos = (_maxVideo && typeof _maxVideo._wpPendingSeek === 'number' && _maxVideo._wpPendingSeek > 0)
           ? _maxVideo._wpPendingSeek
           : -1;
+        const isTV = !!((window.DEVICE && window.DEVICE.isTV) || /SmartTV|Smart-TV|Tizen|Web0S|webOS|HbbTV|BRAVIA/i.test(navigator.userAgent));
         _maxHls = new Hls({
-          enableWorker: true,
+          enableWorker: !isTV, // Tizen/SmartTV Web Workers leak memory & stutter during long playback; run in-thread on TV
           lowLatencyMode: false,
           enableCEA708Captions: false, // Turn off in-stream closed captions (often Arabic/Persian yellow text)
           subtitleDisplay: false,      // Prevent Hls.js native subtitle rendering
-          // ── Buffer tuning: pre-load as much as possible to survive proxy slowdowns ──
-          maxBufferLength: 120,          // try to keep 120s ahead in buffer (default 30s)
-          maxMaxBufferLength: 600,       // allow up to 600s if bandwidth allows
-          backBufferLength: 30,          // only keep 30s behind (saves memory, was 90)
-          maxBufferSize: 200 * 1000 * 1000, // 200MB max buffer size
-          startFragPrefetch: true,       // start fetching next segment early
+          // ── Buffer tuning: optimized for TV limited RAM vs desktop ──
+          maxBufferLength: isTV ? 20 : 60,          // TV: 20s ahead (prevents SourceBuffer QuotaExceededError); PC: 60s
+          maxMaxBufferLength: isTV ? 40 : 120,       // TV: 40s ceiling; PC: 120s
+          backBufferLength: isTV ? 12 : 30,          // TV: aggressively evict watched chunks after 12s to free RAM
+          maxBufferSize: isTV ? (25 * 1000 * 1000) : (80 * 1000 * 1000), // TV: 25MB max buffer in RAM (was 200MB!)
+          maxBufferHole: 0.5,                        // auto-skip 0.5s timestamp discontinuities without freezing
+          nudgeOffset: 0.2,                          // smooth auto-nudge on decoder stall
+          nudgeMaxRetry: 6,                          // auto-recover stalled decoder
+          highBufferWatchdogPeriod: 2,
+          startFragPrefetch: !isTV,                  // don't prefetch extra frags on low-RAM TV
           // ── Retry tuning: proxy can be slow, retry aggressively ──
           fragLoadingMaxRetry: 8,
           fragLoadingRetryDelay: 500,
@@ -10637,10 +10655,10 @@
           manifestLoadingMaxRetry: 6,
           manifestLoadingRetryDelay: 500,
           manifestLoadingTimeOut: 15000,
-          // ── ABR: lock to highest quality, don't auto-downgrade ──
+          // ── ABR tuning ──
           abrEwmaFastLive: 4,
           abrEwmaSlowLive: 15,
-          abrBandWidthFactor: 0.8,
+          abrBandWidthFactor: isTV ? 0.75 : 0.85,
           abrBandWidthUpFactor: 0.7,
           startLevel: -1,               // auto-pick best level initially
           startPosition: _hlsStartPos,
@@ -10718,6 +10736,23 @@
 
         let _hlsNetRecoveries = 0, _hlsMediaRecoveries = 0;
         _maxHls.on(Hls.Events.ERROR, (event, data) => {
+          if (data.details === 'bufferFullError') {
+            console.warn('[HLS] SourceBuffer full on TV — evicting back buffer to free RAM...');
+            if (_maxHls && _maxVideo) {
+              try {
+                // Clear old video buffer from RAM
+                _maxHls.trigger(Hls.Events.BUFFER_FLUSHING, { startOffset: 0, endOffset: Math.max(0, _maxVideo.currentTime - 8), type: 'all' });
+              } catch (_) {}
+            }
+            return;
+          }
+          if (data.details === 'bufferStalledError') {
+            console.warn('[HLS] Playback stalled on TV decoder — auto-nudging...');
+            if (_maxVideo && !_maxVideo.paused) {
+              _maxVideo.currentTime += 0.15;
+            }
+            return;
+          }
           if (data.fatal) {
             console.warn(`[HLS Error] ${engineLabel}: ${data.type} (${data.details})`);
             const isManifestError = data.details === 'manifestLoadError' || data.details === 'manifestParsingError';
@@ -10733,15 +10768,17 @@
               _maxHls.recoverMediaError();
               return;
             }
-            if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
+            if (window._activeMaxLoadTimer) {
+              clearInterval(window._activeMaxLoadTimer);
+              clearTimeout(window._activeMaxLoadTimer);
+              window._activeMaxLoadTimer = null;
+            }
             _maxWrap.classList.remove('buffering', 'ready');
             _maxWrap.classList.add('error');
-            const candidate = _getNextFallbackBtn();
-            const targetName = candidate ? candidate.textContent.trim() : (engine === 'hackymax' ? 'SinMax' : (engine === 'sinmax' ? 'ZeeMax' : 'Infinity'));
-            if (_maxErrMsg) _maxErrMsg.innerHTML = `${engineLabel} stream error (${data.details || data.type})<br><span style="color:${accentCol};font-weight:600;">Auto-switching to ${targetName}...</span>`;
+            if (_maxErrMsg) _maxErrMsg.innerHTML = `${engineLabel} stream error (${data.details || data.type})<br><span style="color:${accentCol};font-weight:600;">Auto-switching to Infinity...</span>`;
             try { _maxHls.destroy(); } catch (_) {}
             _maxHls = null;
-            _fallbackFromMax(isManifestError);
+            _fallbackToInfinity();
           }
         });
 
