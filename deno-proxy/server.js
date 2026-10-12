@@ -122,6 +122,10 @@ Deno.serve(async (req) => {
   resHeaders.set('Access-Control-Allow-Origin', '*');
   resHeaders.set('Access-Control-Expose-Headers', 'Content-Range, Accept-Ranges, Content-Length, Content-Type');
   resHeaders.set('Accept-Ranges', 'bytes');
+  // Prevent Smart TV / browser from caching hundreds of megabytes of video chunks to flash disk
+  resHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+  resHeaders.set('Pragma', 'no-cache');
+  resHeaders.set('Expires', '0');
 
   return new Response(upstream.body, {
     status: upstream.status,
