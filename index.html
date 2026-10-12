@@ -5683,10 +5683,29 @@
           <svg class="icon-flash-play" viewBox="0 0 24 24"><polygon points="6,4 20,12 6,20"/></svg>
           <svg class="icon-flash-pause" viewBox="0 0 24 24" style="display:none;"><rect x="5" y="4" width="4" height="16"/><rect x="15" y="4" width="4" height="16"/></svg>
         </div>
-        <!-- Buffering spinner -->
-        <div id="maxBuffering" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.6); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem; z-index:11;">
-          <div style="width:48px;height:48px;border:4px solid rgba(232,201,122,0.2);border-top-color:#E8C97A;border-radius:50%;animation:spin 1s linear infinite;"></div>
-          <span style="color:#E8C97A;font-size:0.85rem;font-family:'Inter',sans-serif;letter-spacing:1px;font-weight:600;">MAX · LOADING</span>
+        <!-- Buffering spinner / Rich Loading Screen -->
+        <div id="maxBuffering" style="display:none; position:absolute; inset:0; background:#07090F; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.75rem; z-index:11;">
+          <!-- Ambient blurred backdrop -->
+          <div id="maxBufferingBackdrop" style="position:absolute; inset:-20px; background-size:cover; background-position:center; filter:blur(24px) brightness(0.25); transform:scale(1.1); pointer-events:none; opacity:0.85; transition:opacity 0.4s ease;"></div>
+          <!-- Dark vignette overlay -->
+          <div style="position:absolute; inset:0; background:radial-gradient(circle at center, rgba(7,9,15,0.4) 0%, rgba(7,9,15,0.92) 85%); pointer-events:none;"></div>
+          
+          <!-- Movie Poster Card -->
+          <div id="maxBufferingPosterWrap" style="position:relative; z-index:2; display:flex; flex-direction:column; align-items:center;">
+            <img id="maxBufferingPoster" src="" alt="Movie Poster" style="width:115px; height:170px; object-fit:cover; border-radius:12px; box-shadow:0 16px 40px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.12); display:none;" />
+          </div>
+
+          <!-- Title -->
+          <div id="maxBufferingTitle" style="position:relative; z-index:2; font-family:'Inter',sans-serif; font-weight:700; font-size:1.15rem; color:#fff; text-shadow:0 2px 8px rgba(0,0,0,0.8); max-width:85%; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
+
+          <!-- Spinner and Status -->
+          <div style="position:relative; z-index:2; display:flex; align-items:center; gap:10px;">
+            <div id="maxBufferingSpinner" style="width:26px; height:26px; border:3px solid rgba(0,198,255,0.2); border-top-color:#00C6FF; border-radius:50%; animation:spin 0.9s linear infinite;"></div>
+            <span id="maxBufferingStatus" style="color:#00C6FF; font-size:0.85rem; font-family:'Inter',sans-serif; letter-spacing:0.8px; font-weight:700; text-transform:uppercase;">HACKYMAX ✦ · LOADING STREAM (20s)</span>
+          </div>
+
+          <!-- Quick Switch to Infinity Button -->
+          <button id="maxBufferingSkipBtn" type="button" style="position:relative; z-index:3; pointer-events:auto; margin-top:0.3rem; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-family:'Inter',sans-serif; font-size:0.75rem; font-weight:600; padding:6px 14px; border-radius:20px; cursor:pointer; backdrop-filter:blur(8px); transition:all 0.2s ease;">Switch to Infinity ✦</button>
         </div>
         <!-- Error / no stream state -->
         <div id="maxError" style="display:none; position:absolute; inset:0; background:linear-gradient(135deg,#07090F 0%,#0D1117 100%); flex-direction:column; align-items:center; justify-content:center; gap:1.2rem; z-index:11; text-align:center; padding:2rem;">
@@ -8298,7 +8317,8 @@
               const resData = await getModalServerUrls(_currentModalId, _currentModalType, _selectedSeason, _selectedEpisode);
               const curUrls = resData.urls || [];
               const curLabels = resData.labels || [];
-              playStream(curUrls[serverIdx], curUrls, curLabels);
+              const targetUrl = curUrls[serverIdx] || curUrls[0];
+              if (targetUrl) playStream(targetUrl, curUrls, curLabels);
             };
           });
 
@@ -10318,15 +10338,96 @@
       const engineLabel = engine === 'hackymax' ? 'HACKYMAX' : (engine === 'sinmax' ? 'SINMAX' : 'ZEEMAX');
       const accentCol   = engine === 'hackymax' ? '#00C6FF' : (engine === 'sinmax' ? '#FF416C' : '#E8C97A');
 
-      const bufText = document.querySelector('#maxBuffering span');
-      if (bufText) {
-        bufText.textContent = `${engineLabel} · LOADING`;
-        bufText.style.color = accentCol;
+      // Populate rich loading screen (poster, backdrop, title, countdown)
+      const bufPoster = document.getElementById('maxBufferingPoster');
+      const bufBackdrop = document.getElementById('maxBufferingBackdrop');
+      const bufTitle = document.getElementById('maxBufferingTitle');
+      const bufStatus = document.getElementById('maxBufferingStatus');
+      const bufSkipBtn = document.getElementById('maxBufferingSkipBtn');
+
+      const modalItem = window._currentModalItem;
+      const modalPosterSrc = document.getElementById('modalPoster')?.src || '';
+      const posterPath = (modalItem && modalItem.poster_path) ? `${IMG}w500${modalItem.poster_path}` : modalPosterSrc;
+      const backdropPath = (modalItem && modalItem.backdrop_path) ? `${IMG}original${modalItem.backdrop_path}` : posterPath;
+      const displayTitle = (modalItem && (modalItem.title || modalItem.name)) || document.getElementById('modalTitle')?.textContent || '';
+
+      if (bufPoster) {
+        if (posterPath && !posterPath.includes('placeholder')) {
+          bufPoster.src = posterPath;
+          bufPoster.style.display = 'block';
+        } else {
+          bufPoster.style.display = 'none';
+        }
       }
-      const bufSpinner = document.querySelector('#maxBuffering div');
-      if (bufSpinner) {
-        bufSpinner.style.borderTopColor = accentCol;
+      if (bufBackdrop) {
+        if (backdropPath) {
+          bufBackdrop.style.backgroundImage = `url("${backdropPath}")`;
+          bufBackdrop.style.display = 'block';
+        } else {
+          bufBackdrop.style.display = 'none';
+        }
       }
+      if (bufTitle) {
+        bufTitle.textContent = displayTitle;
+      }
+
+      // ── Direct Infinity fallback helper ──────────────────────────────────
+      const _fallbackToInfinity = async () => {
+        if (window._activeMaxLoadTimer) {
+          clearInterval(window._activeMaxLoadTimer);
+          clearTimeout(window._activeMaxLoadTimer);
+          window._activeMaxLoadTimer = null;
+        }
+        if (!_maxMode) return;
+        console.warn(`[HackyMax] Loading watchdog (20s). Falling back directly to Infinity...`);
+        _destroyMax();
+        try {
+          const sUrls = await getModalServerUrls(tmdbId, mediaType, season || 1, episode || 1);
+          if (sUrls && sUrls.urls && sUrls.urls.length) {
+            let infIdx = sUrls.labels ? sUrls.labels.findIndex(l => l.toLowerCase().includes('infinity')) : -1;
+            if (infIdx < 0) infIdx = sUrls.urls.findIndex(u => u.includes('vidlove.cc'));
+            if (infIdx < 0) infIdx = sUrls.urls.findIndex(u => !u.startsWith('hackymax://'));
+            const targetUrl = sUrls.urls[infIdx >= 0 ? infIdx : 1] || sUrls.urls[0];
+            playStream(targetUrl, sUrls.urls, sUrls.labels);
+          }
+        } catch (_) {}
+      };
+
+      if (bufSkipBtn) {
+        bufSkipBtn.onclick = (e) => {
+          e.stopPropagation();
+          _fallbackToInfinity();
+        };
+      }
+
+      // 20-second countdown loading watchdog
+      let _maxLoadingSeconds = 20;
+      if (window._activeMaxLoadTimer) {
+        clearInterval(window._activeMaxLoadTimer);
+        clearTimeout(window._activeMaxLoadTimer);
+        window._activeMaxLoadTimer = null;
+      }
+      
+      const _updateLoadStatus = (sec, customMsg = '') => {
+        if (bufStatus) {
+          bufStatus.textContent = customMsg || `${engineLabel} ✦ · CONNECTING STREAM (${sec}s)`;
+          bufStatus.style.color = accentCol;
+        }
+      };
+      _updateLoadStatus(_maxLoadingSeconds);
+
+      window._activeMaxLoadTimer = setInterval(() => {
+        _maxLoadingSeconds--;
+        if (_maxLoadingSeconds > 0) {
+          _updateLoadStatus(_maxLoadingSeconds);
+        } else {
+          clearInterval(window._activeMaxLoadTimer);
+          window._activeMaxLoadTimer = null;
+          if (_maxWrap.classList.contains('buffering') && !_maxWrap.classList.contains('ready') && _maxMode) {
+            _fallbackToInfinity();
+          }
+        }
+      }, 1000);
 
       // ── Load hls.js lazily ────────────────────────────────────────────
       try { await _loadHlsJs(); }
@@ -10337,126 +10438,25 @@
         return;
       }
 
-      // Helper to compute next player in the seamless failover ring:
-      // HackyMax -> SinMax -> ZeeMax -> Infinity (external iframe)
       function _getNextFallbackBtn() {
         const btns = Array.from(document.querySelectorAll('.player-server-btn'));
         if (!btns.length) return null;
-
-        const key = `${tmdbId}_${mediaType}_${season || 1}_${episode || 1}`;
-        if (!window._engineAttempts) window._engineAttempts = {};
-        if (!window._engineAttempts[key]) window._engineAttempts[key] = new Set();
-        window._engineAttempts[key].add(engine);
-        const tried = window._engineAttempts[key];
-
-        // Priority failover ring among the 3 custom players:
-        let candidateOrder = [];
-        if (engine === 'hackymax') candidateOrder = ['sinmax', 'zeemax'];
-        else if (engine === 'sinmax') candidateOrder = ['zeemax', 'hackymax'];
-        else candidateOrder = ['hackymax', 'sinmax'];
-
-        let nextBtn = null;
-        for (const nextEng of candidateOrder) {
-          if (!tried.has(nextEng)) {
-            nextBtn = btns.find(b => b.classList.contains(`${nextEng}-btn`) || (nextEng === 'zeemax' && b.classList.contains('max-btn')));
-            if (nextBtn) break;
-          }
-        }
-
-        // If all 3 custom engines failed, fallback to first external server (Infinity, Nova, etc.)
-        if (!nextBtn) {
-          nextBtn = btns.find(b =>
-            !b.classList.contains('hackymax-btn') &&
-            !b.classList.contains('sinmax-btn') &&
-            !b.classList.contains('zeemax-btn') &&
-            !b.classList.contains('max-btn')
-          );
-        }
-
-        return nextBtn;
+        return btns.find(b => !b.classList.contains('hackymax-btn')) || btns[1] || null;
       }
 
       function _fallbackFromMax(immediate = false) {
-        if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
-        if (window._fallbackTimer) { clearTimeout(window._fallbackTimer); window._fallbackTimer = null; }
-        const delay = immediate ? 150 : 600;
-        window._fallbackTimer = setTimeout(() => {
-          window._fallbackTimer = null;
-          if (!_maxWrap.classList.contains('error')) return;
-
-          // Record current engine attempt
-          const key = `${tmdbId}_${mediaType}_${season || 1}_${episode || 1}`;
-          if (!window._engineAttempts) window._engineAttempts = {};
-          if (!window._engineAttempts[key]) window._engineAttempts[key] = new Set();
-          window._engineAttempts[key].add(engine);
-          const tried = window._engineAttempts[key];
-
-          let candidateOrder = [];
-          if (engine === 'hackymax') candidateOrder = ['sinmax', 'zeemax'];
-          else if (engine === 'sinmax') candidateOrder = ['zeemax'];
-          else candidateOrder = [];
-
-          let nextEng = null;
-          for (const cand of candidateOrder) {
-            if (!tried.has(cand)) { nextEng = cand; break; }
-          }
-          if (nextEng) {
-            console.log(`[Auto-Failover] ${engine} failed, directly switching to: ${nextEng}`);
-            window._currentMaxEngine = nextEng;
-            window._currentPlayingEngine = nextEng;
-            _maxWrap.classList.remove('error');
-            initMaxPlayer(tmdbId, mediaType, season, episode, nextEng);
-            return;
-          }
-
-          // If all custom engines exhausted, switch to first external embed
-          console.log(`[Auto-Failover] All custom engines exhausted for this title, switching to external embed...`);
-          getModalServerUrls(tmdbId, mediaType, season || 1, episode || 1).then(data => {
-            if (data && data.urls && data.urls.length) {
-              const extUrl = data.urls.find(u => !u.startsWith('hackymax://') && !u.startsWith('sinmax://') && !u.startsWith('zeemax://') && !u.startsWith('max://'));
-              if (extUrl) playStream(extUrl, data.urls, data.labels);
-            }
-          }).catch(() => {});
-        }, delay);
+        _fallbackToInfinity();
       }
 
       const fbBtn = document.getElementById('maxFallbackBtn');
       if (fbBtn && !fbBtn._wired) {
         fbBtn._wired = true;
         fbBtn.onclick = () => {
-          if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
-          const nextBtn = _getNextFallbackBtn() || document.querySelector('.player-server-btn:not(.active)');
-          if (nextBtn) {
-            nextBtn.click();
-            return;
-          }
-          getModalServerUrls(tmdbId, mediaType, season || 1, episode || 1).then(data => {
-            if (data && data.urls && data.urls.length) {
-              const extUrl = data.urls.find(u => !u.startsWith('hackymax://') && !u.startsWith('sinmax://') && !u.startsWith('zeemax://') && !u.startsWith('max://'));
-              if (extUrl) playStream(extUrl, data.urls, data.labels);
-            }
-          }).catch(() => {});
+          _fallbackToInfinity();
         };
       }
 
-      // Initial loading watchdog: if buffering takes >22s without becoming ready, auto-failover
-      if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
-      window._activeMaxLoadTimer = setTimeout(() => {
-        window._activeMaxLoadTimer = null;
-        if (_maxWrap.classList.contains('buffering') && !_maxWrap.classList.contains('ready') && _maxMode) {
-          console.warn(`[Auto-Failover] ${engine} initial load timeout (>22s), switching...`);
-          _maxWrap.classList.remove('buffering');
-          _maxWrap.classList.add('error');
-          if (_maxHls) { try { _maxHls.destroy(); } catch (_) {} _maxHls = null; }
-          const candidate = _getNextFallbackBtn();
-          const targetName = candidate ? candidate.textContent.trim() : 'next player';
-          const accentCol  = engine === 'hackymax' ? '#00C6FF' : (engine === 'sinmax' ? '#FF416C' : '#E8C97A');
-          if (_maxErrMsg) _maxErrMsg.innerHTML = `${engineLabel} stream timed out.<br><span style="color:${accentCol};font-weight:600;">Auto-switching to ${targetName}...</span>`;
-          _fallbackFromMax();
-        }
-      }, 22000);
-
-      // ── Fetch stream URL & Subtitle from /api/hls or /api/sinmax ──────
+      // ── Fetch stream URL & Subtitle from /api/hackymax ──────────────────
       let streamUrl = null;
       let streamFormat = 'hls';
       let subtitleUrl = null;
@@ -10472,8 +10472,7 @@
         if (season)  params.set('season',  season);
         if (episode) params.set('episode', episode);
         if (imdbId)  params.set('imdb', imdbId);
-        const apiPath = engine === 'hackymax' ? '/api/hackymax' : (engine === 'sinmax' ? '/api/sinmax' : '/api/zeemax');
-        const resp = await fetch(`${apiPath}?${params}`, {
+        const resp = await fetch(`/api/hackymax?${params}`, {
           signal: AbortSignal.timeout(12000),
           headers: { 'x-hacky-token': _ht }
         });
@@ -10485,15 +10484,8 @@
       } catch (_) {}
 
       if (!streamUrl) {
-        if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
-        _maxWrap.classList.remove('buffering');
-        _maxWrap.classList.add('error');
-        if (_maxErrMsg) {
-          const candidate = _getNextFallbackBtn();
-          const targetName = candidate ? candidate.textContent.trim() : (engine === 'hackymax' ? 'SinMax' : (engine === 'sinmax' ? 'ZeeMax' : 'Infinity'));
-          _maxErrMsg.innerHTML = `${engineLabel} stream unavailable for this title.<br><span style="color:${accentCol};font-weight:600;">Auto-switching to ${targetName}...</span>`;
-        }
-        _fallbackFromMax();
+        console.warn('[HackyMax] Stream not immediately available, waiting out remaining countdown before Infinity fallback...');
+        _updateLoadStatus(_maxLoadingSeconds, `HACKYMAX ✦ · STREAM DELAYED · SWITCHING TO INFINITY (${_maxLoadingSeconds}s)`);
         return;
       }
 
@@ -10910,6 +10902,10 @@
     }
 
     function playStream(url, allUrls, labels) {
+      if (!url) {
+        console.warn('[playStream] Called with invalid URL:', url);
+        return;
+      }
       if (_currentModalItem) saveRecentWatch(_currentModalItem, _currentModalType);
       // Stop background video
       if (typeof _destroyHeroPlayer === 'function') _destroyHeroPlayer();
