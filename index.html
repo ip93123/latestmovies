@@ -2273,6 +2273,8 @@
       height: 100%;
       border: none;
       transition: opacity 0.3s;
+      position: relative;
+      z-index: 1; /* explicit low z-index so #subOverlay can paint above the iframe compositing layer */
     }
 
     /* ── Skip Intro Button ──────────────────────────────────────────────── */
@@ -2333,7 +2335,7 @@
       position: absolute;
       inset: 0;
       pointer-events: none;
-      z-index: 55;
+      z-index: 100; /* above iframe compositing layer (iframe z-index: 1) */
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
