@@ -7914,6 +7914,7 @@
 
       if (type === 'tv') {
         urls = [
+          `hackymax://tv/${id}/${s}/${e}`,
           `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=1&mute=0&showNextEpisode=1`,
           `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&muted=false&nextEpisode=true&episodeSelector=true`,
           `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
@@ -7923,9 +7924,10 @@
           `https://vidcore.net/tv/${id}/${s}/${e}?autoplay=1&server=orbit`,
           `https://anyembed.xyz/embed/tmdb-tv-${id}-${s}-${e}?logo=false&autoplay=1`
         ];
-        labels = ['Infinity', 'Nova', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
+        labels = ['HackyMax ✦', 'Infinity', 'Nova', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
       } else {
         urls = [
+          `hackymax://movie/${id}`,
           `https://vidlove.cc/embed/movie/${id}?autoplay=1&mute=0`,
           `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&muted=false`,
           `https://vidnest.fun/movie/${id}?autoplay=1`,
@@ -7935,7 +7937,7 @@
           `https://vidcore.net/movie/${id}?autoplay=1&server=orbit`,
           `https://anyembed.xyz/embed/tmdb-movie-${id}?logo=false&autoplay=1`
         ];
-        labels = ['Infinity', 'Nova', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
+        labels = ['HackyMax ✦', 'Infinity', 'Nova', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
       }
       return { urls, labels };
     }
@@ -10829,6 +10831,84 @@
       }
     }
 
+    async function _autoLoadIframeSinhalaSub() {
+      if (!_currentModalId) return;
+      _attachSubOverlayToActiveWrap();
+      const localSub = typeof SUBTITLE_MAP !== 'undefined' ? SUBTITLE_MAP[String(_currentModalId)] : null;
+      let srtText = null;
+      let subLabel = 'Sinhala 🇱🇰';
+
+      if (localSub) {
+        try {
+          const r = await fetch(localSub);
+          if (r.ok) srtText = await r.text();
+        } catch (_) {}
+      }
+
+      // If not in local SUBTITLE_MAP, query /api/subtitles for Sinhala track
+      if (!srtText) {
+        try {
+          const p = new URLSearchParams({ id: _currentModalId, type: _currentModalType || 'movie' });
+          if (_selectedSeason) p.set('season', _selectedSeason);
+          if (_selectedEpisode) p.set('episode', _selectedEpisode);
+          const r = await fetch(`/api/subtitles?${p}`, { signal: AbortSignal.timeout(4500) });
+          if (r.ok) {
+            const d = await r.json();
+            if (Array.isArray(d.tracks)) {
+              const sinTr = d.tracks.find(t => {
+                const l = (t.lang || '').toLowerCase();
+                const lbl = (t.label || '').toLowerCase();
+                return l === 'si' || l === 'sin' || l === 'sinhala' || lbl.includes('sinhala');
+              });
+              if (sinTr && sinTr.url) {
+                let subRes = null;
+                try { subRes = await fetch(sinTr.url); } catch (_) {}
+                if (!subRes || !subRes.ok) {
+                  try { subRes = await fetch(`/api/subtitles?url=${encodeURIComponent(sinTr.url)}`); } catch (_) {}
+                }
+                if (subRes && subRes.ok) {
+                  srtText = await subRes.text();
+                  subLabel = sinTr.label || 'Sinhala 🇱🇰';
+                }
+              }
+            }
+          }
+        } catch (_) {}
+      }
+
+      if (srtText) {
+        // Strict Arabic elimination
+        if (!/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(srtText)) {
+          let parsedCues = [];
+          if (srtText.includes('WEBVTT')) parsedCues = parseVtt(srtText);
+          else parsedCues = parseSrt(srtText);
+          if (!parsedCues.length) parsedCues = parseVtt(srtText);
+
+          if (parsedCues.length) {
+            _loadSubCues(parsedCues, subLabel);
+            // Auto-start wall-clock sync for iframe player
+            _subStartTime = Date.now();
+            _subOffset = 0;
+            _stopSubLoop();
+            _subRaf = requestAnimationFrame(_subLoop);
+            if (_subStartBtn) _subStartBtn.textContent = '⟳ Restart';
+            if (_subToggleBtn) {
+              _subToggleBtn.style.opacity = '1';
+              _subToggleBtn.style.cursor = 'pointer';
+              _subToggleBtn.classList.add('active');
+              _subToggleBtn.title = `Sinhala subtitles active (${parsedCues.length} cues) — Click to sync`;
+            }
+            const msg = document.getElementById('subPanelMsg');
+            if (msg) msg.innerHTML = `✅ <strong style="color:var(--gold)">${_escHtml(subLabel)}</strong> active — <em>${parsedCues.length} cues</em>.<br><span style="color:#27AE60;font-size:0.8em;">⚡ Wall-clock auto-sync active</span>`;
+            setTimeout(() => {
+              if (_subSyncPanel) _subSyncPanel.classList.remove('visible');
+            }, 3500);
+            console.log(`[Iframe Subtitles] Auto-started ${parsedCues.length} Sinhala cues`);
+          }
+        }
+      }
+    }
+
     function playStream(url, allUrls, labels) {
       if (_currentModalItem) saveRecentWatch(_currentModalItem, _currentModalType);
       // Stop background video
@@ -10905,86 +10985,8 @@
 
       // ── Auto-load & auto-start Sinhala subtitle for iframe (Infinity, etc.) ────────
       if (!isHackyMaxUrl && !isSinMaxUrl && !isZeeMaxUrl && _currentModalId) {
-        _attachSubOverlayToActiveWrap();
-        const localSub = typeof SUBTITLE_MAP !== 'undefined' ? SUBTITLE_MAP[String(_currentModalId)] : null;
-        
-        (async function _autoLoadIframeSinhalaSub() {
-          let srtText = null;
-          let subLabel = 'Sinhala 🇱🇰';
-
-          if (localSub) {
-            try {
-              const r = await fetch(localSub);
-              if (r.ok) srtText = await r.text();
-            } catch (_) {}
-          }
-
-          // If not in local SUBTITLE_MAP, query /api/subtitles for Sinhala track
-          if (!srtText) {
-            try {
-              const p = new URLSearchParams({ id: _currentModalId, type: _currentModalType || 'movie' });
-              if (_selectedSeason) p.set('season', _selectedSeason);
-              if (_selectedEpisode) p.set('episode', _selectedEpisode);
-              const r = await fetch(`/api/subtitles?${p}`, { signal: AbortSignal.timeout(4500) });
-              if (r.ok) {
-                const d = await r.json();
-                if (Array.isArray(d.tracks)) {
-                  const sinTr = d.tracks.find(t => {
-                    const l = (t.lang || '').toLowerCase();
-                    const lbl = (t.label || '').toLowerCase();
-                    return l === 'si' || l === 'sin' || l === 'sinhala' || lbl.includes('sinhala');
-                  });
-                  if (sinTr && sinTr.url) {
-                    let subRes = null;
-                    try { subRes = await fetch(sinTr.url); } catch (_) {}
-                    if (!subRes || !subRes.ok) {
-                      try { subRes = await fetch(`/api/subtitles?url=${encodeURIComponent(sinTr.url)}`); } catch (_) {}
-                    }
-                    if (subRes && subRes.ok) {
-                      srtText = await subRes.text();
-                      subLabel = sinTr.label || 'Sinhala 🇱🇰';
-                    }
-                  }
-                }
-              }
-            } catch (_) {}
-          }
-
-          if (srtText) {
-            // Strict Arabic elimination
-            if (!/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(srtText)) {
-              let parsedCues = [];
-              if (srtText.includes('WEBVTT')) parsedCues = parseVtt(srtText);
-              else parsedCues = parseSrt(srtText);
-              if (!parsedCues.length) parsedCues = parseVtt(srtText);
-
-              if (parsedCues.length) {
-                _loadSubCues(parsedCues, subLabel);
-                // Auto-start wall-clock sync for iframe player
-                _subStartTime = Date.now();
-                _subOffset = 0;
-                _stopSubLoop();
-                _subRaf = requestAnimationFrame(_subLoop);
-                if (_subStartBtn) _subStartBtn.textContent = '⟳ Restart';
-                if (_subToggleBtn) {
-                  _subToggleBtn.style.opacity = '1';
-                  _subToggleBtn.style.cursor = 'pointer';
-                  _subToggleBtn.classList.add('active');
-                  _subToggleBtn.title = `Sinhala subtitles active (${parsedCues.length} cues) — Click to sync`;
-                }
-                const msg = document.getElementById('subPanelMsg');
-                if (msg) msg.innerHTML = `✅ <strong style="color:var(--gold)">${_escHtml(subLabel)}</strong> active — <em>${parsedCues.length} cues</em>.<br><span style="color:#27AE60;font-size:0.8em;">⚡ Wall-clock auto-sync active</span>`;
-                // Keep sync panel visible briefly, then dismiss so video is unobstructed
-                setTimeout(() => {
-                  if (_subSyncPanel) _subSyncPanel.classList.remove('visible');
-                }, 3500);
-                console.log(`[Infinity Subtitles] Auto-started ${parsedCues.length} Sinhala cues`);
-              }
-            }
-          }
-        })();
+        _autoLoadIframeSinhalaSub();
       }
-
 
       // ── Skip Intro — TV only, load + start wall-clock timer ──────────────
       if (_currentModalType === 'tv' && _currentModalId && typeof window._loadSkipIntro === 'function') {
@@ -10997,18 +10999,7 @@
       // will trigger popstate and auto-reopen this video.
       if (typeof window._adblock_pushRecovery === 'function') window._adblock_pushRecovery(url);
 
-
-
-      // NOTE: We intentionally do NOT auto-request fullscreen here.
-      // Calling requestFullscreen() on the container immediately takes the browser's
-      // fullscreen slot, which prevents cross-origin embed iframes from
-      // calling their own requestFullscreen() internally — causing a NotAllowedError
-      // The player overlay is already full-viewport via CSS (position:fixed + inset:0),
-      // so system fullscreen is not needed at play-start.
-      // The explicit fullscreen button still works when the user clicks it manually.
-
       // Only animate open if the player wasn't already visible
-      // Prevents the "new player on top of old" flash when switching servers or next episode
       if (!wasAlreadyOpen) {
         gsap.fromTo('.player-container', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'power3.out' });
       }
@@ -11037,6 +11028,7 @@
       const isZeeMaxUrl   = url.startsWith('zeemax://') || url.startsWith('max://');
       if (isHackyMaxUrl || isSinMaxUrl || isZeeMaxUrl) {
         // Switch TO HackyMax, SinMax or ZeeMax player
+        _stopSubLoop();
         _destroyMax();
         if (loader) loader.style.opacity = '0';
         frame.style.display = 'none';
@@ -11061,6 +11053,7 @@
           frame.style.opacity = '1';
         };
         if (typeof window._adblock_pushRecovery === 'function') window._adblock_pushRecovery(url);
+        _autoLoadIframeSinhalaSub();
       }
     }
 
