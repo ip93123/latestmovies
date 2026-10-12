@@ -14,6 +14,12 @@ const PROXY_HEADERS = {
 const MAX_CHUNK_BYTES = 4 * 1024 * 1024;
 
 export default async function handler(req, res) {
+  // ── Secret Token Auth ─────────────────────────────────────────────────────
+  const secret = process.env.API_SECRET;
+  if (secret && req.headers['x-hacky-token'] !== secret) {
+    return res.status(401).send('Unauthorized');
+  }
+
   const { url } = req.query;
   if (!url) return res.status(400).send('Missing url parameter');
 
@@ -21,7 +27,8 @@ export default async function handler(req, res) {
   // This bypasses Vercel Serverless Function egress completely and saves 100% bandwidth!
   if (process.env.CF_PROXY_URL) {
     const cfBase = process.env.CF_PROXY_URL.replace(/\/$/, '');
-    return res.redirect(307, `${cfBase}?url=${encodeURIComponent(url)}`);
+    const _tParam = process.env.API_SECRET ? `&_t=${encodeURIComponent(process.env.API_SECRET)}` : '';
+    return res.redirect(307, `${cfBase}?url=${encodeURIComponent(url)}${_tParam}`);
   }
 
   let targetUrl;

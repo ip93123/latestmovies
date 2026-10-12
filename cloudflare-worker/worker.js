@@ -26,10 +26,28 @@ export default {
       return new Response('Method Not Allowed', { status: 405 });
     }
 
+    // ── 1b. Secret Token Auth ─────────────────────────────────────────────────
+    // Set API_SECRET in Cloudflare Worker env vars.
+    // Vercel API appends ?_t=TOKEN to every worker URL it builds server-side.
+    // HLS.js player can't send custom headers, so we use a query param instead.
+    // Bots calling the worker directly without ?_t get 401 — quota protected.
+    const secret = env.API_SECRET;
+    if (secret) {
+      const reqUrlForAuth = new URL(request.url);
+      const token = reqUrlForAuth.searchParams.get('_t') || '';
+      if (token !== secret) {
+        return new Response('Unauthorized', { status: 401, headers: CORS });
+      }
+    }
+
     // ── 2. Robust URL Extraction (Preserves ALL query params like internal_token) ──
     const reqUrl = new URL(request.url);
     const fullSearch = reqUrl.search;
     const urlMatch = fullSearch.match(/[?&]url=([^]*)/);
+
+    // ?direct=1 → segments served directly from CDN (no worker bandwidth used)
+    // Only the manifest itself passes through the worker — saves ~99% bandwidth!
+    const directMode = reqUrl.searchParams.get('direct') === '1';
     
     if (!urlMatch || !urlMatch[1]) {
       return new Response('Missing ?url= parameter', { status: 400 });
@@ -91,6 +109,8 @@ export default {
                 || (ct.includes('text') && !targetUrl.pathname.endsWith('.mp4'));
 
     const proxyBase = `${reqUrl.origin}${reqUrl.pathname}`;
+    // Carry the auth token into all rewritten segment/playlist URLs
+    const tParam = reqUrl.searchParams.get('_t') ? `&_t=${encodeURIComponent(reqUrl.searchParams.get('_t'))}` : '';
 
     // ── 5. HLS Manifest Rewriting ─────────────────────────────────────────────
     if (isM3U8) {
@@ -98,6 +118,9 @@ export default {
 
       // Check if it's an actual HLS playlist
       if (text.startsWith('#EXTM3U')) {
+        // Detect if this is a master playlist (has #EXT-X-STREAM-INF) or media playlist (has segments)
+        const isMasterPlaylist = text.includes('#EXT-X-STREAM-INF');
+
         const rewritten = text.split('\n').map(line => {
           const trimmed = line.trim();
           if (!trimmed) return line;
@@ -108,10 +131,11 @@ export default {
                                   /NAME=["']?(English|Sinhala)["']?/i.test(trimmed);
             if (!isAllowedLang) return null;
 
+          // Rewrite subtitle URI — always proxied (needs rewriting too)
             return trimmed.replace(/URI=["']([^"']+)["']/i, (match, subUri) => {
               try {
                 const absSub = new URL(subUri, targetUrl.href).href;
-                return `URI="${proxyBase}?url=${encodeURIComponent(absSub)}"`;
+                return `URI="${proxyBase}?url=${encodeURIComponent(absSub)}${tParam}"`;
               } catch {
                 return match;
               }
@@ -120,10 +144,10 @@ export default {
 
           if (trimmed.startsWith('#')) return line;
 
-          // Rewrite segment URLs to stream through this worker
           try {
             const absUrl = new URL(trimmed, targetUrl.href).href;
-            return `${proxyBase}?url=${encodeURIComponent(absUrl)}`;
+            // Normal mode: all segments proxied through worker
+            return `${proxyBase}?url=${encodeURIComponent(absUrl)}${tParam}`;
           } catch {
             return line;
           }

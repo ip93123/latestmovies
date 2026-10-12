@@ -104,6 +104,13 @@ async function getVidloveStream(id, type, season, episode) {
 }
 
 export default async function handler(req, res) {
+  // ── Secret Token Auth ─────────────────────────────────────────────────────
+  // Set API_SECRET in Vercel env vars. Frontend sends x-hacky-token header.
+  const secret = process.env.API_SECRET;
+  if (secret && req.headers['x-hacky-token'] !== secret) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   const { id, type = 'movie', season = 1, episode = 1, imdb } = req.query;
   if (!id) return res.status(400).json({ error: 'Missing id parameter' });
 
@@ -191,7 +198,13 @@ export default async function handler(req, res) {
       const PROXY_BASE = (rawProxy && !rawProxy.includes('onrender.com') && !rawProxy.includes('workers.dev') && !rawProxy.includes('deno.net'))
         ? rawProxy
         : 'https://funny-sfogliatella-4e51f6.netlify.app/proxy';
-      finalUrl = `${PROXY_BASE}?url=${encodeURIComponent(streamInfo.streamUrl)}`;
+      // Append ?_t=TOKEN so the CF Worker can verify the request (query param,
+      // since HLS.js player can't send custom headers for segment requests).
+      const _tParam = process.env.API_SECRET ? `&_t=${encodeURIComponent(process.env.API_SECRET)}` : '';
+      // NOTE: ?direct=1 was tested but d.ravenflix.st CDN returns 403 Forbidden
+      // for direct browser segment fetches (requires Referer: vidlove.cc header).
+      // All .ts segments MUST be proxied. Worker is unavoidable for this CDN.
+      finalUrl = `${PROXY_BASE}?url=${encodeURIComponent(streamInfo.streamUrl)}${_tParam}`;
     }
     return res.status(200).json({
       url: finalUrl,

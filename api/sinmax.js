@@ -126,6 +126,12 @@ async function getSinMaxStream(id, type, season, episode) {
 }
 
 export default async function handler(req, res) {
+  // ── Secret Token Auth ─────────────────────────────────────────────────────
+  const secret = process.env.API_SECRET;
+  if (secret && req.headers['x-hacky-token'] !== secret) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   const { id, type = 'movie', season = 1, episode = 1, imdb } = req.query;
   if (!id) return res.status(400).json({ error: 'Missing id parameter' });
 
@@ -211,13 +217,14 @@ export default async function handler(req, res) {
     const PROXY_BASE = (rawProxy && !rawProxy.includes('onrender.com') && !rawProxy.includes('workers.dev') && !rawProxy.includes('deno.net'))
       ? rawProxy
       : 'https://funny-sfogliatella-4e51f6.netlify.app/proxy';
-    const finalUrl = `${PROXY_BASE}?url=${encodeURIComponent(streamInfo.streamUrl)}`;
+    const _tParam = process.env.API_SECRET ? `&_t=${encodeURIComponent(process.env.API_SECRET)}` : '';
+    const finalUrl = `${PROXY_BASE}?url=${encodeURIComponent(streamInfo.streamUrl)}${_tParam}`;
 
     let proxiedQualities = null;
     if (Array.isArray(streamInfo.qualities)) {
       proxiedQualities = streamInfo.qualities.map(q => ({
         ...q,
-        url: `${PROXY_BASE}?url=${encodeURIComponent(q.url)}`
+        url: `${PROXY_BASE}?url=${encodeURIComponent(q.url)}${_tParam}`
       }));
     }
 

@@ -5623,10 +5623,7 @@
           <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" />
           <path d="M9 21V12h6v9" />
         </svg></button>
-      <button class="topbar-sub-btn" id="subToggleBtn" title="Sinhala Subtitles — Toggle / Sync">
-        <span class="sub-flag">🇱🇰</span>
-        <span>Sinhala Sub</span>
-      </button>
+
       <button class="topbar-wp-btn" id="topbarWatchPartyBtn" title="Watch Party — Watch together with friends">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
           <circle cx="9" cy="7" r="4"/>
@@ -10465,12 +10462,17 @@
       } catch (_) {}
 
       try {
+        // Anti-scraper token — matches API_SECRET env var on Vercel & Cloudflare
+        const _ht = 'hky-' + btoa('hackystreaming').slice(0,12);
         const params = new URLSearchParams({ id: tmdbId, type: mediaType });
         if (season)  params.set('season',  season);
         if (episode) params.set('episode', episode);
         if (imdbId)  params.set('imdb', imdbId);
         const apiPath = engine === 'hackymax' ? '/api/hackymax' : (engine === 'sinmax' ? '/api/sinmax' : '/api/zeemax');
-        const resp = await fetch(`${apiPath}?${params}`, { signal: AbortSignal.timeout(12000) });
+        const resp = await fetch(`${apiPath}?${params}`, {
+          signal: AbortSignal.timeout(12000),
+          headers: { 'x-hacky-token': _ht }
+        });
         const data = await resp.json();
         if (data.url) streamUrl = data.url;
         if (data.format) streamFormat = data.format;
