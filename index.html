@@ -1428,6 +1428,20 @@
       border: 1px solid rgba(167, 139, 250, 0.3);
     }
 
+    .trending-sub-tag {
+      font-size: .62rem;
+      font-weight: 700;
+      padding: .15rem .45rem;
+      border-radius: 4px;
+      letter-spacing: .5px;
+      background: rgba(46, 204, 113, 0.15);
+      color: #2ECC71;
+      border: 1px solid rgba(46, 204, 113, 0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
     .trending-score {
       flex-shrink: 0;
       width: 46px;
@@ -6771,9 +6785,11 @@
       <div class="card-overlay"></div>
       <div class="card-play"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>
       ${rank ? `<div class="card-rank">${String(rank).padStart(2, '0')}</div>` : ''}
-      ${!rank && !hasNewEp ? `<div class="type-badge ${typeClass}">${typeLabel}</div>` : ''}
+      <div class="card-badges-row" style="position:absolute;top:10px;left:10px;display:flex;gap:5px;align-items:center;z-index:4;">
+        ${!rank && !hasNewEp ? `<div class="type-badge ${typeClass}" style="position:static;">${typeLabel}</div>` : ''}
+        ${(typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(item.id)]) ? `<div class="card-sub-tag" style="position:static;background:rgba(7,9,15,0.85);border:1px solid rgba(46,204,113,0.5);color:#2ECC71;font-size:0.65rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:4px;letter-spacing:0.5px;backdrop-filter:blur(8px);pointer-events:none;display:inline-flex;align-items:center;gap:3px;">🇱🇰 SUB</div>` : ''}
+      </div>
       ${newEpBadgeHtml}
-      ${(typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(item.id)]) ? `<div class="card-sub-tag" style="position:absolute;top:8px;right:8px;background:rgba(5,7,14,0.85);border:1px solid rgba(46,204,113,0.7);color:#2ECC71;font-size:0.62rem;font-weight:800;padding:2px 6px;border-radius:10px;backdrop-filter:blur(6px);z-index:4;letter-spacing:0.4px;pointer-events:none;">🇱🇰 SUB</div>` : ''}
       ${buildRatingRing(vote, `${item.id}-card`, true)}
       <div class="card-stream-logos">${streamLogos}</div>
     </div>
@@ -6794,6 +6810,7 @@
       const typeLabel = type === 'movie' ? 'Movie' : 'TV Show';
       const typeCls = type === 'movie' ? 'trending-type-movie' : 'trending-type-tv';
       const genres = (item.genre_ids || []).slice(0, 1).map(id => GENRE_MAP[id]).filter(Boolean);
+      const hasSub = (typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(item.id)]);
 
       let scoreCls = 'score-na';
       if (vote) {
@@ -6806,7 +6823,6 @@
       return `<div class="trending-card" tabindex="0" role="button" aria-label="${title}" data-id="${item.id}" data-type="${type}">
       <div class="trending-poster" style="position:relative">
         ${poster ? `<img src="${poster}" alt="${title}" loading="lazy">` : ''}
-        ${(typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(item.id)]) ? `<div class="card-sub-tag" style="position:absolute;top:8px;right:8px;background:rgba(5,7,14,0.85);border:1px solid rgba(46,204,113,0.7);color:#2ECC71;font-size:0.62rem;font-weight:800;padding:2px 6px;border-radius:10px;backdrop-filter:blur(6px);z-index:4;letter-spacing:0.4px;pointer-events:none;box-shadow:0 2px 8px rgba(46,204,113,0.3);">🇱🇰 SUB</div>` : ''}
       </div>
       <div class="trending-info">
         ${metaParts ? `<div class="trending-meta">${metaParts}</div>` : ''}
@@ -6814,6 +6830,7 @@
         <div class="trending-genres">
           ${genres.map(g => `<span class="trending-genre-tag">${g}</span>`).join('')}
           <span class="trending-type-tag ${typeCls}">${typeLabel}</span>
+          ${hasSub ? `<span class="trending-sub-tag">🇱🇰 SUB</span>` : ''}
         </div>
       </div>
       ${buildRatingRing(vote || '0', `${item.id}-tr`, false)}
