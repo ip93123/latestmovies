@@ -8651,6 +8651,8 @@
         return null;
       }
       if (typeof obj === 'object') {
+        if (obj.paused === true) return 'pause';
+        if (obj.paused === false && (obj.event === 'play' || obj.type === 'play' || obj.event === 'timeupdate')) return 'play';
         const evt = String(obj.event || obj.type || obj.action || obj.state || obj.status || '');
         if (/\b(?:pause|paused)\b/i.test(evt)) return 'pause';
         if (/\b(?:play|playing|resumed?)\b/i.test(evt)) return 'play';
@@ -8803,15 +8805,19 @@
         try { d = JSON.parse(d); } catch (_) {}
       }
 
-      // Vidlink Pro PLAYER_EVENT schema handling
+      // Vidlink Pro & anyembed (Nebula) PLAYER_EVENT schema handling
       if (d.type === 'PLAYER_EVENT' && d.data) {
         const ev = d.data.event;
         const ct = typeof d.data.currentTime === 'number' ? d.data.currentTime : null;
-        if (ev === 'pause') {
+        const isPaused = ev === 'pause' || d.data.paused === true;
+        const isPlay = ev === 'play' || (d.data.paused === false && ev !== 'pause');
+        if (isPaused) {
           window._externalIsPaused = true;
-          window._subPausedElapsed = (Date.now() - _subStartTime);
+          if (window._subPausedElapsed == null) {
+            window._subPausedElapsed = (Date.now() - _subStartTime);
+          }
           _setSubSyncBarPaused(true);
-        } else if (ev === 'play') {
+        } else if (isPlay) {
           if (window._externalIsPaused && window._subPausedElapsed != null) {
             _subStartTime = Date.now() - window._subPausedElapsed;
             window._subPausedElapsed = null;
