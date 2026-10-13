@@ -10505,6 +10505,22 @@
       }
     });
 
+    // Unpause subtitles when user clicks into iframe player (focus moves to iframe)
+    window.addEventListener('blur', () => {
+      const frame = document.getElementById('playerFrame');
+      const overlayOpen = document.getElementById('playerOverlay')?.classList.contains('open');
+      if (overlayOpen && !_maxMode && document.activeElement === frame) {
+        if (window._externalIsPaused) {
+          window._externalIsPaused = false;
+          _subStartTime = Date.now() - (window._subPausedElapsed || 0);
+          window._subPausedElapsed = null;
+          _setSubSyncBarPaused(false);
+          _markBufferState(false);
+          if (!_subRaf) _subRaf = requestAnimationFrame(_subLoop);
+        }
+      }
+    });
+
     // Lazy-load hls.js from CDN (only once, only when Max is selected)
     function _loadHlsJs() {
       return new Promise((resolve, reject) => {
@@ -10960,6 +10976,12 @@
         ? `${activeId}_S${_selectedSeason || 1}_E${_selectedEpisode || 1}`
         : String(activeId);
 
+      const frameEl = document.getElementById('playerFrame');
+      const activeBtn = document.querySelector('.player-server-btn.active');
+      const curServerLabel = activeBtn ? activeBtn.textContent.toLowerCase() : '';
+      const curFrameSrc = (frameEl && frameEl.src) ? frameEl.src.toLowerCase() : '';
+      const isSparkPlayer = curFrameSrc.includes('spark') || curFrameSrc.includes('vidspark') || curServerLabel.includes('spark');
+
       // If cues are already loaded for THIS video/episode, IMMEDIATELY resume the loop and re-render
       if (_subCues && _subCues.length > 0 && window._currentLoadedSubKey === subKey) {
         const resumeSec = (typeof window._externalCurrentTime === 'number' && window._externalCurrentTime > 0)
@@ -10967,9 +10989,15 @@
           : 0;
         _subStartTime = Date.now() - (resumeSec * 1000);
         _subOffset = 0;
-        window._subPausedElapsed = Math.round(resumeSec * 1000);
-        window._externalIsPaused = true; // Subtitles remain paused until video starts playing!
-        _setSubSyncBarPaused(true);
+        if (isSparkPlayer) {
+          window._externalIsPaused = false;
+          window._subPausedElapsed = null;
+          _setSubSyncBarPaused(false);
+        } else {
+          window._subPausedElapsed = Math.round(resumeSec * 1000);
+          window._externalIsPaused = true;
+          _setSubSyncBarPaused(true);
+        }
         _stopSubLoop();
         _lastIframeSubCueText = null;
         _subActive = true;
@@ -11046,15 +11074,21 @@
             window._currentLoadedSubKey = subKey;
             _subActive = true;
             _subLoaded = true;
-            // Start paused at current watch position until video starts playing
+            // Start paused at current watch position until video starts playing (unless Spark which autoplays)
             const resumeSec = (typeof window._externalCurrentTime === 'number' && window._externalCurrentTime > 0)
               ? window._externalCurrentTime
               : 0;
             _subStartTime = Date.now() - (resumeSec * 1000);
             _subOffset = 0;
-            window._subPausedElapsed = Math.round(resumeSec * 1000);
-            window._externalIsPaused = true; // Wait for movie playback to start!
-            _setSubSyncBarPaused(true);
+            if (isSparkPlayer) {
+              window._externalIsPaused = false;
+              window._subPausedElapsed = null;
+              _setSubSyncBarPaused(false);
+            } else {
+              window._subPausedElapsed = Math.round(resumeSec * 1000);
+              window._externalIsPaused = true;
+              _setSubSyncBarPaused(true);
+            }
             _stopSubLoop();
             _lastIframeSubCueText = null;
             _subRaf = requestAnimationFrame(_subLoop);
@@ -11113,11 +11147,13 @@
       _destroyMax();
       window._externalCurrentTime = 0;
       window._lastExternalMsgTime = null;
-      window._externalIsPaused = true;
+      const isSparkUrl = (url && (url.includes('spark') || url.includes('vidspark'))) ||
+        (labels && labels[_activeServerIndex] && labels[_activeServerIndex].toLowerCase().includes('spark'));
+      window._externalIsPaused = !isSparkUrl;
       window._isStreamBuffering = false;
       window._bufferFreezeElapsed = null;
       window._ctStallStartTime = null;
-      window._subPausedElapsed = 0;
+      window._subPausedElapsed = isSparkUrl ? null : 0;
       _subStartTime = Date.now();
       _lastIframeSubCueText = null;
       frame.style.display = '';
@@ -11127,6 +11163,16 @@
         if (loader) loader.style.opacity = '0';
         frame.style.opacity = '1';
         _attachSubOverlayToActiveWrap();
+        // If server does not send postMessages (like Spark), ensure subtitle clock unpauses
+        setTimeout(() => {
+          if (!window._lastExternalMsgTime && window._externalIsPaused && _subLoaded && _subCues && _subCues.length) {
+            window._externalIsPaused = false;
+            _subStartTime = Date.now() - (window._subPausedElapsed || 0);
+            window._subPausedElapsed = null;
+            _setSubSyncBarPaused(false);
+            if (!_subRaf) _subRaf = requestAnimationFrame(_subLoop);
+          }
+        }, 1800);
         // If guest in Watch Party, request host state immediately so iframe syncs
         if (typeof WP !== 'undefined' && WP && !WP.isHost && WP.hostConn && WP.hostConn.open) {
           try { WP.hostConn.send({ type: 'request-state' }); } catch (_) {}
@@ -11211,21 +11257,30 @@
         if (loader) loader.style.opacity = '0';
         frame.style.opacity = '1';
         _attachSubOverlayToActiveWrap();
+        setTimeout(() => {
+          if (!window._lastExternalMsgTime && window._externalIsPaused && _subLoaded && _subCues && _subCues.length) {
+            window._externalIsPaused = false;
+            _subStartTime = Date.now() - (window._subPausedElapsed || 0);
+            window._subPausedElapsed = null;
+            _setSubSyncBarPaused(false);
+            if (!_subRaf) _subRaf = requestAnimationFrame(_subLoop);
+          }
+        }, 1800);
       };
       if (typeof window._adblock_pushRecovery === 'function') window._adblock_pushRecovery(url);
 
-      // Clean start for the new server (starts paused until video plays)
+      const sName = btn ? btn.textContent.trim() : 'Server';
+      const isSparkServer = url.includes('spark') || url.includes('vidspark') || sName.toLowerCase().includes('spark');
       window._externalCurrentTime = 0;
       window._lastExternalMsgTime = null;
-      window._externalIsPaused = true;
+      window._externalIsPaused = !isSparkServer;
       window._isStreamBuffering = false;
       window._bufferFreezeElapsed = null;
       window._ctStallStartTime = null;
-      window._subPausedElapsed = 0;
+      window._subPausedElapsed = isSparkServer ? null : 0;
       _subStartTime = Date.now();
       _lastIframeSubCueText = null;
 
-      const sName = btn ? btn.textContent.trim() : 'Server';
       const isAutoLive = sName.toLowerCase().includes('hackymax') || sName.toLowerCase().includes('infinity') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('vortex');
       _markSubSyncAutoLive(isAutoLive);
       _showSubToast(`Switched to <strong>${_escHtml(sName)}</strong> • Sinhala Subtitles Active`, 3200);
