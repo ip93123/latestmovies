@@ -8800,7 +8800,16 @@
 
       const pState = _checkPlayPause(d);
       const isExplicitPause = (evName === 'pause') || (d.data && d.data.paused === true) || (d.paused === true) || (pState === 'pause');
-      const isExplicitPlay  = (evName === 'play') || (d.data && d.data.paused === false && evName !== 'pause') || (d.paused === false && evName !== 'pause' && evName !== 'timeupdate') || (pState === 'play');
+      let isExplicitPlay  = (evName === 'play') || (d.data && d.data.paused === false && evName !== 'pause') || (d.paused === false && evName !== 'pause' && evName !== 'timeupdate') || (pState === 'play');
+
+      // If time is advancing during active playback (e.g. from timeupdate messages) and it's not a pause message, video has started playing!
+      if (!isExplicitPause && ct !== null && ct > 0.05) {
+        if (typeof window._externalCurrentTime === 'number' && ct > (window._externalCurrentTime + 0.05)) {
+          isExplicitPlay = true;
+        } else if (window._externalCurrentTime === 0 && ct > 0.3) {
+          isExplicitPlay = true;
+        }
+      }
 
       // ── CASE 1: PAUSE EVENT ──────────────────────────────────────────
       if (isExplicitPause) {
@@ -10625,7 +10634,9 @@
           : 0;
         _subStartTime = Date.now() - (resumeSec * 1000);
         _subOffset = 0;
-        window._subPausedElapsed = null;
+        window._subPausedElapsed = Math.round(resumeSec * 1000);
+        window._externalIsPaused = true; // Subtitles remain paused until video starts playing!
+        _setSubSyncBarPaused(true);
         _stopSubLoop();
         _lastIframeSubCueText = null;
         _subRaf = requestAnimationFrame(_subLoop);
@@ -10700,13 +10711,15 @@
           if (parsedCues.length) {
             _loadSubCues(parsedCues, subLabel);
             window._currentLoadedSubKey = subKey;
-            // Auto-start wall-clock sync for iframe player from current watch position
+            // Start paused at current watch position until video starts playing
             const resumeSec = (typeof window._externalCurrentTime === 'number' && window._externalCurrentTime > 0)
               ? window._externalCurrentTime
               : 0;
             _subStartTime = Date.now() - (resumeSec * 1000);
             _subOffset = 0;
-            window._subPausedElapsed = null;
+            window._subPausedElapsed = Math.round(resumeSec * 1000);
+            window._externalIsPaused = true; // Wait for movie playback to start!
+            _setSubSyncBarPaused(true);
             _stopSubLoop();
             _lastIframeSubCueText = null;
             _subRaf = requestAnimationFrame(_subLoop);
@@ -10763,6 +10776,12 @@
 
       // ── Clean iframe player loading ───────────────────────────────────────
       _destroyMax();
+      window._externalCurrentTime = 0;
+      window._lastExternalMsgTime = null;
+      window._externalIsPaused = true;
+      window._subPausedElapsed = 0;
+      _subStartTime = Date.now();
+      _lastIframeSubCueText = null;
       frame.style.display = '';
       if (loader) loader.style.opacity = '1';
       frame.style.opacity = '0';
@@ -10849,11 +10868,11 @@
       };
       if (typeof window._adblock_pushRecovery === 'function') window._adblock_pushRecovery(url);
 
-      // Clean start for the new server
+      // Clean start for the new server (starts paused until video plays)
       window._externalCurrentTime = 0;
       window._lastExternalMsgTime = null;
-      window._externalIsPaused = false;
-      window._subPausedElapsed = null;
+      window._externalIsPaused = true;
+      window._subPausedElapsed = 0;
       _subStartTime = Date.now();
       _lastIframeSubCueText = null;
 
