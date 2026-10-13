@@ -1663,7 +1663,7 @@
     #modal {
       position: fixed;
       inset: 0;
-      z-index: 600;
+      z-index: 2000;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -2136,7 +2136,7 @@
     .category-view-overlay {
       position: fixed;
       inset: 0;
-      z-index: 9999;
+      z-index: 600;
       background: radial-gradient(ellipse at top, #141A29 0%, #07090F 70%);
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
@@ -2747,7 +2747,7 @@
     #playerOverlay {
       position: fixed;
       inset: 0;
-      z-index: 700;
+      z-index: 3000;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -9292,7 +9292,10 @@
       _currentModalId = id;
       _currentModalType = type;
       try {
-        const u = new URL(window.location.origin + window.location.pathname);
+        const catOverlay = document.getElementById('categoryViewOverlay');
+        const isCatOpen = catOverlay && catOverlay.classList.contains('open');
+        // Preserve current URL parameters (like cat=genre&id=28) when opening modal from inside category
+        const u = new URL(window.location.href);
         u.hash = '';
         if (type === 'tv') {
           u.searchParams.delete('m');
@@ -9307,7 +9310,16 @@
           const shareEl = document.getElementById('wpShareUrl');
           if (shareEl) shareEl.textContent = u.toString();
         }
-        history.pushState({ ui: 'modal', id: id, type: type }, '', u.toString());
+        history.pushState({
+          ui: 'modal',
+          id: id,
+          type: type,
+          inCategory: isCatOpen,
+          catType: _currentCatType,
+          catKey: _currentCatKey,
+          catTitle: _currentCatItemData?.title,
+          catSub: _currentCatItemData?.sub
+        }, '', u.toString());
       } catch (_) {
         history.pushState({ ui: 'modal', id: id, type: type }, '', location.href);
       }
@@ -9639,17 +9651,18 @@
         const epChooser = document.getElementById('modalEpChooser');
         if (epChooser) epChooser.style.display = 'none';
       }
-      // 3. Reset history to a clean page state (no player/modal in stack)
+      // 3. Close category overlay if open
+      const catOverlay = document.getElementById('categoryViewOverlay');
+      if (catOverlay && catOverlay.classList.contains('open')) {
+        catOverlay.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+      // 4. Reset history to a clean page state (no player/modal/category in stack)
       try {
-        const st = history.state || {};
-        if (st.ui === 'player' || st._hackyMaxPlayer || st.ui === 'modal') {
-          const u = new URL(window.location.href);
-          u.searchParams.delete('m');
-          u.searchParams.delete('s');
-          history.replaceState({ ui: 'page' }, '', u.toString());
-        }
+        const u = new URL(window.location.origin + window.location.pathname);
+        history.replaceState({ ui: 'page' }, '', u.toString());
       } catch (e) { }
-      // 4. Scroll to top smoothly
+      // 5. Scroll to top smoothly
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -9661,8 +9674,10 @@
         scale: 0.92, opacity: 0, y: 20, duration: 0.3, ease: 'power3.in', onComplete: () => {
           document.getElementById('modal').classList.remove('open');
           document.getElementById('modalFrame')?.remove();
-          // Resume hero rotation and YT background if we are at the top
-          if (window.scrollY < 300) {
+          // Resume hero rotation and YT background only if category overlay is NOT open and we are at the top
+          const catOverlay = document.getElementById('categoryViewOverlay');
+          const isCatOpen = catOverlay && catOverlay.classList.contains('open');
+          if (!isCatOpen && window.scrollY < 300) {
             heroTimer = setInterval(() => setHero((heroIdx + 1) % heroMovies.length), 15000);
             if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
               try { ytPlayer.playVideo(); } catch (e) { }
@@ -9674,6 +9689,26 @@
             _currentModalId = null;
           }
           document.getElementById('modalEpChooser').style.display = 'none';
+
+          // Clean up URL: remove m and s parameters without destroying cat parameters
+          try {
+            const u = new URL(window.location.href);
+            if (u.searchParams.has('m') || u.searchParams.has('s')) {
+              u.searchParams.delete('m');
+              u.searchParams.delete('s');
+              if (isCatOpen) {
+                history.replaceState({
+                  ui: 'category',
+                  catType: _currentCatType,
+                  catKey: _currentCatKey,
+                  title: _currentCatItemData?.title,
+                  sub: _currentCatItemData?.sub
+                }, '', u.toString());
+              } else {
+                history.replaceState({ ui: 'home' }, '', u.toString());
+              }
+            }
+          } catch (e) { }
         }
       });
     }
@@ -12877,12 +12912,15 @@
 
         // Handle Category View Overlay
         const catOverlay = document.getElementById('categoryViewOverlay');
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasCatParam = urlParams.has('cat');
         if (state && state.ui === 'category') {
           if (catOverlay && !catOverlay.classList.contains('open')) {
             openCategoryPage(state.catType, state.catKey, state.title, state.sub, false);
           }
         } else if (state && state.ui !== 'modal' && state.ui !== 'player') {
-          if (catOverlay && catOverlay.classList.contains('open')) {
+          // Only close category overlay if URL also doesn't specify a category and state isn't category
+          if (!hasCatParam && catOverlay && catOverlay.classList.contains('open')) {
             closeCategoryPage(false);
           }
         }
@@ -13411,11 +13449,19 @@
 
     function getVisibleFocusables() {
       const vw = window.innerWidth;
+      const modal = document.getElementById('modal');
+      const isModalOpen = modal && modal.classList.contains('open');
+      const playerOverlay = document.getElementById('playerOverlay');
+      const isPlayerOpen = playerOverlay && playerOverlay.classList.contains('open');
       const catOverlay = document.getElementById('categoryViewOverlay');
       const isCatOpen = catOverlay && catOverlay.classList.contains('open');
 
       return [...document.querySelectorAll(FOCUSABLE_SEL)].filter(el => {
-        if (isCatOpen) {
+        if (isPlayerOpen) {
+          if (!el.closest('#playerOverlay')) return false;
+        } else if (isModalOpen) {
+          if (!el.closest('#modal')) return false;
+        } else if (isCatOpen) {
           if (!el.closest('#categoryViewOverlay')) return false;
         } else {
           if (el.closest('#categoryViewOverlay')) return false;
@@ -13759,6 +13805,15 @@
           const displayTitle = item ? (catParam === 'language' ? `${item.title} · ${item.sub}` : item.title) : 'Category';
           const displaySub = item ? (catParam === 'language' ? `Top Rated & Popular ${item.sub} Movies and Series` : item.sub) : '';
           openCategoryPage(catParam, catIdParam, displayTitle, displaySub, false);
+          try {
+            history.replaceState({
+              ui: 'category',
+              catType: catParam,
+              catKey: catIdParam,
+              title: displayTitle,
+              sub: displaySub
+            }, '', window.location.href);
+          } catch (_) { }
         }, 500);
       }
 
