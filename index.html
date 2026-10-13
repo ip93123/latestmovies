@@ -2362,9 +2362,11 @@
       z-index: 2147483647 !important;
       max-width: 90%;
       text-align: center;
-      padding: 0.35rem 1.2rem;
-      background: var(--sub-bg, transparent);
-      border-radius: 6px;
+      padding: 0.38rem 1.35rem;
+      background: var(--sub-bg, rgba(7, 9, 15, 0.90)) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      box-shadow: 0 4px 22px rgba(0, 0, 0, 0.88), 0 0 10px rgba(0,0,0,0.5);
       font-size: var(--sub-size, calc(clamp(1.6rem, 3.4vw, 2.85rem) * 0.75));
       font-weight: 700;
       color: var(--sub-color, #ffffff);
@@ -2392,6 +2394,10 @@
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, #maxPlayerWrap:fullscreen, #maxPlayerWrap:-webkit-full-screen) #subText {
       font-size: var(--sub-size, calc(clamp(1.9rem, 3.8vw, 3.2rem) * 0.85)) !important;
       font-weight: 700 !important;
+      background: var(--sub-bg, rgba(7, 9, 15, 0.92)) !important;
+      padding: 0.45rem 1.6rem !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      box-shadow: 0 6px 28px rgba(0, 0, 0, 0.92) !important;
       z-index: 2147483647 !important;
       transform: translateZ(9999px) !important;
     }
@@ -2408,7 +2414,7 @@
       width: 42px;
       height: 42px;
       border-radius: 8px;
-      background: rgba(13, 17, 23, 0.82);
+      background: rgba(13, 17, 23, 0.85);
       border: 1px solid rgba(232, 201, 122, 0.45);
       color: var(--gold, #E8C97A);
       display: flex;
@@ -2429,12 +2435,154 @@
       border-color: #E8C97A;
       transform: scale(1.1) translateZ(9999px);
     }
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) .player-fs-overlay-btn {
+      display: flex !important;
+      z-index: 2147483647 !important;
+      transform: translateZ(9999px) !important;
+    }
     .player-container.idle-fs .player-fs-overlay-btn {
       opacity: 0.2;
     }
     .player-container:hover .player-fs-overlay-btn,
     .player-container:active .player-fs-overlay-btn {
       opacity: 1 !important;
+    }
+
+    /* ── Floating Subtitle Sync Bar ──────────────────────────────────── */
+    .sub-sync-bar {
+      position: absolute;
+      bottom: 68px;
+      left: 50%;
+      transform: translateX(-50%) translateZ(9999px);
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: rgba(11, 14, 23, 0.88);
+      border: 1px solid rgba(232, 201, 122, 0.4);
+      border-radius: 40px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75), 0 0 16px rgba(232, 201, 122, 0.12);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      z-index: 2147483646 !important;
+      pointer-events: auto;
+      user-select: none;
+      transition: opacity 0.3s, transform 0.3s, bottom 0.3s;
+      max-width: 95vw;
+    }
+    .sub-sync-bar.visible {
+      display: inline-flex !important;
+    }
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) .sub-sync-bar {
+      bottom: 74px !important;
+      z-index: 2147483646 !important;
+    }
+    .player-container.idle-fs .sub-sync-bar:not(:hover) {
+      opacity: 0.15;
+    }
+    .player-container:hover .sub-sync-bar,
+    .sub-sync-bar:hover {
+      opacity: 1 !important;
+    }
+    .sub-sync-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--gold, #E8C97A);
+      padding: 3px 8px;
+      background: rgba(232, 201, 122, 0.12);
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .sub-sync-timer {
+      font-family: monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #fff;
+      min-width: 44px;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .sub-sync-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .sub-sync-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #E2E8F0;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 9px;
+      border-radius: 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .sub-sync-btn:hover {
+      background: rgba(232, 201, 122, 0.25);
+      border-color: var(--gold, #E8C97A);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+    .sub-sync-btn:active {
+      transform: translateY(1px);
+    }
+    .sub-sync-offset-pill {
+      font-family: monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #10B981;
+      padding: 3px 7px;
+      background: rgba(16, 185, 129, 0.12);
+      border-radius: 12px;
+      white-space: nowrap;
+    }
+    .sub-sync-close {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.6);
+      cursor: pointer;
+      font-size: 0.75rem;
+      padding: 2px 5px;
+      border-radius: 50%;
+      transition: color 0.2s;
+    }
+    .sub-sync-close:hover {
+      color: #fff;
+    }
+
+    /* ── Subtitle Toast Badge ────────────────────────────────────────── */
+    .sub-toast-badge {
+      position: absolute;
+      top: 22px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px) translateZ(9999px);
+      background: rgba(11, 14, 23, 0.94);
+      border: 1px solid rgba(232, 201, 122, 0.65);
+      color: #fff;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 8px 20px;
+      border-radius: 30px;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.8), 0 0 15px rgba(232, 201, 122, 0.2);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      z-index: 2147483647 !important;
+      pointer-events: none;
+      opacity: 0;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+      max-width: 90vw;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+    .sub-toast-badge.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0) translateZ(9999px);
     }
 
     /* Suppress any browser native/in-band stream cues so they never clash with custom sub overlay */
@@ -5770,6 +5918,30 @@
         <svg id="fsBtnIconEnter" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
         <svg id="fsBtnIconExit" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
       </button>
+
+      <!-- Floating Subtitle Sync & Quick Adjustment Bar -->
+      <div id="subSyncBar" class="sub-sync-bar">
+        <div class="sub-sync-badge" id="subSyncModeBadge">
+          <span class="sub-sync-icon">🇱🇰</span>
+          <span class="sub-sync-status" id="subSyncStatusText">Sinhala Sub</span>
+        </div>
+        <div class="sub-sync-timer" id="subSyncTimerDisplay">00:00</div>
+        <div class="sub-sync-controls">
+          <button class="sub-sync-btn" id="subSyncMinus5" title="Shift subtitles back 5 seconds">⏮ -5s</button>
+          <button class="sub-sync-btn" id="subSyncMinus2" title="Shift subtitles back 2 seconds">⏮ -2s</button>
+          <button class="sub-sync-btn sub-sync-playpause" id="subSyncPlayPause" title="Pause / Resume subtitle timer">⏸</button>
+          <button class="sub-sync-btn" id="subSyncPlus2" title="Shift subtitles forward 2 seconds">+2s ⏭</button>
+          <button class="sub-sync-btn" id="subSyncPlus5" title="Shift subtitles forward 5 seconds">+5s ⏭</button>
+          <button class="sub-sync-btn sub-sync-reset" id="subSyncReset" title="Restart subtitles from 00:00">⟳ 0:00</button>
+          <button class="sub-sync-btn sub-sync-jump" id="subSyncJumpFirst" title="Jump to first dialogue cue">⏩ 1st Line</button>
+        </div>
+        <div class="sub-sync-offset-pill" id="subSyncOffsetPill" title="Subtitle sync offset">0.0s</div>
+        <button class="sub-sync-close" id="subSyncToggleVisibility" title="Toggle subtitle bar">✕</button>
+      </div>
+
+      <!-- Sinhala Subtitle Announcement / Toast Badge -->
+      <div id="subToastBadge" class="sub-toast-badge"></div>
+
       <!-- Subtitle Sync Panel (hidden overlay) -->
       <div id="subSyncPanel" style="display:none !important;" hidden>
         <p id="subPanelMsg" style="display:none;"></p>
@@ -8585,10 +8757,131 @@
     }
     setInterval(_pingIframeForTimeEvents, 3000);
 
+    // ── Floating Subtitle Toast System ───────────────────────────────────
+    let _subToastTimer = null;
+    function _showSubToast(html, duration = 4000) {
+      const badge = document.getElementById('subToastBadge');
+      if (!badge) return;
+      badge.innerHTML = html;
+      badge.classList.add('show');
+      clearTimeout(_subToastTimer);
+      _subToastTimer = setTimeout(() => {
+        badge.classList.remove('show');
+      }, duration);
+    }
+
+    // ── Subtitle Sync Bar Controls ─────────────────────────────────────────
+    let _subSyncBarVisible = false;
+    function _showSubSyncBar(show = true) {
+      const bar = document.getElementById('subSyncBar');
+      if (bar) {
+        bar.classList.toggle('visible', show);
+        _subSyncBarVisible = show;
+      }
+    }
+
+    function _updateSubSyncOffsetBadge() {
+      const pill = document.getElementById('subSyncOffsetPill');
+      if (pill) {
+        const sec = (_subOffset / 1000).toFixed(1);
+        pill.textContent = (_subOffset > 0 ? '+' : '') + sec + 's';
+        pill.style.color = _subOffset === 0 ? '#10B981' : '#F59E0B';
+      }
+    }
+
+    function _setSubSyncBarPaused(isPaused) {
+      const pp = document.getElementById('subSyncPlayPause');
+      if (pp) {
+        pp.textContent = isPaused ? '▶' : '⏸';
+        pp.title = isPaused ? 'Resume subtitles' : 'Pause subtitles';
+      }
+    }
+
+    function _markSubSyncAutoLive(isLive) {
+      const badge = document.getElementById('subSyncModeBadge');
+      const statusTxt = document.getElementById('subSyncStatusText');
+      if (badge && statusTxt) {
+        if (isLive) {
+          badge.style.background = 'rgba(16, 185, 129, 0.2)';
+          badge.style.color = '#10B981';
+          statusTxt.textContent = '⚡ HackyMax Auto-Synced';
+        } else {
+          badge.style.background = 'rgba(232, 201, 122, 0.12)';
+          badge.style.color = 'var(--gold, #E8C97A)';
+          statusTxt.textContent = '⏱ Manual Sync';
+        }
+      }
+    }
+
+    function _jumpToFirstDialogueCue() {
+      if (!_subCues || !_subCues.length) return;
+      const firstCue = _subCues[0];
+      if (firstCue) {
+        _subStartTime = Date.now() - firstCue.start;
+        _subOffset = 0;
+        window._subPausedElapsed = firstCue.start;
+        _updateSubSyncOffsetBadge();
+        const mm = String(Math.floor(firstCue.start / 60000)).padStart(2, '0');
+        const ss = String(Math.floor((firstCue.start % 60000) / 1000)).padStart(2, '0');
+        _showSubToast(`⏩ Jumped to first dialogue line (${mm}:${ss})`, 2500);
+      }
+    }
+
+    // Initialize Subtitle Sync Bar button click listeners
+    (function _initSubSyncBar() {
+      const m5 = document.getElementById('subSyncMinus5');
+      const m2 = document.getElementById('subSyncMinus2');
+      const p2 = document.getElementById('subSyncPlus2');
+      const p5 = document.getElementById('subSyncPlus5');
+      const pp = document.getElementById('subSyncPlayPause');
+      const res = document.getElementById('subSyncReset');
+      const jmp = document.getElementById('subSyncJumpFirst');
+      const tog = document.getElementById('subSyncToggleVisibility');
+
+      if (m5) m5.addEventListener('click', (e) => { e.stopPropagation(); subShift(-5000); });
+      if (m2) m2.addEventListener('click', (e) => { e.stopPropagation(); subShift(-2000); });
+      if (p2) p2.addEventListener('click', (e) => { e.stopPropagation(); subShift(2000); });
+      if (p5) p5.addEventListener('click', (e) => { e.stopPropagation(); subShift(5000); });
+      if (pp) pp.addEventListener('click', (e) => {
+        e.stopPropagation();
+        window._externalIsPaused = !window._externalIsPaused;
+        if (window._externalIsPaused) {
+          window._subPausedElapsed = (Date.now() - _subStartTime);
+        } else if (window._subPausedElapsed != null) {
+          _subStartTime = Date.now() - window._subPausedElapsed;
+          window._subPausedElapsed = null;
+        }
+        _setSubSyncBarPaused(window._externalIsPaused);
+        _showSubToast(window._externalIsPaused ? '⏸ Subtitles paused' : '▶ Subtitles resumed', 1500);
+      });
+      if (res) res.addEventListener('click', (e) => {
+        e.stopPropagation();
+        _subStartTime = Date.now();
+        _subOffset = 0;
+        window._subPausedElapsed = 0;
+        _updateSubSyncOffsetBadge();
+        _showSubToast('⟳ Subtitles reset to 00:00', 2000);
+      });
+      if (jmp) jmp.addEventListener('click', (e) => {
+        e.stopPropagation();
+        _jumpToFirstDialogueCue();
+      });
+      if (tog) tog.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const bar = document.getElementById('subSyncBar');
+        if (bar) bar.classList.toggle('visible');
+      });
+    })();
+
     // RAF loop — renders current cue smoothly at 60fps
     function _subLoop() {
       if (!_subStartTime || !_subCues.length || !_subActive) return;
-      const elapsed = (Date.now() - _subStartTime) + _subOffset;
+      let elapsed;
+      if (window._externalIsPaused) {
+        elapsed = (window._subPausedElapsed != null ? window._subPausedElapsed : (Date.now() - _subStartTime)) + _subOffset;
+      } else {
+        elapsed = (Date.now() - _subStartTime) + _subOffset;
+      }
       const cue = _subCues.find(c => elapsed >= c.start && elapsed < c.end);
       const newText = cue ? cue.text : '';
       if (newText !== _lastIframeSubCueText) {
@@ -8600,12 +8893,20 @@
           _subText.classList.remove('active');
         }
       }
-      // Update status line throttled to once per second
-      const secs = Math.floor(elapsed / 1000);
+
+      // Update sync bar & status line
+      const secs = Math.max(0, Math.floor(elapsed / 1000));
+      const mm = String(Math.floor(secs / 60)).padStart(2, '0');
+      const ss = String(secs % 60).padStart(2, '0');
+
+      const timerDisp = document.getElementById('subSyncTimerDisplay');
+      if (timerDisp && timerDisp._lastSec !== secs) {
+        timerDisp._lastSec = secs;
+        timerDisp.textContent = `${mm}:${ss}`;
+      }
+
       if (_subStatusLine && _subStatusLine._lastSec !== secs) {
         _subStatusLine._lastSec = secs;
-        const mm = String(Math.floor(secs / 60)).padStart(2, '0');
-        const ss = String(secs % 60).padStart(2, '0');
         const isLive = !!(window._lastExternalMsgTime && (Date.now() - window._lastExternalMsgTime < 4000));
         _subStatusLine.textContent = isLive ? `⚡ Live-Sync (${mm}:${ss})` : `${mm}:${ss}`;
       }
@@ -8624,11 +8925,42 @@
         try { d = JSON.parse(d); } catch (_) {}
       }
 
+      // Vidlink Pro PLAYER_EVENT schema handling
+      if (d.type === 'PLAYER_EVENT' && d.data) {
+        const ev = d.data.event;
+        const ct = typeof d.data.currentTime === 'number' ? d.data.currentTime : null;
+        if (ev === 'pause') {
+          window._externalIsPaused = true;
+          window._subPausedElapsed = (Date.now() - _subStartTime);
+          _setSubSyncBarPaused(true);
+        } else if (ev === 'play') {
+          if (window._externalIsPaused && window._subPausedElapsed != null) {
+            _subStartTime = Date.now() - window._subPausedElapsed;
+            window._subPausedElapsed = null;
+          }
+          window._externalIsPaused = false;
+          _setSubSyncBarPaused(false);
+        } else if (ev === 'seeked' && ct !== null) {
+          _subStartTime = Date.now() - (ct * 1000);
+          window._subPausedElapsed = ct * 1000;
+          window._externalCurrentTime = ct;
+        }
+      }
+
       const pState = _checkPlayPause(d);
       if (pState === 'pause') {
         window._externalIsPaused = true;
+        if (window._subPausedElapsed == null) {
+          window._subPausedElapsed = (Date.now() - _subStartTime);
+        }
+        _setSubSyncBarPaused(true);
       } else if (pState === 'play') {
+        if (window._externalIsPaused && window._subPausedElapsed != null) {
+          _subStartTime = Date.now() - window._subPausedElapsed;
+          window._subPausedElapsed = null;
+        }
         window._externalIsPaused = false;
+        _setSubSyncBarPaused(false);
       }
 
       const extracted = _extractTimeFromMessage(d);
@@ -8637,6 +8969,8 @@
         // If time is advancing, unpause automatically
         if (typeof window._externalCurrentTime === 'number' && Math.abs(ct - window._externalCurrentTime) > 0.05) {
           window._externalIsPaused = false;
+          window._subPausedElapsed = null;
+          _setSubSyncBarPaused(false);
         }
         window._externalCurrentTime = ct;
         window._lastExternalMsgTime = Date.now();
@@ -8644,6 +8978,7 @@
         // Re-anchor the wall-clock baseline to the player's exact playback position
         _subStartTime = Date.now() - (ct * 1000);
         _subActive = true;
+        _markSubSyncAutoLive(true);
 
         if (!_maxMode && _subLoaded && _subCues && _subCues.length) {
           // Immediately check cue at this exact millisecond
@@ -8665,7 +9000,6 @@
             _subRaf = requestAnimationFrame(_subLoop);
           }
 
-          // Auto-hide manual Start button once live events are received
           if (_subStartBtn && _subStartBtn.style.display !== 'none') {
             _subStartBtn.style.display = 'none';
           }
@@ -8681,6 +9015,9 @@
 
     function subShift(ms) {
       _subOffset += ms;
+      _updateSubSyncOffsetBadge();
+      const sec = (_subOffset / 1000).toFixed(1);
+      _showSubToast(`Subtitle Offset: ${_subOffset > 0 ? '+' : ''}${sec}s`, 1600);
     }
 
     // Load subtitle from /api/subtitles
@@ -10337,10 +10674,13 @@
           : 0;
         _subStartTime = Date.now() - (resumeSec * 1000);
         _subOffset = 0;
+        window._subPausedElapsed = null;
         _stopSubLoop();
         _lastIframeSubCueText = null;
         _subRaf = requestAnimationFrame(_subLoop);
         _subActive = true;
+        _showSubSyncBar(true);
+        _updateSubSyncOffsetBadge();
         if (_subToggleBtn) {
           _subToggleBtn.style.opacity = '1';
           _subToggleBtn.style.cursor = 'pointer';
@@ -10354,6 +10694,7 @@
       _subCues = [];
       window._currentLoadedSubKey = null;
       _lastIframeSubCueText = null;
+      window._subPausedElapsed = null;
 
       const localSub = typeof SUBTITLE_MAP !== 'undefined' ? (SUBTITLE_MAP[subKey] || SUBTITLE_MAP[String(_currentModalId)]) : null;
       let srtText = null;
@@ -10414,9 +10755,25 @@
               : 0;
             _subStartTime = Date.now() - (resumeSec * 1000);
             _subOffset = 0;
+            window._subPausedElapsed = null;
             _stopSubLoop();
             _lastIframeSubCueText = null;
             _subRaf = requestAnimationFrame(_subLoop);
+            _showSubSyncBar(true);
+            _updateSubSyncOffsetBadge();
+
+            // Display clear announcement badge showing dialogue start point
+            const firstCue = parsedCues[0];
+            if (firstCue && firstCue.start > 20000) {
+              const mm = String(Math.floor(firstCue.start / 60000)).padStart(2, '0');
+              const ss = String(Math.floor((firstCue.start % 60000) / 1000)).padStart(2, '0');
+              _showSubToast(`🇱🇰 <strong>Sinhala Subtitles Active</strong> (${parsedCues.length} cues)<br><span style="color:var(--gold);font-size:0.86em;">Spoken dialogue starts at ${mm}:${ss}</span>`, 6000);
+              const statusTxt = document.getElementById('subSyncStatusText');
+              if (statusTxt) statusTxt.textContent = `Dialogue at ${mm}:${ss}`;
+            } else {
+              _showSubToast(`🇱🇰 <strong>Sinhala Subtitles Active</strong> (${parsedCues.length} cues)`, 4000);
+            }
+
             if (_subStartBtn) _subStartBtn.textContent = '⟳ Restart';
             if (_subToggleBtn) {
               _subToggleBtn.style.opacity = '1';
@@ -10545,8 +10902,14 @@
       window._externalCurrentTime = 0;
       window._lastExternalMsgTime = null;
       window._externalIsPaused = false;
+      window._subPausedElapsed = null;
       _subStartTime = Date.now();
       _lastIframeSubCueText = null;
+
+      const sName = btn ? btn.textContent.trim() : 'Server';
+      const isHackyMax = sName.toLowerCase().includes('hackymax');
+      _markSubSyncAutoLive(isHackyMax);
+      _showSubToast(`Switched to <strong>${_escHtml(sName)}</strong> • Sinhala Subtitles Active`, 3200);
 
       _autoLoadIframeSinhalaSub();
     }
@@ -10574,6 +10937,9 @@
           _stopSubLoop();
           _subCues = [];
           window._currentLoadedSubKey = null;
+          _showSubSyncBar(false);
+          const badge = document.getElementById('subToastBadge');
+          if (badge) badge.classList.remove('show');
           const epBar = document.getElementById('playerEpBar');
           if (epBar) epBar.classList.remove('visible');
           if (document.fullscreenElement) {
