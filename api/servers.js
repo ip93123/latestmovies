@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     const e = episode || 1;
     
     urls = [
-      `https://vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true`,
+      `https://vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&sub=false&subtitles=false&cc=false`,
       `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=true&showNextEpisode=1`,
       `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=sin`,
       `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true`,
@@ -27,7 +27,7 @@ export default async function handler(req, res) {
   } else {
     // Movie
     urls = [
-      `https://vidy.st/movie/${id}?color=E8C97A&autoplay=true`,
+      `https://vidy.st/movie/${id}?color=E8C97A&autoplay=true&sub=false&subtitles=false&cc=false`,
       `https://vidlove.cc/embed/movie/${id}?autoplay=true`,
       `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=sin`,
       `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true`,

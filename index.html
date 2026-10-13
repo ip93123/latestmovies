@@ -3045,13 +3045,13 @@
       z-index: 2147483647 !important;
       max-width: 90%;
       text-align: center;
-      padding: 0.15rem 0.6rem;
-      background: transparent !important;
-      border: none !important;
-      border-radius: 0 !important;
-      box-shadow: none !important;
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
+      padding: 0.25rem 0.95rem;
+      background: var(--sub-bg, rgba(7, 9, 15, 0.92)) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      border-radius: 8px !important;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.65) !important;
+      backdrop-filter: blur(8px) !important;
+      -webkit-backdrop-filter: blur(8px) !important;
       font-size: var(--sub-size, calc(clamp(1.6rem, 3.4vw, 2.85rem) * 0.75));
       font-weight: 700;
       color: var(--sub-color, #ffffff);
@@ -3079,13 +3079,13 @@
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, #maxPlayerWrap:fullscreen, #maxPlayerWrap:-webkit-full-screen) #subText {
       font-size: var(--sub-size, calc(clamp(1.9rem, 3.8vw, 3.2rem) * 0.85)) !important;
       font-weight: 700 !important;
-      background: transparent !important;
-      border: none !important;
-      border-radius: 0 !important;
-      box-shadow: none !important;
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
-      padding: 0.2rem 0.8rem !important;
+      background: var(--sub-bg, rgba(7, 9, 15, 0.92)) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      border-radius: 8px !important;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.65) !important;
+      backdrop-filter: blur(8px) !important;
+      -webkit-backdrop-filter: blur(8px) !important;
+      padding: 0.35rem 1.15rem !important;
       text-shadow: 0 2px 4px rgba(0,0,0,1), 0 0 14px rgba(0,0,0,0.95), 1px 1px 3px #000, -1px -1px 3px #000, 2px 2px 4px #000, -2px -2px 4px #000 !important;
       z-index: 2147483647 !important;
       transform: translateZ(9999px) !important;
@@ -9159,7 +9159,7 @@
 
       if (type === 'tv') {
         urls = [
-          `https://vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true`,
+          `https://vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&sub=false&subtitles=false&cc=false`,
           `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=true&showNextEpisode=1`,
           `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=sin`,
           `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true`,
@@ -9171,7 +9171,7 @@
         labels = ['HackyMax', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Nebula', 'Zenith', 'Hyperion'];
       } else {
         urls = [
-          `https://vidy.st/movie/${id}?color=E8C97A&autoplay=true`,
+          `https://vidy.st/movie/${id}?color=E8C97A&autoplay=true&sub=false&subtitles=false&cc=false`,
           `https://vidlove.cc/embed/movie/${id}?autoplay=true`,
           `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=sin`,
           `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true`,
@@ -10027,17 +10027,20 @@
       if (typeof eventData !== 'object') return null;
 
       const d = eventData;
-      const timeKeys = ['currenttime', 'current_time', 'time', 'position', 'pos', 'seconds', 'second', 'offset', 'value', 'progress', 'player_progress', 'playerprogress', 'watched'];
 
       // Special check: Vidy progress object { progress: { watched: number } }
       if (d.progress && typeof d.progress === 'object' && typeof d.progress.watched === 'number') {
         return { time: d.progress.watched, event: 'timeupdate' };
       }
 
+      // Priority 1: High-confidence exact time keys (currentTime, timestamp, etc.)
+      // Note: 'progress' is NOT included here because progress in HTML5 video is a ratio (0.0 to 1.0 or percentage), NOT seconds.
+      const exactTimeKeys = ['currenttime', 'current_time', 'timestamp', 'time', 'position', 'pos', 'seconds', 'second', 'offset', 'value', 'watched'];
+
       // 1. Direct key match (case-insensitive)
       for (const key of Object.keys(d)) {
         const kLow = key.toLowerCase();
-        if (timeKeys.includes(kLow) && typeof d[key] === 'number' && !isNaN(d[key]) && d[key] >= 0) {
+        if (exactTimeKeys.includes(kLow) && typeof d[key] === 'number' && !isNaN(d[key]) && d[key] >= 0) {
           let sec = d[key];
           if (sec > 86400 || d.unit === 'ms' || d.units === 'ms' || d.unit === 'milliseconds') {
             sec = sec / 1000;
@@ -10047,7 +10050,7 @@
       }
 
       // 2. Inspect nested wrapper objects commonly used by players (VidLink, Vidy, Plyr, JWPlayer, Vimeo, etc.)
-      const wrappers = ['data', 'detail', 'payload', 'player', 'state', 'info', 'media', 'plyr', 'video', 'progress'];
+      const wrappers = ['data', 'detail', 'payload', 'player', 'state', 'info', 'media', 'plyr', 'video'];
       for (const w of wrappers) {
         if (d[w] != null) {
           const res = _extractTimeFromMessage(d[w], depth + 1);
@@ -10055,9 +10058,9 @@
         }
       }
 
-      // 3. Fallback: inspect any remaining object properties
+      // 3. Fallback: inspect any remaining object properties (excluding progress)
       for (const key of Object.keys(d)) {
-        if (typeof d[key] === 'object' && d[key] !== null) {
+        if (key.toLowerCase() !== 'progress' && typeof d[key] === 'object' && d[key] !== null) {
           const res = _extractTimeFromMessage(d[key], depth + 1);
           if (res) return res;
         }
@@ -10929,7 +10932,7 @@
     // ════════════════════════════════════════════════════════════════════════
     const MXS_KEY = 'hacky_mxs_v1';
     let _mxsSettings = {
-      subColor: '#ffffff', subSize: 75, subBg: '#000000', subBgOp: 0,
+      subColor: '#ffffff', subSize: 75, subBg: '#000000', subBgOp: 85,
       subPos: 'bottom', subShadow: true, speed: 1, quality: 'auto',
       autoNext: true, autoNextCountdown: true, autoSub: true
     };
@@ -10940,8 +10943,11 @@
       if (saved.subSize === 100 || saved.subSize === undefined) {
         _mxsSettings.subSize = 75;
       }
+      if (saved.subBgOp === undefined || saved.subBgOp === 0) {
+        _mxsSettings.subBgOp = 85;
+      }
     } catch (_) {}
-    if (typeof _mxsSettings.subBgOp !== 'number') _mxsSettings.subBgOp = 0;
+    if (typeof _mxsSettings.subBgOp !== 'number') _mxsSettings.subBgOp = 85;
 
     function _mxsSave() {
       try { localStorage.setItem(MXS_KEY, JSON.stringify(_mxsSettings)); } catch (_) {}
