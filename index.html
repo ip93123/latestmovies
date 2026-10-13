@@ -2362,20 +2362,22 @@
       z-index: 2147483647 !important;
       max-width: 90%;
       text-align: center;
-      padding: 0.38rem 1.35rem;
-      background: var(--sub-bg, rgba(7, 9, 15, 0.90)) !important;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 8px;
-      box-shadow: 0 4px 22px rgba(0, 0, 0, 0.88), 0 0 10px rgba(0,0,0,0.5);
+      padding: 0.15rem 0.6rem;
+      background: transparent !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
       font-size: var(--sub-size, calc(clamp(1.6rem, 3.4vw, 2.85rem) * 0.75));
       font-weight: 700;
       color: var(--sub-color, #ffffff);
-      text-shadow: var(--sub-shadow, 0 2px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.95), 1px 1px 2px #000, -1px -1px 2px #000);
+      text-shadow: var(--sub-shadow, 0 2px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.95), 1px 1px 2px #000, -1px -1px 2px #000, 2px 2px 3px #000, -2px -2px 3px #000);
       line-height: 1.45;
       letter-spacing: 0.015em;
       font-family: 'Noto Sans Sinhala', 'Iskoola Pota', 'Inter', -apple-system, sans-serif;
       display: none;
-      transition: color 0.15s, font-size 0.15s, background 0.15s;
+      transition: color 0.15s, font-size 0.15s;
       user-select: none;
       transform: translateZ(9999px) !important;
     }
@@ -2394,10 +2396,14 @@
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, #maxPlayerWrap:fullscreen, #maxPlayerWrap:-webkit-full-screen) #subText {
       font-size: var(--sub-size, calc(clamp(1.9rem, 3.8vw, 3.2rem) * 0.85)) !important;
       font-weight: 700 !important;
-      background: var(--sub-bg, rgba(7, 9, 15, 0.92)) !important;
-      padding: 0.45rem 1.6rem !important;
-      border: 1px solid rgba(255, 255, 255, 0.15) !important;
-      box-shadow: 0 6px 28px rgba(0, 0, 0, 0.92) !important;
+      background: transparent !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      padding: 0.2rem 0.8rem !important;
+      text-shadow: 0 2px 4px rgba(0,0,0,1), 0 0 14px rgba(0,0,0,0.95), 1px 1px 3px #000, -1px -1px 3px #000, 2px 2px 4px #000, -2px -2px 4px #000 !important;
       z-index: 2147483647 !important;
       transform: translateZ(9999px) !important;
     }
