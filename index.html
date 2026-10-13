@@ -10925,12 +10925,6 @@
         console.warn('[playStream] Called with invalid URL:', url);
         return;
       }
-      if (typeof url === 'string') {
-        url = url.replace(/autoplay=false/gi, 'autoplay=true');
-      }
-      if (Array.isArray(allUrls)) {
-        allUrls = allUrls.map(u => typeof u === 'string' ? u.replace(/autoplay=false/gi, 'autoplay=true') : u);
-      }
       if (_currentModalItem) saveRecentWatch(_currentModalItem, _currentModalType);
       // Stop background video
       if (typeof _destroyHeroPlayer === 'function') _destroyHeroPlayer();
@@ -10972,11 +10966,13 @@
 
       // Build server switcher
       if (allUrls && allUrls.length) {
+        const matchedIdx = allUrls.findIndex(u => u === url || (u && url && u.split('?')[0] === url.split('?')[0]));
+        _activeServerIndex = matchedIdx >= 0 ? matchedIdx : 0;
         const colors = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#F97316', '#A855F7', '#14B8A6', '#6366F1', '#FF4D6D'];
         bar.innerHTML = allUrls.map((u, i) => {
           const lbl = labels ? labels[i] : `Server ${i + 1}`;
           const extraClass = getServerBtnClass(lbl);
-          const activeClass = u === url ? ' active' : '';
+          const activeClass = i === _activeServerIndex ? ' active' : '';
           const fallbackStyle = extraClass ? '' : ` style="background:${colors[i % colors.length] || '#6B7280'};color:#fff;border-color:transparent"`;
           return `<button class="player-server-btn${extraClass}${activeClass}"${fallbackStyle} data-server-index="${i}">${lbl}</button>`;
         }).join('');
@@ -10986,8 +10982,6 @@
             switchServer(allUrls[i], btn);
           });
         });
-        _activeServerIndex = allUrls.indexOf(url);
-        if (_activeServerIndex < 0) _activeServerIndex = 0;
       } else {
         bar.innerHTML = '';
       }
@@ -12675,13 +12669,15 @@
         const overlayOpen = document.getElementById('playerOverlay')?.classList.contains('open');
 
         const isSameServer = (typeof _activeServerIndex === 'number' && _activeServerIndex === targetServerIdx);
+        const hasMountedPlayer = !!((document.getElementById('playerFrame')?.src && document.getElementById('playerFrame')?.src !== 'about:blank') || (window._maxMode && _vid()?.src));
 
-        if (id && (!isSameMedia || !overlayOpen || !isSameServer) && (data.type === 'state' || data.type === 'play' || data.type === 'heartbeat')) {
+        if (id && (!isSameMedia || !overlayOpen || !isSameServer || !hasMountedPlayer) && (data.type === 'state' || data.type === 'play' || data.type === 'heartbeat')) {
           window._currentPlayingId = id;
           window._currentPlayingType = type;
           window._currentPlayingSeason = season;
           window._currentPlayingEpisode = episode;
           window._currentPlayingEngine = targetEngine;
+          _activeServerIndex = targetServerIdx;
 
           try {
             const u = new URL(window.location.origin + window.location.pathname);
@@ -12710,7 +12706,54 @@
           getModalServerUrls(id, type, season, episode).then(sData => {
             if (sData && sData.urls && sData.urls.length) {
               const pickIdx = (targetServerIdx < sData.urls.length) ? targetServerIdx : 0;
-              playStream(sData.urls[pickIdx], sData.urls, sData.labels);
+              let urlToPlay = sData.urls[pickIdx];
+              const isHostPlaying = !!data.playing;
+              const hostTarget = _calcTargetTime(data, isHostPlaying);
+
+              if (!isHostPlaying) {
+                // Host is PAUSED! Mount strictly paused at host's timestamp
+                urlToPlay = urlToPlay.replace(/autoplay=true/gi, 'autoplay=false').replace(/autoplay=1/gi, 'autoplay=0');
+                if (urlToPlay.includes('videasy.ws')) {
+                  urlToPlay += (urlToPlay.includes('?') ? '&' : '?') + `time=${Math.round(hostTarget)}`;
+                } else {
+                  urlToPlay += (urlToPlay.includes('?') ? '&' : '?') + `startAt=${Math.round(hostTarget)}`;
+                }
+                window._externalIsPaused = true;
+                window._externalCurrentTime = hostTarget;
+                window._subPausedElapsed = Math.round(hostTarget * 1000);
+                _setSubSyncBarPaused(true);
+                const lockEl = document.getElementById('wpGuestLock');
+                const lockMsg = document.getElementById('wpGuestLockMsg');
+                if (lockEl) lockEl.classList.add('active');
+                if (lockMsg) lockMsg.textContent = 'Host paused';
+              } else {
+                if (hostTarget > 1) {
+                  if (urlToPlay.includes('videasy.ws')) {
+                    urlToPlay += (urlToPlay.includes('?') ? '&' : '?') + `time=${Math.round(hostTarget)}`;
+                  } else {
+                    urlToPlay += (urlToPlay.includes('?') ? '&' : '?') + `startAt=${Math.round(hostTarget)}`;
+                  }
+                }
+                window._externalIsPaused = false;
+                window._externalCurrentTime = hostTarget;
+                window._subStartTime = Date.now() - (hostTarget * 1000);
+                window._subPausedElapsed = null;
+                _setSubSyncBarPaused(false);
+                const lockEl = document.getElementById('wpGuestLock');
+                if (lockEl) lockEl.classList.remove('active');
+              }
+
+              playStream(urlToPlay, sData.urls, sData.labels);
+
+              setTimeout(() => {
+                if (!isHostPlaying) {
+                  _sendIframeCmd('pause');
+                  _sendIframeCmd('seek', hostTarget);
+                } else {
+                  _sendIframeCmd('seek', hostTarget);
+                  _sendIframeCmd('play');
+                }
+              }, 1200);
             }
           }).catch(() => {});
         }
@@ -12734,6 +12777,14 @@
             } else {
               _sendIframeCmd('pause');
               if (Math.abs(_getPlaybackTime() - target) > 1.5) _sendIframeCmd('seek', target);
+              const frame = document.getElementById('playerFrame');
+              if (frame && frame.src && (frame.src.includes('vidlove.cc') || frame.src.includes('vidlink.pro'))) {
+                if (frame.src.includes('autoplay=true') || frame.src.includes('autoplay=1')) {
+                  let pauseUrl = frame.src.replace(/autoplay=true/gi, 'autoplay=false').replace(/autoplay=1/gi, 'autoplay=0');
+                  pauseUrl = pauseUrl.replace(/startAt=\d+/gi, `startAt=${Math.round(target)}`).replace(/time=\d+/gi, `time=${Math.round(target)}`);
+                  frame.src = pauseUrl;
+                }
+              }
             }
             window._externalCurrentTime = target;
             window._subPausedElapsed = Math.round(target * 1000);
@@ -12757,6 +12808,12 @@
           } else {
             _sendIframeCmd('seek', target);
             _sendIframeCmd('play');
+            const frame = document.getElementById('playerFrame');
+            if (frame && frame.src && (frame.src.includes('autoplay=false') || frame.src.includes('autoplay=0'))) {
+              let resumeUrl = frame.src.replace(/autoplay=false/gi, 'autoplay=true').replace(/autoplay=0/gi, 'autoplay=1');
+              resumeUrl = resumeUrl.replace(/startAt=\d+/gi, `startAt=${Math.round(target)}`).replace(/time=\d+/gi, `time=${Math.round(target)}`);
+              frame.src = resumeUrl;
+            }
           }
           window._externalCurrentTime = target;
           window._subStartTime = Date.now() - (target * 1000);
@@ -12795,6 +12852,13 @@
           _sendIframeCmd('seek', target);
           _sendIframeCmd('play');
           setTimeout(() => { _sendIframeCmd('seek', target); _sendIframeCmd('play'); }, 400);
+
+          const frame = document.getElementById('playerFrame');
+          if (frame && frame.src && (frame.src.includes('autoplay=false') || frame.src.includes('autoplay=0'))) {
+            let resumeUrl = frame.src.replace(/autoplay=false/gi, 'autoplay=true').replace(/autoplay=0/gi, 'autoplay=1');
+            resumeUrl = resumeUrl.replace(/startAt=\d+/gi, `startAt=${Math.round(target)}`).replace(/time=\d+/gi, `time=${Math.round(target)}`);
+            frame.src = resumeUrl;
+          }
         }
 
         window._externalCurrentTime = target;
@@ -12820,6 +12884,14 @@
         } else {
           _sendIframeCmd('pause');
           _sendIframeCmd('seek', target);
+          const frame = document.getElementById('playerFrame');
+          if (frame && frame.src && (frame.src.includes('vidlove.cc') || frame.src.includes('vidlink.pro'))) {
+            if (frame.src.includes('autoplay=true') || frame.src.includes('autoplay=1')) {
+              let pauseUrl = frame.src.replace(/autoplay=true/gi, 'autoplay=false').replace(/autoplay=1/gi, 'autoplay=0');
+              pauseUrl = pauseUrl.replace(/startAt=\d+/gi, `startAt=${Math.round(target)}`).replace(/time=\d+/gi, `time=${Math.round(target)}`);
+              frame.src = pauseUrl;
+            }
+          }
         }
 
         window._externalCurrentTime = target;
@@ -12871,6 +12943,13 @@
             _sendIframeCmd('play');
             setTimeout(() => { _sendIframeCmd('seek', target); _sendIframeCmd('play'); }, 400);
             setTimeout(() => { _sendIframeCmd('seek', target); }, 1200);
+
+            const frame = document.getElementById('playerFrame');
+            if (frame && frame.src && (frame.src.includes('autoplay=false') || frame.src.includes('autoplay=0'))) {
+              let resumeUrl = frame.src.replace(/autoplay=false/gi, 'autoplay=true').replace(/autoplay=0/gi, 'autoplay=1');
+              resumeUrl = resumeUrl.replace(/startAt=\d+/gi, `startAt=${Math.round(target)}`).replace(/time=\d+/gi, `time=${Math.round(target)}`);
+              frame.src = resumeUrl;
+            }
           }
           window._externalCurrentTime = target;
           window._subStartTime = Date.now() - (target * 1000);
@@ -12886,6 +12965,14 @@
           } else {
             _sendIframeCmd('pause');
             _sendIframeCmd('seek', target);
+            const frame = document.getElementById('playerFrame');
+            if (frame && frame.src && (frame.src.includes('vidlove.cc') || frame.src.includes('vidlink.pro'))) {
+              if (frame.src.includes('autoplay=true') || frame.src.includes('autoplay=1')) {
+                let pauseUrl = frame.src.replace(/autoplay=true/gi, 'autoplay=false').replace(/autoplay=1/gi, 'autoplay=0');
+                pauseUrl = pauseUrl.replace(/startAt=\d+/gi, `startAt=${Math.round(target)}`).replace(/time=\d+/gi, `time=${Math.round(target)}`);
+                frame.src = pauseUrl;
+              }
+            }
           }
           window._externalCurrentTime = target;
           window._subPausedElapsed = Math.round(target * 1000);
@@ -13558,18 +13645,10 @@
         }
         const overlay = document.getElementById('playerOverlay');
         if (overlay) overlay.classList.add('open');
-        if (engParam && (engParam === 'hackymax' || engParam === 'sinmax' || engParam === 'zeemax')) {
-          window._currentPlayingEngine = engParam;
-          if (typeof initMaxPlayer === 'function') {
-            initMaxPlayer(id, mType, 1, 1, engParam);
-          }
-        } else {
-          getModalServerUrls(id, mType, 1, 1).then(data => {
-            if (data && data.urls && data.urls.length) {
-              playStream(data.urls[0], data.urls, data.labels);
-            }
-          }).catch(() => {});
-        }
+        const loader = document.getElementById('playerLoading');
+        if (loader) loader.style.opacity = '1';
+        // Note: Do NOT playStream here yet!
+        // We wait for host connection state so we know whether host is paused or playing!
       }
 
       await new Promise(r => setTimeout(r, 600));
@@ -13599,10 +13678,12 @@
           try { WP.hostConn.send({ type: 'request-state' }); } catch (_) {}
         }
 
-        // Hook user gesture unlock so browser audio policy never blocks playback
+        // Hook user gesture unlock so browser audio policy never blocks playback when host is playing
         const overlay = document.getElementById('playerOverlay');
         const unlockOnUserTap = () => {
           if (!WP.isHost && WP.code) {
+            const lockActive = document.getElementById('wpGuestLock')?.classList.contains('active');
+            if (window._externalIsPaused || lockActive) return; // NEVER unpause if host is paused!
             _sendIframeCmd('play');
             const v = _vid();
             if (v && v.paused) _safePlay(v);
@@ -13618,6 +13699,22 @@
         console.warn('[WatchParty] Host is offline or room closed:', e?.message || e);
         WP.code = null; WP.isHost = false;
         if (WP.peer) { try { WP.peer.destroy(); } catch (_) {} WP.peer = null; }
+        if (paramVal) {
+          const id = parseInt(paramVal, 10);
+          const mType = tvParam ? 'tv' : 'movie';
+          if (engParam && (engParam === 'hackymax' || engParam === 'sinmax' || engParam === 'zeemax')) {
+            window._currentPlayingEngine = engParam;
+            if (typeof initMaxPlayer === 'function') {
+              initMaxPlayer(id, mType, 1, 1, engParam);
+            }
+          } else {
+            getModalServerUrls(id, mType, 1, 1).then(data => {
+              if (data && data.urls && data.urls.length) {
+                playStream(data.urls[0], data.urls, data.labels);
+              }
+            }).catch(() => {});
+          }
+        }
       }
     })();
 
