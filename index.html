@@ -2033,6 +2033,8 @@
       padding: 0.6rem 2rem 1.4rem 2rem;
       scrollbar-width: none;
       scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x proximity;
     }
     .category-cards-row::-webkit-scrollbar {
       display: none;
@@ -2040,6 +2042,8 @@
     .category-card {
       position: relative;
       flex: 0 0 270px;
+      flex-shrink: 0;
+      scroll-snap-align: start;
       height: 140px;
       border-radius: 14px;
       overflow: hidden;
@@ -2253,11 +2257,12 @@
     @keyframes catSpin {
       to { transform: rotate(360deg); }
     }
-    /* ── Category Dedicated Page Grid (8 columns x 10 rows) ────────── */
+    /* ── Category Dedicated Page Grid & Responsive Layout ───────────── */
     .cat-page-content {
       max-width: 1720px;
       margin: 0 auto;
       padding: 1.8rem 2.5rem 5rem 2.5rem;
+      transition: padding 0.25s ease;
     }
     #categoryGrid {
       display: grid !important;
@@ -2275,40 +2280,85 @@
       flex: none !important;
       margin: 0 !important;
     }
-    @media (max-width: 1650px) {
+
+    /* ── Responsive Grid Breakpoints ──────────────────────────────────── */
+    @media (min-width: 2000px) {
+      .cat-page-content {
+        max-width: 2300px;
+        padding: 2.5rem 3.5rem 6rem 3.5rem;
+      }
+      #categoryGrid {
+        grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
+        gap: 1.6rem 1.25rem !important;
+      }
+      .cat-page-title {
+        font-size: 2.2rem;
+      }
+      .cat-page-sub {
+        font-size: 1rem;
+      }
+      .cat-back-btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+      }
+      .cat-toggle-btn {
+        padding: 0.65rem 1.6rem;
+        font-size: 0.95rem;
+      }
+      .category-card {
+        flex: 0 0 320px;
+        height: 160px;
+      }
+      .category-card-native {
+        font-size: 1.65rem;
+      }
+    }
+    @media (max-width: 1550px) {
       #categoryGrid {
         grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
         gap: 1.15rem 0.85rem !important;
       }
     }
-    @media (max-width: 1400px) {
+    @media (max-width: 1300px) {
       #categoryGrid {
         grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
         gap: 1.05rem 0.8rem !important;
       }
     }
-    @media (max-width: 1150px) {
+    @media (max-width: 1050px) {
       #categoryGrid {
         grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
         gap: 1rem 0.75rem !important;
       }
+      .cat-page-content {
+        padding: 1.5rem 1.8rem 4.5rem 1.8rem;
+      }
     }
-    @media (max-width: 900px) {
+    @media (max-width: 820px) {
       #categoryGrid {
         grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
         gap: 0.9rem 0.65rem !important;
       }
+      .cat-page-content {
+        padding: 1.3rem 1.3rem 4rem 1.3rem;
+      }
     }
-    @media (max-width: 650px) {
+    @media (max-width: 620px) {
       #categoryGrid {
         grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-        gap: 0.75rem 0.5rem !important;
+        gap: 0.75rem 0.55rem !important;
+      }
+      .cat-page-content {
+        padding: 1rem 0.9rem 4rem 0.9rem;
       }
     }
     @media (max-width: 440px) {
       #categoryGrid {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         gap: 0.65rem 0.45rem !important;
+      }
+      .cat-page-content {
+        padding: 0.9rem 0.65rem 3.5rem 0.65rem;
       }
     }
 
@@ -2337,6 +2387,7 @@
       transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
       font-family: inherit;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
+      touch-action: manipulation;
     }
     .cat-page-nav-btn:hover:not(:disabled) {
       background: var(--gold, #E8C97A);
@@ -2355,6 +2406,7 @@
       align-items: center;
       gap: 0.42rem;
       flex-wrap: wrap;
+      justify-content: center;
     }
     .cat-page-btn {
       min-width: 40px;
@@ -2372,6 +2424,7 @@
       justify-content: center;
       transition: all 0.2s ease;
       font-family: inherit;
+      touch-action: manipulation;
     }
     .cat-page-btn:hover {
       background: rgba(232, 201, 122, 0.2);
@@ -2391,29 +2444,123 @@
       padding: 0 0.35rem;
       font-size: 0.95rem;
     }
+    .cat-page-info {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted, rgba(255, 255, 255, 0.65));
+      margin-left: 0.5rem;
+      white-space: nowrap;
+    }
 
-    @media (max-width: 768px) {
-      .category-card {
-        flex: 0 0 215px;
-        height: 115px;
-      }
-      .category-card-native {
-        font-size: 1.15rem;
-      }
-      .category-cards-row {
-        padding: 0.4rem 1.2rem 1.2rem 1.2rem;
-      }
+    /* ── Mobile Screen Optimizations (Header, Cards, and Pagination) ── */
+    @media (max-width: 640px) {
       .cat-page-header {
-        padding: 0.9rem 1.2rem;
-        flex-wrap: wrap;
-        gap: 0.8rem;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        grid-template-areas:
+          "back . toggle"
+          "titles titles titles";
+        padding: 0.75rem 1rem 0.85rem 1rem;
+        gap: 0.5rem;
+      }
+      .cat-back-btn {
+        grid-area: back;
+        padding: 0.45rem 0.95rem;
+        font-size: 0.82rem;
+        border-radius: 20px;
+      }
+      .cat-toggle-wrap {
+        grid-area: toggle;
+        justify-self: end;
+      }
+      .cat-toggle-btn {
+        padding: 0.4rem 0.95rem;
+        font-size: 0.78rem;
+      }
+      .cat-header-titles {
+        grid-area: titles;
+        text-align: center;
+        width: 100%;
+        margin-top: 0.15rem;
       }
       .cat-page-title {
-        font-size: 1.3rem;
+        font-size: 1.35rem;
+        line-height: 1.2;
       }
-      .cat-page-content {
-        padding: 1.2rem 1.2rem 4rem 1.2rem;
+      .cat-page-sub {
+        font-size: 0.78rem;
       }
+
+      .category-cards-row {
+        padding: 0.3rem 0.9rem 1rem 0.9rem;
+        gap: 0.8rem;
+        scroll-snap-type: x proximity;
+      }
+      .category-card {
+        flex: 0 0 205px;
+        height: 110px;
+        border-radius: 12px;
+        scroll-snap-align: start;
+      }
+      .category-card-content {
+        padding: 0.85rem 0.95rem;
+      }
+      .category-card-native {
+        font-size: 1.18rem;
+      }
+      .category-card-sub {
+        font-size: 0.74rem;
+      }
+      .category-card-badge {
+        font-size: 0.58rem;
+        padding: 0.18rem 0.45rem;
+        margin-top: 6px;
+      }
+
+      .cat-pagination-wrap {
+        gap: 0.45rem;
+        margin-top: 2.2rem;
+      }
+      .cat-page-nav-btn {
+        padding: 0.52rem 0.95rem;
+        font-size: 0.82rem;
+        border-radius: 20px;
+      }
+      .cat-page-btn {
+        min-width: 36px;
+        height: 36px;
+        font-size: 0.82rem;
+        border-radius: 18px;
+        padding: 0 0.45rem;
+      }
+      .cat-page-info {
+        width: 100%;
+        text-align: center;
+        margin-top: 0.4rem;
+        margin-left: 0;
+      }
+    }
+
+    /* ── TV Mode & D-Pad Remote Navigation Styles ───────────────────── */
+    body.tv-mode .category-card:focus,
+    body.tv-mode .category-card.tv-focused {
+      outline: 3.5px solid var(--gold, #E8C97A) !important;
+      outline-offset: 4px !important;
+      transform: scale(1.06) !important;
+      box-shadow: 0 0 30px rgba(232, 201, 122, 0.75), 0 16px 36px rgba(0, 0, 0, 0.9) !important;
+      border-color: rgba(255, 255, 255, 0.8) !important;
+      z-index: 25 !important;
+    }
+    body.tv-mode .cat-back-btn:focus,
+    body.tv-mode .cat-toggle-btn:focus,
+    body.tv-mode .cat-page-btn:focus,
+    body.tv-mode .cat-page-nav-btn:focus {
+      outline: 3px solid var(--gold, #E8C97A) !important;
+      outline-offset: 3px !important;
+      transform: scale(1.08) !important;
+      box-shadow: 0 0 20px rgba(232, 201, 122, 0.6) !important;
+      border-color: var(--gold, #E8C97A) !important;
+      z-index: 25 !important;
     }
 
     /* ── Cast Cards (6 per row, wraps downwards) ────────────────────────── */
@@ -8103,7 +8250,7 @@
       if (langRow && !langRow.children.length) {
         langRow.innerHTML = CATEGORIES_DATA.languages.map(l => {
           return `
-            <div class="category-card" data-cat-type="language" data-cat-key="${l.code}" style="--cat-accent:${l.accent}">
+            <div class="category-card" tabindex="0" role="button" aria-label="${l.title} · ${l.sub}" data-cat-type="language" data-cat-key="${l.code}" style="--cat-accent:${l.accent}">
               <img src="${l.img}" alt="${l.sub}" loading="lazy" onerror="this.style.display='none'">
               <div class="category-card-overlay"></div>
               <div class="category-card-tint"></div>
@@ -8119,7 +8266,7 @@
       if (genreRow && !genreRow.children.length) {
         genreRow.innerHTML = CATEGORIES_DATA.genres.map(g => {
           return `
-            <div class="category-card" data-cat-type="genre" data-cat-key="${g.id}" style="--cat-accent:${g.accent}">
+            <div class="category-card" tabindex="0" role="button" aria-label="${g.title} · ${g.sub}" data-cat-type="genre" data-cat-key="${g.id}" style="--cat-accent:${g.accent}">
               <img src="${g.img}" alt="${g.title}" loading="lazy" onerror="this.style.display='none'">
               <div class="category-card-overlay"></div>
               <div class="category-card-tint"></div>
@@ -8206,6 +8353,13 @@
         } catch (_) {}
       }
 
+      if (_tvMode) {
+        setTimeout(() => {
+          const backBtn = document.getElementById('catBackBtn');
+          if (backBtn) backBtn.focus();
+        }, 300);
+      }
+
       await loadCategoryTitles(1);
     }
 
@@ -8213,6 +8367,13 @@
       const overlay = document.getElementById('categoryViewOverlay');
       if (overlay) overlay.classList.remove('open');
       document.body.style.overflow = '';
+
+      if (_tvMode) {
+        setTimeout(() => {
+          const catPill = document.querySelector(`.category-card[data-cat-type="${_currentCatType}"][data-cat-key="${_currentCatKey}"]`);
+          if (catPill) catPill.focus();
+        }, 150);
+      }
 
       if (pushHistory) {
         try {
@@ -8346,26 +8507,43 @@
       if (prevBtn) prevBtn.disabled = (currentPage <= 1);
       if (nextBtn) nextBtn.disabled = (currentPage >= totalPages);
 
+      const isMobile = window.innerWidth < 540;
       let pages = [];
-      if (totalPages <= 7) {
-        for (let i = 1; i <= totalPages; i++) pages.push(i);
-      } else {
-        if (currentPage <= 4) {
-          pages = [1, 2, 3, 4, 5, '...', totalPages];
-        } else if (currentPage >= totalPages - 3) {
-          pages = [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+      if (isMobile) {
+        if (totalPages <= 4) {
+          for (let i = 1; i <= totalPages; i++) pages.push(i);
         } else {
-          pages = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+          if (currentPage <= 2) {
+            pages = [1, 2, '...', totalPages];
+          } else if (currentPage >= totalPages - 1) {
+            pages = [1, '...', totalPages - 1, totalPages];
+          } else {
+            pages = [1, '...', currentPage, '...', totalPages];
+          }
+        }
+      } else {
+        if (totalPages <= 7) {
+          for (let i = 1; i <= totalPages; i++) pages.push(i);
+        } else {
+          if (currentPage <= 4) {
+            pages = [1, 2, 3, 4, 5, '...', totalPages];
+          } else if (currentPage >= totalPages - 3) {
+            pages = [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+          } else {
+            pages = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+          }
         }
       }
 
-      numbersWrap.innerHTML = pages.map(p => {
+      const pillsHtml = pages.map(p => {
         if (p === '...') {
           return `<span class="cat-page-ellipsis">…</span>`;
         }
         const isActive = (p === currentPage);
         return `<button class="cat-page-btn ${isActive ? 'active' : ''}" onclick="setCategoryPage(${p})" ${isActive ? 'aria-current="page"' : ''}>${p}</button>`;
       }).join('');
+
+      numbersWrap.innerHTML = pillsHtml + `<div class="cat-page-info">Page ${currentPage} of ${totalPages}</div>`;
     }
 
     function changeCategoryPage(delta) {
@@ -8386,6 +8564,12 @@
       }
     }
     window.setCategoryPage = setCategoryPage;
+
+    window.addEventListener('resize', () => {
+      if (_currentCatTotalPages > 1) {
+        renderCategoryPagination(_currentCatPage, _currentCatTotalPages);
+      }
+    }, { passive: true });
 
     // ── GENRE DATA ────────────────────────────────────────────────────────────
     const MOVIE_GENRES = [
@@ -13227,7 +13411,15 @@
 
     function getVisibleFocusables() {
       const vw = window.innerWidth;
+      const catOverlay = document.getElementById('categoryViewOverlay');
+      const isCatOpen = catOverlay && catOverlay.classList.contains('open');
+
       return [...document.querySelectorAll(FOCUSABLE_SEL)].filter(el => {
+        if (isCatOpen) {
+          if (!el.closest('#categoryViewOverlay')) return false;
+        } else {
+          if (el.closest('#categoryViewOverlay')) return false;
+        }
         if (el.closest('#searchOverlay:not(.open)') ||
           el.closest('#modal:not(.open)') ||
           el.closest('#playerOverlay:not(.open)')) return false;
@@ -13243,8 +13435,16 @@
       const all = getVisibleFocusables();
       if (!all.length) return;
 
-      // If no valid active element, focus the hero button by default
+      // If no valid active element, focus the hero button by default or category back button
       if (!cur || cur === document.body || !all.includes(cur)) {
+        const catOverlay = document.getElementById('categoryViewOverlay');
+        if (catOverlay && catOverlay.classList.contains('open')) {
+          const catBack = document.getElementById('catBackBtn');
+          if (catBack && all.includes(catBack)) {
+            catBack.focus();
+            return;
+          }
+        }
         const defaultTarget = document.getElementById('heroWatch');
         if (defaultTarget && all.includes(defaultTarget)) {
           defaultTarget.focus();
