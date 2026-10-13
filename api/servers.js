@@ -12,9 +12,8 @@ export default async function handler(req, res) {
     const s = season || 1;
     const e = episode || 1;
     
-    const tvSubParam = `&sub_file=https%3A%2F%2Fmovies.hackystreaming.online%2Fapi%2Fsubtitles%3Fid%3D${id}%26type%3Dtv%26season%3D${s}%26episode%3D${e}%26format%3Dvtt&sub_label=Sinhala%20%F0%9F%87%B1%F0%9F%87%B0`;
     urls = [
-      `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false&nextEpisode=true&episodeSelector=true${tvSubParam}`,
+      `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false&nextEpisode=true&episodeSelector=true`,
       `https://moviesapi.to/tv/${id}/${s}/${e}`,
       `https://autoembed.co/tv/tmdb/${id}-${s}-${e}`,
       `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`,
@@ -31,9 +30,8 @@ export default async function handler(req, res) {
 
   } else {
     // Movie
-    const movieSubParam = `&sub_file=https%3A%2F%2Fmovies.hackystreaming.online%2Fapi%2Fsubtitles%3Fid%3D${id}%26type%3Dmovie%26format%3Dvtt&sub_label=Sinhala%20%F0%9F%87%B1%F0%9F%87%B0`;
     urls = [
-      `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false${movieSubParam}`,
+      `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false`,
       `https://moviesapi.to/movie/${id}`,
       `https://autoembed.co/movie/tmdb/${id}`,
       `https://embed.smashystream.com/playere.php?tmdb=${id}`,

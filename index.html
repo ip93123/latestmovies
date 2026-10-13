@@ -20,7 +20,7 @@
   <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap"
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Sinhala:wght@400;600;700&display=swap"
     rel="stylesheet">
   <!-- hls.js — loaded lazily only when Max player is activated -->
   <script>window._hlsJsLoaded = false;</script>
@@ -2271,7 +2271,8 @@
       position: relative;
     }
     .player-container:fullscreen,
-    .player-container:-webkit-full-screen {
+    .player-container:-webkit-full-screen,
+    .player-container.is-fullscreen {
       width: 100vw !important;
       height: 100vh !important;
       max-width: 100vw !important;
@@ -2354,6 +2355,7 @@
       align-items: center;
       padding-bottom: 6%;
       box-sizing: border-box;
+      transform: translateZ(9999px) !important; /* Force separate GPU compositing layer above accelerated iframe */
     }
     #subText {
       position: relative;
@@ -2373,25 +2375,66 @@
       display: none;
       transition: color 0.15s, font-size 0.15s, background 0.15s;
       user-select: none;
+      transform: translateZ(9999px) !important;
     }
-    #subText.active { display: inline-block; }
+    #subText.active { display: inline-block !important; }
 
     /* When in fullscreen, ensure font scales nicely and overlay stays on top */
-    #playerContainer:fullscreen #subOverlay,
-    #playerContainer:-webkit-full-screen #subOverlay,
-    #maxPlayerWrap:fullscreen #subOverlay,
-    #maxPlayerWrap:-webkit-full-screen #subOverlay {
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, #maxPlayerWrap:fullscreen, #maxPlayerWrap:-webkit-full-screen) #subOverlay {
+      position: absolute !important;
+      inset: 0 !important;
       z-index: 2147483647 !important;
       padding-bottom: 7% !important;
+      display: flex !important;
+      transform: translateZ(9999px) !important;
     }
 
-    #playerContainer:fullscreen #subText,
-    #playerContainer:-webkit-full-screen #subText,
-    #maxPlayerWrap:fullscreen #subText,
-    #maxPlayerWrap:-webkit-full-screen #subText {
-      font-size: var(--sub-size, calc(clamp(1.9rem, 3.8vw, 3.2rem) * 0.75)) !important;
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, #maxPlayerWrap:fullscreen, #maxPlayerWrap:-webkit-full-screen) #subText {
+      font-size: var(--sub-size, calc(clamp(1.9rem, 3.8vw, 3.2rem) * 0.85)) !important;
       font-weight: 700 !important;
       z-index: 2147483647 !important;
+      transform: translateZ(9999px) !important;
+    }
+
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, #maxPlayerWrap:fullscreen, #maxPlayerWrap:-webkit-full-screen) #subText.active {
+      display: inline-block !important;
+    }
+
+    /* ── Dedicated Fullscreen Toggle Button in Bottom-Right Corner ── */
+    .player-fs-overlay-btn {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      background: rgba(13, 17, 23, 0.82);
+      border: 1px solid rgba(232, 201, 122, 0.45);
+      color: var(--gold, #E8C97A);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      pointer-events: auto;
+      z-index: 2147483647 !important;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.65);
+      transition: opacity 0.25s, transform 0.2s, background 0.2s, border-color 0.2s;
+      transform: translateZ(9999px);
+      user-select: none;
+    }
+    .player-fs-overlay-btn:hover {
+      background: rgba(232, 201, 122, 0.22);
+      border-color: #E8C97A;
+      transform: scale(1.1) translateZ(9999px);
+    }
+    .player-container.idle-fs .player-fs-overlay-btn {
+      opacity: 0.2;
+    }
+    .player-container:hover .player-fs-overlay-btn,
+    .player-container:active .player-fs-overlay-btn {
+      opacity: 1 !important;
     }
 
     /* Suppress any browser native/in-band stream cues so they never clash with custom sub overlay */
@@ -4828,14 +4871,19 @@
       color: #fff;
     }
 
-    /* Hide custom close/home buttons when player is fullscreen */
-    #playerContainer:fullscreen #playerHome,
-    #playerContainer:fullscreen #playerClose,
-    #playerContainer:fullscreen #playerFullscreenBtn,
-    #playerContainer:-webkit-full-screen #playerHome,
-    #playerContainer:-webkit-full-screen #playerClose,
-    #playerContainer:-webkit-full-screen #playerFullscreenBtn {
+    /* In fullscreen, hide home icon, but keep close and fullscreen controls accessible */
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #playerHome {
       display: none !important;
+    }
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #playerClose {
+      display: flex !important;
+      z-index: 2147483647 !important;
+      transform: translateZ(9999px) !important;
+    }
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #playerFullscreenBtn {
+      display: flex !important;
+      z-index: 2147483647 !important;
+      transform: translateZ(9999px) !important;
     }
 
     /* ── WISHLIST BUTTON ON CARD ──────────────────────────────────────── */
@@ -5713,11 +5761,15 @@
       <div id="skipInfoBadge">Intro: <span id="skipInfoText"></span></div>
 
       <iframe id="playerFrame" src="about:blank"
-        allow="autoplay *; encrypted-media *; fullscreen *; picture-in-picture *; web-share *"
-        allowfullscreen
+        allow="autoplay *; encrypted-media *; picture-in-picture *; web-share *"
         frameborder="0"></iframe>
       <!-- Subtitle Overlay (rendered on top of iframe) -->
       <div id="subOverlay"><span id="subText"></span></div>
+      <!-- Dedicated High-Z-Index Fullscreen Button (ensures Sinhala subtitles remain visible) -->
+      <button class="player-fs-overlay-btn" id="playerFsOverlayBtn" title="Full Screen (with Sinhala Subtitles)">
+        <svg id="fsBtnIconEnter" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+        <svg id="fsBtnIconExit" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
+      </button>
       <!-- Subtitle Sync Panel (hidden overlay) -->
       <div id="subSyncPanel" style="display:none !important;" hidden>
         <p id="subPanelMsg" style="display:none;"></p>
@@ -7676,9 +7728,8 @@
       let urls = [], labels = [];
 
       if (type === 'tv') {
-        const tvSubParam = `&sub_file=https%3A%2F%2Fmovies.hackystreaming.online%2Fapi%2Fsubtitles%3Fid%3D${id}%26type%3Dtv%26season%3D${s}%26episode%3D${e}%26format%3Dvtt&sub_label=Sinhala%20%F0%9F%87%B1%F0%9F%87%B0`;
         urls = [
-          `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false&nextEpisode=true&episodeSelector=true${tvSubParam}`,
+          `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false&nextEpisode=true&episodeSelector=true`,
           `https://moviesapi.to/tv/${id}/${s}/${e}`,
           `https://autoembed.co/tv/tmdb/${id}-${s}-${e}`,
           `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`,
@@ -7693,9 +7744,8 @@
         ];
         labels = ['HackyMax ✦', 'Nova', 'Cosmos', 'Nebula', 'Titan', 'Infinity', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
       } else {
-        const movieSubParam = `&sub_file=https%3A%2F%2Fmovies.hackystreaming.online%2Fapi%2Fsubtitles%3Fid%3D${id}%26type%3Dmovie%26format%3Dvtt&sub_label=Sinhala%20%F0%9F%87%B1%F0%9F%87%B0`;
         urls = [
-          `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false${movieSubParam}`,
+          `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false`,
           `https://moviesapi.to/movie/${id}`,
           `https://autoembed.co/movie/tmdb/${id}`,
           `https://embed.smashystream.com/playere.php?tmdb=${id}`,
@@ -8263,13 +8313,7 @@
     // ─── SINHALA SUBTITLE ENGINE (Baiscope.lk) ────────────────────────────────
     // Loads /api/subtitles → parses WebVTT → overlays cues on top of the iframe
 
-    // Preload Noto Sans Sinhala for correct glyph rendering
-    (function() {
-      const lnk = document.createElement('link');
-      lnk.rel = 'stylesheet';
-      lnk.href = 'https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;600&display=swap';
-      document.head.appendChild(lnk);
-    })();
+    // Noto Sans Sinhala is loaded in document head for optimal typography
 
     let _subCues = [];          // parsed cues [{start, end, text}]
     let _subStartTime = null;   // Date.now() when user pressed Start
@@ -8430,26 +8474,38 @@
     // ── Universal External Player PostMessage Sync ────────────────────────
     let _lastIframeSubCueText = null;
 
-    function _extractTimeFromMessage(eventData) {
-      if (eventData == null) return null;
+    function _extractTimeFromMessage(eventData, depth = 0) {
+      if (eventData == null || depth > 3) return null;
+
+      if (typeof eventData === 'number') {
+        if (!isNaN(eventData) && eventData >= 0) {
+          const sec = eventData > 86400 ? eventData / 1000 : eventData;
+          return { time: sec, event: 'timeupdate' };
+        }
+        return null;
+      }
 
       if (typeof eventData === 'string') {
         const str = eventData.trim();
-        if (str.startsWith('{') || str.startsWith('[')) {
+        if ((str.startsWith('{') && str.endsWith('}')) || (str.startsWith('[') && str.endsWith(']'))) {
           try {
             const parsed = JSON.parse(str);
-            const res = _extractTimeFromMessage(parsed);
+            const res = _extractTimeFromMessage(parsed, depth + 1);
             if (res !== null) return res;
           } catch (_) {}
         }
-        const m = str.match(/(?:current_?time|time|position|pos|seek)[:=\s]+(\d+(?:\.\d+)?)/i);
+        const m = str.match(/(?:current_?time|position|pos|seek|seconds?|time)[:=\s]+(\d+(?:\.\d+)?)/i);
         if (m && m[1]) {
           const val = parseFloat(m[1]);
-          if (!isNaN(val) && val >= 0) return { time: val, event: 'timeupdate' };
+          if (!isNaN(val) && val >= 0) {
+            return { time: val > 86400 ? val / 1000 : val, event: 'timeupdate' };
+          }
         }
         if (/^\d+(\.\d+)?$/.test(str)) {
           const val = parseFloat(str);
-          if (!isNaN(val) && val >= 0) return { time: val, event: 'timeupdate' };
+          if (!isNaN(val) && val >= 0) {
+            return { time: val > 86400 ? val / 1000 : val, event: 'timeupdate' };
+          }
         }
         return null;
       }
@@ -8457,55 +8513,81 @@
       if (typeof eventData !== 'object') return null;
 
       const d = eventData;
-      let t = null;
-      let evt = d.event || d.type || d.action || '';
+      const timeKeys = ['currenttime', 'current_time', 'time', 'position', 'pos', 'seconds', 'second', 'offset', 'value', 'progress'];
 
-      const candidateKeys = ['currentTime', 'current_time', 'time', 'position', 'pos', 'seconds', 'offset'];
-      for (const k of candidateKeys) {
-        if (typeof d[k] === 'number' && !isNaN(d[k]) && d[k] >= 0) {
-          t = d[k];
-          break;
-        }
-      }
-
-      if (t === null) {
-        const sub = d.data || d.payload || d.info || d.detail;
-        if (sub) {
-          if (typeof sub === 'number' && !isNaN(sub) && sub >= 0) {
-            t = sub;
-          } else if (typeof sub === 'object') {
-            for (const k of candidateKeys) {
-              if (typeof sub[k] === 'number' && !isNaN(sub[k]) && sub[k] >= 0) {
-                t = sub[k];
-                break;
-              }
-            }
-            if (sub.event) evt = sub.event;
-            else if (sub.type) evt = sub.type;
-          } else if (typeof sub === 'string') {
-            const res = _extractTimeFromMessage(sub);
-            if (res) return res;
+      // 1. Direct key match (case-insensitive)
+      for (const key of Object.keys(d)) {
+        const kLow = key.toLowerCase();
+        if (timeKeys.includes(kLow) && typeof d[key] === 'number' && !isNaN(d[key]) && d[key] >= 0) {
+          let sec = d[key];
+          if (sec > 86400 || d.unit === 'ms' || d.units === 'ms' || d.unit === 'milliseconds') {
+            sec = sec / 1000;
           }
+          return { time: sec, event: String(d.event || d.type || d.action || 'timeupdate') };
         }
       }
 
-      if (t === null && typeof d.value === 'number' && !isNaN(d.value) && d.value >= 0) {
-        t = d.value;
+      // 2. Inspect nested wrapper objects commonly used by players (VidLink, Plyr, JWPlayer, Vimeo, etc.)
+      const wrappers = ['data', 'detail', 'payload', 'player', 'state', 'info', 'media', 'plyr', 'video'];
+      for (const w of wrappers) {
+        if (d[w] != null) {
+          const res = _extractTimeFromMessage(d[w], depth + 1);
+          if (res) return res;
+        }
       }
 
-      if (t !== null) {
-        return { time: t, event: String(evt) };
+      // 3. Fallback: inspect any remaining object properties
+      for (const key of Object.keys(d)) {
+        if (typeof d[key] === 'object' && d[key] !== null) {
+          const res = _extractTimeFromMessage(d[key], depth + 1);
+          if (res) return res;
+        }
+      }
+
+      return null;
+    }
+
+    function _checkPlayPause(obj, depth = 0) {
+      if (!obj || depth > 2) return null;
+      if (typeof obj === 'string') {
+        if (/\b(?:pause|paused)\b/i.test(obj)) return 'pause';
+        if (/\b(?:play|playing|resumed?)\b/i.test(obj)) return 'play';
+        return null;
+      }
+      if (typeof obj === 'object') {
+        const evt = String(obj.event || obj.type || obj.action || obj.state || obj.status || '');
+        if (/\b(?:pause|paused)\b/i.test(evt)) return 'pause';
+        if (/\b(?:play|playing|resumed?)\b/i.test(evt)) return 'play';
+        if (obj.data) {
+          const sub = _checkPlayPause(obj.data, depth + 1);
+          if (sub) return sub;
+        }
+        if (obj.detail) {
+          const sub = _checkPlayPause(obj.detail, depth + 1);
+          if (sub) return sub;
+        }
       }
       return null;
     }
 
+    // Ping iframe to subscribe to timeupdate events across players supporting handshake
+    function _pingIframeForTimeEvents() {
+      const frame = document.getElementById('playerFrame');
+      if (!frame || !frame.contentWindow) return;
+      try {
+        const cw = frame.contentWindow;
+        cw.postMessage(JSON.stringify({ event: 'listening' }), '*');
+        cw.postMessage({ type: 'subscribe' }, '*');
+        cw.postMessage({ event: 'subscribe' }, '*');
+        cw.postMessage({ type: 'player:listen' }, '*');
+        cw.postMessage({ action: 'getTime' }, '*');
+      } catch (_) {}
+    }
+    setInterval(_pingIframeForTimeEvents, 3000);
+
     // RAF loop — renders current cue smoothly at 60fps
     function _subLoop() {
       if (!_subStartTime || !_subCues.length || !_subActive) return;
-      if (window._externalIsPaused) {
-        _subRaf = requestAnimationFrame(_subLoop);
-        return;
-      }
       const elapsed = (Date.now() - _subStartTime) + _subOffset;
       const cue = _subCues.find(c => elapsed >= c.start && elapsed < c.end);
       const newText = cue ? cue.text : '';
@@ -8542,19 +8624,20 @@
         try { d = JSON.parse(d); } catch (_) {}
       }
 
-      // Check pause / play states across any player
-      const rawEvt = (d && (d.event || d.type || d.action || (d.data && d.data.event))) || '';
-      if (typeof rawEvt === 'string') {
-        if (/pause/i.test(rawEvt)) {
-          window._externalIsPaused = true;
-        } else if (/play|playing/i.test(rawEvt)) {
-          window._externalIsPaused = false;
-        }
+      const pState = _checkPlayPause(d);
+      if (pState === 'pause') {
+        window._externalIsPaused = true;
+      } else if (pState === 'play') {
+        window._externalIsPaused = false;
       }
 
       const extracted = _extractTimeFromMessage(d);
       if (extracted && typeof extracted.time === 'number') {
         const ct = extracted.time;
+        // If time is advancing, unpause automatically
+        if (typeof window._externalCurrentTime === 'number' && Math.abs(ct - window._externalCurrentTime) > 0.05) {
+          window._externalIsPaused = false;
+        }
         window._externalCurrentTime = ct;
         window._lastExternalMsgTime = Date.now();
 
@@ -9627,20 +9710,36 @@
         });
       }
 
-      // Fullscreen change handler to update fs icon & ensure subOverlay remains on top
-      function _handleGlobalFullscreen() {
-        _updateFsIcons();
-        const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
-        const frame = document.getElementById('playerFrame');
-        const pContainer = document.getElementById('playerContainer');
-        if (fsEl === frame && pContainer) {
-          if (pContainer.requestFullscreen) pContainer.requestFullscreen().catch(() => {});
-          else if (pContainer.webkitRequestFullscreen) pContainer.webkitRequestFullscreen();
+      // Consolidated fullscreen change handler
+      function _handleFullscreenChange() {
+        if (typeof _updateFsIcons === 'function') _updateFsIcons();
+        const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+        const container = document.getElementById('playerContainer');
+        if (container) {
+          container.classList.toggle('is-fullscreen', isFs);
         }
+        document.body.classList.toggle('is-fullscreen', isFs);
+
+        // Update dedicated overlay button icons
+        const fsEnter = document.getElementById('fsBtnIconEnter');
+        const fsExit = document.getElementById('fsBtnIconExit');
+        if (fsEnter && fsExit) {
+          fsEnter.style.display = isFs ? 'none' : 'block';
+          fsExit.style.display = isFs ? 'block' : 'none';
+        }
+        const topFsBtn = document.getElementById('playerFullscreenBtn');
+        if (topFsBtn) {
+          topFsBtn.textContent = isFs ? '🗗' : '⛶';
+          topFsBtn.title = isFs ? 'Exit Full Screen' : 'Full Screen';
+        }
+
+        // Force immediate cue redraw in new fullscreen dimensions
+        _lastIframeSubCueText = null;
         _attachSubOverlayToActiveWrap();
+        _mxsApplySubStyle();
       }
-      document.addEventListener('fullscreenchange', _handleGlobalFullscreen);
-      document.addEventListener('webkitfullscreenchange', _handleGlobalFullscreen);
+      document.addEventListener('fullscreenchange', _handleFullscreenChange);
+      document.addEventListener('webkitfullscreenchange', _handleFullscreenChange);
     }
 
     _initMaxCustomControls();
@@ -9663,13 +9762,40 @@
     function _togglePlayerFullscreen() {
       const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
       if (!fsEl) {
-        const wrap = (_maxMode && document.getElementById('maxPlayerWrap')) || document.getElementById('playerContainer');
+        const wrap = document.getElementById('playerContainer') || document.body;
         if (wrap && wrap.requestFullscreen) wrap.requestFullscreen().catch(() => {});
         else if (wrap && wrap.webkitRequestFullscreen) wrap.webkitRequestFullscreen();
       } else {
         if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
         else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
       }
+    }
+
+    // Attach click handler for dedicated Fullscreen Overlay Button
+    const _fsOverlayBtn = document.getElementById('playerFsOverlayBtn');
+    if (_fsOverlayBtn) {
+      _fsOverlayBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        _togglePlayerFullscreen();
+      });
+    }
+
+    // Idle timer for fullscreen overlay button
+    let _fsBtnIdleTimer = null;
+    function _pokePlayerFsControls() {
+      const pCont = document.getElementById('playerContainer');
+      if (pCont) {
+        pCont.classList.remove('idle-fs');
+        clearTimeout(_fsBtnIdleTimer);
+        _fsBtnIdleTimer = setTimeout(() => {
+          pCont.classList.add('idle-fs');
+        }, 3200);
+      }
+    }
+    const _pContEl = document.getElementById('playerContainer');
+    if (_pContEl) {
+      _pContEl.addEventListener('mousemove', _pokePlayerFsControls);
+      _pContEl.addEventListener('touchstart', _pokePlayerFsControls, { passive: true });
     }
 
     let _fsHandlersSetup = false;
@@ -9680,7 +9806,7 @@
       const origRequestFullscreen = _maxVideo.requestFullscreen || _maxVideo.webkitRequestFullscreen;
 
       _maxVideo.requestFullscreen = function(options) {
-        const target = document.getElementById('maxPlayerWrap') || document.getElementById('playerContainer');
+        const target = document.getElementById('playerContainer');
         if (target && target.requestFullscreen) return target.requestFullscreen(options);
         if (target && target.webkitRequestFullscreen) return target.webkitRequestFullscreen(options);
         if (origRequestFullscreen) return origRequestFullscreen.call(_maxVideo, options);
@@ -9690,36 +9816,23 @@
       }
       if (_maxVideo.webkitEnterFullscreen) {
         _maxVideo.webkitEnterFullscreen = function() {
-          const target = document.getElementById('maxPlayerWrap') || document.getElementById('playerContainer');
+          const target = document.getElementById('playerContainer');
           if (target && target.requestFullscreen) return target.requestFullscreen();
           if (target && target.webkitRequestFullscreen) return target.webkitRequestFullscreen();
         };
       }
     }
 
-    function _handleFullscreenChange() {
-      const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
-      const frame = document.getElementById('playerFrame');
-      const container = document.getElementById('playerContainer');
-      // If the iframe itself entered fullscreen (e.g. user clicked fullscreen inside VidLink),
-      // elevate fullscreen to #playerContainer so #subOverlay renders directly over the video!
-      if (fsEl && fsEl === frame && container) {
-        if (container.requestFullscreen) {
-          container.requestFullscreen().catch(() => {});
-        } else if (container.webkitRequestFullscreen) {
-          container.webkitRequestFullscreen();
-        }
-      }
-      _attachSubOverlayToActiveWrap();
-      _mxsApplySubStyle();
-    }
-    document.addEventListener('fullscreenchange', _handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', _handleFullscreenChange);
-
     // Keyboard shortcuts: Space = Play/Pause, Left = -10s, Right = +10s, Up/Down = Volume, M = Mute, F = Fullscreen
     document.addEventListener('keydown', (e) => {
-      if (!_maxMode) return;
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      const overlayOpen = document.getElementById('playerOverlay')?.classList.contains('open');
+      if ((e.key === 'f' || e.key === 'F') && overlayOpen) {
+        e.preventDefault();
+        _togglePlayerFullscreen();
+        return;
+      }
+      if (!_maxMode) return;
       if (e.key === ' ' || e.code === 'Space') {
         e.preventDefault();
         _togglePlayPause();
