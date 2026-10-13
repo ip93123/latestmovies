@@ -9577,7 +9577,7 @@
     let _lastIframeSubCueText = null;
 
     function _extractTimeFromMessage(eventData, depth = 0) {
-      if (eventData == null || depth > 3) return null;
+      if (eventData == null || depth > 5) return null;
 
       if (typeof eventData === 'number') {
         if (!isNaN(eventData) && eventData >= 0) {
@@ -9596,7 +9596,7 @@
             if (res !== null) return res;
           } catch (_) {}
         }
-        const m = str.match(/(?:current_?time|position|pos|seek|seconds?|time)[:=\s]+(\d+(?:\.\d+)?)/i);
+        const m = str.match(/(?:current_?time|position|pos|seek|seconds?|time|watched)[:=\s]+(\d+(?:\.\d+)?)/i);
         if (m && m[1]) {
           const val = parseFloat(m[1]);
           if (!isNaN(val) && val >= 0) {
@@ -9615,7 +9615,12 @@
       if (typeof eventData !== 'object') return null;
 
       const d = eventData;
-      const timeKeys = ['currenttime', 'current_time', 'time', 'position', 'pos', 'seconds', 'second', 'offset', 'value', 'progress', 'player_progress', 'playerprogress'];
+      const timeKeys = ['currenttime', 'current_time', 'time', 'position', 'pos', 'seconds', 'second', 'offset', 'value', 'progress', 'player_progress', 'playerprogress', 'watched'];
+
+      // Special check: Vidy progress object { progress: { watched: number } }
+      if (d.progress && typeof d.progress === 'object' && typeof d.progress.watched === 'number') {
+        return { time: d.progress.watched, event: 'timeupdate' };
+      }
 
       // 1. Direct key match (case-insensitive)
       for (const key of Object.keys(d)) {
@@ -9629,8 +9634,8 @@
         }
       }
 
-      // 2. Inspect nested wrapper objects commonly used by players (VidLink, Plyr, JWPlayer, Vimeo, etc.)
-      const wrappers = ['data', 'detail', 'payload', 'player', 'state', 'info', 'media', 'plyr', 'video'];
+      // 2. Inspect nested wrapper objects commonly used by players (VidLink, Vidy, Plyr, JWPlayer, Vimeo, etc.)
+      const wrappers = ['data', 'detail', 'payload', 'player', 'state', 'info', 'media', 'plyr', 'video', 'progress'];
       for (const w of wrappers) {
         if (d[w] != null) {
           const res = _extractTimeFromMessage(d[w], depth + 1);
@@ -9803,13 +9808,22 @@
       if (!_subStartTime || !_subCues.length || !_subActive) return;
 
       const now = Date.now();
-      const hasLiveFeed = !!(window._lastExternalMsgTime && (now - window._lastExternalMsgTime < 45000));
+      const hasLiveFeed = !!(window._lastExternalMsgTime && (now - window._lastExternalMsgTime < 180000));
 
-      // Watchdog: If movie is supposed to be playing and has live messages, but no message arrived in > 3500ms:
+      // Watchdog: If movie is supposed to be playing and has live messages, but no message arrived in > 1000ms:
       if (!window._externalIsPaused && hasLiveFeed) {
         const silence = now - window._lastExternalMsgTime;
-        if (silence > 3500) {
+        if (silence > 1000) {
+          // Freeze subtitles at current confirmed playback second during buffer/stall
           _markBufferState(true);
+        }
+        if (silence > 2200) {
+          // If silence persists > 2.2s, player is paused: lock paused state permanently until resumed
+          window._externalIsPaused = true;
+          window._subPausedElapsed = (window._bufferFreezeElapsed != null)
+            ? window._bufferFreezeElapsed
+            : Math.round((window._externalCurrentTime || 0) * 1000);
+          _setSubSyncBarPaused(true);
         }
       }
 
@@ -9878,12 +9892,32 @@
       if (typeof d !== 'object' || d === null) return;
 
       // Extract time from message if present
-      const extracted = _extractTimeFromMessage(d);
-      const ct = (extracted && typeof extracted.time === 'number') ? extracted.time : null;
+      let extracted = _extractTimeFromMessage(d);
+      let ct = (extracted && typeof extracted.time === 'number') ? extracted.time : null;
+
+      // Special handling for Vidy / Nova MEDIA_DATA (periodic local history sync)
+      if (ct === null && d.type === 'MEDIA_DATA' && d.data) {
+        try {
+          const hist = typeof d.data === 'string' ? JSON.parse(d.data) : d.data;
+          if (hist && typeof hist === 'object') {
+            const activeId = window._currentPlayingId || _currentModalId;
+            for (const k of Object.keys(hist)) {
+              if (!activeId || k.includes(String(activeId))) {
+                const item = hist[k];
+                if (item && item.progress && typeof item.progress.watched === 'number') {
+                  ct = item.progress.watched;
+                  break;
+                }
+              }
+            }
+          }
+        } catch (_) {}
+      }
 
       // Identify event type
       let evName = '';
       const isVidSpark = (d.source === 'vidspark-player' || d.source === 'moviesapi-player');
+      const isVidyNova = (d.type === 'PLAYER_EVENT' && d.data && d.data.currentTime !== undefined) || (d.type === 'MEDIA_DATA');
       if (isVidSpark && d.event) {
         evName = String(d.event).toLowerCase();
       } else if (d.type === 'PLAYER_EVENT' && d.data) {
@@ -9924,28 +9958,38 @@
       // Check for advancing playback vs stalled buffer position
       if (!isExplicitPause && !isBufferingEvent && ct !== null) {
         if (typeof window._externalCurrentTime === 'number' && window._externalCurrentTime > 0) {
-          if (ct > (window._externalCurrentTime + 0.04)) {
+          if (ct > (window._externalCurrentTime + 0.03)) {
             // Time is clearly advancing -> video has started/continued playing!
             isExplicitPlay = true;
             _markBufferState(false);
+            window._externalIsPaused = false;
             window._ctStallStartTime = null;
-          } else if (Math.abs(ct - window._externalCurrentTime) < 0.04) {
+          } else if (Math.abs(ct - window._externalCurrentTime) < 0.03) {
             // Position unchanged across messages
             if (!window._ctStallStartTime) {
               window._ctStallStartTime = Date.now();
-            } else if (Date.now() - window._ctStallStartTime > 1600) {
-              // Same position for > 1.6s while supposed to be playing -> mark buffering!
+            } else if (Date.now() - window._ctStallStartTime > 1000) {
+              // Same position for > 1s while supposed to be playing -> mark buffering / paused!
               _markBufferState(true);
               isExplicitPlay = false;
             }
+          } else if (Math.abs(ct - window._externalCurrentTime) > 1.5) {
+            // User sought or jumped!
+            _markBufferState(false);
+            window._externalIsPaused = false;
+            _subStartTime = Date.now() - (ct * 1000);
+            window._subPausedElapsed = null;
+            window._externalCurrentTime = ct;
+            isExplicitPlay = true;
           } else {
             window._ctStallStartTime = null;
           }
-        } else if (window._externalCurrentTime === 0) {
-          // Progress restored on load/refresh: if time is advancing or event is play, unpause!
-          if (ct > 0 || evName === 'play' || (isVidSpark && d.paused === false)) {
+        } else if (window._externalCurrentTime === 0 || window._externalCurrentTime == null) {
+          // Progress restored on load/refresh: if time is advancing or event is play/timeupdate, unpause!
+          if (ct > 0 || evName === 'play' || evName === 'timeupdate' || isVidyNova || (isVidSpark && d.paused === false)) {
             isExplicitPlay = true;
             _markBufferState(false);
+            window._externalIsPaused = false;
             window._ctStallStartTime = null;
             window._externalCurrentTime = ct;
             window._subPausedElapsed = null;
@@ -11931,7 +11975,7 @@
       const activeBtn = document.querySelector('.player-server-btn.active');
       const curServerLabel = activeBtn ? activeBtn.textContent.toLowerCase() : '';
       const curFrameSrc = (frameEl && frameEl.src) ? frameEl.src.toLowerCase() : '';
-      const isSparkPlayer = curFrameSrc.includes('spark') || curFrameSrc.includes('vidspark') || curServerLabel.includes('spark');
+      const isAutoplayPlayer = curFrameSrc.includes('spark') || curFrameSrc.includes('vidspark') || curFrameSrc.includes('nova') || curFrameSrc.includes('vidy') || curServerLabel.includes('spark') || curServerLabel.includes('nova') || curServerLabel.includes('vidy');
 
       // If cues are already loaded for THIS video/episode, IMMEDIATELY resume the loop and re-render
       if (_subCues && _subCues.length > 0 && window._currentLoadedSubKey === subKey) {
@@ -11940,7 +11984,7 @@
           : 0;
         _subStartTime = Date.now() - (resumeSec * 1000);
         _subOffset = 0;
-        if (isSparkPlayer) {
+        if (isAutoplayPlayer) {
           window._externalIsPaused = false;
           window._subPausedElapsed = null;
           _setSubSyncBarPaused(false);
@@ -12031,7 +12075,7 @@
               : 0;
             _subStartTime = Date.now() - (resumeSec * 1000);
             _subOffset = 0;
-            if (isSparkPlayer) {
+            if (isAutoplayPlayer) {
               window._externalIsPaused = false;
               window._subPausedElapsed = null;
               _setSubSyncBarPaused(false);
@@ -12098,13 +12142,13 @@
       _destroyMax();
       window._externalCurrentTime = 0;
       window._lastExternalMsgTime = null;
-      const isSparkUrl = (url && (url.includes('spark') || url.includes('vidspark'))) ||
-        (labels && labels[_activeServerIndex] && labels[_activeServerIndex].toLowerCase().includes('spark'));
-      window._externalIsPaused = !isSparkUrl;
+      const isAutoplayUrl = (url && (url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy'))) ||
+        (labels && labels[_activeServerIndex] && (labels[_activeServerIndex].toLowerCase().includes('spark') || labels[_activeServerIndex].toLowerCase().includes('nova') || labels[_activeServerIndex].toLowerCase().includes('vidy')));
+      window._externalIsPaused = !isAutoplayUrl;
       window._isStreamBuffering = false;
       window._bufferFreezeElapsed = null;
       window._ctStallStartTime = null;
-      window._subPausedElapsed = isSparkUrl ? null : 0;
+      window._subPausedElapsed = isAutoplayUrl ? null : 0;
       _subStartTime = Date.now();
       _lastIframeSubCueText = null;
       frame.style.display = '';
@@ -12221,18 +12265,18 @@
       if (typeof window._adblock_pushRecovery === 'function') window._adblock_pushRecovery(url);
 
       const sName = btn ? btn.textContent.trim() : 'Server';
-      const isSparkServer = url.includes('spark') || url.includes('vidspark') || sName.toLowerCase().includes('spark');
+      const isAutoplayServer = url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy');
       window._externalCurrentTime = 0;
       window._lastExternalMsgTime = null;
-      window._externalIsPaused = !isSparkServer;
+      window._externalIsPaused = !isAutoplayServer;
       window._isStreamBuffering = false;
       window._bufferFreezeElapsed = null;
       window._ctStallStartTime = null;
-      window._subPausedElapsed = isSparkServer ? null : 0;
+      window._subPausedElapsed = isAutoplayServer ? null : 0;
       _subStartTime = Date.now();
       _lastIframeSubCueText = null;
 
-      const isAutoLive = sName.toLowerCase().includes('hackymax') || sName.toLowerCase().includes('infinity') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('vortex');
+      const isAutoLive = sName.toLowerCase().includes('hackymax') || sName.toLowerCase().includes('infinity') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy');
       _markSubSyncAutoLive(isAutoLive);
       _showSubToast(`Switched to <strong>${_escHtml(sName)}</strong> • Sinhala Subtitles Active`, 3200);
 
