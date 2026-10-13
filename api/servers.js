@@ -22,7 +22,7 @@ export default async function handler(req, res) {
       `https://vidfast.pro/tv/${id}/${s}/${e}?autoplay=1&mute=0`,
       `https://vidcore.net/tv/${id}/${s}/${e}?autoplay=1&server=orbit`,
     ];
-    labels = ['HackyMax Gold', 'Infinity', 'Nebula', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit'];
+    labels = ['HackyMax', 'Infinity', 'Nebula', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit'];
 
   } else {
     // Movie
@@ -36,7 +36,7 @@ export default async function handler(req, res) {
       `https://vidfast.pro/movie/${id}?autoplay=1&mute=0`,
       `https://vidcore.net/movie/${id}?autoplay=1&server=orbit`,
     ];
-    labels = ['HackyMax Gold', 'Infinity', 'Nebula', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit'];
+    labels = ['HackyMax', 'Infinity', 'Nebula', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit'];
   }
 
   // Short cache so new servers appear quickly
