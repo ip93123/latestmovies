@@ -2025,6 +2025,270 @@
       transform: scale(1.02);
     }
 
+    /* ── Categories Carousel & Card Styles ────────────────────────── */
+    .category-cards-row {
+      display: flex;
+      overflow-x: auto;
+      gap: 1.15rem;
+      padding: 0.6rem 2rem 1.4rem 2rem;
+      scrollbar-width: none;
+      scroll-behavior: smooth;
+    }
+    .category-cards-row::-webkit-scrollbar {
+      display: none;
+    }
+    .category-card {
+      position: relative;
+      flex: 0 0 260px;
+      height: 135px;
+      border-radius: 14px;
+      overflow: hidden;
+      cursor: pointer;
+      background: #0E121E;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+      user-select: none;
+    }
+    .category-card:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.65), 0 0 24px var(--cat-accent, rgba(232, 201, 122, 0.35));
+      border-color: rgba(255, 255, 255, 0.38);
+    }
+    .category-card img {
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 65%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.45s ease, filter 0.3s ease;
+      filter: brightness(0.9);
+    }
+    .category-card:hover img {
+      transform: scale(1.08);
+      filter: brightness(1.05);
+    }
+    .category-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, #0A0D18 0%, rgba(10, 13, 24, 0.94) 45%, rgba(10, 13, 24, 0.38) 75%, transparent 100%);
+      pointer-events: none;
+    }
+    .category-card-content {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      padding: 1.1rem 1.2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      pointer-events: none;
+    }
+    .category-card-native {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #FFFFFF;
+      line-height: 1.15;
+      margin-bottom: 2px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
+      letter-spacing: -0.2px;
+    }
+    .category-card-sub {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.75);
+      letter-spacing: 0.3px;
+    }
+    .category-card-badge {
+      display: inline-block;
+      font-size: 0.64rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-top: 8px;
+      padding: 0.22rem 0.55rem;
+      border-radius: 5px;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      width: fit-content;
+      color: var(--cat-accent, #E8C97A);
+    }
+
+    /* ── Fullscreen Category View Overlay (SPA Page) ─────────────── */
+    .category-view-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: radial-gradient(ellipse at top, #141A29 0%, #07090F 70%);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      display: none;
+      animation: catFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .category-view-overlay.open {
+      display: block;
+    }
+    @keyframes catFadeIn {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .cat-page-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.2rem;
+      padding: 1.1rem 2.5rem;
+      background: rgba(7, 9, 15, 0.88);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+    .cat-back-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 0.55rem 1.15rem;
+      border-radius: 24px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .cat-back-btn:hover {
+      background: rgba(232, 201, 122, 0.15);
+      border-color: var(--gold, #E8C97A);
+      color: var(--gold, #E8C97A);
+      transform: translateX(-2px);
+    }
+    .cat-header-titles {
+      text-align: center;
+      flex: 1;
+      min-width: 0;
+    }
+    .cat-page-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.5px;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .cat-page-sub {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 2px;
+      font-weight: 500;
+    }
+    .cat-toggle-wrap {
+      display: flex;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 30px;
+      padding: 3px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .cat-toggle-btn {
+      padding: 0.5rem 1.3rem;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.65);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .cat-toggle-btn.active {
+      background: var(--gold, #E8C97A);
+      color: #07090F;
+      font-weight: 800;
+      box-shadow: 0 2px 12px rgba(232, 201, 122, 0.4);
+    }
+    .cat-page-content {
+      max-width: 1540px;
+      margin: 0 auto;
+      padding: 2.2rem 2.5rem 5rem 2.5rem;
+    }
+    .cat-loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 4rem 1rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .cat-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-top-color: var(--gold, #E8C97A);
+      border-radius: 50%;
+      animation: catSpin 0.8s linear infinite;
+    }
+    @keyframes catSpin {
+      to { transform: rotate(360deg); }
+    }
+    .cat-pagination-wrap {
+      display: flex;
+      justify-content: center;
+      margin-top: 3.5rem;
+    }
+    .cat-load-more-btn {
+      background: linear-gradient(135deg, rgba(232, 201, 122, 0.18) 0%, rgba(245, 158, 11, 0.25) 100%);
+      color: var(--gold, #E8C97A);
+      border: 1px solid rgba(232, 201, 122, 0.45);
+      font-size: 0.95rem;
+      font-weight: 800;
+      padding: 0.85rem 2.5rem;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      font-family: inherit;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+    .cat-load-more-btn:hover {
+      background: var(--gold, #E8C97A);
+      color: #07090F;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(232, 201, 122, 0.5);
+    }
+    @media (max-width: 768px) {
+      .category-card {
+        flex: 0 0 215px;
+        height: 115px;
+      }
+      .category-card-native {
+        font-size: 1.15rem;
+      }
+      .category-cards-row {
+        padding: 0.4rem 1.2rem 1.2rem 1.2rem;
+      }
+      .cat-page-header {
+        padding: 0.9rem 1.2rem;
+        flex-wrap: wrap;
+        gap: 0.8rem;
+      }
+      .cat-page-title {
+        font-size: 1.3rem;
+      }
+      .cat-page-content {
+        padding: 1.2rem 1.2rem 4rem 1.2rem;
+      }
+    }
+
     /* ── Cast Cards (6 per row, wraps downwards) ────────────────────────── */
     .modal-cast {
       display: grid;
@@ -6128,6 +6392,40 @@
     </div>
   </div>
 
+  <!-- FULLSCREEN DEDICATED CATEGORY VIEW (SPA PAGE) -->
+  <div id="categoryViewOverlay" class="category-view-overlay">
+    <div class="cat-page-header">
+      <button class="cat-back-btn" id="catBackBtn" onclick="closeCategoryPage()" title="Back to Categories">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span>Back</span>
+      </button>
+
+      <div class="cat-header-titles">
+        <h1 class="cat-page-title" id="catPageTitle">Category</h1>
+        <div class="cat-page-sub" id="catPageSub">Explore top rated &amp; popular titles</div>
+      </div>
+
+      <div class="cat-toggle-wrap" id="catToggleWrap">
+        <button class="cat-toggle-btn active" data-type="movie" id="catTabMovie">Movies</button>
+        <button class="cat-toggle-btn" data-type="tv" id="catTabTv">Series</button>
+      </div>
+    </div>
+
+    <div class="cat-page-content">
+      <div class="cards-grid" id="categoryGrid"></div>
+      <div class="cat-loader" id="catLoader" style="display:none">
+        <div class="cat-spinner"></div>
+        <span>Loading titles…</span>
+      </div>
+      <div class="cat-pagination-wrap" id="catPaginationWrap" style="display:none">
+        <button class="cat-load-more-btn" id="catLoadMoreBtn">Load More Titles ▾</button>
+      </div>
+    </div>
+  </div>
+
   <nav id="mainNav">
     <div class="nav-logo">
       <img src="logo.png" alt="Logo">
@@ -6135,6 +6433,7 @@
     </div>
     <ul class="nav-links">
       <li><a href="#trending">Trending</a></li>
+      <li><a href="#categories">Categories</a></li>
       <li><a href="#movies">Movies</a></li>
       <li><a href="#tvshows">TV Shows</a></li>
       <li><a href="#toprated">Top Rated</a></li>
@@ -6182,6 +6481,7 @@
 
       <ul class="mobile-nav-list">
         <li><a href="#trending" onclick="window.toggleMobileNav(false)"><span>🔥 Trending</span><span style="opacity:0.4;">›</span></a></li>
+        <li><a href="#categories" onclick="window.toggleMobileNav(false)"><span>🏷️ Categories</span><span style="opacity:0.4;">›</span></a></li>
         <li><a href="#sinsub" onclick="window.toggleMobileNav(false)" style="color:#2ECC71;"><span>🇱🇰 Sin Sub (Sinhala)</span><span class="mobile-sub-tag">SUB</span></a></li>
         <li><a href="#movies" onclick="window.toggleMobileNav(false)"><span>🎬 Latest Movies</span><span style="opacity:0.4;">›</span></a></li>
         <li><a href="#tvshows" onclick="window.toggleMobileNav(false)"><span>📺 TV Shows</span><span style="opacity:0.4;">›</span></a></li>
@@ -6272,6 +6572,35 @@
       <button class="scroll-btn scroll-left" onclick="scrollRow('sinsubRow', -1)">❮</button>
       <div class="trending-row" id="sinsubRow"></div>
       <button class="scroll-btn scroll-right" onclick="scrollRow('sinsubRow', 1)">❯</button>
+    </div>
+  </section>
+
+  <!-- CATEGORIES SECTION (POPULAR LANGUAGES & POPULAR GENRES) -->
+  <section id="categories" style="background:var(--dark2);padding:2.5rem 0 3.2rem 0;border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06);">
+    <!-- Popular Languages -->
+    <div style="margin-bottom:2.5rem;">
+      <div class="section-header">
+        <h2 class="section-title">🌐 <span>Popular</span> Languages</h2>
+        <span class="see-all" style="cursor:pointer" onclick="scrollRow('catLangRow', 1)">Scroll right →</span>
+      </div>
+      <div class="scroll-wrapper">
+        <button class="scroll-btn scroll-left" onclick="scrollRow('catLangRow', -1)">❮</button>
+        <div class="category-cards-row" id="catLangRow"></div>
+        <button class="scroll-btn scroll-right" onclick="scrollRow('catLangRow', 1)">❯</button>
+      </div>
+    </div>
+
+    <!-- Popular Genres -->
+    <div>
+      <div class="section-header">
+        <h2 class="section-title">🎭 <span>Popular</span> Genres</h2>
+        <span class="see-all" style="cursor:pointer" onclick="scrollRow('catGenreRow', 1)">Scroll right →</span>
+      </div>
+      <div class="scroll-wrapper">
+        <button class="scroll-btn scroll-left" onclick="scrollRow('catGenreRow', -1)">❮</button>
+        <div class="category-cards-row" id="catGenreRow"></div>
+        <button class="scroll-btn scroll-right" onclick="scrollRow('catGenreRow', 1)">❯</button>
+      </div>
     </div>
   </section>
 
@@ -7438,6 +7767,430 @@
         addCardListeners(row, '.trending-card');
       } catch (e) {
         console.warn('loadSinSubMovies failed:', e);
+      }
+    }
+
+    /* ─── BROWSE CATEGORIES ENGINE (POPULAR LANGUAGES & GENRES) ──────────── */
+    const CATEGORIES_DATA = {
+      languages: [
+        {
+          code: 'si',
+          title: 'සිංහල',
+          sub: 'Sinhala',
+          badge: '🇱🇰 Sin Sub',
+          accent: '#059669',
+          gradient: 'linear-gradient(135deg, rgba(5,150,105,0.88) 0%, rgba(6,78,59,0.95) 100%)',
+          img: 'https://image.tmdb.org/t/p/w780/gDyLcjvmdAhmYqjCMwZ9PndnAVm.jpg'
+        },
+        {
+          code: 'hi',
+          title: 'हिन्दी',
+          sub: 'Hindi',
+          badge: 'Bollywood',
+          accent: '#6366F1',
+          gradient: 'linear-gradient(135deg, rgba(79,70,229,0.88) 0%, rgba(49,46,129,0.95) 100%)',
+          img: 'https://image.tmdb.org/t/p/w780/5LtSjMNw6j3LkG29Oa4O0iY5U8.jpg'
+        },
+        {
+          code: 'ta',
+          title: 'தமிழ்',
+          sub: 'Tamil',
+          badge: 'Kollywood',
+          accent: '#EA580C',
+          gradient: 'linear-gradient(135deg, rgba(234,88,12,0.88) 0%, rgba(124,45,18,0.95) 100%)',
+          img: 'https://image.tmdb.org/t/p/w780/auXrHU6O17n9Tz11SHReoorjrU6.jpg'
+        },
+        {
+          code: 'te',
+          title: 'తెలుగు',
+          sub: 'Telugu',
+          badge: 'Tollywood',
+          accent: '#9333EA',
+          gradient: 'linear-gradient(135deg, rgba(147,51,234,0.88) 0%, rgba(88,28,135,0.95) 100%)',
+          img: 'https://image.tmdb.org/t/p/w780/4vw2auyqSnxlXRb0NP1Z3nZ59TP.jpg'
+        },
+        {
+          code: 'ml',
+          title: 'മലയാളം',
+          sub: 'Malayalam',
+          badge: 'Mollywood',
+          accent: '#0D9488',
+          gradient: 'linear-gradient(135deg, rgba(13,148,136,0.88) 0%, rgba(17,94,89,0.95) 100%)',
+          img: 'https://image.tmdb.org/t/p/w780/gDyLcjvmdAhmYqjCMwZ9PndnAVm.jpg'
+        },
+        {
+          code: 'en',
+          title: 'English',
+          sub: 'Hollywood',
+          badge: 'Global Hits',
+          accent: '#2563EB',
+          gradient: 'linear-gradient(135deg, rgba(37,99,235,0.88) 0%, rgba(30,58,138,0.95) 100%)',
+          img: 'https://image.tmdb.org/t/p/w780/neeNHeXjMF5fXoCJRsOmkNGC7q.jpg'
+        },
+        {
+          code: 'es',
+          title: 'Español',
+          sub: 'Spanish',
+          badge: 'La Casa',
+          accent: '#DC2626',
+          gradient: 'linear-gradient(135deg, rgba(220,38,38,0.88) 0%, rgba(127,29,29,0.95) 100%)',
+          img: 'https://image.tmdb.org/t/p/w780/xGexTKCJDkl12dTW4YCBDXWb1AD.jpg'
+        },
+        {
+          code: 'ko',
+          title: '한국어',
+          sub: 'Korean',
+          badge: 'K-Drama',
+          accent: '#DB2777',
+          gradient: 'linear-gradient(135deg, rgba(219,39,119,0.88) 0%, rgba(131,24,67,0.95) 100%)',
+          img: 'https://image.tmdb.org/t/p/w780/2meX1nMdScFOoV4370rqHWKmXhY.jpg'
+        },
+        {
+          code: 'ja',
+          title: '日本語',
+          sub: 'Japanese',
+          badge: 'Anime & More',
+          accent: '#D97706',
+          gradient: 'linear-gradient(135deg, rgba(217,119,6,0.88) 0%, rgba(120,53,15,0.95) 100%)',
+          img: 'https://image.tmdb.org/t/p/w780/1RgPyOhN4DRs225BGTlHJqCudII.jpg'
+        }
+      ],
+      genres: [
+        {
+          id: 28,
+          tvId: 10759,
+          title: 'Action',
+          sub: 'Adrenaline & High Stakes',
+          badge: 'Blockbusters',
+          accent: '#EF4444',
+          gradient: 'linear-gradient(135deg, rgba(239,68,68,0.88) 0%, rgba(127,29,29,0.95) 100%)',
+          img: 'https://image.tmdb.org/t/p/w780/ff2ti5DkA9UYLzyqhQfI2kZqEuh.jpg'
+        },
+        {
+          id: 35,
+          tvId: 35,
+          title: 'Comedy',
+          sub: 'Laughs & Good Vibes',
+          badge: 'Feel-Good',
+          accent: '#0284C7',
+          gradient: 'linear-gradient(135deg, rgba(2,132,199,0.88) 0%, rgba(12,74,110,0.95) 100%)',
+          img: 'https://image.tmdb.org/t/p/w780/bQlw59HncOXX9alFlOYKHAvSnm.jpg'
+        },
+        {
+          id: 10749,
+          tvId: 18,
+          title: 'Romance',
+          sub: 'Love & Heartfelt Stories',
+          badge: 'Passion',
+          accent: '#E11D48',
+          gradient: 'linear-gradient(135deg, rgba(225,29,72,0.88) 0%, rgba(136,19,55,0.95) 100%)',
+          img: 'https://image.tmdb.org/t/p/w780/xXCuto8YVp5RFqBJ7yKmVmLOWpF.jpg'
+        },
+        {
+          id: 27,
+          tvId: 9648,
+          title: 'Horror',
+          sub: 'Spines, Chills & Thrills',
+          badge: 'Dark',
+          accent: '#71717A',
+          gradient: 'linear-gradient(135deg, rgba(39,39,42,0.9) 0%, rgba(9,9,11,0.96) 100%)',
+          img: 'https://image.tmdb.org/t/p/w780/ecKQlAEG95k62SMGhvX83oEqANK.jpg'
+        },
+        {
+          id: 878,
+          tvId: 10765,
+          title: 'Sci-Fi & Fantasy',
+          sub: 'Worlds Beyond Imagination',
+          badge: 'Future & Magic',
+          accent: '#8B5CF6',
+          gradient: 'linear-gradient(135deg, rgba(139,92,246,0.88) 0%, rgba(76,29,149,0.95) 100%)',
+          img: 'https://image.tmdb.org/t/p/w780/8sNiAPPYU14PUepFNeSNGUTiHW.jpg'
+        },
+        {
+          id: 18,
+          tvId: 18,
+          title: 'Drama',
+          sub: 'Powerful Human Stories',
+          badge: 'Award-Winning',
+          accent: '#059669',
+          gradient: 'linear-gradient(135deg, rgba(5,150,105,0.88) 0%, rgba(6,78,59,0.95) 100%)',
+          img: 'https://image.tmdb.org/t/p/w780/ejdD20cdHNFAYAN2DlqPToXKyzx.jpg'
+        },
+        {
+          id: 53,
+          tvId: 80,
+          title: 'Thriller & Crime',
+          sub: 'Mystery, Suspense & Heists',
+          badge: 'Edge of Seat',
+          accent: '#A21CAF',
+          gradient: 'linear-gradient(135deg, rgba(162,28,175,0.88) 0%, rgba(112,26,117,0.95) 100%)',
+          img: 'https://image.tmdb.org/t/p/w780/9FE5eD92WfVCiivM9Pq9GVSrlWk.jpg'
+        },
+        {
+          id: 16,
+          tvId: 16,
+          title: 'Animation',
+          sub: 'Animated Masterpieces',
+          badge: 'All Ages',
+          accent: '#F97316',
+          gradient: 'linear-gradient(135deg, rgba(249,115,22,0.88) 0%, rgba(154,52,18,0.95) 100%)',
+          img: 'https://image.tmdb.org/t/p/w780/kVd3a9YeLGkoeR50jGEXM6EqseS.jpg'
+        },
+        {
+          id: 10751,
+          tvId: 10751,
+          title: 'Family',
+          sub: 'Fun For Everyone',
+          badge: 'Together',
+          accent: '#06B6D4',
+          gradient: 'linear-gradient(135deg, rgba(6,182,212,0.88) 0%, rgba(21,94,117,0.95) 100%)',
+          img: 'https://image.tmdb.org/t/p/w780/g0VmjKGMyipJSlPwlQvlLBvXTAQ.jpg'
+        }
+      ]
+    };
+
+    let _currentCatType = 'language'; // 'language' | 'genre'
+    let _currentCatKey = 'hi';
+    let _currentCatMediaType = 'movie'; // 'movie' | 'tv'
+    let _currentCatPage = 1;
+    let _currentCatTotalPages = 1;
+    let _currentCatItemData = null;
+    let _isCatLoading = false;
+
+    function initCategories() {
+      const langRow = document.getElementById('catLangRow');
+      const genreRow = document.getElementById('catGenreRow');
+
+      if (langRow && !langRow.children.length) {
+        langRow.innerHTML = CATEGORIES_DATA.languages.map(l => {
+          return `
+            <div class="category-card" data-cat-type="language" data-cat-key="${l.code}" style="--cat-accent:${l.accent}">
+              <img src="${l.img}" alt="${l.sub}" loading="lazy" onerror="this.style.display='none'">
+              <div class="category-card-overlay" style="background:${l.gradient}"></div>
+              <div class="category-card-content">
+                <div class="category-card-native">${l.title}</div>
+                <div class="category-card-sub">${l.sub}</div>
+                <div class="category-card-badge">${l.badge}</div>
+              </div>
+            </div>`;
+        }).join('');
+      }
+
+      if (genreRow && !genreRow.children.length) {
+        genreRow.innerHTML = CATEGORIES_DATA.genres.map(g => {
+          return `
+            <div class="category-card" data-cat-type="genre" data-cat-key="${g.id}" style="--cat-accent:${g.accent}">
+              <img src="${g.img}" alt="${g.title}" loading="lazy" onerror="this.style.display='none'">
+              <div class="category-card-overlay" style="background:${g.gradient}"></div>
+              <div class="category-card-content">
+                <div class="category-card-native">${g.title}</div>
+                <div class="category-card-sub">${g.sub}</div>
+                <div class="category-card-badge">${g.badge}</div>
+              </div>
+            </div>`;
+        }).join('');
+      }
+
+      // Add click listeners to all category cards
+      document.querySelectorAll('.category-card').forEach(card => {
+        card.onclick = () => {
+          const catType = card.dataset.catType;
+          const catKey = card.dataset.catKey;
+          let item = null;
+          if (catType === 'language') {
+            item = CATEGORIES_DATA.languages.find(x => x.code === catKey);
+          } else {
+            item = CATEGORIES_DATA.genres.find(x => String(x.id) === String(catKey));
+          }
+          if (item) {
+            const displayTitle = catType === 'language' ? `${item.title} · ${item.sub}` : item.title;
+            const displaySub = catType === 'language' ? `Top Rated & Popular ${item.sub} Movies and Series` : item.sub;
+            openCategoryPage(catType, catKey, displayTitle, displaySub, true);
+          }
+        };
+      });
+
+      // Wire up toggle buttons (Movies | Series)
+      const tabMovie = document.getElementById('catTabMovie');
+      const tabTv = document.getElementById('catTabTv');
+      if (tabMovie) {
+        tabMovie.onclick = () => switchCategoryMediaType('movie');
+      }
+      if (tabTv) {
+        tabTv.onclick = () => switchCategoryMediaType('tv');
+      }
+
+      // Wire up load more button
+      const loadMoreBtn = document.getElementById('catLoadMoreBtn');
+      if (loadMoreBtn) {
+        loadMoreBtn.onclick = () => {
+          if (!_isCatLoading && _currentCatPage < _currentCatTotalPages) {
+            loadCategoryTitles(_currentCatPage + 1, true);
+          }
+        };
+      }
+    }
+
+    async function openCategoryPage(catType, catKey, title, sub, pushHistory = true) {
+      _currentCatType = catType;
+      _currentCatKey = catKey;
+      _currentCatMediaType = 'movie'; // default to Movies
+      _currentCatPage = 1;
+
+      // Find metadata
+      if (catType === 'language') {
+        _currentCatItemData = CATEGORIES_DATA.languages.find(x => x.code === catKey) || { title, sub };
+      } else {
+        _currentCatItemData = CATEGORIES_DATA.genres.find(x => String(x.id) === String(catKey)) || { title, sub };
+      }
+
+      const overlay = document.getElementById('categoryViewOverlay');
+      if (!overlay) return;
+
+      const titleEl = document.getElementById('catPageTitle');
+      const subEl = document.getElementById('catPageSub');
+      if (titleEl) titleEl.textContent = title || 'Category';
+      if (subEl) subEl.textContent = sub || 'Explore top rated & popular titles';
+
+      // Reset media tabs
+      const tabMovie = document.getElementById('catTabMovie');
+      const tabTv = document.getElementById('catTabTv');
+      if (tabMovie) tabMovie.classList.add('active');
+      if (tabTv) tabTv.classList.remove('active');
+
+      // Clear previous grid
+      const grid = document.getElementById('categoryGrid');
+      if (grid) grid.innerHTML = '';
+
+      overlay.classList.add('open');
+      overlay.scrollTop = 0;
+      document.body.style.overflow = 'hidden';
+
+      if (pushHistory) {
+        try {
+          const u = new URL(window.location.origin + window.location.pathname);
+          u.searchParams.set('cat', catType);
+          u.searchParams.set('id', catKey);
+          history.pushState({ ui: 'category', catType, catKey, title, sub }, '', u.toString());
+        } catch (_) {}
+      }
+
+      await loadCategoryTitles(1, false);
+    }
+
+    function closeCategoryPage(pushHistory = true) {
+      const overlay = document.getElementById('categoryViewOverlay');
+      if (overlay) overlay.classList.remove('open');
+      document.body.style.overflow = '';
+
+      if (pushHistory) {
+        try {
+          const u = new URL(window.location.origin + window.location.pathname);
+          u.searchParams.delete('cat');
+          u.searchParams.delete('id');
+          history.pushState({ ui: 'home' }, '', u.toString());
+        } catch (_) {}
+      }
+    }
+
+    async function switchCategoryMediaType(mediaType) {
+      if (_currentCatMediaType === mediaType) return;
+      _currentCatMediaType = mediaType;
+      _currentCatPage = 1;
+
+      const tabMovie = document.getElementById('catTabMovie');
+      const tabTv = document.getElementById('catTabTv');
+      if (tabMovie) tabMovie.classList.toggle('active', mediaType === 'movie');
+      if (tabTv) tabTv.classList.toggle('active', mediaType === 'tv');
+
+      await loadCategoryTitles(1, false);
+    }
+
+    async function loadCategoryTitles(page = 1, append = false) {
+      if (_isCatLoading) return;
+      _isCatLoading = true;
+
+      const grid = document.getElementById('categoryGrid');
+      const loader = document.getElementById('catLoader');
+      const paginationWrap = document.getElementById('catPaginationWrap');
+      const loadMoreBtn = document.getElementById('catLoadMoreBtn');
+
+      if (!append && grid) grid.innerHTML = '';
+      if (loader) loader.style.display = 'flex';
+      if (paginationWrap) paginationWrap.style.display = 'none';
+
+      try {
+        let results = [];
+        let totalPages = 1;
+
+        if (_currentCatType === 'language') {
+          // Special handling for Sinhala ('si'): combine Sinhala subtitle catalog if on page 1 of movies
+          if (_currentCatKey === 'si' && _currentCatMediaType === 'movie' && page === 1) {
+            try {
+              const fetchSinsub = await Promise.all(
+                SINSUB_MOVIE_IDS.slice(0, 12).map(id => tmdb(`/movie/${id}?language=en-US`).catch(() => null))
+              );
+              const validSubs = fetchSinsub.filter(m => m && m.id);
+              results.push(...validSubs);
+            } catch (_) {}
+          }
+
+          const tmdbData = await tmdb(`/discover/${_currentCatMediaType}?with_original_language=${_currentCatKey}&page=${page}&sort_by=popularity.desc`);
+          if (tmdbData && tmdbData.results) {
+            results.push(...tmdbData.results);
+            totalPages = tmdbData.total_pages || 1;
+          }
+        } else if (_currentCatType === 'genre') {
+          let genreId = _currentCatKey;
+          if (_currentCatMediaType === 'tv' && _currentCatItemData && _currentCatItemData.tvId) {
+            genreId = _currentCatItemData.tvId;
+          }
+          const tmdbData = await tmdb(`/discover/${_currentCatMediaType}?with_genres=${genreId}&page=${page}&sort_by=popularity.desc`);
+          if (tmdbData && tmdbData.results) {
+            results.push(...tmdbData.results);
+            totalPages = tmdbData.total_pages || 1;
+          }
+        }
+
+        // Deduplicate items by ID
+        const seenIds = new Set();
+        const uniqueResults = [];
+        results.forEach(m => {
+          if (m && m.id && !seenIds.has(m.id)) {
+            seenIds.add(m.id);
+            uniqueResults.push(m);
+          }
+        });
+
+        _currentCatPage = page;
+        _currentCatTotalPages = totalPages;
+
+        if (grid) {
+          const cardsHtml = uniqueResults.map(m => buildCard(m, null, _currentCatMediaType, null)).join('');
+          if (append) {
+            grid.innerHTML += cardsHtml;
+          } else {
+            grid.innerHTML = cardsHtml || `<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--muted)">No titles found in this category.</div>`;
+          }
+          addCardListeners(grid, '.movie-card');
+        }
+
+        if (paginationWrap && loadMoreBtn) {
+          if (page < totalPages) {
+            paginationWrap.style.display = 'flex';
+            loadMoreBtn.textContent = `Load More Titles (${page}/${Math.min(totalPages, 50)}) ▾`;
+          } else {
+            paginationWrap.style.display = 'none';
+          }
+        }
+      } catch (err) {
+        console.warn('loadCategoryTitles failed:', err);
+        if (grid && !append) {
+          grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--muted)">Failed to load category titles. Please try again.</div>`;
+        }
+      } finally {
+        _isCatLoading = false;
+        if (loader) loader.style.display = 'none';
       }
     }
 
@@ -11681,6 +12434,18 @@
             closeModalInternal();
           }
         }
+
+        // Handle Category View Overlay
+        const catOverlay = document.getElementById('categoryViewOverlay');
+        if (state && state.ui === 'category') {
+          if (catOverlay && !catOverlay.classList.contains('open')) {
+            openCategoryPage(state.catType, state.catKey, state.title, state.sub, false);
+          }
+        } else if (state && state.ui !== 'modal' && state.ui !== 'player') {
+          if (catOverlay && catOverlay.classList.contains('open')) {
+            closeCategoryPage(false);
+          }
+        }
       });
 
       // ── Layer 7: MutationObserver on iframe src ────────────────────────────────
@@ -12308,7 +13073,7 @@
         return;
       }
 
-      // Back button → dismiss overlays in order: player → modal → search
+      // Back button → dismiss overlays in order: player → modal → category → search
       if (TV_BACK.has(key)) {
         // Don't intercept Escape/Backspace inside text inputs
         if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
@@ -12320,6 +13085,10 @@
         const modal = document.getElementById('modal');
         if (modal && modal.classList.contains('open')) {
           document.getElementById('modalClose').click(); return;
+        }
+        const catOverlay = document.getElementById('categoryViewOverlay');
+        if (catOverlay && catOverlay.classList.contains('open')) {
+          closeCategoryPage(); return;
         }
         const searchOverlay2 = document.getElementById('searchOverlay');
         if (searchOverlay2 && searchOverlay2.classList.contains('open')) {
@@ -12502,6 +13271,13 @@
 
     // INIT
     async function init() {
+      // ── Initialize Popular Languages & Genres Categories ──
+      try {
+        initCategories();
+      } catch (catErr) {
+        console.warn('initCategories error:', catErr);
+      }
+
       // ── Handle Shareable Links ──
       const params = new URLSearchParams(window.location.search);
       const mParam = params.get('m');
@@ -12511,6 +13287,23 @@
       if (paramVal && !partyParam) {
         const id = parseInt(paramVal, 10);
         setTimeout(() => openModal(id, tvParam ? 'tv' : 'movie'), 600);
+      }
+
+      // Handle category shareable link / direct navigation
+      const catParam = params.get('cat') || params.get('category');
+      const catIdParam = params.get('id');
+      if (catParam && catIdParam) {
+        setTimeout(() => {
+          let item = null;
+          if (catParam === 'language') {
+            item = CATEGORIES_DATA.languages.find(x => x.code === catIdParam);
+          } else {
+            item = CATEGORIES_DATA.genres.find(x => String(x.id) === String(catIdParam));
+          }
+          const displayTitle = item ? (catParam === 'language' ? `${item.title} · ${item.sub}` : item.title) : 'Category';
+          const displaySub = item ? (catParam === 'language' ? `Top Rated & Popular ${item.sub} Movies and Series` : item.sub) : '';
+          openCategoryPage(catParam, catIdParam, displayTitle, displaySub, false);
+        }, 500);
       }
 
       const [nowPlaying] = await Promise.all([tmdb('/movie/now_playing?language=en-US&page=1')]);
@@ -12529,6 +13322,7 @@
 
             if (id === 'trending') await loadTrending();
             else if (id === 'sinsub') await loadSinSubMovies();
+            else if (id === 'categories') initCategories();
             else if (id === 'movies') await loadMovies('now_playing');
             else if (id === 'tvshows') await loadTV('on_the_air');
             else if (id === 'toprated') {
@@ -12559,7 +13353,7 @@
         trailerObs.observe(document.getElementById('trailers'));
       }
 
-      const sectionsToObserve = ['trending', 'sinsub', 'movies', 'tvshows', 'toprated'];
+      const sectionsToObserve = ['trending', 'sinsub', 'categories', 'movies', 'tvshows', 'toprated'];
       sectionsToObserve.forEach(id => {
         const el = document.getElementById(id);
         if (el) observer.observe(el);
