@@ -5037,7 +5037,20 @@
       display: none !important;
     }
 
-    /* In fullscreen, keep close, fullscreen and watch party elevated */
+    /* ── Fullscreen Invisible Mouse Catcher Overlay ──────────────────── */
+    #fsMouseCatcher {
+      position: absolute;
+      inset: 0;
+      z-index: 2000;
+      pointer-events: none;
+      background: transparent;
+    }
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs #fsMouseCatcher {
+      pointer-events: auto !important; /* Catches any cursor movement/touch over iframe when idle */
+      cursor: default !important;
+    }
+
+    /* In fullscreen, keep close, fullscreen, and watch party elevated when active (not idle) */
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #playerClose,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #playerFullscreenBtn,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #topbarWatchPartyBtn {
@@ -5045,6 +5058,21 @@
       z-index: 2147483647 !important;
       transform: translateZ(9999px) !important;
       opacity: 1;
+    }
+
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) #playerClose,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) #playerFullscreenBtn,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) #topbarWatchPartyBtn,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) .player-fs-overlay-btn {
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      transform: translateY(0) translateZ(9999px) !important;
+    }
+
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) .sub-sync-bar.visible {
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      transform: translateX(-50%) translateY(0) translateZ(9999px) !important;
     }
 
     /* Automatically hide watchparty, x mark (close), fullscreen marks, and overlay within 2 seconds when idle in fullscreen */
@@ -5070,8 +5098,7 @@
     }
 
     /* Hide mouse cursor when idle in fullscreen */
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs,
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs * {
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs {
       cursor: none !important;
     }
 
@@ -5952,6 +5979,8 @@
       <iframe id="playerFrame" src="about:blank"
         allow="autoplay *; encrypted-media *; picture-in-picture *; web-share *"
         frameborder="0"></iframe>
+      <!-- Fullscreen Invisible Mouse Catcher Overlay (wakes up controls on any cursor movement over iframe) -->
+      <div id="fsMouseCatcher"></div>
       <!-- Subtitle Overlay (rendered on top of iframe) -->
       <div id="subOverlay"><span id="subText"></span></div>
       <!-- Dedicated High-Z-Index Fullscreen Button (ensures Sinhala subtitles remain visible) -->
@@ -10180,10 +10209,18 @@
       }
     }
 
-    // Attach listeners on document and playerContainer so mouse movements and touches are always caught
+    // Attach listeners on document, window and fsMouseCatcher so mouse movements and touches are always caught
     ['mousemove', 'pointermove', 'mousedown', 'touchstart', 'touchmove', 'keydown'].forEach(evt => {
       document.addEventListener(evt, _pokePlayerFsControls, { passive: true });
+      window.addEventListener(evt, _pokePlayerFsControls, { passive: true });
     });
+
+    const _fsCatcherEl = document.getElementById('fsMouseCatcher');
+    if (_fsCatcherEl) {
+      ['mousemove', 'pointermove', 'mousedown', 'touchstart'].forEach(evt => {
+        _fsCatcherEl.addEventListener(evt, _pokePlayerFsControls, { passive: true });
+      });
+    }
 
     let _fsHandlersSetup = false;
     function _setupMaxFullscreenHandlers() {
