@@ -13,10 +13,10 @@ export default async function handler(req, res) {
     const e = episode || 1;
     
     urls = [
-      `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=false&showNextEpisode=1`,
-      `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false&nextEpisode=true&episodeSelector=true`,
-      `https://vidspark.to/tv/${id}/${s}/${e}?theme=E8C97A`,
-      `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`,
+      `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=true&showNextEpisode=1`,
+      `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true`,
+      `https://vidspark.to/tv/${id}/${s}/${e}?theme=E8C97A&autoplay=true`,
+      `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}&autoplay=1`,
       `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
       `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
     ];
@@ -25,10 +25,10 @@ export default async function handler(req, res) {
   } else {
     // Movie
     urls = [
-      `https://vidlove.cc/embed/movie/${id}?autoplay=false`,
-      `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false`,
-      `https://vidspark.to/movie/${id}?theme=E8C97A`,
-      `https://embed.smashystream.com/playere.php?tmdb=${id}`,
+      `https://vidlove.cc/embed/movie/${id}?autoplay=true`,
+      `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true`,
+      `https://vidspark.to/movie/${id}?theme=E8C97A&autoplay=true`,
+      `https://embed.smashystream.com/playere.php?tmdb=${id}&autoplay=1`,
       `https://vidnest.fun/movie/${id}?autoplay=1`,
       `https://vixsrc.to/movie/${id}?autoplay=1`
     ];

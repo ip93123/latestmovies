@@ -7840,20 +7840,20 @@
 
       if (type === 'tv') {
         urls = [
-          `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=false&showNextEpisode=1`,
-          `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false&nextEpisode=true&episodeSelector=true`,
-          `https://vidspark.to/tv/${id}/${s}/${e}?theme=E8C97A`,
-          `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`,
+          `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=true&showNextEpisode=1`,
+          `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true`,
+          `https://vidspark.to/tv/${id}/${s}/${e}?theme=E8C97A&autoplay=true`,
+          `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}&autoplay=1`,
           `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
           `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
         ];
         labels = ['HackyMax', 'Infinity', 'Spark', 'Nebula', 'Zenith', 'Hyperion'];
       } else {
         urls = [
-          `https://vidlove.cc/embed/movie/${id}?autoplay=false`,
-          `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false`,
-          `https://vidspark.to/movie/${id}?theme=E8C97A`,
-          `https://embed.smashystream.com/playere.php?tmdb=${id}`,
+          `https://vidlove.cc/embed/movie/${id}?autoplay=true`,
+          `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true`,
+          `https://vidspark.to/movie/${id}?theme=E8C97A&autoplay=true`,
+          `https://embed.smashystream.com/playere.php?tmdb=${id}&autoplay=1`,
           `https://vidnest.fun/movie/${id}?autoplay=1`,
           `https://vixsrc.to/movie/${id}?autoplay=1`
         ];
@@ -8292,8 +8292,11 @@
               try { ytPlayer.playVideo(); } catch (e) { }
             }
           }
-          // Reset chooser
-          _currentModalId = null;
+          // Reset chooser, but keep _currentModalId if player is currently open
+          const pOverlay = document.getElementById('playerOverlay');
+          if (!pOverlay || !pOverlay.classList.contains('open')) {
+            _currentModalId = null;
+          }
           document.getElementById('modalEpChooser').style.display = 'none';
         }
       });
@@ -8528,6 +8531,7 @@
       _subCues = cues;
       _subFileName = filename || 'subtitle';
       _subLoaded = true;
+      _subActive = true;
       _stopSubLoop();
       _subStartTime = null;
       _subOffset = 0;
@@ -8682,9 +8686,11 @@
         cw.postMessage({ event: 'subscribe' }, '*');
         cw.postMessage({ type: 'player:listen' }, '*');
         cw.postMessage({ action: 'getTime' }, '*');
+        cw.postMessage({ action: 'getStatus' }, '*');
+        cw.postMessage(JSON.stringify({ action: 'getStatus' }), '*');
       } catch (_) {}
     }
-    setInterval(_pingIframeForTimeEvents, 3000);
+    setInterval(_pingIframeForTimeEvents, 2500);
 
     // ── Floating Subtitle Toast System ───────────────────────────────────
     let _subToastTimer = null;
@@ -8746,15 +8752,21 @@
       if (!_subCues || !_subCues.length) return;
       const firstCue = _subCues[0];
       if (firstCue) {
+        const sec = firstCue.start / 1000;
         _subStartTime = Date.now() - firstCue.start;
         _subOffset = 0;
         window._subPausedElapsed = firstCue.start;
+        window._externalCurrentTime = sec;
+        _sendIframeCmd('seek', sec);
         _updateSubSyncOffsetBadge();
         const mm = String(Math.floor(firstCue.start / 60000)).padStart(2, '0');
         const ss = String(Math.floor((firstCue.start % 60000) / 1000)).padStart(2, '0');
-        _showSubToast(`⏩ Jumped to first dialogue line (${mm}:${ss})`, 2500);
+        _showSubToast(`⏩ Jumped to dialogue line (${mm}:${ss})`, 2500);
+        _subActive = true;
+        if (!_subRaf) _subRaf = requestAnimationFrame(_subLoop);
       }
     }
+    window._jumpToFirstDialogueCue = _jumpToFirstDialogueCue;
 
     // RAF loop — renders current cue smoothly at 60fps
     function _subLoop() {
@@ -8815,7 +8827,8 @@
 
       // Identify event type
       let evName = '';
-      if (d.source === 'vidspark-player' && d.event) {
+      const isVidSpark = (d.source === 'vidspark-player' || d.source === 'moviesapi-player');
+      if (isVidSpark && d.event) {
         evName = String(d.event).toLowerCase();
       } else if (d.type === 'PLAYER_EVENT' && d.data && d.data.event) {
         evName = String(d.data.event).toLowerCase();
@@ -8829,13 +8842,24 @@
 
       const pState = _checkPlayPause(d);
       const isExplicitPause = (evName === 'pause') || (d.data && d.data.paused === true) || (d.paused === true) || (pState === 'pause');
-      let isExplicitPlay  = (evName === 'play') || (d.data && d.data.paused === false && evName !== 'pause') || (d.paused === false && evName !== 'pause' && evName !== 'timeupdate') || (pState === 'play');
+      let isExplicitPlay  = !isExplicitPause && ((evName === 'play') || (d.paused === false && evName !== 'pause') || (d.data && d.data.paused === false && evName !== 'pause') || (pState === 'play'));
+
+      if (isExplicitPause) {
+        isExplicitPlay = false;
+      }
 
       // If time is advancing during active playback (e.g. from timeupdate messages) and it's not a pause message, video has started playing!
-      if (!isExplicitPause && ct !== null && ct > 0.05) {
-        if (typeof window._externalCurrentTime === 'number' && ct > (window._externalCurrentTime + 0.05)) {
+      if (!isExplicitPause && ct !== null) {
+        if (typeof window._externalCurrentTime === 'number' && window._externalCurrentTime > 0 && ct > (window._externalCurrentTime + 0.12)) {
           isExplicitPlay = true;
-        } else if (window._externalCurrentTime === 0 && ct > 0.3) {
+        } else if (window._externalCurrentTime === 0) {
+          // Progress restored on load/refresh while paused: record current position and keep frozen
+          window._externalCurrentTime = ct;
+          window._subPausedElapsed = Math.round(ct * 1000);
+          if (evName === 'play' || pState === 'play') {
+            isExplicitPlay = true;
+          }
+        } else if (isVidSpark && evName === 'timeupdate' && typeof window._externalCurrentTime === 'number' && ct > (window._externalCurrentTime + 0.05)) {
           isExplicitPlay = true;
         }
       }
@@ -8893,7 +8917,11 @@
           window._subPausedElapsed = null;
         }
         window._externalIsPaused = false;
+        _subActive = true;
         _setSubSyncBarPaused(false);
+        if (!_subRaf) {
+          _subRaf = requestAnimationFrame(_subLoop);
+        }
 
         // Broadcast play to Watch Party guests
         if (typeof WP !== 'undefined' && WP && WP.isHost && WP.code && typeof _broadcast === 'function') {
@@ -8912,6 +8940,7 @@
 
       // ── CASE 3: SEEKED WHILE PAUSED ──────────────────────────────────
       if ((evName === 'seeked' || evName === 'seek') && ct !== null) {
+        _subActive = true;
         if (window._externalIsPaused) {
           window._subPausedElapsed = Math.round(ct * 1000);
           window._externalCurrentTime = ct;
@@ -8929,6 +8958,7 @@
               }
             }
           }
+          if (!_subRaf) _subRaf = requestAnimationFrame(_subLoop);
           // Broadcast seek to Watch Party guests
           if (typeof WP !== 'undefined' && WP && WP.isHost && WP.code && typeof _broadcast === 'function') {
             _broadcast({
@@ -8947,6 +8977,21 @@
           _subStartTime = Date.now() - (ct * 1000);
           window._subPausedElapsed = null;
           window._externalCurrentTime = ct;
+          if (!_maxMode && _subLoaded && _subCues && _subCues.length) {
+            const ms = Math.floor(ct * 1000) + _subOffset;
+            const cue = _subCues.find(c => ms >= c.start && ms < c.end);
+            const newText = cue ? cue.text : '';
+            if (newText !== _lastIframeSubCueText) {
+              _lastIframeSubCueText = newText;
+              if (newText) {
+                _subText.innerHTML = newText.replace(/\n/g, '<br>');
+                _subText.classList.add('active');
+              } else {
+                _subText.classList.remove('active');
+              }
+            }
+          }
+          if (!_subRaf) _subRaf = requestAnimationFrame(_subLoop);
           if (typeof WP !== 'undefined' && WP && WP.isHost && WP.code && typeof _broadcast === 'function') {
             _broadcast({
               type: 'seek',
@@ -10702,12 +10747,15 @@
     }
 
     async function _autoLoadIframeSinhalaSub() {
-      if (!_currentModalId) return;
+      const activeId = _currentModalId || window._currentPlayingId || (window._currentModalItem && window._currentModalItem.id) || new URLSearchParams(window.location.search).get('m') || new URLSearchParams(window.location.search).get('s');
+      if (!activeId) return;
+      _currentModalId = activeId;
+      window._currentPlayingId = activeId;
       _attachSubOverlayToActiveWrap();
 
       const subKey = (_currentModalType === 'tv')
-        ? `${_currentModalId}_S${_selectedSeason || 1}_E${_selectedEpisode || 1}`
-        : String(_currentModalId);
+        ? `${activeId}_S${_selectedSeason || 1}_E${_selectedEpisode || 1}`
+        : String(activeId);
 
       // If cues are already loaded for THIS video/episode, IMMEDIATELY resume the loop and re-render
       if (_subCues && _subCues.length > 0 && window._currentLoadedSubKey === subKey) {
@@ -10721,8 +10769,8 @@
         _setSubSyncBarPaused(true);
         _stopSubLoop();
         _lastIframeSubCueText = null;
-        _subRaf = requestAnimationFrame(_subLoop);
         _subActive = true;
+        _subRaf = requestAnimationFrame(_subLoop);
         _showSubSyncBar(true);
         _updateSubSyncOffsetBadge();
         if (_subToggleBtn) {
@@ -10740,7 +10788,7 @@
       _lastIframeSubCueText = null;
       window._subPausedElapsed = null;
 
-      const localSub = typeof SUBTITLE_MAP !== 'undefined' ? (SUBTITLE_MAP[subKey] || SUBTITLE_MAP[String(_currentModalId)]) : null;
+      const localSub = typeof SUBTITLE_MAP !== 'undefined' ? (SUBTITLE_MAP[subKey] || SUBTITLE_MAP[String(activeId)]) : null;
       let srtText = null;
       let subLabel = 'Sinhala 🇱🇰';
 
@@ -10754,7 +10802,7 @@
       // If not in local SUBTITLE_MAP, query /api/subtitles for Sinhala track
       if (!srtText) {
         try {
-          const p = new URLSearchParams({ id: _currentModalId, type: _currentModalType || 'movie' });
+          const p = new URLSearchParams({ id: activeId, type: _currentModalType || 'movie' });
           if (_selectedSeason) p.set('season', _selectedSeason);
           if (_selectedEpisode) p.set('episode', _selectedEpisode);
           const r = await fetch(`/api/subtitles?${p}`, { signal: AbortSignal.timeout(4500) });
@@ -10793,6 +10841,8 @@
           if (parsedCues.length) {
             _loadSubCues(parsedCues, subLabel);
             window._currentLoadedSubKey = subKey;
+            _subActive = true;
+            _subLoaded = true;
             // Start paused at current watch position until video starts playing
             const resumeSec = (typeof window._externalCurrentTime === 'number' && window._externalCurrentTime > 0)
               ? window._externalCurrentTime
@@ -10813,7 +10863,7 @@
             if (firstCue && firstCue.start > 20000) {
               const mm = String(Math.floor(firstCue.start / 60000)).padStart(2, '0');
               const ss = String(Math.floor((firstCue.start % 60000) / 1000)).padStart(2, '0');
-              _showSubToast(`🇱🇰 <strong>Sinhala Subtitles Active</strong> (${parsedCues.length} cues)<br><span style="color:var(--gold);font-size:0.86em;">Spoken dialogue starts at ${mm}:${ss}</span>`, 6000);
+              _showSubToast(`🇱🇰 <strong>Sinhala Subtitles Active</strong> (${parsedCues.length} cues)<br><span style="color:var(--gold);font-size:0.86em;">Spoken dialogue starts at ${mm}:${ss}</span> <button onclick="_jumpToFirstDialogueCue()" style="margin-left:8px;padding:3px 10px;border-radius:4px;background:var(--gold);color:#000;font-weight:700;border:none;cursor:pointer;font-size:0.82em;">⏩ Jump</button>`, 8000);
               const statusTxt = document.getElementById('subSyncStatusText');
               if (statusTxt) statusTxt.textContent = `Dialogue at ${mm}:${ss}`;
             } else {
@@ -10838,6 +10888,12 @@
       if (!url) {
         console.warn('[playStream] Called with invalid URL:', url);
         return;
+      }
+      if (typeof url === 'string') {
+        url = url.replace(/autoplay=false/gi, 'autoplay=true');
+      }
+      if (Array.isArray(allUrls)) {
+        allUrls = allUrls.map(u => typeof u === 'string' ? u.replace(/autoplay=false/gi, 'autoplay=true') : u);
       }
       if (_currentModalItem) saveRecentWatch(_currentModalItem, _currentModalType);
       // Stop background video
@@ -10871,6 +10927,10 @@
         if (loader) loader.style.opacity = '0';
         frame.style.opacity = '1';
         _attachSubOverlayToActiveWrap();
+        // If guest in Watch Party, request host state immediately so iframe syncs
+        if (typeof WP !== 'undefined' && WP && !WP.isHost && WP.hostConn && WP.hostConn.open) {
+          try { WP.hostConn.send({ type: 'request-state' }); } catch (_) {}
+        }
       };
       frame.src = url;
 
@@ -12448,27 +12508,49 @@
       try {
         const cw = frame.contentWindow;
         if (cmd === 'play') {
-          cw.postMessage({ action: 'play' }, '*');
-          cw.postMessage({ type: 'play' }, '*');
-          cw.postMessage({ event: 'play' }, '*');
-          cw.postMessage(JSON.stringify({ action: 'play' }), '*');
-          cw.postMessage(JSON.stringify({ event: 'play' }), '*');
-          cw.postMessage(JSON.stringify({ type: 'play' }), '*');
+          const msgs = [
+            { action: 'play' },
+            { type: 'play' },
+            { event: 'play' },
+            { type: 'PLAY' },
+            { action: 'PLAY' },
+            { method: 'play' },
+            { command: 'play' }
+          ];
+          msgs.forEach(m => {
+            try { cw.postMessage(m, '*'); } catch (_) {}
+            try { cw.postMessage(JSON.stringify(m), '*'); } catch (_) {}
+          });
         } else if (cmd === 'pause') {
-          cw.postMessage({ action: 'pause' }, '*');
-          cw.postMessage({ type: 'pause' }, '*');
-          cw.postMessage({ event: 'pause' }, '*');
-          cw.postMessage(JSON.stringify({ action: 'pause' }), '*');
-          cw.postMessage(JSON.stringify({ event: 'pause' }), '*');
-          cw.postMessage(JSON.stringify({ type: 'pause' }), '*');
+          const msgs = [
+            { action: 'pause' },
+            { type: 'pause' },
+            { event: 'pause' },
+            { type: 'PAUSE' },
+            { action: 'PAUSE' },
+            { method: 'pause' },
+            { command: 'pause' }
+          ];
+          msgs.forEach(m => {
+            try { cw.postMessage(m, '*'); } catch (_) {}
+            try { cw.postMessage(JSON.stringify(m), '*'); } catch (_) {}
+          });
         } else if (cmd === 'seek') {
           const sec = typeof payload === 'number' ? payload : 0;
-          cw.postMessage({ action: 'seek', time: sec }, '*');
-          cw.postMessage({ action: 'seek', time: sec, currentTime: sec }, '*');
-          cw.postMessage({ type: 'seek', currentTime: sec, time: sec }, '*');
-          cw.postMessage({ type: 'SET_TIME', time: sec }, '*');
-          cw.postMessage(JSON.stringify({ action: 'seek', time: sec }), '*');
-          cw.postMessage(JSON.stringify({ event: 'seek', time: sec, currentTime: sec }), '*');
+          const msgs = [
+            { action: 'seek', time: sec },
+            { action: 'seek', time: sec, currentTime: sec },
+            { type: 'seek', currentTime: sec, time: sec },
+            { type: 'SET_TIME', time: sec },
+            { action: 'setTime', time: sec },
+            { type: 'setcurrenttime', time: sec },
+            { type: 'playerseek', time: sec },
+            { type: 'skip', time: sec }
+          ];
+          msgs.forEach(m => {
+            try { cw.postMessage(m, '*'); } catch (_) {}
+            try { cw.postMessage(JSON.stringify(m), '*'); } catch (_) {}
+          });
         }
       } catch (_) {}
     }
@@ -12673,6 +12755,7 @@
         } else {
           _sendIframeCmd('seek', target);
           _sendIframeCmd('play');
+          setTimeout(() => { _sendIframeCmd('seek', target); _sendIframeCmd('play'); }, 400);
         }
 
         window._externalCurrentTime = target;
@@ -12747,6 +12830,8 @@
           } else {
             _sendIframeCmd('seek', target);
             _sendIframeCmd('play');
+            setTimeout(() => { _sendIframeCmd('seek', target); _sendIframeCmd('play'); }, 400);
+            setTimeout(() => { _sendIframeCmd('seek', target); }, 1200);
           }
           window._externalCurrentTime = target;
           window._subStartTime = Date.now() - (target * 1000);
@@ -13471,8 +13556,23 @@
         _refreshHud(2);
         _wpToast('✅ Joined! Playback synced with host.');
 
-        if (!paramVal && WP.hostConn && WP.hostConn.open) {
+        if (WP.hostConn && WP.hostConn.open) {
           try { WP.hostConn.send({ type: 'request-state' }); } catch (_) {}
+        }
+
+        // Hook user gesture unlock so browser audio policy never blocks playback
+        const overlay = document.getElementById('playerOverlay');
+        const unlockOnUserTap = () => {
+          if (!WP.isHost && WP.code) {
+            _sendIframeCmd('play');
+            const v = _vid();
+            if (v && v.paused) _safePlay(v);
+          }
+        };
+        if (overlay && !overlay._wpTapHooked) {
+          overlay._wpTapHooked = true;
+          overlay.addEventListener('click', unlockOnUserTap, { passive: true });
+          overlay.addEventListener('touchstart', unlockOnUserTap, { passive: true });
         }
       } catch (e) {
         _wpToast('⚠ Host is offline — playing independently');
