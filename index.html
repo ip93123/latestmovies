@@ -12676,16 +12676,27 @@
     /* ── UI Helpers ──────────────────────────────────────────── */
     function _refreshHud(total) {
       const count = total || (WP.isHost ? WP.conns.length + 1 : (WP.guestNames.length + 2));
-      document.getElementById('wpHudRole').textContent  = WP.isHost ? 'HOST' : 'GUEST';
-      document.getElementById('wpHudCount').textContent = `${count} watching`;
+      const roleEl = document.getElementById('wpHudRole');
+      if (roleEl) roleEl.textContent  = WP.isHost ? 'HOST' : 'GUEST';
+      const countEl = document.getElementById('wpHudCount');
+      if (countEl) countEl.textContent = `${count} watching`;
       const menuCode = document.getElementById('wpHudMenuCode');
       if (menuCode && WP.code) menuCode.textContent = WP.code;
       const hudLeaveBtn = document.getElementById('wpHudLeaveBtn');
       if (hudLeaveBtn) {
         hudLeaveBtn.innerHTML = WP.isHost ? '<span>🛑</span> End Party' : '<span>🚪</span> Leave Party';
       }
-      document.getElementById('wpHud').classList.add('active');
-      document.getElementById('wpActiveDot').style.display = 'block';
+      const wpHud = document.getElementById('wpHud');
+      if (wpHud) wpHud.classList.add('active');
+
+      // Update active dots safely
+      const topbarDot = document.getElementById('topbarWpActiveDot');
+      if (topbarDot) topbarDot.style.display = 'inline-block';
+      const wpHudDot = document.getElementById('wpHudDot');
+      if (wpHudDot) wpHudDot.style.display = 'block';
+      const wpActiveDot = document.getElementById('wpActiveDot');
+      if (wpActiveDot) wpActiveDot.style.display = 'block';
+
       const maxWp = document.getElementById('maxWatchPartyBtn');
       if (maxWp) maxWp.classList.add('active');
       const topbarWp = document.getElementById('topbarWatchPartyBtn');
@@ -12861,17 +12872,26 @@
       if (v) {
         try { v.playbackRate = (_mxsSettings && _mxsSettings.speed) || 1.0; } catch (_) {}
       }
-      document.getElementById('wpHud').classList.remove('active');
+      const wpHud = document.getElementById('wpHud');
+      if (wpHud) wpHud.classList.remove('active');
       const hudMenu = document.getElementById('wpHudMenu');
       if (hudMenu) hudMenu.classList.remove('open');
       const chevron = document.getElementById('wpHudChevron');
       if (chevron) chevron.style.transform = 'rotate(0deg)';
-      document.getElementById('wpActiveDot').style.display = 'none';
+
+      const topbarDot = document.getElementById('topbarWpActiveDot');
+      if (topbarDot) topbarDot.style.display = 'none';
+      const wpHudDot = document.getElementById('wpHudDot');
+      if (wpHudDot) wpHudDot.style.display = 'none';
+      const wpActiveDot = document.getElementById('wpActiveDot');
+      if (wpActiveDot) wpActiveDot.style.display = 'none';
+
       const maxWp = document.getElementById('maxWatchPartyBtn');
       if (maxWp) maxWp.classList.remove('active');
       const topbarWp = document.getElementById('topbarWatchPartyBtn');
       if (topbarWp) topbarWp.classList.remove('active');
-      document.getElementById('wpGuestLock').classList.remove('active');
+      const guestLock = document.getElementById('wpGuestLock');
+      if (guestLock) guestLock.classList.remove('active');
 
       document.getElementById('wpRoomCode').textContent = '------';
       document.getElementById('wpShareUrl').textContent  = '';
@@ -13071,14 +13091,15 @@
         _refreshHud(1);
         _refreshGuestList();
 
-        // If the user started the Watch Party while on an iframe player (like Infinity),
-        // seamlessly transition to HackyMax so that full HTML5 P2P sync & Sinhala subtitles work!
-        if (!_maxMode && currentId && typeof initMaxPlayer === 'function') {
+        // If the user started the Watch Party while not in a player, open the player
+        if (!document.getElementById('playerOverlay')?.classList.contains('open') && currentId && typeof initMaxPlayer === 'function') {
           initMaxPlayer(currentId, currentType, s, ep, 'hackymax');
         }
 
-        document.getElementById('wpSetupView').style.display = 'none';
-        document.getElementById('wpActiveView').style.display = 'block';
+        const setupView = document.getElementById('wpSetupView');
+        if (setupView) setupView.style.display = 'none';
+        const activeView = document.getElementById('wpActiveView');
+        if (activeView) activeView.style.display = 'block';
         _wpToast(`👑 Room ${code} created! Share the link with friends.`);
       } catch (e) {
         _wpToast('⚠ Could not create room — try again');
