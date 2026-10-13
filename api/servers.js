@@ -13,38 +13,30 @@ export default async function handler(req, res) {
     const e = episode || 1;
     
     urls = [
-      `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false&nextEpisode=true&episodeSelector=true`,
-      `https://vidspark.to/tv/${id}/${s}/${e}`,
-      `https://autoembed.co/tv/tmdb/${id}-${s}-${e}`,
-      `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`,
-      `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`,
       `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=1&mute=0&showNextEpisode=1`,
+      `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false&nextEpisode=true&episodeSelector=true`,
+      `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`,
       `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
       `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`,
       `https://vidup.to/tv/${id}/${s}/${e}?autoplay=1`,
       `https://vidfast.pro/tv/${id}/${s}/${e}?autoplay=1&mute=0`,
       `https://vidcore.net/tv/${id}/${s}/${e}?autoplay=1&server=orbit`,
-      `https://anyembed.xyz/embed/tmdb-tv-${id}-${s}-${e}?logo=false&autoplay=1`,
     ];
-    labels = ['HackyMax ✦', 'Nova', 'Cosmos', 'Nebula', 'Titan', 'Infinity', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
+    labels = ['HackyMax Gold', 'Infinity', 'Nebula', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit'];
 
   } else {
     // Movie
     urls = [
-      `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false`,
-      `https://vidspark.to/movie/${id}`,
-      `https://autoembed.co/movie/tmdb/${id}`,
-      `https://embed.smashystream.com/playere.php?tmdb=${id}`,
-      `https://www.2embed.cc/embed/${id}`,
       `https://vidlove.cc/embed/movie/${id}?autoplay=1&mute=0`,
+      `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false`,
+      `https://embed.smashystream.com/playere.php?tmdb=${id}`,
       `https://vidnest.fun/movie/${id}?autoplay=1`,
       `https://vixsrc.to/movie/${id}?autoplay=1`,
       `https://vidup.to/movie/${id}?autoplay=1`,
       `https://vidfast.pro/movie/${id}?autoplay=1&mute=0`,
       `https://vidcore.net/movie/${id}?autoplay=1&server=orbit`,
-      `https://anyembed.xyz/embed/tmdb-movie-${id}?logo=false&autoplay=1`,
     ];
-    labels = ['HackyMax ✦', 'Nova', 'Cosmos', 'Nebula', 'Titan', 'Infinity', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
+    labels = ['HackyMax Gold', 'Infinity', 'Nebula', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit'];
   }
 
   // Short cache so new servers appear quickly

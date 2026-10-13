@@ -3025,6 +3025,26 @@
       50%       { box-shadow: 0 0 26px rgba(212, 160, 23, 0.85); }
     }
 
+    /* ── Infinity Server button (Electric Blue theme) ───────────────── */
+    .player-server-btn.infinity-btn,
+    .modal-stream-pill.infinity-btn {
+      background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%) !important;
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      border-color: transparent !important;
+      letter-spacing: normal;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+      box-shadow: 0 0 14px rgba(2, 132, 199, 0.45);
+    }
+    .player-server-btn.infinity-btn:hover,
+    .modal-stream-pill.infinity-btn:hover {
+      box-shadow: 0 0 20px rgba(2, 132, 199, 0.7);
+      transform: translateY(-1px);
+    }
+    .player-server-btn.infinity-btn.active {
+      box-shadow: 0 0 24px rgba(2, 132, 199, 0.9);
+    }
+
     /* ── MoviesAPI Server button (Blue theme) ───────────────────────── */
     .player-server-btn.moviesapi-btn,
     .modal-stream-pill.moviesapi-btn {
@@ -7800,9 +7820,10 @@
     function getServerBtnClass(label) {
       const lbl = (label || '').toLowerCase();
       if (lbl.includes('hackymax')) return ' hackymax-btn';
+      if (lbl.includes('infinity')) return ' infinity-btn';
+      if (lbl.includes('nebula') || lbl.includes('smashy')) return ' smashystream-btn';
       if (lbl.includes('nova') || lbl.includes('moviesapi')) return ' moviesapi-btn';
       if (lbl.includes('cosmos') || lbl.includes('autoembed')) return ' autoembed-btn';
-      if (lbl.includes('nebula') || lbl.includes('smashy')) return ' smashystream-btn';
       if (lbl.includes('titan') || lbl.includes('2embed')) return ' twoembed-btn';
       return ' silver-btn';
     }
@@ -7825,36 +7846,28 @@
 
       if (type === 'tv') {
         urls = [
-          `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false&nextEpisode=true&episodeSelector=true`,
-          `https://vidspark.to/tv/${id}/${s}/${e}`,
-          `https://autoembed.co/tv/tmdb/${id}-${s}-${e}`,
-          `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`,
-          `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`,
           `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=1&mute=0&showNextEpisode=1`,
+          `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false&nextEpisode=true&episodeSelector=true`,
+          `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`,
           `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
           `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`,
           `https://vidup.to/tv/${id}/${s}/${e}?autoplay=1`,
           `https://vidfast.pro/tv/${id}/${s}/${e}?autoplay=1&mute=0`,
-          `https://vidcore.net/tv/${id}/${s}/${e}?autoplay=1&server=orbit`,
-          `https://anyembed.xyz/embed/tmdb-tv-${id}-${s}-${e}?logo=false&autoplay=1`
+          `https://vidcore.net/tv/${id}/${s}/${e}?autoplay=1&server=orbit`
         ];
-        labels = ['HackyMax ✦', 'Nova', 'Cosmos', 'Nebula', 'Titan', 'Infinity', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
+        labels = ['HackyMax Gold', 'Infinity', 'Nebula', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit'];
       } else {
         urls = [
-          `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false`,
-          `https://vidspark.to/movie/${id}`,
-          `https://autoembed.co/movie/tmdb/${id}`,
-          `https://embed.smashystream.com/playere.php?tmdb=${id}`,
-          `https://www.2embed.cc/embed/${id}`,
           `https://vidlove.cc/embed/movie/${id}?autoplay=1&mute=0`,
+          `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false`,
+          `https://embed.smashystream.com/playere.php?tmdb=${id}`,
           `https://vidnest.fun/movie/${id}?autoplay=1`,
           `https://vixsrc.to/movie/${id}?autoplay=1`,
           `https://vidup.to/movie/${id}?autoplay=1`,
           `https://vidfast.pro/movie/${id}?autoplay=1&mute=0`,
-          `https://vidcore.net/movie/${id}?autoplay=1&server=orbit`,
-          `https://anyembed.xyz/embed/tmdb-movie-${id}?logo=false&autoplay=1`
+          `https://vidcore.net/movie/${id}?autoplay=1&server=orbit`
         ];
-        labels = ['HackyMax ✦', 'Nova', 'Cosmos', 'Nebula', 'Titan', 'Infinity', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
+        labels = ['HackyMax Gold', 'Infinity', 'Nebula', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit'];
       }
       return { urls, labels };
     }
@@ -10803,8 +10816,8 @@
       _lastIframeSubCueText = null;
 
       const sName = btn ? btn.textContent.trim() : 'Server';
-      const isHackyMax = sName.toLowerCase().includes('hackymax');
-      _markSubSyncAutoLive(isHackyMax);
+      const isAutoLive = sName.toLowerCase().includes('hackymax') || sName.toLowerCase().includes('infinity') || sName.toLowerCase().includes('nebula');
+      _markSubSyncAutoLive(isAutoLive);
       _showSubToast(`Switched to <strong>${_escHtml(sName)}</strong> • Sinhala Subtitles Active`, 3200);
 
       _autoLoadIframeSinhalaSub();
