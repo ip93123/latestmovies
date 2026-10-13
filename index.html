@@ -2999,30 +2999,8 @@
       filter: brightness(1.1);
     }
     .wp-action-btn:disabled {
-      opacity: 0.6;
+      opacity: 0.5;
       cursor: not-allowed;
-      transform: none;
-    }
-    #navWpQuickBtn {
-      background: rgba(0, 198, 255, 0.12);
-      border: 1px solid rgba(0, 198, 255, 0.35);
-      color: #00C6FF;
-      border-radius: 10px;
-      padding: 7px 12px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.8rem;
-      font-weight: 600;
-      transition: all 0.2s;
-    }
-    #navWpQuickBtn:hover {
-      background: rgba(0, 198, 255, 0.25);
-      border-color: #00C6FF;
-      color: #fff;
-      box-shadow: 0 0 14px rgba(0, 198, 255, 0.4);
     }
 
     /* ── HackyMax Server button (Gold theme) ───────────────────────── */
@@ -3031,23 +3009,22 @@
       background: linear-gradient(135deg, #D4A017 0%, #B8860B 100%) !important;
       color: #ffffff !important;
       font-weight: 700 !important;
-      border-color: transparent !important;
+      border: 1px solid rgba(255, 255, 255, 0.25) !important;
       letter-spacing: normal;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
-      box-shadow: 0 0 14px rgba(212, 160, 23, 0.45);
+      box-shadow: none !important;
     }
     .player-server-btn.hackymax-btn:hover,
     .modal-stream-pill.hackymax-btn:hover {
-      box-shadow: 0 0 20px rgba(212, 160, 23, 0.7);
+      box-shadow: none !important;
       transform: translateY(-1px);
+      filter: brightness(1.1);
     }
     .player-server-btn.hackymax-btn.active {
-      box-shadow: 0 0 24px rgba(212, 160, 23, 0.9);
-      animation: hackymaxPulse 2.5s ease-in-out infinite;
-    }
-    @keyframes hackymaxPulse {
-      0%, 100% { box-shadow: 0 0 14px rgba(212, 160, 23, 0.45); }
-      50%       { box-shadow: 0 0 26px rgba(212, 160, 23, 0.85); }
+      box-shadow: none !important;
+      border-color: #FFE082 !important;
+      outline: 2px solid rgba(255, 224, 130, 0.5) !important;
+      outline-offset: 1px;
     }
 
     /* ── Infinity Server button (Vibrant Blue theme) ───────────────── */
@@ -3056,56 +3033,22 @@
       background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
       color: #ffffff !important;
       font-weight: 700 !important;
-      border-color: transparent !important;
+      border: 1px solid rgba(255, 255, 255, 0.25) !important;
       letter-spacing: normal;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
-      box-shadow: 0 0 14px rgba(37, 99, 235, 0.5) !important;
+      box-shadow: none !important;
     }
     .player-server-btn.infinity-btn:hover,
     .modal-stream-pill.infinity-btn:hover {
-      background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%) !important;
-      box-shadow: 0 0 20px rgba(37, 99, 235, 0.75) !important;
+      box-shadow: none !important;
       transform: translateY(-1px);
+      filter: brightness(1.1);
     }
     .player-server-btn.infinity-btn.active {
-      background: linear-gradient(135deg, #60A5FA 0%, #2563EB 100%) !important;
-      box-shadow: 0 0 24px rgba(37, 99, 235, 0.95) !important;
-    }
-
-    /* ── MoviesAPI Server button (Blue theme) ───────────────────────── */
-    .player-server-btn.moviesapi-btn,
-    .modal-stream-pill.moviesapi-btn {
-      background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
-      color: #ffffff !important;
-      font-weight: 700 !important;
-      border-color: transparent !important;
-      box-shadow: 0 0 14px rgba(37, 99, 235, 0.4);
-    }
-    .player-server-btn.moviesapi-btn:hover,
-    .modal-stream-pill.moviesapi-btn:hover {
-      box-shadow: 0 0 20px rgba(37, 99, 235, 0.7);
-      transform: translateY(-1px);
-    }
-    .player-server-btn.moviesapi-btn.active {
-      box-shadow: 0 0 24px rgba(37, 99, 235, 0.9);
-    }
-
-    /* ── AutoEmbed Server button (Red theme) ────────────────────────── */
-    .player-server-btn.autoembed-btn,
-    .modal-stream-pill.autoembed-btn {
-      background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%) !important;
-      color: #ffffff !important;
-      font-weight: 700 !important;
-      border-color: transparent !important;
-      box-shadow: 0 0 14px rgba(239, 68, 68, 0.4);
-    }
-    .player-server-btn.autoembed-btn:hover,
-    .modal-stream-pill.autoembed-btn:hover {
-      box-shadow: 0 0 20px rgba(239, 68, 68, 0.7);
-      transform: translateY(-1px);
-    }
-    .player-server-btn.autoembed-btn.active {
-      box-shadow: 0 0 24px rgba(239, 68, 68, 0.9);
+      box-shadow: none !important;
+      border-color: #93C5FD !important;
+      outline: 2px solid rgba(147, 197, 253, 0.5) !important;
+      outline-offset: 1px;
     }
 
     /* ── SmashyStream Server button (Green theme) ────────────────────── */
@@ -3114,60 +3057,49 @@
       background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
       color: #ffffff !important;
       font-weight: 700 !important;
-      border-color: transparent !important;
-      box-shadow: 0 0 14px rgba(16, 185, 129, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.25) !important;
+      box-shadow: none !important;
     }
     .player-server-btn.smashystream-btn:hover,
     .modal-stream-pill.smashystream-btn:hover {
-      box-shadow: 0 0 20px rgba(16, 185, 129, 0.7);
+      box-shadow: none !important;
       transform: translateY(-1px);
+      filter: brightness(1.1);
     }
     .player-server-btn.smashystream-btn.active {
-      box-shadow: 0 0 24px rgba(16, 185, 129, 0.9);
-    }
-
-    /* ── 2Embed Server button (Purple theme) ─────────────────────────── */
-    .player-server-btn.twoembed-btn,
-    .modal-stream-pill.twoembed-btn {
-      background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%) !important;
-      color: #ffffff !important;
-      font-weight: 700 !important;
-      border-color: transparent !important;
-      box-shadow: 0 0 14px rgba(139, 92, 246, 0.4);
-    }
-    .player-server-btn.twoembed-btn:hover,
-    .modal-stream-pill.twoembed-btn:hover {
-      box-shadow: 0 0 20px rgba(139, 92, 246, 0.7);
-      transform: translateY(-1px);
-    }
-    .player-server-btn.twoembed-btn.active {
-      box-shadow: 0 0 24px rgba(139, 92, 246, 0.9);
+      box-shadow: none !important;
+      border-color: #6EE7B7 !important;
+      outline: 2px solid rgba(110, 231, 183, 0.5) !important;
+      outline-offset: 1px;
     }
 
     /* ── Silver Theme for Non-PostMessage Fallback Players ─────────── */
     .player-server-btn.silver-btn,
     .modal-stream-pill.silver-btn {
-      background: linear-gradient(135deg, #71717A 0%, #52525B 50%, #3F3F46 100%) !important;
+      background: linear-gradient(135deg, #52525B 0%, #3F3F46 100%) !important;
       color: #F4F4F5 !important;
       font-weight: 600 !important;
-      border: 1px solid rgba(255, 255, 255, 0.22) !important;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      box-shadow: none !important;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
     }
     .player-server-btn.silver-btn:hover,
     .modal-stream-pill.silver-btn:hover {
-      background: linear-gradient(135deg, #A1A1AA 0%, #71717A 50%, #52525B 100%) !important;
-      box-shadow: 0 0 14px rgba(212, 212, 216, 0.45) !important;
+      background: linear-gradient(135deg, #71717A 0%, #52525B 100%) !important;
+      box-shadow: none !important;
       transform: translateY(-1px);
     }
     .player-server-btn.silver-btn.active {
-      background: linear-gradient(135deg, #E4E4E7 0%, #D4D4D8 50%, #A1A1AA 100%) !important;
+      background: linear-gradient(135deg, #D4D4D8 0%, #A1A1AA 100%) !important;
       color: #18181B !important;
       font-weight: 700 !important;
       border-color: #FAFAFA !important;
-      box-shadow: 0 0 20px rgba(244, 244, 245, 0.75) !important;
+      outline: 2px solid rgba(250, 250, 250, 0.5) !important;
+      outline-offset: 1px;
+      box-shadow: none !important;
       text-shadow: none;
     }
+
 
     /* ─────────────────────────────────────────────────────────────
        WATCH PARTY
@@ -8802,7 +8734,7 @@
       if (!_subStartTime || !_subCues.length || !_subActive) return;
       let elapsed;
       if (window._externalIsPaused) {
-        elapsed = (window._subPausedElapsed != null ? window._subPausedElapsed : (Date.now() - _subStartTime)) + _subOffset;
+        elapsed = (window._subPausedElapsed != null ? window._subPausedElapsed : 0) + _subOffset;
       } else {
         elapsed = (Date.now() - _subStartTime) + _subOffset;
       }
@@ -8848,58 +8780,106 @@
       if (typeof d === 'string') {
         try { d = JSON.parse(d); } catch (_) {}
       }
+      if (typeof d !== 'object' || d === null) return;
 
-      // Vidlink Pro & anyembed (Nebula) PLAYER_EVENT schema handling
-      if (d.type === 'PLAYER_EVENT' && d.data) {
-        const ev = d.data.event;
-        const ct = typeof d.data.currentTime === 'number' ? d.data.currentTime : null;
-        const isPaused = ev === 'pause' || d.data.paused === true;
-        const isPlay = ev === 'play' || (d.data.paused === false && ev !== 'pause');
-        if (isPaused) {
-          window._externalIsPaused = true;
-          if (window._subPausedElapsed == null) {
-            window._subPausedElapsed = (Date.now() - _subStartTime);
-          }
-          _setSubSyncBarPaused(true);
-        } else if (isPlay) {
-          if (window._externalIsPaused && window._subPausedElapsed != null) {
-            _subStartTime = Date.now() - window._subPausedElapsed;
-            window._subPausedElapsed = null;
-          }
-          window._externalIsPaused = false;
-          _setSubSyncBarPaused(false);
-        } else if (ev === 'seeked' && ct !== null) {
-          _subStartTime = Date.now() - (ct * 1000);
-          window._subPausedElapsed = ct * 1000;
-          window._externalCurrentTime = ct;
-        }
+      // Extract time from message if present
+      const extracted = _extractTimeFromMessage(d);
+      const ct = (extracted && typeof extracted.time === 'number') ? extracted.time : null;
+
+      // Identify event type
+      let evName = '';
+      if (d.type === 'PLAYER_EVENT' && d.data && d.data.event) {
+        evName = String(d.data.event).toLowerCase();
+      } else if (d.event) {
+        evName = String(d.event).toLowerCase();
+      } else if (d.action) {
+        evName = String(d.action).toLowerCase();
+      } else if (d.type) {
+        evName = String(d.type).toLowerCase();
       }
 
       const pState = _checkPlayPause(d);
-      if (pState === 'pause') {
+      const isExplicitPause = (evName === 'pause') || (d.data && d.data.paused === true) || (d.paused === true) || (pState === 'pause');
+      const isExplicitPlay  = (evName === 'play') || (d.data && d.data.paused === false && evName !== 'pause') || (d.paused === false && evName !== 'pause' && evName !== 'timeupdate') || (pState === 'play');
+
+      // ── CASE 1: PAUSE EVENT ──────────────────────────────────────────
+      if (isExplicitPause) {
         window._externalIsPaused = true;
-        if (window._subPausedElapsed == null) {
-          window._subPausedElapsed = (Date.now() - _subStartTime);
+        if (ct !== null) {
+          window._subPausedElapsed = Math.round(ct * 1000);
+          window._externalCurrentTime = ct;
+        } else if (window._subPausedElapsed == null && _subStartTime) {
+          window._subPausedElapsed = Math.max(0, Date.now() - _subStartTime);
         }
         _setSubSyncBarPaused(true);
-      } else if (pState === 'play') {
+
+        // Immediately update subtitle to frozen frame
+        if (!_maxMode && _subLoaded && _subCues && _subCues.length && window._subPausedElapsed != null) {
+          const ms = window._subPausedElapsed + _subOffset;
+          const cue = _subCues.find(c => ms >= c.start && ms < c.end);
+          const newText = cue ? cue.text : '';
+          if (newText !== _lastIframeSubCueText) {
+            _lastIframeSubCueText = newText;
+            if (newText) {
+              _subText.innerHTML = newText.replace(/\n/g, '<br>');
+              _subText.classList.add('active');
+            } else {
+              _subText.classList.remove('active');
+            }
+          }
+        }
+        return; // CRITICAL: Stop processing here so time updates or auto-unpause never trigger!
+      }
+
+      // ── CASE 2: PLAY EVENT ───────────────────────────────────────────
+      if (isExplicitPlay) {
         if (window._externalIsPaused && window._subPausedElapsed != null) {
           _subStartTime = Date.now() - window._subPausedElapsed;
+          window._subPausedElapsed = null;
+        } else if (ct !== null) {
+          _subStartTime = Date.now() - (ct * 1000);
           window._subPausedElapsed = null;
         }
         window._externalIsPaused = false;
         _setSubSyncBarPaused(false);
       }
 
-      const extracted = _extractTimeFromMessage(d);
-      if (extracted && typeof extracted.time === 'number') {
-        const ct = extracted.time;
-        // If time is advancing, unpause automatically
-        if (typeof window._externalCurrentTime === 'number' && Math.abs(ct - window._externalCurrentTime) > 0.05) {
-          window._externalIsPaused = false;
+      // ── CASE 3: SEEKED WHILE PAUSED ──────────────────────────────────
+      if (evName === 'seeked' && ct !== null) {
+        if (window._externalIsPaused) {
+          window._subPausedElapsed = Math.round(ct * 1000);
+          window._externalCurrentTime = ct;
+          if (!_maxMode && _subLoaded && _subCues && _subCues.length) {
+            const ms = window._subPausedElapsed + _subOffset;
+            const cue = _subCues.find(c => ms >= c.start && ms < c.end);
+            const newText = cue ? cue.text : '';
+            if (newText !== _lastIframeSubCueText) {
+              _lastIframeSubCueText = newText;
+              if (newText) {
+                _subText.innerHTML = newText.replace(/\n/g, '<br>');
+                _subText.classList.add('active');
+              } else {
+                _subText.classList.remove('active');
+              }
+            }
+          }
+          return; // Remain paused after seek
+        } else {
+          _subStartTime = Date.now() - (ct * 1000);
           window._subPausedElapsed = null;
-          _setSubSyncBarPaused(false);
+          window._externalCurrentTime = ct;
         }
+      }
+
+      // ── CASE 4: CURRENTLY PAUSED ─────────────────────────────────────
+      if (window._externalIsPaused) {
+        // If we are currently paused and did not receive an explicit play event,
+        // stay paused! Do NOT allow background time updates or heartbeats to unpause us.
+        return;
+      }
+
+      // ── CASE 5: TIME UPDATE (ACTIVE PLAYBACK) ────────────────────────
+      if (ct !== null) {
         window._externalCurrentTime = ct;
         window._lastExternalMsgTime = Date.now();
 
@@ -8909,7 +8889,6 @@
         _markSubSyncAutoLive(true);
 
         if (!_maxMode && _subLoaded && _subCues && _subCues.length) {
-          // Immediately check cue at this exact millisecond
           const ms = Math.floor(ct * 1000) + _subOffset;
           const cue = _subCues.find(c => ms >= c.start && ms < c.end);
           const newText = cue ? cue.text : '';
@@ -8923,7 +8902,6 @@
             }
           }
 
-          // Ensure RAF loop continues running smoothly at 60fps between messages
           if (!_subRaf) {
             _subRaf = requestAnimationFrame(_subLoop);
           }
@@ -10108,6 +10086,39 @@
         e.preventDefault();
         _togglePlayerFullscreen();
         return;
+      }
+      if (overlayOpen && !_maxMode) {
+        if (e.key === ' ' || e.code === 'Space' || e.key === 'k' || e.key === 'K') {
+          e.preventDefault();
+          const frame = document.getElementById('playerFrame');
+          if (window._externalIsPaused) {
+            if (window._subPausedElapsed != null) {
+              _subStartTime = Date.now() - window._subPausedElapsed;
+              window._subPausedElapsed = null;
+            }
+            window._externalIsPaused = false;
+            _setSubSyncBarPaused(false);
+            _showSubToast('▶ Subtitles Resumed', 1500);
+            try {
+              frame?.contentWindow?.postMessage({ type: 'play' }, '*');
+              frame?.contentWindow?.postMessage({ action: 'play' }, '*');
+              frame?.contentWindow?.postMessage({ event: 'play' }, '*');
+            } catch (_) {}
+          } else {
+            window._externalIsPaused = true;
+            if (_subStartTime) {
+              window._subPausedElapsed = Math.max(0, Date.now() - _subStartTime);
+            }
+            _setSubSyncBarPaused(true);
+            _showSubToast('⏸ Subtitles Paused', 1500);
+            try {
+              frame?.contentWindow?.postMessage({ type: 'pause' }, '*');
+              frame?.contentWindow?.postMessage({ action: 'pause' }, '*');
+              frame?.contentWindow?.postMessage({ event: 'pause' }, '*');
+            } catch (_) {}
+          }
+          return;
+        }
       }
       if (!_maxMode) return;
       if (e.key === ' ' || e.code === 'Space') {
