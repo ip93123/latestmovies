@@ -3075,6 +3075,30 @@
       outline-offset: 1px;
     }
 
+    /* ── Videasy Server button (Electric Cyan theme) ───────────────── */
+    .player-server-btn.videasy-btn,
+    .modal-stream-pill.videasy-btn {
+      background: linear-gradient(135deg, #06B6D4 0%, #0891B2 100%) !important;
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      border: 1px solid rgba(255, 255, 255, 0.25) !important;
+      letter-spacing: normal;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+      box-shadow: none !important;
+    }
+    .player-server-btn.videasy-btn:hover,
+    .modal-stream-pill.videasy-btn:hover {
+      box-shadow: none !important;
+      transform: translateY(-1px);
+      filter: brightness(1.1);
+    }
+    .player-server-btn.videasy-btn.active {
+      box-shadow: none !important;
+      border-color: #67E8F9 !important;
+      outline: 2px solid rgba(103, 232, 249, 0.5) !important;
+      outline-offset: 1px;
+    }
+
     /* ── SmashyStream Server button (Green theme) ────────────────────── */
     .player-server-btn.smashystream-btn,
     .modal-stream-pill.smashystream-btn {
@@ -7810,6 +7834,7 @@
       if (lbl.includes('hackymax')) return ' hackymax-btn';
       if (lbl.includes('infinity')) return ' infinity-btn';
       if (lbl.includes('spark') || lbl.includes('vidspark')) return ' spark-btn';
+      if (lbl.includes('videasy')) return ' videasy-btn';
       if (lbl.includes('nebula') || lbl.includes('smashy')) return ' smashystream-btn';
       if (lbl.includes('nova') || lbl.includes('moviesapi')) return ' moviesapi-btn';
       if (lbl.includes('cosmos') || lbl.includes('autoembed')) return ' autoembed-btn';
@@ -7843,21 +7868,23 @@
           `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=true&showNextEpisode=1`,
           `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true`,
           `https://vidspark.to/tv/${id}/${s}/${e}?theme=E8C97A&autoplay=true`,
+          `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1`,
           `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}&autoplay=1`,
           `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
           `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
         ];
-        labels = ['HackyMax', 'Infinity', 'Spark', 'Nebula', 'Zenith', 'Hyperion'];
+        labels = ['HackyMax', 'Infinity', 'Spark', 'Videasy', 'Nebula', 'Zenith', 'Hyperion'];
       } else {
         urls = [
           `https://vidlove.cc/embed/movie/${id}?autoplay=true`,
           `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true`,
           `https://vidspark.to/movie/${id}?theme=E8C97A&autoplay=true`,
+          `https://player.videasy.ws/embed/movie/${id}?autoplay=1`,
           `https://embed.smashystream.com/playere.php?tmdb=${id}&autoplay=1`,
           `https://vidnest.fun/movie/${id}?autoplay=1`,
           `https://vixsrc.to/movie/${id}?autoplay=1`
         ];
-        labels = ['HackyMax', 'Infinity', 'Spark', 'Nebula', 'Zenith', 'Hyperion'];
+        labels = ['HackyMax', 'Infinity', 'Spark', 'Videasy', 'Nebula', 'Zenith', 'Hyperion'];
       }
       return { urls, labels };
     }
@@ -8616,7 +8643,7 @@
       if (typeof eventData !== 'object') return null;
 
       const d = eventData;
-      const timeKeys = ['currenttime', 'current_time', 'time', 'position', 'pos', 'seconds', 'second', 'offset', 'value', 'progress'];
+      const timeKeys = ['currenttime', 'current_time', 'time', 'position', 'pos', 'seconds', 'second', 'offset', 'value', 'progress', 'player_progress', 'playerprogress'];
 
       // 1. Direct key match (case-insensitive)
       for (const key of Object.keys(d)) {
@@ -8660,7 +8687,7 @@
       if (typeof obj === 'object') {
         if (obj.paused === true) return 'pause';
         if (obj.paused === false && (obj.event === 'play' || obj.type === 'play' || obj.event === 'timeupdate')) return 'play';
-        const evt = String(obj.event || obj.type || obj.action || obj.state || obj.status || '');
+        const evt = String(obj.event || obj.type || obj.action || obj.state || obj.status || obj.player_status || '');
         if (/\b(?:pause|paused)\b/i.test(evt)) return 'pause';
         if (/\b(?:play|playing|resumed?)\b/i.test(evt)) return 'play';
         if (obj.data) {
@@ -8830,8 +8857,12 @@
       const isVidSpark = (d.source === 'vidspark-player' || d.source === 'moviesapi-player');
       if (isVidSpark && d.event) {
         evName = String(d.event).toLowerCase();
-      } else if (d.type === 'PLAYER_EVENT' && d.data && d.data.event) {
-        evName = String(d.data.event).toLowerCase();
+      } else if (d.type === 'PLAYER_EVENT' && d.data) {
+        if (d.data.player_status) {
+          evName = String(d.data.player_status).toLowerCase();
+        } else if (d.data.event) {
+          evName = String(d.data.event).toLowerCase();
+        }
       } else if (d.event) {
         evName = String(d.event).toLowerCase();
       } else if (d.action) {
@@ -8841,8 +8872,8 @@
       }
 
       const pState = _checkPlayPause(d);
-      const isExplicitPause = (evName === 'pause') || (d.data && d.data.paused === true) || (d.paused === true) || (pState === 'pause');
-      let isExplicitPlay  = !isExplicitPause && ((evName === 'play') || (d.paused === false && evName !== 'pause') || (d.data && d.data.paused === false && evName !== 'pause') || (pState === 'play'));
+      const isExplicitPause = (evName === 'pause' || evName === 'paused') || (d.data && d.data.paused === true) || (d.paused === true) || (pState === 'pause');
+      let isExplicitPlay  = !isExplicitPause && ((evName === 'play' || evName === 'playing') || (d.paused === false && evName !== 'pause' && evName !== 'paused') || (d.data && d.data.paused === false && evName !== 'pause' && evName !== 'paused') || (pState === 'play'));
 
       if (isExplicitPause) {
         isExplicitPlay = false;
