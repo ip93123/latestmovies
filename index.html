@@ -8811,31 +8811,22 @@
     window._isStreamBuffering = false;
     window._bufferFreezeElapsed = null;
     window._ctStallStartTime = null;
-    let _bufferToastActive = false;
 
     function _markBufferState(isBuffering) {
       if (isBuffering) {
         if (!window._isStreamBuffering && !window._externalIsPaused) {
           window._isStreamBuffering = true;
-          // Freeze subtitles at current confirmed playback second
+          // Freeze subtitles silently at current confirmed playback second
           const freezeSec = (typeof window._externalCurrentTime === 'number' && window._externalCurrentTime > 0)
             ? window._externalCurrentTime
             : (_subStartTime ? Math.max(0, (Date.now() - _subStartTime) / 1000) : 0);
           window._bufferFreezeElapsed = Math.round(freezeSec * 1000);
-          if (!_bufferToastActive) {
-            _bufferToastActive = true;
-            _showSubToast('⏳ Film buffering — Subtitles paused', 3000);
-          }
         }
       } else {
         if (window._isStreamBuffering) {
           window._isStreamBuffering = false;
           window._bufferFreezeElapsed = null;
           window._ctStallStartTime = null;
-          if (_bufferToastActive) {
-            _bufferToastActive = false;
-            _showSubToast('▶ Resumed', 1500);
-          }
         }
       }
     }
@@ -9306,7 +9297,6 @@
             _markBufferState(false);
             _sendIframeCmd('play');
             if (!_subRaf) _subRaf = requestAnimationFrame(_subLoop);
-            _showSubToast('▶ Subtitles Resumed', 2000);
             return;
           }
           // Toggle subtitle visibility directly without showing any sync panel
@@ -10432,7 +10422,6 @@
             }
             window._externalIsPaused = false;
             _setSubSyncBarPaused(false);
-            _showSubToast('▶ Subtitles Resumed', 1500);
             try {
               frame?.contentWindow?.postMessage({ type: 'play' }, '*');
               frame?.contentWindow?.postMessage({ action: 'play' }, '*');
@@ -10444,7 +10433,6 @@
               window._subPausedElapsed = Math.max(0, Date.now() - _subStartTime);
             }
             _setSubSyncBarPaused(true);
-            _showSubToast('⏸ Subtitles Paused', 1500);
             try {
               frame?.contentWindow?.postMessage({ type: 'pause' }, '*');
               frame?.contentWindow?.postMessage({ action: 'pause' }, '*');
