@@ -194,16 +194,10 @@ export default async function handler(req, res) {
   if (streamInfo && streamInfo.streamUrl) {
     let finalUrl = streamInfo.streamUrl;
     if (streamInfo.format === 'hls' || streamInfo.streamUrl.includes('.m3u8')) {
-      const rawProxy = process.env.CF_PROXY_URL || '';
-      const PROXY_BASE = (rawProxy && !rawProxy.includes('onrender.com') && !rawProxy.includes('workers.dev') && !rawProxy.includes('deno.net'))
-        ? rawProxy
-        : 'https://funny-sfogliatella-4e51f6.netlify.app/proxy';
-      // Append ?_t=TOKEN so the CF Worker can verify the request (query param,
-      // since HLS.js player can't send custom headers for segment requests).
-      const _tParam = process.env.API_SECRET ? `&_t=${encodeURIComponent(process.env.API_SECRET)}` : '';
-      // NOTE: ?direct=1 was tested but d.ravenflix.st CDN returns 403 Forbidden
-      // for direct browser segment fetches (requires Referer: vidlove.cc header).
-      // All .ts segments MUST be proxied. Worker is unavoidable for this CDN.
+      const rawProxy = (process.env.CF_PROXY_URL || '').replace(/\/$/, '');
+      const PROXY_BASE = rawProxy || '/api/hls-proxy';
+      const _t = process.env.API_SECRET || 'hky-aGFja3lzdHJl';
+      const _tParam = `&_t=${encodeURIComponent(_t)}`;
       finalUrl = `${PROXY_BASE}?url=${encodeURIComponent(streamInfo.streamUrl)}${_tParam}`;
     }
     return res.status(200).json({

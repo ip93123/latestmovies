@@ -16,8 +16,11 @@ const MAX_CHUNK_BYTES = 4 * 1024 * 1024;
 export default async function handler(req, res) {
   // ── Secret Token Auth ─────────────────────────────────────────────────────
   const secret = process.env.API_SECRET;
-  if (secret && req.headers['x-hacky-token'] !== secret) {
-    return res.status(401).send('Unauthorized');
+  if (secret) {
+    const token = (req.query && req.query._t) || (req.headers && req.headers['x-hacky-token']);
+    if (token !== secret) {
+      return res.status(401).send('Unauthorized');
+    }
   }
 
   const { url } = req.query;
@@ -79,6 +82,8 @@ export default async function handler(req, res) {
       const text = await upstream.text();
       const base = new URL(targetUrl);
 
+      const _tParam = secret ? `&_t=${encodeURIComponent(secret)}` : '';
+
       const rewritten = text.split('\n').map(line => {
         const trimmed = line.trim();
         if (!trimmed) return line;
@@ -95,7 +100,7 @@ export default async function handler(req, res) {
           return trimmed.replace(/URI=["']([^"']+)["']/i, (match, subUri) => {
             try {
               const absSub = new URL(subUri, base).href;
-              return `URI="/api/hls-proxy?url=${encodeURIComponent(absSub)}"`;
+              return `URI="/api/hls-proxy?url=${encodeURIComponent(absSub)}${_tParam}"`;
             } catch {
               return match;
             }
@@ -112,7 +117,7 @@ export default async function handler(req, res) {
           return line;
         }
 
-        return `/api/hls-proxy?url=${encodeURIComponent(absUrl)}`;
+        return `/api/hls-proxy?url=${encodeURIComponent(absUrl)}${_tParam}`;
       }).filter(line => line !== null).join('\n');
 
       res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');

@@ -7946,12 +7946,12 @@
           `https://vidcore.net/tv/${id}/${s}/${e}?autoplay=1&server=orbit`,
           `https://anyembed.xyz/embed/tmdb-tv-${id}-${s}-${e}?logo=false&autoplay=1`
         ];
-        labels = ['HackyMax ✦', 'Infinity', 'Nova', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
+        labels = ['HackyMax ✦', 'Nova (⚡ Auto-Sync)', 'Infinity', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
       } else {
         urls = [
           `hackymax://movie/${id}`,
-          `https://vidlove.cc/embed/movie/${id}?autoplay=1&mute=0`,
           `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&muted=false`,
+          `https://vidlove.cc/embed/movie/${id}?autoplay=1&mute=0`,
           `https://vidnest.fun/movie/${id}?autoplay=1`,
           `https://vixsrc.to/movie/${id}?autoplay=1`,
           `https://vidup.to/movie/${id}?autoplay=1`,
@@ -7959,7 +7959,7 @@
           `https://vidcore.net/movie/${id}?autoplay=1&server=orbit`,
           `https://anyembed.xyz/embed/tmdb-movie-${id}?logo=false&autoplay=1`
         ];
-        labels = ['HackyMax ✦', 'Infinity', 'Nova', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
+        labels = ['HackyMax ✦', 'Nova (⚡ Auto-Sync)', 'Infinity', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
       }
       return { urls, labels };
     }
@@ -8725,20 +8725,69 @@
     // ── External Player PostMessage Sync (VidLink / Nova auto-sync) ────────
     window.addEventListener('message', (event) => {
       if (!event || !event.data) return;
-      const d = event.data;
-      if (d.type === 'PLAYER_EVENT' || typeof d.currentTime === 'number') {
-        const ct = typeof d.currentTime === 'number' ? d.currentTime : (d.data && d.data.currentTime);
-        if (typeof ct === 'number') {
-          window._externalCurrentTime = ct;
-          if (!_maxMode && _subLoaded && _subCues && _subCues.length) {
-            const ms = ct * 1000 + _subOffset;
-            const cue = _subCues.find(c => ms >= c.start && ms < c.end);
-            if (cue) {
-              _subText.innerHTML = cue.text.replace(/\n/g, '<br>');
+      let d = event.data;
+      if (typeof d === 'string') {
+        try { d = JSON.parse(d); } catch (_) {}
+      }
+      if (!d || typeof d !== 'object') return;
+
+      // Extract playback position from VidLink PLAYER_EVENT or generic player
+      let ct = null;
+      let evt = '';
+      if (d.type === 'PLAYER_EVENT' && d.data) {
+        ct = typeof d.data.currentTime === 'number' ? d.data.currentTime : null;
+        evt = d.data.event || '';
+      } else if (typeof d.currentTime === 'number') {
+        ct = d.currentTime;
+        evt = d.event || '';
+      } else if (d.data && typeof d.data.currentTime === 'number') {
+        ct = d.data.currentTime;
+        evt = d.data.event || '';
+      }
+
+      if (typeof ct === 'number') {
+        window._externalCurrentTime = ct;
+
+        // When external player sends active timestamps, shut down manual wall-clock timer
+        if (_subStartTime) {
+          _subStartTime = null;
+          _stopSubLoop();
+        }
+
+        if (!_maxMode && _subLoaded && _subCues && _subCues.length) {
+          _subActive = true;
+          const ms = Math.floor(ct * 1000) + _subOffset;
+          const cue = _subCues.find(c => ms >= c.start && ms < c.end);
+          const newText = cue ? cue.text : '';
+
+          if (newText !== _lastIframeSubCueText) {
+            _lastIframeSubCueText = newText;
+            if (newText) {
+              _subText.innerHTML = newText.replace(/\n/g, '<br>');
               _subText.classList.add('active');
             } else {
               _subText.classList.remove('active');
             }
+          }
+
+          // Throttled time counter update
+          const secs = Math.floor(ct);
+          if (_subStatusLine && _subStatusLine._lastSec !== secs) {
+            _subStatusLine._lastSec = secs;
+            const mm = String(Math.floor(secs / 60)).padStart(2, '0');
+            const ss = String(secs % 60).padStart(2, '0');
+            _subStatusLine.textContent = `⚡ Nova Live-Sync (${mm}:${ss})`;
+          }
+
+          // Auto-hide manual Start button once live events are received
+          if (_subStartBtn && _subStartBtn.style.display !== 'none') {
+            _subStartBtn.style.display = 'none';
+          }
+
+          const msg = document.getElementById('subPanelMsg');
+          if (msg && !msg._hasLiveSyncNotice) {
+            msg._hasLiveSyncNotice = true;
+            msg.innerHTML = `✅ <strong style="color:var(--gold)">${_escHtml(_subFileName)}</strong> loaded — <em>${_subCues.length} cues</em>.<br><span style="color:#2ECC71;font-size:0.85em;font-weight:700;">⚡ Live-Sync active (Nova / VidLink) — Auto-syncs on skip/seek!</span>`;
           }
         }
       }

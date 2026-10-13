@@ -1,20 +1,25 @@
 // ──────────────────────────────────────────────────────────────────────────────
-//  Hacky Streaming — Deno Deploy Stream Proxy
-//  Bypasses Ravenflix/DCloud Cloudflare Worker blocks (runs on AWS/GCP edge).
+//  Hacky Streaming — Deno Deploy Stream Proxy (Hardened & Protected)
+//  Bypasses Ravenflix/DCloud WAF blocks (runs on AWS/GCP edge).
 //
-//  Benefits:
-//    • 100 GB/month FREE bandwidth
-//    • Zero cold starts (instant V8 isolates)
-//    • Ravenflix firewall DOES NOT block Deno Deploy (different ASN & headers)
-//    • Full byte-range seeking for MP4 and HLS playlist rewriting
+//  Protection Rules (Prevents Suspensions & Abuse):
+//    1. Token Authentication: Only requests with ?_t=... from your app are accepted
+//    2. Target Whitelist: Only streaming CDNs (ravenflix/vidlove) can be proxied
+//    3. Anti-Open-Proxy: Bots and scrapers cannot abuse your bandwidth
 // ──────────────────────────────────────────────────────────────────────────────
+
+const API_SECRET = Deno.env.get('API_SECRET') || 'hky-aGFja3lzdHJl';
+
+// Only allow movie stream CDNs (prevents open-proxy abuse suspensions)
+const ALLOWED_HOSTS = ['ravenflix.st', 'vidlove.cc', 'dcloud'];
 
 Deno.serve(async (req) => {
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
-    'Access-Control-Allow-Headers': 'Range, Content-Type, Accept',
+    'Access-Control-Allow-Headers': 'Range, Content-Type, Accept, User-Agent',
     'Access-Control-Expose-Headers': 'Content-Range, Accept-Ranges, Content-Length, Content-Type',
+    'Access-Control-Max-Age': '86400',
   };
 
   if (req.method === 'OPTIONS') {
@@ -22,9 +27,17 @@ Deno.serve(async (req) => {
   }
 
   const reqUrl = new URL(req.url);
+
+  // ── 1. Secret Token Auth (Protects your 100 GB quota from bots) ────────────
+  const token = reqUrl.searchParams.get('_t') || '';
+  if (API_SECRET && token !== API_SECRET) {
+    return new Response('Unauthorized: Missing or invalid token', { status: 401, headers: corsHeaders });
+  }
+
+  // ── 2. URL Extraction ──────────────────────────────────────────────────────
   const match = reqUrl.search.match(/[?&]url=([^]*)/);
   if (!match || !match[1]) {
-    return new Response('Missing ?url= parameter', { status: 400, headers: corsHeaders });
+    return new Response('Hacky Streaming Proxy Active. Usage: /?url=<stream_url>', { status: 200, headers: corsHeaders });
   }
 
   let targetStr = match[1];
@@ -39,6 +52,13 @@ Deno.serve(async (req) => {
     return new Response('Invalid target URL', { status: 400, headers: corsHeaders });
   }
 
+  // ── 3. Host Whitelist (Prevents Deno from flagging as an open proxy) ────────
+  const isAllowedHost = ALLOWED_HOSTS.some(h => targetUrl.hostname.endsWith(h));
+  if (!isAllowedHost) {
+    return new Response('Forbidden: Target domain not permitted', { status: 403, headers: corsHeaders });
+  }
+
+  // ── 4. Authenticated Upstream Headers ──────────────────────────────────────
   const upHeaders = {
     'Referer': 'https://vidlove.cc/',
     'Origin': 'https://vidlove.cc',
@@ -62,7 +82,7 @@ Deno.serve(async (req) => {
 
   if (!upstream.ok && upstream.status !== 206) {
     const errText = await upstream.text().catch(() => '');
-    return new Response(`Upstream error ${upstream.status}: ${errText}`, {
+    return new Response(`Upstream error ${upstream.status}: ${errText || 'Forbidden'}`, {
       status: upstream.status,
       headers: corsHeaders,
     });
@@ -74,29 +94,35 @@ Deno.serve(async (req) => {
               || targetUrl.href.includes('.m3u8');
 
   const proxyBase = `${reqUrl.origin}${reqUrl.pathname}`;
+  const tParam = API_SECRET ? `&_t=${encodeURIComponent(API_SECRET)}` : '';
 
-  // Rewrite HLS manifest
+  // ── 5. Rewrite HLS Manifest ────────────────────────────────────────────────
   if (isM3U8) {
     const text = await upstream.text();
     if (text.startsWith('#EXTM3U')) {
       const rewritten = text.split('\n').map(line => {
         const trimmed = line.trim();
         if (!trimmed) return line;
+
+        // Rewrite subtitle tracks if English or Sinhala
         if (trimmed.startsWith('#EXT-X-MEDIA:') && /TYPE=SUBTITLES/i.test(trimmed)) {
           const isAllowedLang = /LANGUAGE=["']?(en|eng|si|sin)["']?/i.test(trimmed) ||
                                 /NAME=["']?(English|Sinhala)["']?/i.test(trimmed);
           if (!isAllowedLang) return null;
+
           return trimmed.replace(/URI=["']([^"']+)["']/i, (m, subUri) => {
             try {
               const abs = new URL(subUri, targetUrl.href).href;
-              return `URI="${proxyBase}?url=${encodeURIComponent(abs)}"`;
+              return `URI="${proxyBase}?url=${encodeURIComponent(abs)}${tParam}"`;
             } catch { return m; }
           });
         }
+
         if (trimmed.startsWith('#')) return line;
+
         try {
           const abs = new URL(trimmed, targetUrl.href).href;
-          return `${proxyBase}?url=${encodeURIComponent(abs)}`;
+          return `${proxyBase}?url=${encodeURIComponent(abs)}${tParam}`;
         } catch { return line; }
       }).filter(l => l !== null).join('\n');
 
@@ -105,13 +131,13 @@ Deno.serve(async (req) => {
         headers: {
           ...corsHeaders,
           'Content-Type': 'application/vnd.apple.mpegurl',
-          'Cache-Control': 'no-store, no-cache',
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
         },
       });
     }
   }
 
-  // Stream binary body (MP4 / TS)
+  // ── 6. Stream Binary Body (TS Chunks / MP4) ────────────────────────────────
   const resHeaders = new Headers(corsHeaders);
   for (const [key, val] of upstream.headers.entries()) {
     const k = key.toLowerCase();
@@ -122,7 +148,6 @@ Deno.serve(async (req) => {
   resHeaders.set('Access-Control-Allow-Origin', '*');
   resHeaders.set('Access-Control-Expose-Headers', 'Content-Range, Accept-Ranges, Content-Length, Content-Type');
   resHeaders.set('Accept-Ranges', 'bytes');
-  // Prevent Smart TV / browser from caching hundreds of megabytes of video chunks to flash disk
   resHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate');
   resHeaders.set('Pragma', 'no-cache');
   resHeaders.set('Expires', '0');

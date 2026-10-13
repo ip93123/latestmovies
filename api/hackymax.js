@@ -213,11 +213,10 @@ export default async function handler(req, res) {
   }
 
   if (streamInfo && streamInfo.streamUrl) {
-    const rawProxy = process.env.CF_PROXY_URL || '';
-    const PROXY_BASE = (rawProxy && !rawProxy.includes('onrender.com') && !rawProxy.includes('workers.dev') && !rawProxy.includes('deno.net'))
-      ? rawProxy
-      : 'https://funny-sfogliatella-4e51f6.netlify.app/proxy';
-    const _tParam = process.env.API_SECRET ? `&_t=${encodeURIComponent(process.env.API_SECRET)}` : '';
+    const rawProxy = (process.env.CF_PROXY_URL || '').replace(/\/$/, '');
+    const PROXY_BASE = rawProxy || '/api/hls-proxy';
+    const _t = process.env.API_SECRET || 'hky-aGFja3lzdHJl';
+    const _tParam = `&_t=${encodeURIComponent(_t)}`;
     const finalUrl = `${PROXY_BASE}?url=${encodeURIComponent(streamInfo.streamUrl)}${_tParam}`;
 
     let proxiedQualities = null;
