@@ -8790,9 +8790,13 @@
         const sec = firstCue.start / 1000;
         _subStartTime = Date.now() - firstCue.start;
         _subOffset = 0;
-        window._subPausedElapsed = firstCue.start;
+        window._subPausedElapsed = null;
         window._externalCurrentTime = sec;
+        window._externalIsPaused = false;
+        _markBufferState(false);
+        _setSubSyncBarPaused(false);
         _sendIframeCmd('seek', sec);
+        _sendIframeCmd('play');
         _updateSubSyncOffsetBadge();
         const mm = String(Math.floor(firstCue.start / 60000)).padStart(2, '0');
         const ss = String(Math.floor((firstCue.start % 60000) / 1000)).padStart(2, '0');
@@ -8843,10 +8847,10 @@
       const now = Date.now();
       const hasLiveFeed = !!(window._lastExternalMsgTime && (now - window._lastExternalMsgTime < 45000));
 
-      // Watchdog: If movie is supposed to be playing and has live messages, but no message arrived in > 1000ms:
+      // Watchdog: If movie is supposed to be playing and has live messages, but no message arrived in > 3500ms:
       if (!window._externalIsPaused && hasLiveFeed) {
         const silence = now - window._lastExternalMsgTime;
-        if (silence > 1000) {
+        if (silence > 3500) {
           _markBufferState(true);
         }
       }
@@ -8943,7 +8947,13 @@
         (evName === 'waiting' || evName === 'buffering' || evName === 'buffer' || evName === 'stalled') ||
         (d.data && (d.data.event === 'waiting' || d.data.event === 'buffering' || d.data.player_status === 'buffering' || d.data.player_status === 'waiting'));
       const isExplicitPause = (evName === 'pause' || evName === 'paused') || (d.data && d.data.paused === true) || (d.paused === true) || (pState === 'pause');
-      let isExplicitPlay  = !isExplicitPause && !isBufferingEvent && ((evName === 'play' || evName === 'playing') || (d.paused === false && evName !== 'pause' && evName !== 'paused' && !isBufferingEvent) || (d.data && d.data.paused === false && evName !== 'pause' && evName !== 'paused' && !isBufferingEvent) || (pState === 'play'));
+      let isExplicitPlay  = !isExplicitPause && !isBufferingEvent && (
+        (evName === 'play' || evName === 'playing') ||
+        (d.paused === false && evName !== 'pause' && evName !== 'paused' && !isBufferingEvent) ||
+        (d.data && d.data.paused === false && evName !== 'pause' && evName !== 'paused' && !isBufferingEvent) ||
+        (pState === 'play') ||
+        (isVidSpark && (evName === 'timeupdate' || evName === 'play' || (evName === 'playerstatus' && d.paused === false)))
+      );
 
       if (isExplicitPause) {
         isExplicitPlay = false;
@@ -8956,26 +8966,34 @@
             // Time is clearly advancing -> video has started/continued playing!
             isExplicitPlay = true;
             _markBufferState(false);
+            window._ctStallStartTime = null;
           } else if (Math.abs(ct - window._externalCurrentTime) < 0.02) {
             // Position unchanged across messages
             if (!window._ctStallStartTime) {
               window._ctStallStartTime = Date.now();
-            } else if (Date.now() - window._ctStallStartTime > 500) {
-              // Same position for > 500ms while supposed to be playing -> mark buffering!
+            } else if (Date.now() - window._ctStallStartTime > 2800) {
+              // Same position for > 2.8s while supposed to be playing -> mark buffering!
               _markBufferState(true);
             }
+          } else {
+            window._ctStallStartTime = null;
           }
         } else if (window._externalCurrentTime === 0) {
-          // Progress restored on load/refresh while paused: record current position and keep frozen
-          window._externalCurrentTime = ct;
-          window._subPausedElapsed = Math.round(ct * 1000);
-          if (evName === 'play' || pState === 'play') {
+          // Progress restored on load/refresh: if time is advancing or event is timeupdate/play/vidspark, unpause!
+          if (ct > 0 || evName === 'play' || evName === 'timeupdate' || pState === 'play' || isVidSpark) {
             isExplicitPlay = true;
             _markBufferState(false);
+            window._ctStallStartTime = null;
+            window._externalCurrentTime = ct;
+            window._subPausedElapsed = null;
+          } else {
+            window._externalCurrentTime = ct;
+            window._subPausedElapsed = Math.round(ct * 1000);
           }
-        } else if (isVidSpark && evName === 'timeupdate' && typeof window._externalCurrentTime === 'number' && ct > (window._externalCurrentTime + 0.05)) {
+        } else if (isVidSpark && (evName === 'timeupdate' || evName === 'play')) {
           isExplicitPlay = true;
           _markBufferState(false);
+          window._ctStallStartTime = null;
         }
       }
 
@@ -9035,15 +9053,23 @@
       // ── CASE 2: PLAY EVENT ───────────────────────────────────────────
       if (isExplicitPlay) {
         _markBufferState(false);
-        if (window._externalIsPaused && window._subPausedElapsed != null) {
+        if (ct !== null && ct > 0) {
+          _subStartTime = Date.now() - (ct * 1000);
+          window._subPausedElapsed = null;
+          window._externalCurrentTime = ct;
+        } else if (window._externalIsPaused && window._subPausedElapsed != null && window._subPausedElapsed > 0) {
           _subStartTime = Date.now() - window._subPausedElapsed;
           window._subPausedElapsed = null;
         } else if (ct !== null) {
           _subStartTime = Date.now() - (ct * 1000);
           window._subPausedElapsed = null;
           window._externalCurrentTime = ct;
+        } else {
+          _subStartTime = Date.now();
+          window._subPausedElapsed = null;
         }
         window._externalIsPaused = false;
+        window._lastExternalMsgTime = Date.now();
         _subActive = true;
         _setSubSyncBarPaused(false);
         if (!_subRaf) {
@@ -9268,6 +9294,21 @@
     if (_subToggleBtn) {
       _subToggleBtn.addEventListener('click', () => {
         if (_subLoaded) {
+          if (window._externalIsPaused) {
+            window._externalIsPaused = false;
+            if (window._subPausedElapsed != null && window._subPausedElapsed > 0) {
+              _subStartTime = Date.now() - window._subPausedElapsed;
+              window._subPausedElapsed = null;
+            } else {
+              _subStartTime = Date.now() - ((window._externalCurrentTime || 0) * 1000);
+            }
+            _setSubSyncBarPaused(false);
+            _markBufferState(false);
+            _sendIframeCmd('play');
+            if (!_subRaf) _subRaf = requestAnimationFrame(_subLoop);
+            _showSubToast('▶ Subtitles Resumed', 2000);
+            return;
+          }
           // Toggle subtitle visibility directly without showing any sync panel
           const overlay = document.getElementById('subOverlay');
           if (overlay) {
@@ -11112,6 +11153,10 @@
       const wasAlreadyOpen = overlay.classList.contains('open');
       overlay.classList.add('open');
 
+      const curLabel = labels && labels[_activeServerIndex] ? labels[_activeServerIndex] : 'Server';
+      const isInitAutoLive = curLabel.toLowerCase().includes('hackymax') || curLabel.toLowerCase().includes('infinity') || curLabel.toLowerCase().includes('spark') || curLabel.toLowerCase().includes('nebula') || curLabel.toLowerCase().includes('vortex');
+      _markSubSyncAutoLive(isInitAutoLive);
+
       // ── Auto-load & auto-start Sinhala subtitle for iframe (VidLink, etc.) ────────
       if (_currentModalId) {
         _autoLoadIframeSinhalaSub();
@@ -11176,7 +11221,7 @@
       _lastIframeSubCueText = null;
 
       const sName = btn ? btn.textContent.trim() : 'Server';
-      const isAutoLive = sName.toLowerCase().includes('hackymax') || sName.toLowerCase().includes('infinity') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nebula');
+      const isAutoLive = sName.toLowerCase().includes('hackymax') || sName.toLowerCase().includes('infinity') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('vortex');
       _markSubSyncAutoLive(isAutoLive);
       _showSubToast(`Switched to <strong>${_escHtml(sName)}</strong> • Sinhala Subtitles Active`, 3200);
 
