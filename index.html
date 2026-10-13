@@ -2149,7 +2149,7 @@
     .topbar-wp-btn {
       position: absolute;
       top: 1.7rem;
-      right: 9.8rem;
+      right: 4.8rem;
       display: inline-flex;
       align-items: center;
       gap: 0.45rem;
@@ -2454,113 +2454,6 @@
     .player-container:not(.idle-fs):active .player-fs-overlay-btn {
       opacity: 1 !important;
       pointer-events: auto !important;
-    }
-
-    /* ── Floating Subtitle Sync Bar ──────────────────────────────────── */
-    .sub-sync-bar {
-      position: absolute;
-      bottom: 68px;
-      left: 50%;
-      transform: translateX(-50%) translateZ(9999px);
-      display: none;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      background: rgba(11, 14, 23, 0.88);
-      border: 1px solid rgba(232, 201, 122, 0.4);
-      border-radius: 40px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75), 0 0 16px rgba(232, 201, 122, 0.12);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      z-index: 2147483646 !important;
-      pointer-events: auto;
-      user-select: none;
-      transition: opacity 0.3s, transform 0.3s, bottom 0.3s;
-      max-width: 95vw;
-    }
-    .sub-sync-bar.visible {
-      display: inline-flex !important;
-    }
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) .sub-sync-bar {
-      bottom: 74px !important;
-      z-index: 2147483646 !important;
-    }
-    .player-container.idle-fs .sub-sync-bar:not(:hover) {
-      opacity: 0.15;
-    }
-    .player-container:hover .sub-sync-bar,
-    .sub-sync-bar:hover {
-      opacity: 1 !important;
-    }
-    .sub-sync-badge {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: var(--gold, #E8C97A);
-      padding: 3px 8px;
-      background: rgba(232, 201, 122, 0.12);
-      border-radius: 20px;
-      white-space: nowrap;
-    }
-    .sub-sync-timer {
-      font-family: monospace;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: #fff;
-      min-width: 44px;
-      text-align: center;
-      white-space: nowrap;
-    }
-    .sub-sync-controls {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .sub-sync-btn {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      color: #E2E8F0;
-      font-size: 0.75rem;
-      font-weight: 600;
-      padding: 4px 9px;
-      border-radius: 14px;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.15s;
-    }
-    .sub-sync-btn:hover {
-      background: rgba(232, 201, 122, 0.25);
-      border-color: var(--gold, #E8C97A);
-      color: #fff;
-      transform: translateY(-1px);
-    }
-    .sub-sync-btn:active {
-      transform: translateY(1px);
-    }
-    .sub-sync-offset-pill {
-      font-family: monospace;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #10B981;
-      padding: 3px 7px;
-      background: rgba(16, 185, 129, 0.12);
-      border-radius: 12px;
-      white-space: nowrap;
-    }
-    .sub-sync-close {
-      background: none;
-      border: none;
-      color: rgba(255, 255, 255, 0.6);
-      cursor: pointer;
-      font-size: 0.75rem;
-      padding: 2px 5px;
-      border-radius: 50%;
-      transition: color 0.2s;
-    }
-    .sub-sync-close:hover {
-      color: #fff;
     }
 
     /* ── Subtitle Toast Badge ────────────────────────────────────────── */
@@ -2914,16 +2807,9 @@
         right: 0.8rem !important;
         font-size: 1.5rem !important;
       }
-      #playerFullscreenBtn {
-        top: 0.6rem !important;
-        right: 2.8rem !important;
-        width: 30px !important;
-        height: 30px !important;
-        font-size: 1rem !important;
-      }
       #topbarWatchPartyBtn {
         top: 0.6rem !important;
-        right: 4.8rem !important;
+        right: 3.2rem !important;
         width: 30px !important;
         height: 30px !important;
         padding: 0 !important;
@@ -5029,10 +4915,8 @@
 
     /* Fullscreen controls transitions */
     #playerClose,
-    #playerFullscreenBtn,
     #topbarWatchPartyBtn,
     .player-fs-overlay-btn,
-    .sub-sync-bar,
     #skipIntroBtn,
     #skipInfoBadge {
       transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
@@ -5056,9 +4940,8 @@
       cursor: default !important;
     }
 
-    /* In fullscreen, keep close, fullscreen, and watch party elevated when active (not idle) */
+    /* In fullscreen, keep close and watch party elevated when active (not idle) */
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #playerClose,
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #playerFullscreenBtn,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #topbarWatchPartyBtn {
       display: flex !important;
       z-index: 2147483647 !important;
@@ -5067,7 +4950,6 @@
     }
 
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) #playerClose,
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) #playerFullscreenBtn,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) #topbarWatchPartyBtn,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) .player-fs-overlay-btn {
       opacity: 1 !important;
@@ -5075,18 +4957,10 @@
       transform: translateY(0) translateZ(9999px) !important;
     }
 
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) .sub-sync-bar.visible {
-      opacity: 1 !important;
-      pointer-events: auto !important;
-      transform: translateX(-50%) translateY(0) translateZ(9999px) !important;
-    }
-
     /* Automatically hide watchparty, x mark (close), fullscreen marks, and overlay within 2 seconds when idle in fullscreen */
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs #playerClose,
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs #playerFullscreenBtn,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs #topbarWatchPartyBtn,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs .player-fs-overlay-btn,
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs .sub-sync-bar,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs #skipIntroBtn,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs #skipInfoBadge,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs .popup-home {
@@ -5097,10 +4971,6 @@
 
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs .player-fs-overlay-btn {
       transform: translateY(12px) translateZ(9999px) !important;
-    }
-
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs .sub-sync-bar {
-      transform: translateX(-50%) translateY(14px) translateZ(9999px) !important;
     }
 
     /* Hide mouse cursor when idle in fullscreen */
@@ -5966,8 +5836,6 @@
         <span>Watch Party</span>
         <span class="topbar-wp-dot" id="topbarWpActiveDot"></span>
       </button>
-      <button class="player-fullscreen" id="playerFullscreenBtn" title="Full Screen"
-        style="position: absolute; top: 1.7rem; right: 7rem; font-size: 1.4rem; cursor: pointer; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 36px; height: 36px; color: var(--text); z-index: 710; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); transition: all 0.2s;">⛶</button>
       <!-- Subtitle File Loader (always visible) -->
       <input type="file" id="subFileInput" accept=".srt,.vtt,.ass,.ssa" style="display:none">
 
@@ -5994,26 +5862,6 @@
         <svg id="fsBtnIconEnter" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
         <svg id="fsBtnIconExit" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
       </button>
-
-      <!-- Floating Subtitle Sync & Quick Adjustment Bar -->
-      <div id="subSyncBar" class="sub-sync-bar">
-        <div class="sub-sync-badge" id="subSyncModeBadge">
-          <span class="sub-sync-icon">🇱🇰</span>
-          <span class="sub-sync-status" id="subSyncStatusText">Sinhala Sub</span>
-        </div>
-        <div class="sub-sync-timer" id="subSyncTimerDisplay">00:00</div>
-        <div class="sub-sync-controls">
-          <button class="sub-sync-btn" id="subSyncMinus5" title="Shift subtitles back 5 seconds">⏮ -5s</button>
-          <button class="sub-sync-btn" id="subSyncMinus2" title="Shift subtitles back 2 seconds">⏮ -2s</button>
-          <button class="sub-sync-btn sub-sync-playpause" id="subSyncPlayPause" title="Pause / Resume subtitle timer">⏸</button>
-          <button class="sub-sync-btn" id="subSyncPlus2" title="Shift subtitles forward 2 seconds">+2s ⏭</button>
-          <button class="sub-sync-btn" id="subSyncPlus5" title="Shift subtitles forward 5 seconds">+5s ⏭</button>
-          <button class="sub-sync-btn sub-sync-reset" id="subSyncReset" title="Restart subtitles from 00:00">⟳ 0:00</button>
-          <button class="sub-sync-btn sub-sync-jump" id="subSyncJumpFirst" title="Jump to first dialogue cue">⏩ 1st Line</button>
-        </div>
-        <div class="sub-sync-offset-pill" id="subSyncOffsetPill" title="Subtitle sync offset">0.0s</div>
-        <button class="sub-sync-close" id="subSyncToggleVisibility" title="Toggle subtitle bar">✕</button>
-      </div>
 
       <!-- Sinhala Subtitle Announcement / Toast Badge -->
       <div id="subToastBadge" class="sub-toast-badge"></div>
@@ -8903,52 +8751,6 @@
       }
     }
 
-    // Initialize Subtitle Sync Bar button click listeners
-    (function _initSubSyncBar() {
-      const m5 = document.getElementById('subSyncMinus5');
-      const m2 = document.getElementById('subSyncMinus2');
-      const p2 = document.getElementById('subSyncPlus2');
-      const p5 = document.getElementById('subSyncPlus5');
-      const pp = document.getElementById('subSyncPlayPause');
-      const res = document.getElementById('subSyncReset');
-      const jmp = document.getElementById('subSyncJumpFirst');
-      const tog = document.getElementById('subSyncToggleVisibility');
-
-      if (m5) m5.addEventListener('click', (e) => { e.stopPropagation(); subShift(-5000); });
-      if (m2) m2.addEventListener('click', (e) => { e.stopPropagation(); subShift(-2000); });
-      if (p2) p2.addEventListener('click', (e) => { e.stopPropagation(); subShift(2000); });
-      if (p5) p5.addEventListener('click', (e) => { e.stopPropagation(); subShift(5000); });
-      if (pp) pp.addEventListener('click', (e) => {
-        e.stopPropagation();
-        window._externalIsPaused = !window._externalIsPaused;
-        if (window._externalIsPaused) {
-          window._subPausedElapsed = (Date.now() - _subStartTime);
-        } else if (window._subPausedElapsed != null) {
-          _subStartTime = Date.now() - window._subPausedElapsed;
-          window._subPausedElapsed = null;
-        }
-        _setSubSyncBarPaused(window._externalIsPaused);
-        _showSubToast(window._externalIsPaused ? '⏸ Subtitles paused' : '▶ Subtitles resumed', 1500);
-      });
-      if (res) res.addEventListener('click', (e) => {
-        e.stopPropagation();
-        _subStartTime = Date.now();
-        _subOffset = 0;
-        window._subPausedElapsed = 0;
-        _updateSubSyncOffsetBadge();
-        _showSubToast('⟳ Subtitles reset to 00:00', 2000);
-      });
-      if (jmp) jmp.addEventListener('click', (e) => {
-        e.stopPropagation();
-        _jumpToFirstDialogueCue();
-      });
-      if (tog) tog.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const bar = document.getElementById('subSyncBar');
-        if (bar) bar.classList.toggle('visible');
-      });
-    })();
-
     // RAF loop — renders current cue smoothly at 60fps
     function _subLoop() {
       if (!_subStartTime || !_subCues.length || !_subActive) return;
@@ -10140,11 +9942,6 @@
           fsEnter.style.display = isFs ? 'none' : 'block';
           fsExit.style.display = isFs ? 'block' : 'none';
         }
-        const topFsBtn = document.getElementById('playerFullscreenBtn');
-        if (topFsBtn) {
-          topFsBtn.textContent = isFs ? '🗗' : '⛶';
-          topFsBtn.title = isFs ? 'Exit Full Screen' : 'Full Screen';
-        }
 
         // Force immediate cue redraw in new fullscreen dimensions
         _lastIframeSubCueText = null;
@@ -11043,10 +10840,6 @@
         }
       });
     }
-
-    document.getElementById('playerFullscreenBtn').addEventListener('click', () => {
-      _togglePlayerFullscreen();
-    });
 
     document.getElementById('playerOverlay').addEventListener('click', e => {
       if (e.target === document.getElementById('playerOverlay')) document.getElementById('playerClose').click();
