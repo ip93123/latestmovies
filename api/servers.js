@@ -26,7 +26,7 @@ export default async function handler(req, res) {
       `https://vidcore.net/tv/${id}/${s}/${e}?autoplay=1&server=orbit`,
       `https://anyembed.xyz/embed/tmdb-tv-${id}-${s}-${e}?logo=false&autoplay=1`,
     ];
-    labels = ['HackyMax ✦', 'MoviesAPI', 'AutoEmbed', 'SmashyStream', '2Embed', 'Infinity', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
+    labels = ['HackyMax ✦', 'Nova', 'Cosmos', 'Nebula', 'Titan', 'Infinity', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
 
   } else {
     // Movie
@@ -44,7 +44,7 @@ export default async function handler(req, res) {
       `https://vidcore.net/movie/${id}?autoplay=1&server=orbit`,
       `https://anyembed.xyz/embed/tmdb-movie-${id}?logo=false&autoplay=1`,
     ];
-    labels = ['HackyMax ✦', 'MoviesAPI', 'AutoEmbed', 'SmashyStream', '2Embed', 'Infinity', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
+    labels = ['HackyMax ✦', 'Nova', 'Cosmos', 'Nebula', 'Titan', 'Infinity', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
   }
 
   // Short cache so new servers appear quickly

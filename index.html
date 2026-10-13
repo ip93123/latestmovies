@@ -2338,7 +2338,7 @@
       position: absolute;
       inset: 0;
       pointer-events: none;
-      z-index: 100; /* above iframe compositing layer (iframe z-index: 1) */
+      z-index: 2147483647 !important; /* above all iframe compositing and hardware surfaces */
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
@@ -2347,6 +2347,8 @@
       box-sizing: border-box;
     }
     #subText {
+      position: relative;
+      z-index: 2147483647 !important;
       max-width: 90%;
       text-align: center;
       padding: 0.35rem 1.2rem;
@@ -2370,7 +2372,7 @@
     #playerContainer:-webkit-full-screen #subOverlay,
     #maxPlayerWrap:fullscreen #subOverlay,
     #maxPlayerWrap:-webkit-full-screen #subOverlay {
-      z-index: 1000 !important;
+      z-index: 2147483647 !important;
       padding-bottom: 7% !important;
     }
 
@@ -2380,6 +2382,7 @@
     #maxPlayerWrap:-webkit-full-screen #subText {
       font-size: var(--sub-size, calc(clamp(1.9rem, 3.8vw, 3.2rem) * 0.75)) !important;
       font-weight: 700 !important;
+      z-index: 2147483647 !important;
     }
 
     /* Suppress any browser native/in-band stream cues so they never clash with custom sub overlay */
@@ -2998,6 +3001,31 @@
     }
     .player-server-btn.twoembed-btn.active {
       box-shadow: 0 0 24px rgba(139, 92, 246, 0.9);
+    }
+
+    /* ── Silver Theme for Non-PostMessage Fallback Players ─────────── */
+    .player-server-btn.silver-btn,
+    .modal-stream-pill.silver-btn {
+      background: linear-gradient(135deg, #71717A 0%, #52525B 50%, #3F3F46 100%) !important;
+      color: #F4F4F5 !important;
+      font-weight: 600 !important;
+      border: 1px solid rgba(255, 255, 255, 0.22) !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    }
+    .player-server-btn.silver-btn:hover,
+    .modal-stream-pill.silver-btn:hover {
+      background: linear-gradient(135deg, #A1A1AA 0%, #71717A 50%, #52525B 100%) !important;
+      box-shadow: 0 0 14px rgba(212, 212, 216, 0.45) !important;
+      transform: translateY(-1px);
+    }
+    .player-server-btn.silver-btn.active {
+      background: linear-gradient(135deg, #E4E4E7 0%, #D4D4D8 50%, #A1A1AA 100%) !important;
+      color: #18181B !important;
+      font-weight: 700 !important;
+      border-color: #FAFAFA !important;
+      box-shadow: 0 0 20px rgba(244, 244, 245, 0.75) !important;
+      text-shadow: none;
     }
 
     /* ─────────────────────────────────────────────────────────────
@@ -5675,6 +5703,10 @@
       <button id="skipIntroBtn">⏭ Skip Intro</button>
       <div id="skipInfoBadge">Intro: <span id="skipInfoText"></span></div>
 
+      <iframe id="playerFrame" src="about:blank"
+        allow="autoplay *; encrypted-media *; fullscreen *; picture-in-picture *; web-share *"
+        allowfullscreen
+        frameborder="0"></iframe>
       <!-- Subtitle Overlay (rendered on top of iframe) -->
       <div id="subOverlay"><span id="subText"></span></div>
       <!-- Subtitle Sync Panel (hidden overlay) -->
@@ -5684,10 +5716,6 @@
         <button id="subResetBtn" style="display:none;"></button>
         <span id="subStatusLine" style="display:none;"></span>
       </div>
-      <iframe id="playerFrame" src="about:blank"
-        allow="autoplay *; encrypted-media *; fullscreen *; picture-in-picture *; web-share *"
-        allowfullscreen
-        frameborder="0"></iframe>
     </div>
   </div>
 
@@ -7614,12 +7642,12 @@
 
     function getServerBtnClass(label) {
       const lbl = (label || '').toLowerCase();
-      if (lbl.includes('hackymax') || lbl.includes('nova')) return ' hackymax-btn';
-      if (lbl.includes('moviesapi')) return ' moviesapi-btn';
-      if (lbl.includes('autoembed')) return ' autoembed-btn';
-      if (lbl.includes('smashystream')) return ' smashystream-btn';
-      if (lbl.includes('2embed')) return ' twoembed-btn';
-      return '';
+      if (lbl.includes('hackymax')) return ' hackymax-btn';
+      if (lbl.includes('nova') || lbl.includes('moviesapi')) return ' moviesapi-btn';
+      if (lbl.includes('cosmos') || lbl.includes('autoembed')) return ' autoembed-btn';
+      if (lbl.includes('nebula') || lbl.includes('smashy')) return ' smashystream-btn';
+      if (lbl.includes('titan') || lbl.includes('2embed')) return ' twoembed-btn';
+      return ' silver-btn';
     }
 
     async function getModalServerUrls(id, type, season, episode) {
@@ -7653,7 +7681,7 @@
           `https://vidcore.net/tv/${id}/${s}/${e}?autoplay=1&server=orbit`,
           `https://anyembed.xyz/embed/tmdb-tv-${id}-${s}-${e}?logo=false&autoplay=1`
         ];
-        labels = ['HackyMax ✦', 'MoviesAPI', 'AutoEmbed', 'SmashyStream', '2Embed', 'Infinity', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
+        labels = ['HackyMax ✦', 'Nova', 'Cosmos', 'Nebula', 'Titan', 'Infinity', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
       } else {
         urls = [
           `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true`,
@@ -7669,7 +7697,7 @@
           `https://vidcore.net/movie/${id}?autoplay=1&server=orbit`,
           `https://anyembed.xyz/embed/tmdb-movie-${id}?logo=false&autoplay=1`
         ];
-        labels = ['HackyMax ✦', 'MoviesAPI', 'AutoEmbed', 'SmashyStream', '2Embed', 'Infinity', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
+        labels = ['HackyMax ✦', 'Nova', 'Cosmos', 'Nebula', 'Titan', 'Infinity', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
       }
       return { urls, labels };
     }
@@ -8485,7 +8513,7 @@
             _subStatusLine._lastSec = secs;
             const mm = String(Math.floor(secs / 60)).padStart(2, '0');
             const ss = String(secs % 60).padStart(2, '0');
-            _subStatusLine.textContent = `⚡ Nova Live-Sync (${mm}:${ss})`;
+            _subStatusLine.textContent = `⚡ Live-Sync (${mm}:${ss})`;
           }
 
           // Auto-hide manual Start button once live events are received
@@ -8496,7 +8524,7 @@
           const msg = document.getElementById('subPanelMsg');
           if (msg && !msg._hasLiveSyncNotice) {
             msg._hasLiveSyncNotice = true;
-            msg.innerHTML = `✅ <strong style="color:var(--gold)">${_escHtml(_subFileName)}</strong> loaded — <em>${_subCues.length} cues</em>.<br><span style="color:#2ECC71;font-size:0.85em;font-weight:700;">⚡ Live-Sync active (Nova / VidLink) — Auto-syncs on skip/seek!</span>`;
+            msg.innerHTML = `✅ <strong style="color:var(--gold)">${_escHtml(_subFileName)}</strong> loaded — <em>${_subCues.length} cues</em>.<br><span style="color:#2ECC71;font-size:0.85em;font-weight:700;">⚡ Live-Sync active — Auto-syncs on skip/seek!</span>`;
           }
         }
       }
@@ -9492,9 +9520,20 @@
         });
       }
 
-      // Fullscreen change handler to update fs icon
-      document.addEventListener('fullscreenchange', _updateFsIcons);
-      document.addEventListener('webkitfullscreenchange', _updateFsIcons);
+      // Fullscreen change handler to update fs icon & ensure subOverlay remains on top
+      function _handleGlobalFullscreen() {
+        _updateFsIcons();
+        const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+        const frame = document.getElementById('playerFrame');
+        const pContainer = document.getElementById('playerContainer');
+        if (fsEl === frame && pContainer) {
+          if (pContainer.requestFullscreen) pContainer.requestFullscreen().catch(() => {});
+          else if (pContainer.webkitRequestFullscreen) pContainer.webkitRequestFullscreen();
+        }
+        _attachSubOverlayToActiveWrap();
+      }
+      document.addEventListener('fullscreenchange', _handleGlobalFullscreen);
+      document.addEventListener('webkitfullscreenchange', _handleGlobalFullscreen);
     }
 
     _initMaxCustomControls();
@@ -9508,7 +9547,9 @@
       if (_maxMode && maxWrap) {
         if (overlay.parentElement !== maxWrap) maxWrap.appendChild(overlay);
       } else if (pContainer) {
-        if (overlay.parentElement !== pContainer) pContainer.appendChild(overlay);
+        if (overlay.parentElement !== pContainer || pContainer.lastElementChild !== overlay) {
+          pContainer.appendChild(overlay);
+        }
       }
     }
 
@@ -10053,6 +10094,26 @@
     async function _autoLoadIframeSinhalaSub() {
       if (!_currentModalId) return;
       _attachSubOverlayToActiveWrap();
+
+      // If cues are already loaded for the current video, IMMEDIATELY resume the loop and re-render
+      if (_subCues && _subCues.length > 0) {
+        const resumeSec = (typeof window._externalCurrentTime === 'number' && window._externalCurrentTime > 0)
+          ? window._externalCurrentTime
+          : 0;
+        _subStartTime = Date.now() - (resumeSec * 1000);
+        _subOffset = 0;
+        _stopSubLoop();
+        _lastIframeSubCueText = null;
+        _subRaf = requestAnimationFrame(_subLoop);
+        _subActive = true;
+        if (_subToggleBtn) {
+          _subToggleBtn.style.opacity = '1';
+          _subToggleBtn.style.cursor = 'pointer';
+          _subToggleBtn.classList.add('active');
+        }
+        return;
+      }
+
       const localSub = typeof SUBTITLE_MAP !== 'undefined' ? SUBTITLE_MAP[String(_currentModalId)] : null;
       let srtText = null;
       let subLabel = 'Sinhala 🇱🇰';
@@ -10105,10 +10166,14 @@
 
           if (parsedCues.length) {
             _loadSubCues(parsedCues, subLabel);
-            // Auto-start wall-clock sync for iframe player
-            _subStartTime = Date.now();
+            // Auto-start wall-clock sync for iframe player from current watch position
+            const resumeSec = (typeof window._externalCurrentTime === 'number' && window._externalCurrentTime > 0)
+              ? window._externalCurrentTime
+              : 0;
+            _subStartTime = Date.now() - (resumeSec * 1000);
             _subOffset = 0;
             _stopSubLoop();
+            _lastIframeSubCueText = null;
             _subRaf = requestAnimationFrame(_subLoop);
             if (_subStartBtn) _subStartBtn.textContent = '⟳ Restart';
             if (_subToggleBtn) {
@@ -10154,6 +10219,7 @@
       frame.onload = () => {
         if (loader) loader.style.opacity = '0';
         frame.style.opacity = '1';
+        _attachSubOverlayToActiveWrap();
         try {
           frame.contentWindow?.postMessage({ type: 'unmute' }, '*');
           frame.contentWindow?.postMessage({ action: 'unmute' }, '*');
@@ -10234,6 +10300,7 @@
       frame.onload = () => {
         if (loader) loader.style.opacity = '0';
         frame.style.opacity = '1';
+        _attachSubOverlayToActiveWrap();
         try {
           frame.contentWindow?.postMessage({ type: 'unmute' }, '*');
           frame.contentWindow?.postMessage({ action: 'unmute' }, '*');
