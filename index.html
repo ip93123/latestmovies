@@ -2925,33 +2925,9 @@
       box-shadow: 0 0 14px rgba(0, 198, 255, 0.4);
     }
 
-    /* ── SinMax Player server button ──────────────────────────────────── */
-    .player-server-btn.sinmax-btn,
-    .modal-stream-pill.sinmax-btn {
-      background: linear-gradient(135deg, #FF4B2B 0%, #FF416C 100%) !important;
-      color: #ffffff !important;
-      font-weight: 800 !important;
-      border-color: transparent !important;
-      letter-spacing: 0.5px;
-      box-shadow: 0 0 14px rgba(255, 65, 108, 0.45);
-    }
-    .player-server-btn.sinmax-btn:hover,
-    .modal-stream-pill.sinmax-btn:hover {
-      box-shadow: 0 0 22px rgba(255, 65, 108, 0.65);
-      transform: translateY(-1px);
-    }
-    .player-server-btn.sinmax-btn.active {
-      box-shadow: 0 0 28px rgba(255, 65, 108, 0.85);
-      animation: sinmaxPulse 2.5s ease-in-out infinite;
-    }
-    @keyframes sinmaxPulse {
-      0%, 100% { box-shadow: 0 0 14px rgba(255, 65, 108, 0.5); }
-      50%       { box-shadow: 0 0 28px rgba(255, 65, 108, 0.9); }
-    }
-
-    /* ── ZeeMax Player server button (Gold theme) ───────────────────────── */
-    .player-server-btn.zeemax-btn,
-    .modal-stream-pill.zeemax-btn {
+    /* ── HackyMax Server button (Gold theme) ───────────────────────── */
+    .player-server-btn.hackymax-btn,
+    .modal-stream-pill.hackymax-btn {
       background: linear-gradient(135deg, #E8C97A 0%, #C9A227 100%) !important;
       color: #07090F !important;
       font-weight: 800 !important;
@@ -2959,18 +2935,90 @@
       letter-spacing: 0.5px;
       box-shadow: 0 0 14px rgba(232, 201, 122, 0.45);
     }
-    .player-server-btn.zeemax-btn:hover,
-    .modal-stream-pill.zeemax-btn:hover {
+    .player-server-btn.hackymax-btn:hover,
+    .modal-stream-pill.hackymax-btn:hover {
       box-shadow: 0 0 22px rgba(232, 201, 122, 0.75);
       transform: translateY(-1px);
     }
-    .player-server-btn.zeemax-btn.active {
-      box-shadow: 0 0 28px rgba(232, 201, 122, 0.9);
-      animation: zeemaxPulse 2.5s ease-in-out infinite;
+    .player-server-btn.hackymax-btn.active {
+      box-shadow: 0 0 28px rgba(232, 201, 122, 0.95);
+      animation: hackymaxPulse 2.5s ease-in-out infinite;
     }
-    @keyframes zeemaxPulse {
+    @keyframes hackymaxPulse {
       0%, 100% { box-shadow: 0 0 14px rgba(232, 201, 122, 0.5); }
       50%       { box-shadow: 0 0 28px rgba(232, 201, 122, 0.95); }
+    }
+
+    /* ── MoviesAPI Server button (Blue theme) ───────────────────────── */
+    .player-server-btn.moviesapi-btn,
+    .modal-stream-pill.moviesapi-btn {
+      background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      border-color: transparent !important;
+      box-shadow: 0 0 14px rgba(37, 99, 235, 0.4);
+    }
+    .player-server-btn.moviesapi-btn:hover,
+    .modal-stream-pill.moviesapi-btn:hover {
+      box-shadow: 0 0 20px rgba(37, 99, 235, 0.7);
+      transform: translateY(-1px);
+    }
+    .player-server-btn.moviesapi-btn.active {
+      box-shadow: 0 0 24px rgba(37, 99, 235, 0.9);
+    }
+
+    /* ── AutoEmbed Server button (Red theme) ────────────────────────── */
+    .player-server-btn.autoembed-btn,
+    .modal-stream-pill.autoembed-btn {
+      background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%) !important;
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      border-color: transparent !important;
+      box-shadow: 0 0 14px rgba(239, 68, 68, 0.4);
+    }
+    .player-server-btn.autoembed-btn:hover,
+    .modal-stream-pill.autoembed-btn:hover {
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.7);
+      transform: translateY(-1px);
+    }
+    .player-server-btn.autoembed-btn.active {
+      box-shadow: 0 0 24px rgba(239, 68, 68, 0.9);
+    }
+
+    /* ── SmashyStream Server button (Green theme) ────────────────────── */
+    .player-server-btn.smashystream-btn,
+    .modal-stream-pill.smashystream-btn {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      border-color: transparent !important;
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.4);
+    }
+    .player-server-btn.smashystream-btn:hover,
+    .modal-stream-pill.smashystream-btn:hover {
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.7);
+      transform: translateY(-1px);
+    }
+    .player-server-btn.smashystream-btn.active {
+      box-shadow: 0 0 24px rgba(16, 185, 129, 0.9);
+    }
+
+    /* ── 2Embed Server button (Purple theme) ─────────────────────────── */
+    .player-server-btn.twoembed-btn,
+    .modal-stream-pill.twoembed-btn {
+      background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%) !important;
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      border-color: transparent !important;
+      box-shadow: 0 0 14px rgba(139, 92, 246, 0.4);
+    }
+    .player-server-btn.twoembed-btn:hover,
+    .modal-stream-pill.twoembed-btn:hover {
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.7);
+      transform: translateY(-1px);
+    }
+    .player-server-btn.twoembed-btn.active {
+      box-shadow: 0 0 24px rgba(139, 92, 246, 0.9);
     }
 
     /* ─────────────────────────────────────────────────────────────
@@ -5676,321 +5724,6 @@
           <button class="sub-sync-btn" onclick="subShift(2000)">+2s</button>
         </div>
       </div>
-      <!-- ══ MAX PLAYER ══ Custom HLS player — shown instead of iframe when Max server selected -->
-      <div id="maxPlayerWrap" style="display:none; position:absolute; inset:0; background:#000; z-index:5; border-radius:inherit; overflow:hidden;">
-        <!-- Video element -->
-        <video id="maxVideo" playsinline referrerpolicy="no-referrer" style="width:100%;height:100%;display:block;background:#000;cursor:pointer;"></video>
-
-        <!-- Big Center Click Flash (Play/Pause) -->
-        <div id="maxCenterFlash">
-          <svg class="icon-flash-play" viewBox="0 0 24 24"><polygon points="6,4 20,12 6,20"/></svg>
-          <svg class="icon-flash-pause" viewBox="0 0 24 24" style="display:none;"><rect x="5" y="4" width="4" height="16"/><rect x="15" y="4" width="4" height="16"/></svg>
-        </div>
-        <!-- Buffering spinner / Rich Loading Screen -->
-        <div id="maxBuffering" style="display:none; position:absolute; inset:0; background:#07090F; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.75rem; z-index:11;">
-          <!-- Ambient blurred backdrop -->
-          <div id="maxBufferingBackdrop" style="position:absolute; inset:-20px; background-size:cover; background-position:center; filter:blur(24px) brightness(0.25); transform:scale(1.1); pointer-events:none; opacity:0.85; transition:opacity 0.4s ease;"></div>
-          <!-- Dark vignette overlay -->
-          <div style="position:absolute; inset:0; background:radial-gradient(circle at center, rgba(7,9,15,0.4) 0%, rgba(7,9,15,0.92) 85%); pointer-events:none;"></div>
-          
-          <!-- Movie Poster Card -->
-          <div id="maxBufferingPosterWrap" style="position:relative; z-index:2; display:flex; flex-direction:column; align-items:center;">
-            <img id="maxBufferingPoster" src="" alt="Movie Poster" style="width:115px; height:170px; object-fit:cover; border-radius:12px; box-shadow:0 16px 40px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.12); display:none;" />
-          </div>
-
-          <!-- Title -->
-          <div id="maxBufferingTitle" style="position:relative; z-index:2; font-family:'Inter',sans-serif; font-weight:700; font-size:1.15rem; color:#fff; text-shadow:0 2px 8px rgba(0,0,0,0.8); max-width:85%; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
-
-          <!-- Spinner and Status -->
-          <div style="position:relative; z-index:2; display:flex; align-items:center; gap:10px;">
-            <div id="maxBufferingSpinner" style="width:26px; height:26px; border:3px solid rgba(0,198,255,0.2); border-top-color:#00C6FF; border-radius:50%; animation:spin 0.9s linear infinite;"></div>
-            <span id="maxBufferingStatus" style="color:#00C6FF; font-size:0.85rem; font-family:'Inter',sans-serif; letter-spacing:0.8px; font-weight:700; text-transform:uppercase;">HACKYMAX ✦ · LOADING STREAM (20s)</span>
-          </div>
-
-          <!-- Quick Switch to Infinity Button -->
-          <button id="maxBufferingSkipBtn" type="button" style="position:relative; z-index:3; pointer-events:auto; margin-top:0.3rem; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2); color:#fff; font-family:'Inter',sans-serif; font-size:0.75rem; font-weight:600; padding:6px 14px; border-radius:20px; cursor:pointer; backdrop-filter:blur(8px); transition:all 0.2s ease;">Switch to Infinity ✦</button>
-        </div>
-        <!-- Error / no stream state -->
-        <div id="maxError" style="display:none; position:absolute; inset:0; background:linear-gradient(135deg,#07090F 0%,#0D1117 100%); flex-direction:column; align-items:center; justify-content:center; gap:1.2rem; z-index:11; text-align:center; padding:2rem;">
-          <div style="width:64px;height:64px;background:rgba(232,201,122,0.12);border:1.5px solid rgba(232,201,122,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;">⚡</div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:3px;color:#E8C97A;">MAX</div>
-          <div style="color:#6B7A94;font-size:0.9rem;font-family:'Inter',sans-serif;max-width:320px;line-height:1.6;" id="maxErrorMsg">HLS stream unavailable for this title.<br><span style="color:#E8C97A;font-weight:600;">Switching to Infinity...</span></div>
-          <button id="maxFallbackBtn" type="button" style="background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;font-weight:700;font-family:'Inter',sans-serif;font-size:0.85rem;padding:8px 18px;border-radius:20px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">Switch to Infinity ✦</button>
-          <div style="height:1px;width:60px;background:linear-gradient(90deg,transparent,rgba(232,201,122,0.4),transparent);"></div>
-          <div style="color:#4a5568;font-size:0.75rem;font-family:'Inter',sans-serif;">Tip: Try Infinity or Nova as fallback</div>
-        </div>
-
-        <!-- ══ UNIFIED CONTROLS BAR (Play time bar on top + buttons below) ══ -->
-        <div id="maxControlsBar">
-          <!-- Top: Full-Width Progress / Scrubber Bar -->
-          <div id="maxProgressWrap">
-            <div id="maxProgressHoverTime">00:00</div>
-            <div id="maxProgressBar">
-              <div id="maxProgressBuffered"></div>
-              <div id="maxProgressPlayed"></div>
-              <div id="maxProgressThumb"></div>
-            </div>
-          </div>
-
-          <!-- Bottom: Action Buttons & Controls -->
-          <div id="maxControlsRow">
-            <!-- Left Group: Play, -10s, +10s, Volume, Time -->
-            <div class="max-ctrl-group max-ctrl-left">
-              <button class="max-ctrl-btn" id="maxPlayPauseBtn" title="Play / Pause (Space)">
-                <svg class="max-icon-play" viewBox="0 0 24 24"><polygon points="6,4 20,12 6,20"/></svg>
-                <svg class="max-icon-pause" viewBox="0 0 24 24" style="display:none;"><rect x="5" y="4" width="4.5" height="16" rx="1"/><rect x="14.5" y="4" width="4.5" height="16" rx="1"/></svg>
-              </button>
-
-              <button class="max-ctrl-btn max-skip-btn-wrap" id="maxSkipBack" title="Rewind 10s (←)">
-                <svg viewBox="0 0 24 24" class="max-skip-svg" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                  <path d="M3 3v5h5"/>
-                </svg>
-                <span class="max-skip-num">10</span>
-              </button>
-
-              <button class="max-ctrl-btn max-skip-btn-wrap" id="maxSkipFwd" title="Forward 10s (→)">
-                <svg viewBox="0 0 24 24" class="max-skip-svg" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 12a9 9 0 1 1-9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
-                  <path d="M21 3v5h-5"/>
-                </svg>
-                <span class="max-skip-num">10</span>
-              </button>
-
-              <!-- Volume Control -->
-              <div class="max-vol-box" id="maxVolBox">
-                <button class="max-ctrl-btn" id="maxMuteBtn" title="Mute / Unmute (M)">
-                  <svg class="max-vol-high" viewBox="0 0 24 24">
-                    <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/>
-                    <path d="M15.5 8.5a5 5 0 0 1 0 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    <path d="M18.8 5.2a10 10 0 0 1 0 13.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                  </svg>
-                  <svg class="max-vol-muted" viewBox="0 0 24 24" style="display:none;">
-                    <polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/>
-                    <line x1="22" y1="9" x2="16" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    <line x1="16" y1="9" x2="22" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                  </svg>
-                </button>
-                <div class="max-vol-track-wrap">
-                  <input type="range" id="maxVolSlider" min="0" max="1" step="0.05" value="1" title="Volume">
-                </div>
-              </div>
-
-              <!-- Time display: 00:24 / 2:14:22 -->
-              <div class="max-time-display">
-                <span id="maxCurTime">00:00</span>
-                <span class="max-time-div">/</span>
-                <span id="maxDurTime">00:00</span>
-              </div>
-            </div>
-
-            <!-- Right Group: Settings, Fullscreen -->
-            <div class="max-ctrl-group max-ctrl-right">
-              <button class="max-ctrl-btn" id="maxSettingsBtn" title="Settings (Quality, Speed, Subtitles)">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="4" y1="21" x2="4" y2="14"/>
-                  <line x1="4" y1="10" x2="4" y2="3"/>
-                  <line x1="12" y1="21" x2="12" y2="12"/>
-                  <line x1="12" y1="8" x2="12" y2="3"/>
-                  <line x1="20" y1="21" x2="20" y2="16"/>
-                  <line x1="20" y1="12" x2="20" y2="3"/>
-                  <line x1="1" y1="14" x2="7" y2="14"/>
-                  <line x1="9" y1="8" x2="15" y2="8"/>
-                  <line x1="17" y1="16" x2="23" y2="16"/>
-                </svg>
-              </button>
-
-              <!-- Watch Party Button -->
-              <button class="max-ctrl-btn" id="maxWatchPartyBtn" title="Watch Party — watch together with friends">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
-                  <circle cx="19" cy="9" r="3"/>
-                  <path d="M23 21v-2a3 3 0 0 0-3-3h-1"/>
-                </svg>
-                <span class="wp-dot" id="wpActiveDot"></span>
-              </button>
-
-              <button class="max-ctrl-btn" id="maxFullscreenBtn" title="Full Screen (F)">
-                <svg class="max-fs-enter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="15 3 21 3 21 9"/>
-                  <polyline points="9 21 3 21 3 15"/>
-                  <polyline points="21 15 21 21 15 21"/>
-                  <polyline points="3 9 3 3 9 3"/>
-                </svg>
-                <svg class="max-fs-exit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
-                  <polyline points="4 14 10 14 10 20"/>
-                  <polyline points="20 10 14 10 14 4"/>
-                  <polyline points="14 20 14 14 20 14"/>
-                  <polyline points="10 4 10 10 4 10"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- skip toast -->
-        <div id="maxSkipToast"></div>
-
-        <!-- ⚙ Settings Panel -->
-        <div id="maxSettingsPanel">
-          <div class="mxs-tabs">
-            <button class="mxs-tab active" data-mxs-tab="sub">Subtitles</button>
-            <button class="mxs-tab" data-mxs-tab="quality">📺 Quality</button>
-            <button class="mxs-tab" data-mxs-tab="playback">▶ Playback</button>
-          </div>
-
-          <!-- ── SUBTITLES TAB ── -->
-          <div class="mxs-pane active" id="mxs-pane-sub">
-            <!-- Subtitle Track Selector -->
-            <div class="mxs-section">Subtitle Track</div>
-            <div class="mxs-row" style="flex-direction:column;align-items:stretch;gap:0.45rem;">
-              <div class="mxs-ctrl" id="mxsTrackList" style="display:flex;flex-wrap:wrap;gap:0.35rem;justify-content:flex-start;">
-                <button class="mxs-pill on" id="mxsTrackOff">Off</button>
-              </div>
-              <div id="mxsTrackHint" style="font-size:0.68rem;color:rgba(255,255,255,0.55);line-height:1.35;"></div>
-            </div>
-            <div class="mxs-divider"></div>
-
-            <div class="mxs-section">Text Color</div>
-            <div class="mxs-row">
-              <span class="mxs-label">Color</span>
-              <div class="mxs-ctrl" id="mxsColorSwatches">
-                <span class="mxs-swatch on" data-color="#ffffff" style="background:#fff" title="White"></span>
-                <span class="mxs-swatch" data-color="#FFE55C" style="background:#FFE55C" title="Yellow"></span>
-                <span class="mxs-swatch" data-color="#7DF9FF" style="background:#7DF9FF" title="Cyan"></span>
-                <span class="mxs-swatch" data-color="#FF6B6B" style="background:#FF6B6B" title="Red"></span>
-                <span class="mxs-swatch" data-color="#A8FF78" style="background:#A8FF78" title="Green"></span>
-                <span class="mxs-swatch" data-color="#E8C97A" style="background:#E8C97A" title="Gold"></span>
-                <span class="mxs-swatch" data-color="#FFB347" style="background:#FFB347" title="Orange"></span>
-                <span class="mxs-swatch" data-color="#C39BD3" style="background:#C39BD3" title="Purple"></span>
-              </div>
-            </div>
-            <div class="mxs-row">
-              <span class="mxs-label">Size</span>
-              <div class="mxs-ctrl mxs-slider-wrap">
-                <input type="range" class="mxs-slider" id="mxsSizeSlider" min="50" max="180" value="75" step="5">
-                <span class="mxs-val" id="mxsSizeVal">75%</span>
-              </div>
-            </div>
-            <div class="mxs-divider"></div>
-            <div class="mxs-section">Background</div>
-            <div class="mxs-row">
-              <span class="mxs-label">BG Opacity</span>
-              <div class="mxs-ctrl mxs-slider-wrap">
-                <input type="range" class="mxs-slider" id="mxsBgSlider" min="0" max="100" value="0" step="5">
-                <span class="mxs-val" id="mxsBgVal">0%</span>
-              </div>
-            </div>
-            <div class="mxs-row">
-              <span class="mxs-label">BG Color</span>
-              <div class="mxs-ctrl" id="mxsBgSwatches">
-                <span class="mxs-swatch on" data-bgc="#000000" style="background:#000" title="Black"></span>
-                <span class="mxs-swatch" data-bgc="#0a0a3a" style="background:#0a0a3a" title="Navy"></span>
-                <span class="mxs-swatch" data-bgc="#1a0a00" style="background:#1a0a00" title="Dark Brown"></span>
-                <span class="mxs-swatch" data-bgc="#002200" style="background:#002200" title="Dark Green"></span>
-              </div>
-            </div>
-            <div class="mxs-divider"></div>
-            <div class="mxs-section">Position &amp; Shadow</div>
-            <div class="mxs-row">
-              <span class="mxs-label">Position</span>
-              <div class="mxs-ctrl">
-                <button class="mxs-pill on" id="mxsPosBottom">Bottom</button>
-                <button class="mxs-pill" id="mxsPosTop">Top</button>
-              </div>
-            </div>
-            <div class="mxs-row">
-              <span class="mxs-label">Text Shadow</span>
-              <div class="mxs-ctrl">
-                <button class="mxs-pill on" id="mxsShadowOn">On</button>
-                <button class="mxs-pill" id="mxsShadowOff">Off</button>
-              </div>
-            </div>
-            <div class="mxs-row">
-              <span class="mxs-label">Offset</span>
-              <div class="mxs-ctrl mxs-slider-wrap">
-                <input type="range" class="mxs-slider" id="mxsSubOffsetSlider" min="-10000" max="10000" value="0" step="500">
-                <span class="mxs-val" id="mxsSubOffsetVal">0s</span>
-              </div>
-            </div>
-            <div class="mxs-divider"></div>
-            <div class="mxs-section">Upload Subtitle File</div>
-            <div class="mxs-row" style="flex-direction:column;align-items:stretch;gap:0.4rem">
-              <div id="mxsSubDropZone" style="border:1.5px dashed rgba(232,201,122,0.35);border-radius:10px;padding:0.8rem 0.6rem;text-align:center;cursor:pointer;transition:all 0.2s;">
-                <div style="font-size:1.3rem;margin-bottom:0.2rem;">📁</div>
-                <div style="font-size:0.72rem;color:rgba(255,255,255,0.5);">Click or drag &amp; drop a .srt / .vtt / .ass file</div>
-                <div id="mxsSubFileName" style="font-size:0.7rem;color:#E8C97A;margin-top:0.3rem;display:none;"></div>
-              </div>
-              <input type="file" id="mxsSubFileInput" accept=".srt,.vtt,.ass,.ssa" style="display:none">
-            </div>
-          </div>
-
-          <!-- ── QUALITY TAB ── -->
-          <div class="mxs-pane" id="mxs-pane-quality">
-            <div class="mxs-section">Stream Quality</div>
-            <div id="mxsQualityGrid">
-              <button class="mxs-pill on" data-quality="auto">Auto</button>
-            </div>
-            <div id="mxsQualityHint" style="font-size:0.7rem;color:rgba(255,255,255,0.55);margin-top:0.45rem;line-height:1.4;"></div>
-            <div class="mxs-divider" style="margin-top:1rem"></div>
-            <div class="mxs-section">Playback Speed</div>
-            <div class="mxs-ctrl" id="mxsSpeedBtns" style="flex-wrap:wrap;gap:0.35rem;justify-content:flex-start">
-              <button class="mxs-pill" data-speed="0.5">0.5×</button>
-              <button class="mxs-pill" data-speed="0.75">0.75×</button>
-              <button class="mxs-pill on" data-speed="1">1×</button>
-              <button class="mxs-pill" data-speed="1.25">1.25×</button>
-              <button class="mxs-pill" data-speed="1.5">1.5×</button>
-              <button class="mxs-pill" data-speed="1.75">1.75×</button>
-              <button class="mxs-pill" data-speed="2">2×</button>
-            </div>
-          </div>
-
-          <!-- ── PLAYBACK TAB ── -->
-          <div class="mxs-pane" id="mxs-pane-playback">
-            <div class="mxs-toggle-row">
-              <div class="mxs-toggle-info">
-                <div class="mxs-toggle-label">Auto-play Next Episode</div>
-                <div class="mxs-toggle-hint">Plays next episode automatically when current ends</div>
-              </div>
-              <label class="mxs-switch">
-                <input type="checkbox" id="mxsAutoNext" checked>
-                <span class="mxs-switch-track"></span>
-              </label>
-            </div>
-            <div class="mxs-toggle-row">
-              <div class="mxs-toggle-info">
-                <div class="mxs-toggle-label">Show Countdown</div>
-                <div class="mxs-toggle-hint">10s countdown before auto-playing next episode</div>
-              </div>
-              <label class="mxs-switch">
-                <input type="checkbox" id="mxsAutoNextCountdown" checked>
-                <span class="mxs-switch-track"></span>
-              </label>
-            </div>
-            <div class="mxs-toggle-row">
-              <div class="mxs-toggle-info">
-                <div class="mxs-toggle-label">Auto-load Subtitles</div>
-                <div class="mxs-toggle-hint">Auto-fetch subtitles when available</div>
-              </div>
-              <label class="mxs-switch">
-                <input type="checkbox" id="mxsAutoSub" checked>
-                <span class="mxs-switch-track"></span>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <!-- Auto-next countdown overlay -->
-        <div id="maxAutoNextOverlay" style="display:none;position:absolute;bottom:4rem;right:1.5rem;z-index:30;background:rgba(5,7,14,0.92);border:1px solid rgba(232,201,122,0.3);border-radius:14px;padding:0.9rem 1.3rem;font-family:'Inter',sans-serif;text-align:center;backdrop-filter:blur(16px);box-shadow:0 8px 32px rgba(0,0,0,0.6);">
-          <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.4);margin-bottom:0.3rem;">Next Episode in</div>
-          <div id="maxAutoNextCount" style="font-size:2rem;font-weight:800;color:#E8C97A;line-height:1;font-family:'Bebas Neue',sans-serif;">10</div>
-          <div style="display:flex;gap:0.5rem;margin-top:0.6rem;">
-            <button id="maxAutoNextPlay" style="flex:1;padding:0.35rem 0;background:#E8C97A;color:#07090F;border:none;border-radius:8px;font-weight:700;font-size:0.75rem;cursor:pointer;">▶ Play Now</button>
-            <button id="maxAutoNextCancel" style="flex:1;padding:0.35rem 0;background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.15);border-radius:8px;font-size:0.75rem;cursor:pointer;">✕ Cancel</button>
-          </div>
-        </div>
-      </div>
       <iframe id="playerFrame" src="about:blank"
         allow="autoplay; encrypted-media; fullscreen; picture-in-picture; web-share"
         frameborder="0"></iframe>
@@ -7918,6 +7651,16 @@
       } catch { _imdbIdCache[key] = null; return null; }
     }
 
+    function getServerBtnClass(label) {
+      const lbl = (label || '').toLowerCase();
+      if (lbl.includes('hackymax') || lbl.includes('nova')) return ' hackymax-btn';
+      if (lbl.includes('moviesapi')) return ' moviesapi-btn';
+      if (lbl.includes('autoembed')) return ' autoembed-btn';
+      if (lbl.includes('smashystream')) return ' smashystream-btn';
+      if (lbl.includes('2embed')) return ' twoembed-btn';
+      return '';
+    }
+
     async function getModalServerUrls(id, type, season, episode) {
       const s = season || 1;
       const e = episode || 1;
@@ -7936,9 +7679,12 @@
 
       if (type === 'tv') {
         urls = [
-          `hackymax://tv/${id}/${s}/${e}`,
-          `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=1&mute=0&showNextEpisode=1`,
           `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&muted=false&nextEpisode=true&episodeSelector=true`,
+          `https://moviesapi.club/tv/${id}-${s}-${e}`,
+          `https://player.autoembed.cc/embed/tv/${id}/${s}/${e}`,
+          `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`,
+          `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`,
+          `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=1&mute=0&showNextEpisode=1`,
           `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
           `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`,
           `https://vidup.to/tv/${id}/${s}/${e}?autoplay=1`,
@@ -7946,11 +7692,14 @@
           `https://vidcore.net/tv/${id}/${s}/${e}?autoplay=1&server=orbit`,
           `https://anyembed.xyz/embed/tmdb-tv-${id}-${s}-${e}?logo=false&autoplay=1`
         ];
-        labels = ['HackyMax ✦', 'Nova (⚡ Auto-Sync)', 'Infinity', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
+        labels = ['HackyMax ✦', 'MoviesAPI', 'AutoEmbed', 'SmashyStream', '2Embed', 'Infinity', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
       } else {
         urls = [
-          `hackymax://movie/${id}`,
           `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&muted=false`,
+          `https://moviesapi.club/movie/${id}`,
+          `https://player.autoembed.cc/embed/movie/${id}`,
+          `https://embed.smashystream.com/playere.php?tmdb=${id}`,
+          `https://www.2embed.cc/embed/${id}`,
           `https://vidlove.cc/embed/movie/${id}?autoplay=1&mute=0`,
           `https://vidnest.fun/movie/${id}?autoplay=1`,
           `https://vixsrc.to/movie/${id}?autoplay=1`,
@@ -7959,7 +7708,7 @@
           `https://vidcore.net/movie/${id}?autoplay=1&server=orbit`,
           `https://anyembed.xyz/embed/tmdb-movie-${id}?logo=false&autoplay=1`
         ];
-        labels = ['HackyMax ✦', 'Nova (⚡ Auto-Sync)', 'Infinity', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
+        labels = ['HackyMax ✦', 'MoviesAPI', 'AutoEmbed', 'SmashyStream', '2Embed', 'Infinity', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
       }
       return { urls, labels };
     }
@@ -8276,34 +8025,20 @@
           const hiddenUrls = allUrls.slice(maxVisible);
 
           playBtnsHtml += visibleUrls.map((u, i) => {
-            const isHackyMax = u.startsWith('hackymax://');
-            const isSinMax   = u.startsWith('sinmax://');
-            const isZeeMax   = u.startsWith('zeemax://') || u.startsWith('max://');
-            const style = isHackyMax
-              ? `background:linear-gradient(135deg,#00C6FF,#0072FF);color:#fff;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(0,198,255,.45);letter-spacing:.5px`
-              : isSinMax
-              ? `background:linear-gradient(135deg,#FF4B2B,#FF416C);color:#fff;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(255,65,108,.45);letter-spacing:.5px`
-              : isZeeMax
-              ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(232,201,122,.45);letter-spacing:.5px`
-              : `background:${colors[i] || '#6B7280'};color:${textColors[i] || '#fff'};border:none;cursor:pointer`;
-            return `<button class="modal-stream-pill modal-play-btn${isHackyMax ? ' hackymax-btn' : isSinMax ? ' sinmax-btn' : isZeeMax ? ' zeemax-btn' : ''}" data-server="${i}" style="${style}">${allLabels[i]}</button>`;
+            const lbl = allLabels[i] || `Server ${i + 1}`;
+            const cls = getServerBtnClass(lbl);
+            const style = cls ? 'border:none;cursor:pointer' : `background:${colors[i % colors.length] || '#6B7280'};color:#fff;border:none;cursor:pointer`;
+            return `<button class="modal-stream-pill modal-play-btn${cls}" data-server="${i}" style="${style}">${lbl}</button>`;
           }).join('');
 
           if (hiddenUrls.length > 0) {
             playBtnsHtml += `<button class="modal-stream-pill" id="showMoreServersBtn" style="background:var(--dark3);color:#fff;border:1px solid rgba(255,255,255,0.2);cursor:pointer">➕ ${hiddenUrls.length} More</button>`;
             playBtnsHtml += hiddenUrls.map((u, i) => {
               const idx = i + maxVisible;
-              const isHackyMax = u.startsWith('hackymax://');
-              const isSinMax   = u.startsWith('sinmax://');
-              const isZeeMax   = u.startsWith('zeemax://') || u.startsWith('max://');
-              const style = isHackyMax
-                ? `background:linear-gradient(135deg,#00C6FF,#0072FF);color:#fff;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(0,198,255,.45);display:none`
-                : isSinMax
-                ? `background:linear-gradient(135deg,#FF4B2B,#FF416C);color:#fff;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(255,65,108,.45);display:none`
-                : isZeeMax
-                ? `background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;border:none;cursor:pointer;font-weight:800;box-shadow:0 0 14px rgba(232,201,122,.45);display:none`
-                : `background:${colors[idx] || '#6B7280'};color:${textColors[idx] || '#fff'};border:none;cursor:pointer;display:none`;
-              return `<button class="modal-stream-pill modal-play-btn extra-server-btn${isHackyMax ? ' hackymax-btn' : isSinMax ? ' sinmax-btn' : isZeeMax ? ' zeemax-btn' : ''}" data-server="${idx}" style="${style}">${allLabels[idx]}</button>`;
+              const lbl = allLabels[idx] || `Server ${idx + 1}`;
+              const cls = getServerBtnClass(lbl);
+              const style = cls ? 'border:none;cursor:pointer;display:none' : `background:${colors[idx % colors.length] || '#6B7280'};color:#fff;border:none;cursor:pointer;display:none`;
+              return `<button class="modal-stream-pill modal-play-btn extra-server-btn${cls}" data-server="${idx}" style="${style}">${lbl}</button>`;
             }).join('');
           }
 
@@ -9895,15 +9630,9 @@
 
     // Destroy any existing hls.js instance and reset UI
     function _destroyMax() {
-      if (window._fallbackTimer) {
-        clearTimeout(window._fallbackTimer);
-        window._fallbackTimer = null;
-      }
-      if (window._activeMaxLoadTimer) {
-        clearTimeout(window._activeMaxLoadTimer);
-        window._activeMaxLoadTimer = null;
-      }
-      if (typeof _destroyHeroPlayer === 'function') _destroyHeroPlayer();
+      if (window._fallbackTimer) { clearTimeout(window._fallbackTimer); window._fallbackTimer = null; }
+      if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
+      if (typeof _destroyHeroPlayer === "function") _destroyHeroPlayer();
       _maxMode = false;
       window._maxMode = false;
       window._maxLoading = false;
@@ -9911,39 +9640,26 @@
       window._maxLoadingEngine = null;
       _lastLoadedSubUrl = null;
       _attachSubOverlayToActiveWrap();
-      if (typeof _mxsCancelCountdown === 'function') _mxsCancelCountdown();
+      if (typeof _mxsCancelCountdown === "function") _mxsCancelCountdown();
       if (_maxSubRaf) { cancelAnimationFrame(_maxSubRaf); _maxSubRaf = null; }
-      if (_maxHls)    { _maxHls.destroy(); _maxHls = null; }
-      _maxVideo.pause();
-      _maxVideo.removeAttribute('src');
-      _maxVideo.load();
-      _maxWrap.className = '';
-      _maxWrap.classList.remove('error', 'buffering', 'ready');
-      _maxWrap.style.display = 'none';
-      if (_subText) _subText.classList.remove('active');
+      if (_maxHls) { try { _maxHls.destroy(); } catch (_) {} _maxHls = null; }
+      if (_maxVideo) {
+        try {
+          _maxVideo.pause();
+          _maxVideo.removeAttribute("src");
+          _maxVideo.load();
+        } catch (_) {}
+      }
+      if (_maxWrap) {
+        _maxWrap.className = "";
+        _maxWrap.classList.remove("error", "buffering", "ready");
+        _maxWrap.style.display = "none";
+      }
+      if (_subText) _subText.classList.remove("active");
       _subCues = [];
       _subLoaded = false;
       _mxsTracks = [];
-      _mxsActiveTrackId = 'off';
-      const _trkCont = document.getElementById('mxsTrackList');
-      if (_trkCont) _trkCont.innerHTML = '<button class="mxs-pill on">Off</button>';
-      const _trkHint = document.getElementById('mxsTrackHint');
-      if (_trkHint) _trkHint.innerHTML = '';
-      if (_maxVideo.textTracks) {
-        for (let i = 0; i < _maxVideo.textTracks.length; i++) {
-          try { _maxVideo.textTracks[i].mode = 'disabled'; } catch (_) {}
-        }
-      }
-      const cp = document.getElementById('maxProgressPlayed');
-      const cb = document.getElementById('maxProgressBuffered');
-      const ct = document.getElementById('maxProgressThumb');
-      const cCur = document.getElementById('maxCurTime');
-      const cDur = document.getElementById('maxDurTime');
-      if (cp) cp.style.width = '0%';
-      if (cb) cb.style.width = '0%';
-      if (ct) ct.style.left = '0%';
-      if (cCur) cCur.textContent = '00:00';
-      if (cDur) cDur.textContent = '00:00';
+      _mxsActiveTrackId = "off";
     }
 
     // Update quality grid
@@ -10312,34 +10028,19 @@
       const bar = document.getElementById('playerServerBar');
       if (!bar) return;
       const existingBtns = bar.querySelectorAll('.player-server-btn');
-      if (existingBtns.length > 0) {
-        existingBtns.forEach(b => {
-          const isTarget = (activeEngine === 'hackymax' && b.classList.contains('hackymax-btn')) ||
-                           (activeEngine === 'sinmax' && b.classList.contains('sinmax-btn')) ||
-                           (activeEngine === 'zeemax' && (b.classList.contains('zeemax-btn') || b.classList.contains('max-btn')));
-          b.classList.toggle('active', isTarget);
-        });
-        return;
-      }
+      if (existingBtns.length > 0) return;
       try {
         const data = await getModalServerUrls(tmdbId, mediaType, season || 1, episode || 1);
         if (data && data.urls && data.urls.length) {
           const allUrls = data.urls;
           const labels = data.labels || [];
+          const colors = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#F97316', '#A855F7', '#14B8A6', '#6366F1', '#FF4D6D'];
           bar.innerHTML = allUrls.map((u, i) => {
             const lbl = labels[i] || `Server ${i + 1}`;
-            const isHackyMax = u.startsWith('hackymax://');
-            const isSinMax   = u.startsWith('sinmax://');
-            const isZeeMax   = u.startsWith('zeemax://') || u.startsWith('max://');
-            const extraClass = isHackyMax ? ' hackymax-btn' : (isSinMax ? ' sinmax-btn' : (isZeeMax ? ' zeemax-btn' : ''));
-            const hackyStyle = isHackyMax ? ' style="background:linear-gradient(135deg,#00C6FF,#0072FF);color:#fff;font-weight:800;border-color:transparent"' : '';
-            const sinMaxStyle = isSinMax ? ' style="background:linear-gradient(135deg,#FF4B2B,#FF416C);color:#fff;font-weight:800;border-color:transparent"' : '';
-            const zeeMaxStyle = isZeeMax ? ' style="background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;font-weight:800;border-color:transparent"' : '';
-            const isTarget = (activeEngine === 'hackymax' && isHackyMax) ||
-                             (activeEngine === 'sinmax' && isSinMax) ||
-                             (activeEngine === 'zeemax' && isZeeMax);
-            const activeClass = isTarget ? ' active' : '';
-            return `<button class="player-server-btn${extraClass}${activeClass}"${hackyStyle || sinMaxStyle || zeeMaxStyle} data-server-index="${i}">${lbl}</button>`;
+            const extraClass = getServerBtnClass(lbl);
+            const activeClass = i === 0 ? ' active' : '';
+            const fallbackStyle = extraClass ? '' : ` style="background:${colors[i % colors.length] || '#6B7280'};color:#fff;border-color:transparent"`;
+            return `<button class="player-server-btn${extraClass}${activeClass}"${fallbackStyle} data-server-index="${i}">${lbl}</button>`;
           }).join('');
           bar.querySelectorAll('.player-server-btn').forEach((btn, i) => {
             btn.addEventListener('click', () => {
@@ -10352,563 +10053,9 @@
     }
 
     async function initMaxPlayer(tmdbId, mediaType, season, episode, engine = 'hackymax') {
-      // ── Reset UI ──────────────────────────────────────────────────────
-      _destroyMax();
-      window._maxLoading = true;
-      window._maxLoadingId = tmdbId;
-      window._maxLoadingEngine = engine;
-      window._currentMaxEngine = engine;
-      window._currentPlayingId = tmdbId;
-      window._currentPlayingType = mediaType || 'movie';
-      window._currentPlayingSeason = season || 1;
-      window._currentPlayingEpisode = episode || 1;
-      window._currentPlayingEngine = engine;
-      _currentModalId = tmdbId;
-      _currentModalType = mediaType || 'movie';
-
-      // Always populate the server bar so servers are visible and clickable
-      _ensurePlayerServerBar(tmdbId, mediaType, season, episode, engine);
-
-      if (typeof window.setWatchPartyTheme === 'function') window.setWatchPartyTheme(engine);
-
-      // Keep Watch Party URL cleanly in sync & broadcast state if host
-      try {
-        const activeParty = (typeof WP !== 'undefined' && WP && WP.code) || new URLSearchParams(window.location.search).get('party');
-        if (activeParty) {
-          const u = new URL(window.location.origin + window.location.pathname);
-          u.hash = '';
-          if (mediaType === 'tv') {
-            u.searchParams.set('s', tmdbId);
-            if (season) u.searchParams.set('season', season);
-            if (episode) u.searchParams.set('episode', episode);
-          } else {
-            u.searchParams.set('m', tmdbId);
-          }
-          if (engine) u.searchParams.set('engine', engine);
-          u.searchParams.set('party', activeParty);
-          history.replaceState(null, '', u.toString());
-          const shareEl = document.getElementById('wpShareUrl');
-          if (shareEl) shareEl.textContent = u.toString();
-        }
-      } catch (_) {}
-
-      if (typeof window._wpBroadcastState === 'function') window._wpBroadcastState();
-      if (typeof window._hookWatchPartyVideo === 'function') window._hookWatchPartyVideo();
-
-      const frame = document.getElementById('playerFrame');
-      frame.style.display  = 'none';
-      _maxWrap.style.display = 'block';
-      _maxWrap.classList.add('buffering');
-
-      const engineLabel = engine === 'hackymax' ? 'HACKYMAX' : (engine === 'sinmax' ? 'SINMAX' : 'ZEEMAX');
-      const accentCol   = engine === 'hackymax' ? '#00C6FF' : (engine === 'sinmax' ? '#FF416C' : '#E8C97A');
-
-      // Populate rich loading screen (poster, backdrop, title, countdown)
-      const bufPoster = document.getElementById('maxBufferingPoster');
-      const bufBackdrop = document.getElementById('maxBufferingBackdrop');
-      const bufTitle = document.getElementById('maxBufferingTitle');
-      const bufStatus = document.getElementById('maxBufferingStatus');
-      const bufSkipBtn = document.getElementById('maxBufferingSkipBtn');
-
-      const modalItem = window._currentModalItem;
-      const modalPosterSrc = document.getElementById('modalPoster')?.src || '';
-      const posterPath = (modalItem && modalItem.poster_path) ? `${IMG}w500${modalItem.poster_path}` : modalPosterSrc;
-      const backdropPath = (modalItem && modalItem.backdrop_path) ? `${IMG}original${modalItem.backdrop_path}` : posterPath;
-      const displayTitle = (modalItem && (modalItem.title || modalItem.name)) || document.getElementById('modalTitle')?.textContent || '';
-
-      if (bufPoster) {
-        if (posterPath && !posterPath.includes('placeholder')) {
-          bufPoster.src = posterPath;
-          bufPoster.style.display = 'block';
-        } else {
-          bufPoster.style.display = 'none';
-        }
-      }
-      if (bufBackdrop) {
-        if (backdropPath) {
-          bufBackdrop.style.backgroundImage = `url("${backdropPath}")`;
-          bufBackdrop.style.display = 'block';
-        } else {
-          bufBackdrop.style.display = 'none';
-        }
-      }
-      if (bufTitle) {
-        bufTitle.textContent = displayTitle;
-      }
-
-      // ── Direct Infinity fallback helper ──────────────────────────────────
-      const _fallbackToInfinity = async () => {
-        if (window._activeMaxLoadTimer) {
-          clearInterval(window._activeMaxLoadTimer);
-          clearTimeout(window._activeMaxLoadTimer);
-          window._activeMaxLoadTimer = null;
-        }
-        if (!_maxMode) return;
-        console.warn(`[HackyMax] Loading watchdog (20s). Falling back directly to Infinity...`);
-        _destroyMax();
-        try {
-          const sUrls = await getModalServerUrls(tmdbId, mediaType, season || 1, episode || 1);
-          if (sUrls && sUrls.urls && sUrls.urls.length) {
-            let infIdx = sUrls.labels ? sUrls.labels.findIndex(l => l.toLowerCase().includes('infinity')) : -1;
-            if (infIdx < 0) infIdx = sUrls.urls.findIndex(u => u.includes('vidlove.cc'));
-            if (infIdx < 0) infIdx = sUrls.urls.findIndex(u => !u.startsWith('hackymax://'));
-            const targetUrl = sUrls.urls[infIdx >= 0 ? infIdx : 1] || sUrls.urls[0];
-            playStream(targetUrl, sUrls.urls, sUrls.labels);
-          }
-        } catch (_) {}
-      };
-
-      if (bufSkipBtn) {
-        bufSkipBtn.onclick = (e) => {
-          e.stopPropagation();
-          _fallbackToInfinity();
-        };
-      }
-
-      // 20-second countdown loading watchdog
-      let _maxLoadingSeconds = 20;
-      if (window._activeMaxLoadTimer) {
-        clearInterval(window._activeMaxLoadTimer);
-        clearTimeout(window._activeMaxLoadTimer);
-        window._activeMaxLoadTimer = null;
-      }
-      
-      const _updateLoadStatus = (sec, customMsg = '') => {
-        if (bufStatus) {
-          bufStatus.textContent = customMsg || `${engineLabel} ✦ · CONNECTING STREAM (${sec}s)`;
-          bufStatus.style.color = accentCol;
-        }
-      };
-      _updateLoadStatus(_maxLoadingSeconds);
-
-      window._activeMaxLoadTimer = setInterval(() => {
-        _maxLoadingSeconds--;
-        if (_maxLoadingSeconds > 0) {
-          _updateLoadStatus(_maxLoadingSeconds);
-        } else {
-          clearInterval(window._activeMaxLoadTimer);
-          window._activeMaxLoadTimer = null;
-          if (_maxWrap.classList.contains('buffering') && !_maxWrap.classList.contains('ready') && _maxMode) {
-            _fallbackToInfinity();
-          }
-        }
-      }, 1000);
-
-      // ── Load hls.js lazily ────────────────────────────────────────────
-      try { await _loadHlsJs(); }
-      catch (e) {
-        _maxWrap.classList.remove('buffering');
-        _maxWrap.classList.add('error');
-        if (_maxErrMsg) _maxErrMsg.innerHTML = 'Could not load player engine.<br>Check your internet connection.';
-        return;
-      }
-
-      function _getNextFallbackBtn() {
-        const btns = Array.from(document.querySelectorAll('.player-server-btn'));
-        if (!btns.length) return null;
-        return btns.find(b => !b.classList.contains('hackymax-btn')) || btns[1] || null;
-      }
-
-      function _fallbackFromMax(immediate = false) {
-        _fallbackToInfinity();
-      }
-
-      const fbBtn = document.getElementById('maxFallbackBtn');
-      if (fbBtn && !fbBtn._wired) {
-        fbBtn._wired = true;
-        fbBtn.onclick = () => {
-          _fallbackToInfinity();
-        };
-      }
-
-      // ── Fetch stream URL & Subtitle from /api/hackymax ──────────────────
-      let streamUrl = null;
-      let streamFormat = 'hls';
-      let subtitleUrl = null;
-      let imdbId = null;
-      try {
-        imdbId = await getImdbId(tmdbId, mediaType);
-      } catch (_) {}
-
-      try {
-        // Anti-scraper token — matches API_SECRET env var on Vercel & Cloudflare
-        const _ht = 'hky-' + btoa('hackystreaming').slice(0,12);
-        const params = new URLSearchParams({ id: tmdbId, type: mediaType });
-        if (season)  params.set('season',  season);
-        if (episode) params.set('episode', episode);
-        if (imdbId)  params.set('imdb', imdbId);
-        const resp = await fetch(`/api/hackymax?${params}`, {
-          signal: AbortSignal.timeout(12000),
-          headers: { 'x-hacky-token': _ht }
-        });
-        const data = await resp.json();
-        if (data.url) streamUrl = data.url;
-        if (data.format) streamFormat = data.format;
-        if (data.subtitle) subtitleUrl = data.subtitle;
-        if (data.imdb) imdbId = data.imdb;
-      } catch (_) {}
-
-      if (!streamUrl) {
-        console.warn('[HackyMax] Stream not immediately available, waiting out remaining countdown before Infinity fallback...');
-        _updateLoadStatus(_maxLoadingSeconds, `HACKYMAX ✦ · STREAM DELAYED · SWITCHING TO INFINITY (${_maxLoadingSeconds}s)`);
-        return;
-      }
-
-      // Auto-load subtitle: Sinhala if mapped, or fallback subtitle
-      const localSinhala = (typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(tmdbId)]) || null;
-      const initialSub = localSinhala || subtitleUrl;
-      if (initialSub) {
-        const ok = await _loadMaxSubtitleFromUrl(initialSub);
-        if (ok && localSinhala) {
-          _mxsActiveTrackId = 'sinhala';
-        }
-      }
-
-      // Populate subtitle track catalog: guarantees Sinhala first, English fallback, ZERO Arabic
-      await _loadMaxSubtitleTracks(tmdbId, imdbId, mediaType, season, episode, initialSub);
-
-      // ── Initialise player controls ────────────────────────────────────
-      _maxMode = true;
-      window._maxMode = true;
-      window._maxLoading = false;
-      _attachSubOverlayToActiveWrap();
-      _setupMaxFullscreenHandlers();
-      _initMaxCustomControls();
-
-      // ── Clean Subtitle Gatekeeper: suppress ALL native and in-band text tracks ──
-      const _suppressNativeTracks = () => {
-        if (_maxVideo && _maxVideo.textTracks) {
-          for (let i = 0; i < _maxVideo.textTracks.length; i++) {
-            try { _maxVideo.textTracks[i].mode = 'disabled'; } catch (_) {}
-          }
-        }
-      };
-      _suppressNativeTracks();
-      if (_maxVideo && _maxVideo.textTracks && !_maxVideo._subTrackWatcherAttached) {
-        _maxVideo._subTrackWatcherAttached = true;
-        _maxVideo.textTracks.addEventListener('addtrack', (e) => {
-          if (e.track) {
-            try { e.track.mode = 'disabled'; } catch (_) {}
-          }
-          _suppressNativeTracks();
-        });
-      }
-
-      if (streamFormat === 'mp4') {
-        // Direct clean 1080p MP4 stream (No burned-in Arabic/Persian subtitles)
-        if (_maxHls) { _maxHls.destroy(); _maxHls = null; }
-        _suppressNativeTracks();
-        _maxVideo.preload = 'auto';
-        _maxVideo.referrerPolicy = 'no-referrer';
-        _maxVideo.src = streamUrl;
-        _maxVideo.playbackRate = _mxsSettings.speed;
-        if (_maxVideo && _maxVideo._wpPendingPlay === false) {
-          _maxVideo.pause();
-          const lockEl = document.getElementById('wpGuestLock');
-          if (lockEl) lockEl.classList.add('active');
-          const msgEl = document.getElementById('wpGuestLockMsg');
-          if (msgEl) msgEl.textContent = 'Host paused';
-        } else {
-          if (typeof _safePlay === 'function') _safePlay(_maxVideo);
-          else _maxVideo.play().catch(() => {});
-        }
-        const _onMp4Ready = () => {
-          if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
-          _suppressNativeTracks();
-          _maxWrap.classList.remove('buffering');
-          _maxWrap.classList.add('ready');
-          _updateMaxQuality();
-          if (_subCues.length) {
-            if (_maxSubRaf) cancelAnimationFrame(_maxSubRaf);
-            _maxSubRaf = requestAnimationFrame(_maxSubLoop);
-          }
-          _mxsRefreshQualityGrid();
-          if (_maxVideo && typeof _maxVideo._wpPendingSeek === 'number') {
-            try { _maxVideo.currentTime = _maxVideo._wpPendingSeek; } catch (_) {}
-            delete _maxVideo._wpPendingSeek;
-          }
-          if (_maxVideo && _maxVideo._wpPendingPlay === true) {
-            if (typeof _safePlay === 'function') _safePlay(_maxVideo);
-            else _maxVideo.play().catch(() => {});
-            const lockEl = document.getElementById('wpGuestLock');
-            if (lockEl) lockEl.classList.remove('active');
-            delete _maxVideo._wpPendingPlay;
-          } else if (_maxVideo && _maxVideo._wpPendingPlay === false) {
-            _maxVideo.pause();
-            const lockEl = document.getElementById('wpGuestLock');
-            if (lockEl) lockEl.classList.add('active');
-            const msgEl = document.getElementById('wpGuestLockMsg');
-            if (msgEl) msgEl.textContent = 'Host paused';
-            delete _maxVideo._wpPendingPlay;
-          }
-        };
-        _maxVideo.addEventListener('loadeddata', _onMp4Ready, { once: true });
-        _maxVideo.addEventListener('canplay', _onMp4Ready, { once: true });
-        _maxVideo.addEventListener('error', () => {
-          if (_maxMode && streamFormat === 'mp4') {
-            if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
-            _maxWrap.classList.remove('buffering', 'ready');
-            _maxWrap.classList.add('error');
-            const candidate = _getNextFallbackBtn();
-            const targetName = candidate ? candidate.textContent.trim() : (engine === 'hackymax' ? 'SinMax' : (engine === 'sinmax' ? 'ZeeMax' : 'Infinity'));
-            if (_maxErrMsg) _maxErrMsg.innerHTML = `${engineLabel} playback error<br><span style="color:${accentCol};font-weight:600;">Auto-switching to ${targetName}...</span>`;
-            _fallbackFromMax();
-          }
-        }, { once: true });
-        _maxVideo.addEventListener('waiting', () => { _suppressNativeTracks(); _maxWrap.classList.add('buffering'); });
-        _maxVideo.addEventListener('playing', () => { _suppressNativeTracks(); _maxWrap.classList.remove('buffering'); });
-        _maxVideo.addEventListener('canplay', () => _maxWrap.classList.remove('buffering'));
-
-        // ── MP4 stall-recovery watchdog ──────────────────────────────────────
-        let _mp4StallTimer = null, _mp4LastStall = -1;
-        _maxVideo.addEventListener('waiting', () => {
-          if (_mp4StallTimer) return;
-          _mp4LastStall = _maxVideo.currentTime;
-          _mp4StallTimer = setTimeout(() => {
-            _mp4StallTimer = null;
-            if (!_maxVideo || _maxVideo.paused) return;
-            if (Math.abs(_maxVideo.currentTime - _mp4LastStall) < 0.1 && _maxVideo.readyState < 3) {
-              _maxVideo.currentTime = _mp4LastStall + 1.0;
-            }
-          }, 5000);
-        });
-        _maxVideo.addEventListener('playing', () => {
-          if (_mp4StallTimer) { clearTimeout(_mp4StallTimer); _mp4StallTimer = null; }
-        });
-        // ─────────────────────────────────────────────────────────────────────
-      } else if (Hls.isSupported()) {
-        const _hlsStartPos = (_maxVideo && typeof _maxVideo._wpPendingSeek === 'number' && _maxVideo._wpPendingSeek > 0)
-          ? _maxVideo._wpPendingSeek
-          : -1;
-        const isTV = !!((window.DEVICE && window.DEVICE.isTV) || /SmartTV|Smart-TV|Tizen|Web0S|webOS|HbbTV|BRAVIA/i.test(navigator.userAgent));
-        _maxHls = new Hls({
-          enableWorker: !isTV, // Tizen/SmartTV Web Workers leak memory & stutter during long playback; run in-thread on TV
-          lowLatencyMode: false,
-          enableCEA708Captions: false, // Turn off in-stream closed captions (often Arabic/Persian yellow text)
-          subtitleDisplay: false,      // Prevent Hls.js native subtitle rendering
-          // ── Buffer tuning: optimized for TV limited RAM vs desktop ──
-          maxBufferLength: isTV ? 20 : 60,          // TV: 20s ahead (prevents SourceBuffer QuotaExceededError); PC: 60s
-          maxMaxBufferLength: isTV ? 40 : 120,       // TV: 40s ceiling; PC: 120s
-          backBufferLength: isTV ? 12 : 30,          // TV: aggressively evict watched chunks after 12s to free RAM
-          maxBufferSize: isTV ? (25 * 1000 * 1000) : (80 * 1000 * 1000), // TV: 25MB max buffer in RAM (was 200MB!)
-          maxBufferHole: 0.5,                        // auto-skip 0.5s timestamp discontinuities without freezing
-          nudgeOffset: 0.2,                          // smooth auto-nudge on decoder stall
-          nudgeMaxRetry: 6,                          // auto-recover stalled decoder
-          highBufferWatchdogPeriod: 2,
-          startFragPrefetch: !isTV,                  // don't prefetch extra frags on low-RAM TV
-          // ── Retry tuning: proxy can be slow, retry aggressively ──
-          fragLoadingMaxRetry: 8,
-          fragLoadingRetryDelay: 500,
-          fragLoadingMaxRetryTimeout: 4000,
-          fragLoadingTimeOut: 25000,     // 25s per segment (6MB via slow proxy ~8.5s, headroom)
-          levelLoadingMaxRetry: 6,
-          levelLoadingRetryDelay: 500,
-          levelLoadingTimeOut: 15000,
-          manifestLoadingMaxRetry: 6,
-          manifestLoadingRetryDelay: 500,
-          manifestLoadingTimeOut: 15000,
-          // ── ABR tuning ──
-          abrEwmaFastLive: 4,
-          abrEwmaSlowLive: 15,
-          abrBandWidthFactor: isTV ? 0.75 : 0.85,
-          abrBandWidthUpFactor: 0.7,
-          startLevel: -1,               // auto-pick best level initially
-          startPosition: _hlsStartPos,
-        });
-        _maxHls.loadSource(streamUrl);
-        _maxHls.attachMedia(_maxVideo);
-        _maxHls.subtitleTrack = -1;     // Keep native in-stream subtitle tracks strictly disabled
-
-        _maxHls.on(Hls.Events.SUBTITLE_TRACKS_UPDATED, () => {
-          if (_maxHls) _maxHls.subtitleTrack = -1; // Permanently enforce OFF (all subtitles are handled cleanly by #subText)
-          _suppressNativeTracks();
-        });
-
-        _maxHls.on(Hls.Events.MANIFEST_PARSED, () => {
-          if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
-          _suppressNativeTracks();
-          _maxWrap.classList.remove('buffering');
-          _maxWrap.classList.add('ready');
-          _updateMaxQuality();
-          _maxVideo.playbackRate = _mxsSettings.speed;
-          if (_subCues.length) {
-            if (_maxSubRaf) cancelAnimationFrame(_maxSubRaf);
-            _maxSubRaf = requestAnimationFrame(_maxSubLoop);
-          }
-          _mxsRefreshQualityGrid();
-
-          if (_maxVideo && _maxVideo._wpPendingPlay === false) {
-            _maxVideo.pause();
-            const lockEl = document.getElementById('wpGuestLock');
-            if (lockEl) lockEl.classList.add('active');
-            const msgEl = document.getElementById('wpGuestLockMsg');
-            if (msgEl) msgEl.textContent = 'Host paused';
-          } else {
-            if (typeof _safePlay === 'function') _safePlay(_maxVideo);
-            else _maxVideo.play().catch(() => {});
-          }
-        });
-
-        const _applyHlsWpPendingSync = () => {
-          if (!_maxVideo) return;
-          if (typeof _maxVideo._wpPendingSeek === 'number' && _maxVideo._wpPendingSeek >= 0) {
-            if (_maxVideo.readyState >= 1) {
-              if (Math.abs(_maxVideo.currentTime - _maxVideo._wpPendingSeek) > 1.2) {
-                try { _maxVideo.currentTime = _maxVideo._wpPendingSeek; } catch (_) {}
-              }
-              if (_maxVideo.readyState >= 2 && !_maxVideo.seeking) {
-                delete _maxVideo._wpPendingSeek;
-              }
-            }
-          }
-          if (_maxVideo._wpPendingPlay === true) {
-            if (typeof _safePlay === 'function') _safePlay(_maxVideo);
-            else _maxVideo.play().catch(() => {});
-            const lockEl = document.getElementById('wpGuestLock');
-            if (lockEl) lockEl.classList.remove('active');
-            delete _maxVideo._wpPendingPlay;
-          } else if (_maxVideo._wpPendingPlay === false) {
-            _maxVideo.pause();
-            const lockEl = document.getElementById('wpGuestLock');
-            if (lockEl) lockEl.classList.add('active');
-            const msgEl = document.getElementById('wpGuestLockMsg');
-            if (msgEl) msgEl.textContent = 'Host paused';
-            delete _maxVideo._wpPendingPlay;
-          }
-        };
-
-        _maxHls.on(Hls.Events.FRAG_LOADED, () => {
-          if (window._activeMaxLoadTimer) { clearTimeout(window._activeMaxLoadTimer); window._activeMaxLoadTimer = null; }
-          _applyHlsWpPendingSync();
-        });
-        _maxVideo.addEventListener('loadeddata', _applyHlsWpPendingSync, { once: true });
-        _maxVideo.addEventListener('canplay', _applyHlsWpPendingSync, { once: true });
-
-        _maxHls.on(Hls.Events.LEVEL_SWITCHED, () => { _suppressNativeTracks(); _updateMaxQuality(); _mxsRefreshQualityGrid(); });
-
-        let _hlsNetRecoveries = 0, _hlsMediaRecoveries = 0;
-        _maxHls.on(Hls.Events.ERROR, (event, data) => {
-          if (data.details === 'bufferFullError') {
-            console.warn('[HLS] SourceBuffer full on TV — evicting back buffer to free RAM...');
-            if (_maxHls && _maxVideo) {
-              try {
-                // Clear old video buffer from RAM
-                _maxHls.trigger(Hls.Events.BUFFER_FLUSHING, { startOffset: 0, endOffset: Math.max(0, _maxVideo.currentTime - 8), type: 'all' });
-              } catch (_) {}
-            }
-            return;
-          }
-          if (data.details === 'bufferStalledError') {
-            console.warn('[HLS] Playback stalled on TV decoder — auto-nudging...');
-            if (_maxVideo && !_maxVideo.paused) {
-              _maxVideo.currentTime += 0.15;
-            }
-            return;
-          }
-          if (data.fatal) {
-            console.warn(`[HLS Error] ${engineLabel}: ${data.type} (${data.details})`);
-            const isManifestError = data.details === 'manifestLoadError' || data.details === 'manifestParsingError';
-            if (data.type === Hls.ErrorTypes.NETWORK_ERROR && !isManifestError && _hlsNetRecoveries < 2) {
-              _hlsNetRecoveries++;
-              console.log(`[HLS] Attempting network recovery #${_hlsNetRecoveries}...`);
-              _maxHls.startLoad();
-              return;
-            }
-            if (data.type === Hls.ErrorTypes.MEDIA_ERROR && _hlsMediaRecoveries < 2) {
-              _hlsMediaRecoveries++;
-              console.log(`[HLS] Attempting media error recovery #${_hlsMediaRecoveries}...`);
-              _maxHls.recoverMediaError();
-              return;
-            }
-            if (window._activeMaxLoadTimer) {
-              clearInterval(window._activeMaxLoadTimer);
-              clearTimeout(window._activeMaxLoadTimer);
-              window._activeMaxLoadTimer = null;
-            }
-            _maxWrap.classList.remove('buffering', 'ready');
-            _maxWrap.classList.add('error');
-            if (_maxErrMsg) _maxErrMsg.innerHTML = `${engineLabel} stream error (${data.details || data.type})<br><span style="color:${accentCol};font-weight:600;">Auto-switching to Infinity...</span>`;
-            try { _maxHls.destroy(); } catch (_) {}
-            _maxHls = null;
-            _fallbackToInfinity();
-          }
-        });
-
-        // Show/hide buffering spinner
-        _maxVideo.addEventListener('waiting', () => { _suppressNativeTracks(); _maxWrap.classList.add('buffering'); });
-        _maxVideo.addEventListener('playing', () => { _suppressNativeTracks(); _maxWrap.classList.remove('buffering'); });
-        _maxVideo.addEventListener('canplay', () => _maxWrap.classList.remove('buffering'));
-        _maxVideo.addEventListener('loadeddata', () => _suppressNativeTracks());
-        _maxVideo.addEventListener('loadedmetadata', () => { _suppressNativeTracks(); _mxsRefreshQualityGrid(); }, { once: true });
-
-        // ── Stall recovery watchdog ──────────────────────────────────────────
-        // If video freezes for >5s while proxy is slow, nudge 1s forward to escape the stall
-        let _stallWatchdogTimer = null;
-        let _lastStallTime = -1;
-        _maxVideo.addEventListener('waiting', () => {
-          if (_stallWatchdogTimer) return;
-          _stallWatchdogTimer = setTimeout(() => {
-            _stallWatchdogTimer = null;
-            if (!_maxVideo || _maxVideo.paused) return;
-            const ct = _maxVideo.currentTime;
-            // Only nudge if we're actually stuck (same position as when stall started)
-            if (Math.abs(ct - _lastStallTime) < 0.1 && _maxVideo.readyState < 3) {
-              _maxVideo.currentTime = ct + 1.0;
-            }
-          }, 5000);
-          _lastStallTime = _maxVideo.currentTime;
-        });
-        _maxVideo.addEventListener('playing', () => {
-          if (_stallWatchdogTimer) { clearTimeout(_stallWatchdogTimer); _stallWatchdogTimer = null; }
-        });
-        // ─────────────────────────────────────────────────────────────────────
-        _maxVideo.addEventListener('seeked', () => {
-          _suppressNativeTracks();
-          if (_maxMode && _subCues.length) {
-            const ms = _maxVideo.currentTime * 1000 + _subOffset;
-            const cue = _subCues.find(c => ms >= c.start && ms < c.end);
-            if (cue) {
-              _subText.innerHTML = cue.text.replace(/\n/g, '<br>');
-              _subText.classList.add('active');
-            } else {
-              _subText.classList.remove('active');
-            }
-          }
-        });
-
-        // Auto-next episode when video ends
-        _maxVideo.addEventListener('ended', () => {
-          if (!_maxMode || _currentModalType !== 'tv') return;
-          const next = getNextEpInfo();
-          if (!next) return;
-          if (_mxsSettings.autoNext) {
-            if (_mxsSettings.autoNextCountdown) {
-              _mxsStartCountdown();
-            } else {
-              playNextEpisode();
-            }
-          }
-        });
-
-      } else if (_maxVideo.canPlayType('application/vnd.apple.mpegurl')) {
-        // Safari native HLS
-        _suppressNativeTracks();
-        _maxVideo.src = streamUrl;
-        _maxVideo.addEventListener('loadedmetadata', () => {
-          _suppressNativeTracks();
-          _maxWrap.classList.remove('buffering');
-          _maxWrap.classList.add('ready');
-          _maxVideo.play().catch(() => {});
-          if (_subCues.length) {
-            if (_maxSubRaf) cancelAnimationFrame(_maxSubRaf);
-            _maxSubRaf = requestAnimationFrame(_maxSubLoop);
-          }
-        }, { once: true });
-        _maxVideo.addEventListener('playing', () => _suppressNativeTracks());
-      } else {
-        _maxWrap.classList.remove('buffering');
-        _maxWrap.classList.add('error');
-        if (_maxErrMsg) _maxErrMsg.innerHTML = 'Your browser does not support HLS.<br>Try Chrome or Firefox.';
+      const data = await getModalServerUrls(tmdbId, mediaType, season || 1, episode || 1);
+      if (data && data.urls && data.urls.length) {
+        playStream(data.urls[0], data.urls, data.labels);
       }
     }
 
@@ -11012,47 +10159,26 @@
         else { epBar.classList.remove('visible'); }
       }
 
-      // ── If HackyMax, SinMax, ZeeMax or Max player selected, skip iframe and launch HLS player ──────
-      const isHackyMaxUrl = url.startsWith('hackymax://');
-      const isSinMaxUrl   = url.startsWith('sinmax://');
-      const isZeeMaxUrl   = url.startsWith('zeemax://') || url.startsWith('max://');
-      if (isHackyMaxUrl || isSinMaxUrl || isZeeMaxUrl) {
+      // ── Clean iframe player loading ───────────────────────────────────────
+      _destroyMax();
+      frame.style.display = '';
+      if (loader) loader.style.opacity = '1';
+      frame.style.opacity = '0';
+      frame.onload = () => {
         if (loader) loader.style.opacity = '0';
-        frame.style.display = 'none';
-        frame.src = 'about:blank';
-        const prefix = isHackyMaxUrl ? 'hackymax://' : (isSinMaxUrl ? 'sinmax://' : (url.startsWith('zeemax://') ? 'zeemax://' : 'max://'));
-        const engine = isHackyMaxUrl ? 'hackymax' : (isSinMaxUrl ? 'sinmax' : 'zeemax');
-        const parts = url.replace(prefix, '').split('/');
-        const mType = parts[0] || _currentModalType || (window._currentModalItem && window._currentModalItem._type) || 'movie';
-        const mId   = parts[1] || _currentModalId || (window._currentModalItem && window._currentModalItem.id);
-        const mSeas = parts[2] || _selectedSeason  || null;
-        const mEp   = parts[3] || _selectedEpisode || null;
-        initMaxPlayer(mId, mType, mSeas, mEp, engine);
-      } else {
-        // ── Regular iframe player ───────────────────────────────────────
-        _destroyMax(); // Tear down Max if switching away from it
-        frame.style.display = '';
-        if (loader) loader.style.opacity = '1';
-        frame.style.opacity = '0';
-        frame.onload = () => {
-          if (loader) loader.style.opacity = '0';
-          frame.style.opacity = '1';
-        };
-        frame.src = url;
-      }
+        frame.style.opacity = '1';
+      };
+      frame.src = url;
+
       // Build server switcher
       if (allUrls && allUrls.length) {
+        const colors = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#F97316', '#A855F7', '#14B8A6', '#6366F1', '#FF4D6D'];
         bar.innerHTML = allUrls.map((u, i) => {
           const lbl = labels ? labels[i] : `Server ${i + 1}`;
-          const isHackyMax = u.startsWith('hackymax://');
-          const isSinMax   = u.startsWith('sinmax://');
-          const isZeeMax   = u.startsWith('zeemax://') || u.startsWith('max://');
-          const extraClass = isHackyMax ? ' hackymax-btn' : (isSinMax ? ' sinmax-btn' : (isZeeMax ? ' zeemax-btn' : ''));
-          const hackyStyle = isHackyMax ? ' style="background:linear-gradient(135deg,#00C6FF,#0072FF);color:#fff;font-weight:800;border-color:transparent"' : '';
-          const sinMaxStyle = isSinMax ? ' style="background:linear-gradient(135deg,#FF4B2B,#FF416C);color:#fff;font-weight:800;border-color:transparent"' : '';
-          const zeeMaxStyle = isZeeMax ? ' style="background:linear-gradient(135deg,#E8C97A,#c9a227);color:#07090F;font-weight:800;border-color:transparent"' : '';
+          const extraClass = getServerBtnClass(lbl);
           const activeClass = u === url ? ' active' : '';
-          return `<button class="player-server-btn${extraClass}${activeClass}"${hackyStyle || sinMaxStyle || zeeMaxStyle} data-server-index="${i}">${lbl}</button>`;
+          const fallbackStyle = extraClass ? '' : ` style="background:${colors[i % colors.length] || '#6B7280'};color:#fff;border-color:transparent"`;
+          return `<button class="player-server-btn${extraClass}${activeClass}"${fallbackStyle} data-server-index="${i}">${lbl}</button>`;
         }).join('');
         bar.querySelectorAll('.player-server-btn').forEach((btn, i) => {
           btn.addEventListener('click', () => {
@@ -11068,8 +10194,8 @@
       const wasAlreadyOpen = overlay.classList.contains('open');
       overlay.classList.add('open');
 
-      // ── Auto-load & auto-start Sinhala subtitle for iframe (Infinity, etc.) ────────
-      if (!isHackyMaxUrl && !isSinMaxUrl && !isZeeMaxUrl && _currentModalId) {
+      // ── Auto-load & auto-start Sinhala subtitle for iframe (VidLink, etc.) ────────
+      if (_currentModalId) {
         _autoLoadIframeSinhalaSub();
       }
 
@@ -11104,40 +10230,20 @@
 
     function switchServer(url, btn) {
       document.querySelectorAll('.player-server-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+      if (btn) btn.classList.add('active');
       const frame  = document.getElementById('playerFrame');
       const loader = document.getElementById('playerLoading');
 
-      const isHackyMaxUrl = url.startsWith('hackymax://');
-      const isSinMaxUrl   = url.startsWith('sinmax://');
-      const isZeeMaxUrl   = url.startsWith('zeemax://') || url.startsWith('max://');
-      if (isHackyMaxUrl || isSinMaxUrl || isZeeMaxUrl) {
-        // Switch TO HackyMax, SinMax or ZeeMax player
-        _stopSubLoop();
-        _destroyMax();
+      _destroyMax();
+      frame.style.display = '';
+      if (loader) loader.style.opacity = '1';
+      frame.style.opacity = '0';
+      frame.src = url;
+      frame.onload = () => {
         if (loader) loader.style.opacity = '0';
-        frame.style.display = 'none';
-        frame.src = 'about:blank';
-        const prefix = isHackyMaxUrl ? 'hackymax://' : (isSinMaxUrl ? 'sinmax://' : (url.startsWith('zeemax://') ? 'zeemax://' : 'max://'));
-        const engine = isHackyMaxUrl ? 'hackymax' : (isSinMaxUrl ? 'sinmax' : 'zeemax');
-        const parts = url.replace(prefix, '').split('/');
-        const mType = parts[0] || _currentModalType;
-        const mId   = parts[1] || _currentModalId;
-        const mSeas = parts[2] || _selectedSeason  || null;
-        const mEp   = parts[3] || _selectedEpisode || null;
-        initMaxPlayer(mId, mType, mSeas, mEp, engine);
-      } else {
-        // Switch FROM Max (or between regular servers)
-        _destroyMax();
-        frame.style.display = '';
-        if (loader) loader.style.opacity = '1';
-        frame.style.opacity = '0';
-        frame.src = url;
-        frame.onload = () => {
-          if (loader) loader.style.opacity = '0';
-          frame.style.opacity = '1';
-        };
-        if (typeof window._adblock_pushRecovery === 'function') window._adblock_pushRecovery(url);
+        frame.style.opacity = '1';
+      };
+      if (typeof window._adblock_pushRecovery === 'function') window._adblock_pushRecovery(url);
         _autoLoadIframeSinhalaSub();
       }
     }
