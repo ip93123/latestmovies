@@ -8837,6 +8837,20 @@
             }
           }
         }
+
+        // Broadcast pause to Watch Party guests
+        if (typeof WP !== 'undefined' && WP && WP.isHost && WP.code && typeof _broadcast === 'function') {
+          _broadcast({
+            type: 'pause',
+            ct: _getPlaybackTime(),
+            ts: Date.now(),
+            mId: window._currentPlayingId || _currentModalId,
+            mType: window._currentPlayingType || _currentModalType,
+            season: window._currentPlayingSeason || (typeof _selectedSeason !== 'undefined' && _selectedSeason) || 1,
+            episode: window._currentPlayingEpisode || (typeof _selectedEpisode !== 'undefined' && _selectedEpisode) || 1,
+            serverIndex: typeof _activeServerIndex === 'number' ? _activeServerIndex : 0
+          });
+        }
         return; // CRITICAL: Stop processing here so time updates or auto-unpause never trigger!
       }
 
@@ -8851,6 +8865,20 @@
         }
         window._externalIsPaused = false;
         _setSubSyncBarPaused(false);
+
+        // Broadcast play to Watch Party guests
+        if (typeof WP !== 'undefined' && WP && WP.isHost && WP.code && typeof _broadcast === 'function') {
+          _broadcast({
+            type: 'play',
+            ct: _getPlaybackTime(),
+            ts: Date.now(),
+            mId: window._currentPlayingId || _currentModalId,
+            mType: window._currentPlayingType || _currentModalType,
+            season: window._currentPlayingSeason || (typeof _selectedSeason !== 'undefined' && _selectedSeason) || 1,
+            episode: window._currentPlayingEpisode || (typeof _selectedEpisode !== 'undefined' && _selectedEpisode) || 1,
+            serverIndex: typeof _activeServerIndex === 'number' ? _activeServerIndex : 0
+          });
+        }
       }
 
       // ── CASE 3: SEEKED WHILE PAUSED ──────────────────────────────────
@@ -8872,11 +8900,36 @@
               }
             }
           }
+          // Broadcast seek to Watch Party guests
+          if (typeof WP !== 'undefined' && WP && WP.isHost && WP.code && typeof _broadcast === 'function') {
+            _broadcast({
+              type: 'seek',
+              ct: ct,
+              ts: Date.now(),
+              mId: window._currentPlayingId || _currentModalId,
+              mType: window._currentPlayingType || _currentModalType,
+              season: window._currentPlayingSeason || (typeof _selectedSeason !== 'undefined' && _selectedSeason) || 1,
+              episode: window._currentPlayingEpisode || (typeof _selectedEpisode !== 'undefined' && _selectedEpisode) || 1,
+              serverIndex: typeof _activeServerIndex === 'number' ? _activeServerIndex : 0
+            });
+          }
           return; // Remain paused after seek
         } else {
           _subStartTime = Date.now() - (ct * 1000);
           window._subPausedElapsed = null;
           window._externalCurrentTime = ct;
+          if (typeof WP !== 'undefined' && WP && WP.isHost && WP.code && typeof _broadcast === 'function') {
+            _broadcast({
+              type: 'seek',
+              ct: ct,
+              ts: Date.now(),
+              mId: window._currentPlayingId || _currentModalId,
+              mType: window._currentPlayingType || _currentModalType,
+              season: window._currentPlayingSeason || (typeof _selectedSeason !== 'undefined' && _selectedSeason) || 1,
+              episode: window._currentPlayingEpisode || (typeof _selectedEpisode !== 'undefined' && _selectedEpisode) || 1,
+              serverIndex: typeof _activeServerIndex === 'number' ? _activeServerIndex : 0
+            });
+          }
         }
       }
 
@@ -12298,7 +12351,7 @@
       _wpHeartbeatInterval = setInterval(() => {
         if (!WP.isHost || !WP.code || !WP.peer || !WP.conns.length) return;
         const v = _vid();
-        if (!v || v.seeking) return;
+        if (v && v.seeking) return;
         const p = new URLSearchParams(window.location.search);
         const movieId = window._currentPlayingId || _currentModalId || (window._currentModalItem && window._currentModalItem.id) || p.get('m') || p.get('s');
         if (!movieId) return;
@@ -12309,15 +12362,16 @@
 
         _broadcast({
           type: 'heartbeat',
-          ct: v.currentTime,
-          playing: !v.paused,
-          speed: v.playbackRate || 1,
+          ct: _getPlaybackTime(),
+          playing: _getIsPlaying(),
+          speed: 1,
           ts: Date.now(),
           mId: movieId,
           mType: mediaType,
           season: parseInt(season, 10) || 1,
           episode: parseInt(episode, 10) || 1,
-          engine: engine
+          engine: engine,
+          serverIndex: typeof _activeServerIndex === 'number' ? _activeServerIndex : 0
         });
       }, 2000);
     }
@@ -12344,6 +12398,46 @@
     };
 
     function _vid() { return document.getElementById('maxVideo'); }
+
+    function _getPlaybackTime() {
+      const v = _vid();
+      if (v && (v.src || v.currentSrc)) return v.currentTime;
+      if (typeof window._externalCurrentTime === 'number' && window._externalCurrentTime > 0) return window._externalCurrentTime;
+      if (window._subPausedElapsed != null) return window._subPausedElapsed / 1000;
+      return 0;
+    }
+
+    function _getIsPlaying() {
+      const v = _vid();
+      if (v && (v.src || v.currentSrc)) return !v.paused;
+      return !window._externalIsPaused;
+    }
+
+    function _sendIframeCmd(cmd, payload) {
+      const frame = document.getElementById('playerFrame');
+      if (!frame || !frame.contentWindow) return;
+      try {
+        const cw = frame.contentWindow;
+        if (cmd === 'play') {
+          cw.postMessage({ type: 'play' }, '*');
+          cw.postMessage({ action: 'play' }, '*');
+          cw.postMessage({ event: 'play' }, '*');
+          cw.postMessage(JSON.stringify({ event: 'play' }), '*');
+          cw.postMessage(JSON.stringify({ type: 'play' }), '*');
+        } else if (cmd === 'pause') {
+          cw.postMessage({ type: 'pause' }, '*');
+          cw.postMessage({ action: 'pause' }, '*');
+          cw.postMessage({ event: 'pause' }, '*');
+          cw.postMessage(JSON.stringify({ event: 'pause' }), '*');
+          cw.postMessage(JSON.stringify({ type: 'pause' }), '*');
+        } else if (cmd === 'seek') {
+          const sec = typeof payload === 'number' ? payload : 0;
+          cw.postMessage({ type: 'seek', currentTime: sec, time: sec }, '*');
+          cw.postMessage({ action: 'seek', time: sec, currentTime: sec }, '*');
+          cw.postMessage(JSON.stringify({ event: 'seek', time: sec, currentTime: sec }), '*');
+        }
+      } catch (_) {}
+    }
 
     function _broadcast(data) {
       WP.conns = WP.conns.filter(c => c.open);
@@ -12416,20 +12510,16 @@
         const season = parseInt(data.season || 1, 10);
         const episode = parseInt(data.episode || 1, 10);
         const targetEngine = data.engine || window._currentMaxEngine || 'hackymax';
+        const targetServerIdx = typeof data.serverIndex === 'number' ? data.serverIndex : 0;
 
         const isSameMedia = (
           window._currentPlayingId &&
           String(window._currentPlayingId) === String(id) &&
           (type !== 'tv' || (parseInt(window._currentPlayingSeason || 1, 10) === season && parseInt(window._currentPlayingEpisode || 1, 10) === episode))
         );
-        const isSameEngine = (
-          !data.engine ||
-          !window._currentPlayingEngine ||
-          String(data.engine) === String(window._currentPlayingEngine)
-        );
-        const isAlreadyLoadingOrPlaying = isSameMedia && isSameEngine && (window._maxMode || (window._maxLoading && String(window._maxLoadingId) === String(id)));
+        const overlayOpen = document.getElementById('playerOverlay')?.classList.contains('open');
 
-        if (id && !isAlreadyLoadingOrPlaying && (data.type === 'state' || data.type === 'play' || data.type === 'heartbeat')) {
+        if (id && (!isSameMedia || !overlayOpen) && (data.type === 'state' || data.type === 'play' || data.type === 'heartbeat')) {
           window._currentPlayingId = id;
           window._currentPlayingType = type;
           window._currentPlayingSeason = season;
@@ -12460,174 +12550,194 @@
           const overlay = document.getElementById('playerOverlay');
           if (overlay) overlay.classList.add('open');
 
-          if (typeof initMaxPlayer === 'function') {
-            initMaxPlayer(id, type, season, episode, targetEngine);
-          }
+          getModalServerUrls(id, type, season, episode).then(sData => {
+            if (sData && sData.urls && sData.urls.length) {
+              const pickIdx = (targetServerIdx < sData.urls.length) ? targetServerIdx : 0;
+              playStream(sData.urls[pickIdx], sData.urls, sData.labels);
+            }
+          }).catch(() => {});
         }
       }
 
+      // ── Handle HEARTBEAT ─────────────────────────────────────────
       if (data.type === 'heartbeat') {
         const isPlaying = !!data.playing;
         const target = _calcTargetTime(data, isPlaying);
         const lockEl = document.getElementById('wpGuestLock');
         const lockMsg = document.getElementById('wpGuestLockMsg');
-        const baseRate = (_mxsSettings && _mxsSettings.speed) || 1.0;
-
-        if (!v || (!v.src && !v.currentSrc) || v.readyState < 2) {
-          if (v) {
-            v._wpPendingSeek = target;
-            v._wpPendingPlay = isPlaying;
-          }
-          return;
-        }
-
-        const drift = target - v.currentTime;
-        const absDrift = Math.abs(drift);
 
         if (!isPlaying) {
-          if (!v.paused) v.pause();
+          // Host is paused
           if (lockEl) lockEl.classList.add('active');
           if (lockMsg) lockMsg.textContent = 'Host paused';
-          if (absDrift > 0.8) v.currentTime = target;
-          if (v.playbackRate !== baseRate) v.playbackRate = baseRate;
+          if (!window._externalIsPaused) {
+            if (v && (v.src || v.currentSrc)) {
+              v.pause();
+              if (Math.abs(v.currentTime - target) > 1.2) v.currentTime = target;
+            } else {
+              _sendIframeCmd('pause');
+              if (Math.abs(_getPlaybackTime() - target) > 1.5) _sendIframeCmd('seek', target);
+            }
+            window._externalCurrentTime = target;
+            window._subPausedElapsed = Math.round(target * 1000);
+            window._externalIsPaused = true;
+            _setSubSyncBarPaused(true);
+          }
           return;
         }
 
         // Host is playing
         if (lockEl) lockEl.classList.remove('active');
-        if (v.paused) {
-          if (absDrift > 1.2) {
-            v.currentTime = target;
-            WP._lastHardSeek = Date.now();
+        const guestCt = _getPlaybackTime();
+        const drift = target - guestCt;
+        const absDrift = Math.abs(drift);
+
+        if (window._externalIsPaused) {
+          // Guest was paused but host is playing -> resume guest!
+          if (v && (v.src || v.currentSrc)) {
+            if (absDrift > 1.5) v.currentTime = target;
+            _safePlay(v);
+          } else {
+            _sendIframeCmd('seek', target);
+            _sendIframeCmd('play');
           }
-          _safePlay(v);
-          v.playbackRate = baseRate;
+          window._externalCurrentTime = target;
+          window._subStartTime = Date.now() - (target * 1000);
+          window._subPausedElapsed = null;
+          window._externalIsPaused = false;
+          _setSubSyncBarPaused(false);
           return;
         }
 
-        // Both are playing: check if guest is buffering or recently seeked
-        if (v.seeking || v.readyState < 3) return;
-        if (Date.now() - (WP._lastHardSeek || 0) < 3500) return;
-
-        // 3-Tier drift synchronization
-        if (absDrift <= 0.45) {
-          // Tier 1: In sync - standard speed
-          if (v.playbackRate !== baseRate) v.playbackRate = baseRate;
-        } else if (absDrift <= 3.0) {
-          // Tier 2: Dynamic smooth rate steering without buffering/stuttering
-          if (drift > 0) {
-            v.playbackRate = Math.min(1.25, baseRate * 1.08);
+        // Both playing: check drift
+        if (absDrift > 2.5) {
+          if (v && (v.src || v.currentSrc)) {
+            v.currentTime = target;
+            WP._lastHardSeek = Date.now();
           } else {
-            v.playbackRate = Math.max(0.75, baseRate * 0.92);
+            _sendIframeCmd('seek', target);
           }
-        } else {
-          // Tier 3: Hard seek for large drift (>3s)
-          v.currentTime = target;
-          WP._lastHardSeek = Date.now();
-          v.playbackRate = baseRate;
+          window._externalCurrentTime = target;
+          _subStartTime = Date.now() - (target * 1000);
         }
 
+      // ── Handle PLAY ──────────────────────────────────────────────
       } else if (data.type === 'play') {
         const target = _calcTargetTime(data, true);
         const lockEl = document.getElementById('wpGuestLock');
         if (lockEl) lockEl.classList.remove('active');
-        const baseRate = (_mxsSettings && _mxsSettings.speed) || 1.0;
-
-        if (!v || (!v.src && !v.currentSrc) || v.readyState < 2) {
-          if (v) {
-            v._wpPendingPlay = true;
-            v._wpPendingSeek = target;
-          }
-          return;
-        }
-        if (Math.abs(v.currentTime - target) > 1.5) {
-          v.currentTime = target;
-          WP._lastHardSeek = Date.now();
-        }
-        v.playbackRate = baseRate;
-        _safePlay(v);
         _wpToast('▶ Host resumed');
 
+        if (v && (v.src || v.currentSrc) && v.readyState >= 2) {
+          if (Math.abs(v.currentTime - target) > 1.5) {
+            v.currentTime = target;
+            WP._lastHardSeek = Date.now();
+          }
+          _safePlay(v);
+        } else {
+          _sendIframeCmd('seek', target);
+          _sendIframeCmd('play');
+        }
+
+        window._externalCurrentTime = target;
+        window._subStartTime = Date.now() - (target * 1000);
+        window._subPausedElapsed = null;
+        window._externalIsPaused = false;
+        _setSubSyncBarPaused(false);
+        _subActive = true;
+        if (!_subRaf) _subRaf = requestAnimationFrame(_subLoop);
+
+      // ── Handle PAUSE ─────────────────────────────────────────────
       } else if (data.type === 'pause') {
-        const target = typeof data.ct === 'number' ? data.ct : (v ? v.currentTime : 0);
+        const target = typeof data.ct === 'number' ? data.ct : _getPlaybackTime();
         const lockEl = document.getElementById('wpGuestLock');
         const lockMsg = document.getElementById('wpGuestLockMsg');
         if (lockEl) lockEl.classList.add('active');
         if (lockMsg) lockMsg.textContent = 'Host paused';
-        const baseRate = (_mxsSettings && _mxsSettings.speed) || 1.0;
-
-        if (!v || (!v.src && !v.currentSrc) || v.readyState < 2) {
-          if (v) {
-            v._wpPendingPlay = false;
-            v._wpPendingSeek = target;
-          }
-          return;
-        }
-        v.pause();
-        if (Math.abs(v.currentTime - target) > 0.8) {
-          v.currentTime = target;
-        }
-        v.playbackRate = baseRate;
         _wpToast('⏸ Host paused');
 
+        if (v && (v.src || v.currentSrc)) {
+          v.pause();
+          if (Math.abs(v.currentTime - target) > 0.8) v.currentTime = target;
+        } else {
+          _sendIframeCmd('pause');
+          _sendIframeCmd('seek', target);
+        }
+
+        window._externalCurrentTime = target;
+        window._subPausedElapsed = Math.round(target * 1000);
+        window._externalIsPaused = true;
+        _setSubSyncBarPaused(true);
+        _subActive = true;
+        if (!_subRaf) _subRaf = requestAnimationFrame(_subLoop);
+
+      // ── Handle SEEK ──────────────────────────────────────────────
       } else if (data.type === 'seek') {
         const target = typeof data.ct === 'number' ? data.ct : 0;
-        const baseRate = (_mxsSettings && _mxsSettings.speed) || 1.0;
-        if (!v || (!v.src && !v.currentSrc) || v.readyState < 2) {
-          if (v) v._wpPendingSeek = target;
-          return;
-        }
-        v.currentTime = target;
-        WP._lastHardSeek = Date.now();
-        v.playbackRate = baseRate;
-        _wpToast(`⏩ Host seeked to ${_fmtTime(data.ct)}`);
+        const mm = String(Math.floor(target / 60)).padStart(2, '0');
+        const ss = String(Math.floor(target % 60)).padStart(2, '0');
+        _wpToast(`⏩ Synced to ${mm}:${ss}`);
 
+        if (v && (v.src || v.currentSrc)) {
+          v.currentTime = target;
+          WP._lastHardSeek = Date.now();
+        } else {
+          _sendIframeCmd('seek', target);
+        }
+
+        window._externalCurrentTime = target;
+        if (window._externalIsPaused) {
+          window._subPausedElapsed = Math.round(target * 1000);
+        } else {
+          _subStartTime = Date.now() - (target * 1000);
+        }
+        _subActive = true;
+        if (!_subRaf) _subRaf = requestAnimationFrame(_subLoop);
+
+      // ── Handle STATE ─────────────────────────────────────────────
       } else if (data.type === 'state') {
-        if (data.engine) {
-          window.setWatchPartyTheme(data.engine);
-        }
-
         const rawId = data.mId || data.mParam || data.sParam;
         const id = rawId ? parseInt(String(rawId).split('-')[0], 10) : null;
         const isPlaying = !!data.playing;
-        const targetCt = _calcTargetTime(data, isPlaying);
-        const baseRate = (_mxsSettings && _mxsSettings.speed) || 1.0;
+        const target = _calcTargetTime(data, isPlaying);
+        const lockEl = document.getElementById('wpGuestLock');
+        const lockMsg = document.getElementById('wpGuestLockMsg');
 
-        if (id) {
-          if (window._wpPollInterval) {
-            clearInterval(window._wpPollInterval);
-            window._wpPollInterval = null;
+        if (isPlaying) {
+          if (lockEl) lockEl.classList.remove('active');
+          if (v && (v.src || v.currentSrc) && v.readyState >= 2) {
+            v.currentTime = target;
+            _safePlay(v);
+          } else {
+            _sendIframeCmd('seek', target);
+            _sendIframeCmd('play');
           }
-
-          if (v) {
-            v._wpPendingSeek = targetCt;
-            v._wpPendingPlay = isPlaying;
-          }
-
-          if (v && v.readyState >= 2) {
-            if (Math.abs(v.currentTime - targetCt) > 1.2) {
-              v.currentTime = targetCt;
-              WP._lastHardSeek = Date.now();
-            }
-            v.playbackRate = baseRate;
-            const lockEl = document.getElementById('wpGuestLock');
-            if (lockEl) lockEl.classList.toggle('active', !isPlaying);
-            if (isPlaying) _safePlay(v);
-            else v.pause();
-          }
+          window._externalCurrentTime = target;
+          window._subStartTime = Date.now() - (target * 1000);
+          window._subPausedElapsed = null;
+          window._externalIsPaused = false;
+          _setSubSyncBarPaused(false);
         } else {
-          _wpToast('🎬 Connected! Waiting for host to select a movie...');
-          if (!window._wpPollInterval) {
-            window._wpPollInterval = setInterval(() => {
-              if (!WP.isHost && WP.hostConn && WP.hostConn.open && !window._currentPlayingId) {
-                try { WP.hostConn.send({ type: 'request-state' }); } catch (_) {}
-              } else if (window._currentPlayingId) {
-                clearInterval(window._wpPollInterval);
-                window._wpPollInterval = null;
-              }
-            }, 3000);
+          if (lockEl) lockEl.classList.add('active');
+          if (lockMsg) lockMsg.textContent = 'Host paused';
+          if (v && (v.src || v.currentSrc)) {
+            v.pause();
+            v.currentTime = target;
+          } else {
+            _sendIframeCmd('pause');
+            _sendIframeCmd('seek', target);
           }
+          window._externalCurrentTime = target;
+          window._subPausedElapsed = Math.round(target * 1000);
+          window._externalIsPaused = true;
+          _setSubSyncBarPaused(true);
         }
+        _subActive = true;
+        if (!_subRaf) _subRaf = requestAnimationFrame(_subLoop);
+
+        const mm = String(Math.floor(target / 60)).padStart(2, '0');
+        const ss = String(Math.floor(target % 60)).padStart(2, '0');
+        _wpToast(isPlaying ? `▶ Synced with host (${mm}:${ss})` : '⏸ Synced with host (Paused)');
 
       } else if (data.type === 'meta') {
         WP.guestNames = data.names || [];
@@ -12750,7 +12860,6 @@
 
     /* ── Host: listener for incoming guest connections ───────── */
     function _hostGetState() {
-      const v = _vid();
       const p = new URLSearchParams(window.location.search);
       const movieId = window._currentPlayingId || _currentModalId || (window._currentModalItem && window._currentModalItem.id) || p.get('m') || p.get('s');
       const mediaType = window._currentPlayingType || _currentModalType || (p.get('s') ? 'tv' : 'movie');
@@ -12760,16 +12869,17 @@
       return {
         type: 'state',
         engine: engine,
-        ct: v ? v.currentTime : 0,
-        playing: v ? !v.paused : false,
-        speed: v ? (v.playbackRate || 1) : 1,
+        ct: _getPlaybackTime(),
+        playing: _getIsPlaying(),
+        speed: 1,
         ts: Date.now(),
         mId: movieId,
         mType: mediaType,
         mParam: mediaType === 'movie' ? movieId : (p.get('m') || null),
         sParam: mediaType === 'tv' ? movieId : (p.get('s') || null),
         season: parseInt(season, 10) || 1,
-        episode: parseInt(episode, 10) || 1
+        episode: parseInt(episode, 10) || 1,
+        serverIndex: typeof _activeServerIndex === 'number' ? _activeServerIndex : 0
       };
     }
 
