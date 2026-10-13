@@ -1919,6 +1919,112 @@
       box-shadow: 0 0 14px rgba(232, 201, 122, 0.4);
     }
 
+    /* ── Modal Hero Play Button ──────────────────────────────────── */
+    .modal-hero-play-wrap {
+      margin: 0.5rem 0 0.85rem 0;
+      width: 100%;
+    }
+
+    .modal-hero-play-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      width: 100%;
+      padding: 0.95rem 1.6rem;
+      background: linear-gradient(135deg, #E8C97A 0%, #F59E0B 50%, #D97706 100%);
+      color: #07090F;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 12px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(232, 201, 122, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+      font-family: inherit;
+    }
+
+    .modal-hero-play-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.38), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .modal-hero-play-btn:hover::before {
+      left: 100%;
+    }
+
+    .modal-hero-play-btn:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 10px 32px rgba(232, 201, 122, 0.6), 0 0 16px rgba(245, 158, 11, 0.45);
+      filter: brightness(1.06);
+    }
+
+    .modal-hero-play-btn:active {
+      transform: translateY(1px) scale(0.99);
+    }
+
+    .modal-hero-play-btn svg {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+      fill: #07090F;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+      transition: transform 0.2s ease;
+    }
+
+    .modal-hero-play-btn:hover svg {
+      transform: scale(1.18);
+    }
+
+    .modal-hero-play-btn .hero-play-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: rgba(7, 9, 15, 0.22);
+      color: #07090F;
+      padding: 0.24rem 0.6rem;
+      border-radius: 6px;
+      margin-left: auto;
+      letter-spacing: 0.5px;
+      border: 1px solid rgba(7, 9, 15, 0.25);
+    }
+
+    .modal-server-divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 0.45rem 0 0.55rem 0;
+      color: var(--muted);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .modal-server-divider::before,
+    .modal-server-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .tv-mode .modal-hero-play-btn:focus {
+      outline: 3px solid #fff;
+      outline-offset: 3px;
+      box-shadow: 0 0 25px rgba(232, 201, 122, 0.85);
+      transform: scale(1.02);
+    }
+
     /* ── Cast Cards (6 per row, wraps downwards) ────────────────────────── */
     .modal-cast {
       display: grid;
@@ -5973,6 +6079,17 @@
           </div>
           <div class="ep-hint" id="epHint"></div>
         </div>
+        <!-- PRIMARY HERO PLAY BUTTON -->
+        <div class="modal-hero-play-wrap" id="modalHeroPlayWrap">
+          <button class="modal-hero-play-btn" id="modalHeroPlayBtn" type="button" title="Play with Default Player">
+            <svg viewBox="0 0 24 24">
+              <polygon points="6 4 20 12 6 20 6 4"></polygon>
+            </svg>
+            <span id="modalHeroPlayText">PLAY MOVIE</span>
+            <span class="hero-play-badge" id="modalHeroPlayBadge">Default · HackyMax</span>
+          </button>
+        </div>
+        <div class="modal-server-divider"><span>OR CHOOSE SERVER</span></div>
         <div class="modal-streams" id="modalStreams">
           <div class="no-stream">Checking platforms…</div>
         </div>
@@ -7921,6 +8038,23 @@
       const allLabels = data.labels || [];
       const colors = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#F97316', '#A855F7', '#14B8A6', '#6366F1', '#FF4D6D'];
       const textColors = ['#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff', '#fff'];
+
+      // Update Hero Play Button
+      const heroBtn = document.getElementById('modalHeroPlayBtn');
+      const heroText = document.getElementById('modalHeroPlayText');
+      const heroBadge = document.getElementById('modalHeroPlayBadge');
+      if (heroBtn) {
+        if (heroText) {
+          heroText.textContent = type === 'tv' ? `PLAY S${s || 1} E${e || 1}` : 'PLAY MOVIE';
+        }
+        if (heroBadge && allLabels[0]) {
+          heroBadge.textContent = `Default · ${allLabels[0]}`;
+        }
+        heroBtn.onclick = () => {
+          if (allUrls[0]) playStream(allUrls[0], allUrls, allLabels);
+        };
+      }
+
       const btns = document.querySelectorAll('.modal-play-btn');
       btns.forEach((btn, i) => {
         if (allUrls[i]) btn.onclick = () => playStream(allUrls[i], allUrls, allLabels);
@@ -8027,6 +8161,22 @@
       document.getElementById('modalCast').textContent = '';
       document.getElementById('modalRatings').innerHTML = '';
       document.getElementById('modalMeta').innerHTML = '';
+
+      // Instant ready state for Hero Play button
+      const heroBtnInit = document.getElementById('modalHeroPlayBtn');
+      const heroTextInit = document.getElementById('modalHeroPlayText');
+      const heroBadgeInit = document.getElementById('modalHeroPlayBadge');
+      if (heroBtnInit) {
+        if (heroTextInit) heroTextInit.textContent = type === 'tv' ? 'PLAY EPISODE 1' : 'PLAY MOVIE';
+        if (heroBadgeInit) heroBadgeInit.textContent = 'Default · HackyMax';
+        heroBtnInit.onclick = async () => {
+          const resData = await getModalServerUrls(id, type, _selectedSeason || 1, _selectedEpisode || 1);
+          const curUrls = resData.urls || [];
+          const curLabels = resData.labels || [];
+          const defaultUrl = curUrls[0];
+          if (defaultUrl) playStream(defaultUrl, curUrls, curLabels);
+        };
+      }
 
       // Instant placeholder poster from the clicked card
       const clickedCard = document.querySelector(`.movie-card[data-id="${id}"], .trending-card[data-id="${id}"]`);
@@ -8246,7 +8396,27 @@
             ms.innerHTML = playBtnsHtml + ms.innerHTML;
           }
 
-          // Wire up play buttons
+          // Setup Hero Play button for instant one-click default playback
+          const heroBtn = document.getElementById('modalHeroPlayBtn');
+          const heroText = document.getElementById('modalHeroPlayText');
+          const heroBadge = document.getElementById('modalHeroPlayBadge');
+          if (heroBtn) {
+            if (heroText) {
+              heroText.textContent = type === 'tv' ? 'PLAY EPISODE 1' : 'PLAY MOVIE';
+            }
+            if (heroBadge && allLabels[0]) {
+              heroBadge.textContent = `Default · ${allLabels[0]}`;
+            }
+            heroBtn.onclick = async () => {
+              const resData = await getModalServerUrls(_currentModalId, _currentModalType, _selectedSeason, _selectedEpisode);
+              const curUrls = resData.urls || [];
+              const curLabels = resData.labels || [];
+              const defaultUrl = curUrls[0];
+              if (defaultUrl) playStream(defaultUrl, curUrls, curLabels);
+            };
+          }
+
+          // Wire up server play buttons
           ms.querySelectorAll('.modal-play-btn').forEach((btn) => {
             const serverIdx = parseInt(btn.dataset.server);
             btn.onclick = async () => {
