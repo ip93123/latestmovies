@@ -31,6 +31,47 @@ const SUBTITLE_MAP = {
   '274092': '/Subtitle/274092.srt', // Bangalore Days (2014) (alt)
   '575351': '/Subtitle/575351.srt', // Kumbalangi Nights (2019)
   '574465': '/Subtitle/574465.srt', // Kumbalangi Nights (2019) (alt)
+
+  // Banshee (2013–2016) [TMDB: 41727]
+  '41727': '/Subtitle/Banshee/S01E01.srt',
+  '41727_S1_E1': '/Subtitle/Banshee/S01E01.srt',
+  '41727_S1_E2': '/Subtitle/Banshee/S01E02.srt',
+  '41727_S1_E3': '/Subtitle/Banshee/S01E03.srt',
+  '41727_S1_E4': '/Subtitle/Banshee/S01E04.srt',
+  '41727_S1_E5': '/Subtitle/Banshee/S01E05.srt',
+  '41727_S1_E6': '/Subtitle/Banshee/S01E06.srt',
+  '41727_S1_E7': '/Subtitle/Banshee/S01E07.srt',
+  '41727_S1_E8': '/Subtitle/Banshee/S01E08.srt',
+  '41727_S1_E9': '/Subtitle/Banshee/S01E09.srt',
+  '41727_S1_E10': '/Subtitle/Banshee/S01E10.srt',
+  '41727_S2_E1': '/Subtitle/Banshee/S02E01.srt',
+  '41727_S2_E2': '/Subtitle/Banshee/S02E02.srt',
+  '41727_S2_E3': '/Subtitle/Banshee/S02E03.srt',
+  '41727_S2_E4': '/Subtitle/Banshee/S02E04.srt',
+  '41727_S2_E5': '/Subtitle/Banshee/S02E05.srt',
+  '41727_S2_E6': '/Subtitle/Banshee/S02E06.srt',
+  '41727_S2_E7': '/Subtitle/Banshee/S02E07.srt',
+  '41727_S2_E8': '/Subtitle/Banshee/S02E08.srt',
+  '41727_S2_E9': '/Subtitle/Banshee/S02E09.srt',
+  '41727_S2_E10': '/Subtitle/Banshee/S02E10.srt',
+  '41727_S3_E1': '/Subtitle/Banshee/S03E01.srt',
+  '41727_S3_E2': '/Subtitle/Banshee/S03E02.srt',
+  '41727_S3_E3': '/Subtitle/Banshee/S03E03.srt',
+  '41727_S3_E4': '/Subtitle/Banshee/S03E04.srt',
+  '41727_S3_E5': '/Subtitle/Banshee/S03E05.srt',
+  '41727_S3_E6': '/Subtitle/Banshee/S03E06.srt',
+  '41727_S3_E7': '/Subtitle/Banshee/S03E07.srt',
+  '41727_S3_E8': '/Subtitle/Banshee/S03E08.srt',
+  '41727_S3_E9': '/Subtitle/Banshee/S03E09.srt',
+  '41727_S3_E10': '/Subtitle/Banshee/S03E10.srt',
+  '41727_S4_E1': '/Subtitle/Banshee/S04E01.srt',
+  '41727_S4_E2': '/Subtitle/Banshee/S04E02.srt',
+  '41727_S4_E3': '/Subtitle/Banshee/S04E03.srt',
+  '41727_S4_E4': '/Subtitle/Banshee/S04E04.srt',
+  '41727_S4_E5': '/Subtitle/Banshee/S04E05.srt',
+  '41727_S4_E6': '/Subtitle/Banshee/S04E06.srt',
+  '41727_S4_E7': '/Subtitle/Banshee/S04E07.srt',
+  '41727_S4_E8': '/Subtitle/Banshee/S04E08.srt',
 };
 
 const LANG_MAP = {
