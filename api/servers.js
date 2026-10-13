@@ -39,7 +39,7 @@ export default async function handler(req, res) {
     labels = ['HackyMax', 'Infinity', 'Nebula', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit'];
   }
 
-  // Short cache so new servers appear quickly
-  res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=300');
+  // Prevent caching so new server labels appear instantly
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.status(200).json({ urls, labels });
 }

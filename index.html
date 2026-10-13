@@ -7836,10 +7836,15 @@
 
       // Try the backend API first (hides URLs from source code when deployed)
       try {
-        const res = await fetch(`/api/servers?id=${id}&type=${type}&season=${s}&episode=${e}`);
+        const res = await fetch(`/api/servers?id=${id}&type=${type}&season=${s}&episode=${e}&_t=${Date.now()}`);
         if (res.ok) {
           const data = await res.json();
-          if (data.urls && data.urls.length > 0) return data;
+          if (data.urls && data.urls.length > 0) {
+            if (Array.isArray(data.labels)) {
+              data.labels = data.labels.map(l => l.replace(/HackyMax\s+Gold/gi, 'HackyMax'));
+            }
+            return data;
+          }
         }
       } catch (_) { /* fall through to local fallback */ }
 
