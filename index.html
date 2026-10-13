@@ -3699,27 +3699,20 @@
       transform: translate(-50%, -50%) scale(1.05);
     }
 
-    /* Sync panel */
-    #subSyncPanel {
-      position: absolute;
-      bottom: 4rem;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(7,9,15,0.95);
-      border: 1px solid rgba(232,201,122,0.3);
-      border-radius: 14px;
-      padding: 1rem 1.5rem;
-      z-index: 720;
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.6rem;
-      min-width: 280px;
-      backdrop-filter: blur(16px);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.7);
-      pointer-events: all;
+    /* Sync panel - permanently hidden per user request */
+    #subSyncPanel,
+    #subSyncPanel.visible {
+      display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+      opacity: 0 !important;
+      height: 0 !important;
+      width: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: none !important;
+      overflow: hidden !important;
     }
-    #subSyncPanel.visible { display: flex; }
     #subSyncPanel p {
       font-size: 0.82rem;
       color: var(--muted);
@@ -5684,27 +5677,16 @@
 
       <!-- Subtitle Overlay (rendered on top of iframe) -->
       <div id="subOverlay"><span id="subText"></span></div>
-      <!-- Sync Panel -->
-      <div id="subSyncPanel">
-        <div style="display:flex;width:100%;justify-content:space-between;align-items:center;margin-bottom:0.2rem;">
-          <span style="font-size:0.8rem;font-weight:700;color:var(--gold);">🇱🇰 Sinhala Subtitle Sync</span>
-          <button type="button" onclick="document.getElementById('subSyncPanel').classList.remove('visible')" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:1.1rem;line-height:1;">✕</button>
-        </div>
-        <p id="subPanelMsg">Download .srt from <strong><a id="baiscopeLink" href="https://www.baiscope.lk" target="_blank" style="color:var(--gold)">Baiscope</a></strong>, then click <strong>📁 LOAD SUB</strong> again</p>
-        <div class="sub-sync-btns">
-          <button class="sub-sync-btn primary" id="subStartBtn">▶ Start Subtitles</button>
-          <button class="sub-sync-btn" id="subResetBtn">↺ Reset</button>
-        </div>
-        <div class="sub-sync-btns">
-          <button class="sub-sync-btn" onclick="subShift(-2000)">−2s</button>
-          <button class="sub-sync-btn" onclick="subShift(-500)">−0.5s</button>
-          <span id="subStatusLine">No file loaded</span>
-          <button class="sub-sync-btn" onclick="subShift(500)">+0.5s</button>
-          <button class="sub-sync-btn" onclick="subShift(2000)">+2s</button>
-        </div>
+      <!-- Subtitle Sync Panel (hidden overlay) -->
+      <div id="subSyncPanel" style="display:none !important;" hidden>
+        <p id="subPanelMsg" style="display:none;"></p>
+        <button id="subStartBtn" style="display:none;"></button>
+        <button id="subResetBtn" style="display:none;"></button>
+        <span id="subStatusLine" style="display:none;"></span>
       </div>
       <iframe id="playerFrame" src="about:blank"
-        allow="autoplay; encrypted-media; fullscreen; picture-in-picture; web-share"
+        allow="autoplay *; encrypted-media *; fullscreen *; picture-in-picture *; web-share *"
+        allowfullscreen
         frameborder="0"></iframe>
     </div>
   </div>
@@ -7658,7 +7640,7 @@
 
       if (type === 'tv') {
         urls = [
-          `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&muted=false&nextEpisode=true&episodeSelector=true`,
+          `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true`,
           `https://moviesapi.to/tv/${id}/${s}/${e}`,
           `https://autoembed.co/tv/tmdb/${id}-${s}-${e}`,
           `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`,
@@ -7674,7 +7656,7 @@
         labels = ['HackyMax ✦', 'MoviesAPI', 'AutoEmbed', 'SmashyStream', '2Embed', 'Infinity', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
       } else {
         urls = [
-          `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&muted=false`,
+          `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true`,
           `https://moviesapi.to/movie/${id}`,
           `https://autoembed.co/movie/tmdb/${id}`,
           `https://embed.smashystream.com/playere.php?tmdb=${id}`,
@@ -8391,11 +8373,13 @@
       } else {
         // ── Iframe mode: wall-clock sync, user presses Start ──────────────
         if (msg) msg.innerHTML = `✅ Loaded <strong style="color:var(--gold)">${_escHtml(_subFileName)}</strong> — <em>${cues.length} cues</em>. Press <strong>▶ Start</strong> when movie begins.`;
-        if (_subStartBtn) _subStartBtn.style.display = '';
+        if (_subStartBtn) {
+          _subStartBtn.style.display = 'none';
+          _subStartBtn.textContent = '▶ Start Subtitles';
+        }
         if (_subStatusLine) _subStatusLine.textContent = 'Ready — press Start';
-        _subStartBtn.textContent = '▶ Start Subtitles';
       }
-      _subSyncPanel.classList.add('visible');
+      if (_subSyncPanel) _subSyncPanel.classList.remove('visible');
       _subActive = true;
       console.log(`[Subtitles] Loaded ${cues.length} cues from "${filename}" (${_maxMode ? 'Max/auto-sync' : 'wall-clock'})`);
     }
@@ -8457,6 +8441,17 @@
       } else if (d.data && typeof d.data.currentTime === 'number') {
         ct = d.data.currentTime;
         evt = d.data.event || '';
+      }
+
+      if (d.type === 'PLAYER_EVENT' || d.type === 'play' || d.type === 'playTriggered' || evt === 'play') {
+        try {
+          const frame = document.getElementById('playerFrame');
+          if (frame && frame.contentWindow) {
+            frame.contentWindow.postMessage({ type: 'unmute' }, '*');
+            frame.contentWindow.postMessage({ action: 'unmute' }, '*');
+            frame.contentWindow.postMessage({ type: 'setMuted', value: false }, '*');
+          }
+        } catch (_) {}
       }
 
       if (typeof ct === 'number') {
@@ -8577,87 +8572,104 @@
       }
     }
 
-    // ── LOAD SUB button → open file picker or toggle panel ───────────────
+    // ── LOAD SUB button → open file picker or toggle subtitle display ───────────
     if (_subToggleBtn) {
       _subToggleBtn.addEventListener('click', () => {
         if (_subLoaded) {
-          // Already loaded: toggle panel visibility (keeps subtitles running)
-          _subSyncPanel.classList.toggle('visible');
+          // Toggle subtitle visibility directly without showing any sync panel
+          const overlay = document.getElementById('subOverlay');
+          if (overlay) {
+            const isHidden = overlay.style.display === 'none';
+            overlay.style.display = isHidden ? '' : 'none';
+            _subToggleBtn.classList.toggle('active', isHidden);
+            _subToggleBtn.title = isHidden ? 'Subtitles active (click to hide)' : 'Subtitles hidden (click to show)';
+          }
           return;
         }
         // No sub loaded yet → open file picker
-        _subFileInput.value = ''; // reset so same file can be re-picked
-        _subFileInput.click();
+        if (_subFileInput) {
+          _subFileInput.value = ''; // reset so same file can be re-picked
+          _subFileInput.click();
+        }
       });
     }
 
     // ── File picker → read & parse ─────────────────────────────────────────
-    _subFileInput.addEventListener('change', () => {
-      const file = _subFileInput.files[0];
-      if (!file) return;
-      const name = file.name.toLowerCase();
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const content = ev.target.result;
-        let cues = [];
-        if (name.endsWith('.srt')) {
-          cues = parseSrt(content);
-        } else if (name.endsWith('.vtt')) {
-          cues = parseVtt(content);
-        } else if (name.endsWith('.ass') || name.endsWith('.ssa')) {
-          cues = parseAss(content);
-        } else {
-          // Unknown — try SRT first, then VTT
-          cues = parseSrt(content);
-          if (!cues.length) cues = parseVtt(content);
-        }
-        _loadSubCues(cues, file.name);
-      };
-      reader.onerror = () => alert('Could not read subtitle file.');
-      reader.readAsText(file, 'UTF-8');
-    });
+    if (_subFileInput) {
+      _subFileInput.addEventListener('change', () => {
+        const file = _subFileInput.files ? _subFileInput.files[0] : null;
+        if (!file) return;
+        const name = file.name.toLowerCase();
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const content = ev.target.result;
+          let cues = [];
+          if (name.endsWith('.srt')) {
+            cues = parseSrt(content);
+          } else if (name.endsWith('.vtt')) {
+            cues = parseVtt(content);
+          } else if (name.endsWith('.ass') || name.endsWith('.ssa')) {
+            cues = parseAss(content);
+          } else {
+            // Unknown — try SRT first, then VTT
+            cues = parseSrt(content);
+            if (!cues.length) cues = parseVtt(content);
+          }
+          _loadSubCues(cues, file.name);
+        };
+        reader.onerror = () => alert('Could not read subtitle file.');
+        reader.readAsText(file, 'UTF-8');
+      });
+    }
 
     // Start button — record playback start time
-    _subStartBtn.addEventListener('click', () => {
-      _subStartTime = Date.now();
-      _subOffset = 0;
-      _stopSubLoop();
-      _subRaf = requestAnimationFrame(_subLoop);
-      _subStartBtn.textContent = '⟳ Restart';
-    });
+    if (_subStartBtn) {
+      _subStartBtn.addEventListener('click', () => {
+        _subStartTime = Date.now();
+        _subOffset = 0;
+        _stopSubLoop();
+        _subRaf = requestAnimationFrame(_subLoop);
+        _subStartBtn.textContent = '⟳ Restart';
+      });
+    }
 
     // Reset button
-    _subResetBtn.addEventListener('click', () => {
-      _stopSubLoop();
-      _subStartTime = null;
-      _subOffset = 0;
-      _subStartBtn.textContent = '▶ Start Subtitles';
-      if (_subStatusLine) _subStatusLine.textContent = 'Not started';
-    });
+    if (_subResetBtn) {
+      _subResetBtn.addEventListener('click', () => {
+        _stopSubLoop();
+        _subStartTime = null;
+        _subOffset = 0;
+        _subStartBtn.textContent = '▶ Start Subtitles';
+        if (_subStatusLine) _subStatusLine.textContent = 'Not started';
+      });
+    }
 
     // Clean up when player closes
-    document.getElementById('playerClose').addEventListener('click', () => {
-      _stopSubLoop();
-      _subStartTime = null;
-      _subLoaded = false;
-      _subCues = [];
-      _subOffset = 0;
-      _subFileName = '';
-      _subActive = false;
-      if (_subToggleBtn) {
-        _subToggleBtn.style.opacity = '1';
-        _subToggleBtn.style.cursor = 'pointer';
-        const flag = _subToggleBtn.querySelector('.sub-flag');
-        if (flag) flag.textContent = '📁';
-        _subToggleBtn.classList.remove('active');
-        _subToggleBtn.title = 'Load subtitle file (.srt / .vtt / .ass from Baiscope or any source)';
-      }
-      _subSyncPanel.classList.remove('visible');
-      _subStartBtn.textContent = '▶ Start Subtitles';
-      if (_subStatusLine) _subStatusLine.textContent = 'No file loaded';
-      const msg = document.getElementById('subPanelMsg');
-      if (msg) msg.innerHTML = 'Download .srt from <strong><a id="baiscopeLink" href="https://www.baiscope.lk" target="_blank" style="color:var(--gold)">Baiscope</a></strong>, then click <strong>📁 LOAD SUB</strong>';
-    }, { capture: true });  // capture = before the existing handler
+    const playerCloseBtn = document.getElementById('playerClose');
+    if (playerCloseBtn) {
+      playerCloseBtn.addEventListener('click', () => {
+        _stopSubLoop();
+        _subStartTime = null;
+        _subLoaded = false;
+        _subCues = [];
+        _subOffset = 0;
+        _subFileName = '';
+        _subActive = false;
+        if (_subToggleBtn) {
+          _subToggleBtn.style.opacity = '1';
+          _subToggleBtn.style.cursor = 'pointer';
+          const flag = _subToggleBtn.querySelector('.sub-flag');
+          if (flag) flag.textContent = '📁';
+          _subToggleBtn.classList.remove('active');
+          _subToggleBtn.title = 'Load subtitle file (.srt / .vtt / .ass from Baiscope or any source)';
+        }
+        if (_subSyncPanel) _subSyncPanel.classList.remove('visible');
+        if (_subStartBtn) _subStartBtn.textContent = '▶ Start Subtitles';
+        if (_subStatusLine) _subStatusLine.textContent = 'No file loaded';
+        const msg = document.getElementById('subPanelMsg');
+        if (msg) msg.innerHTML = 'Download .srt from <strong><a id="baiscopeLink" href="https://www.baiscope.lk" target="_blank" style="color:var(--gold)">Baiscope</a></strong>, then click <strong>📁 LOAD SUB</strong>';
+      }, { capture: true });  // capture = before the existing handler
+    }
 
     // ════════════════════════════════════════════════════════════════════════
     //  MAX PLAYER  — custom HLS player powered by hls.js
@@ -10105,11 +10117,7 @@
               _subToggleBtn.classList.add('active');
               _subToggleBtn.title = `Sinhala subtitles active (${parsedCues.length} cues) — Click to sync`;
             }
-            const msg = document.getElementById('subPanelMsg');
-            if (msg) msg.innerHTML = `✅ <strong style="color:var(--gold)">${_escHtml(subLabel)}</strong> active — <em>${parsedCues.length} cues</em>.<br><span style="color:#27AE60;font-size:0.8em;">⚡ Wall-clock auto-sync active</span>`;
-            setTimeout(() => {
-              if (_subSyncPanel) _subSyncPanel.classList.remove('visible');
-            }, 3500);
+            if (_subSyncPanel) _subSyncPanel.classList.remove('visible');
             console.log(`[Iframe Subtitles] Auto-started ${parsedCues.length} Sinhala cues`);
           }
         }
@@ -10146,6 +10154,11 @@
       frame.onload = () => {
         if (loader) loader.style.opacity = '0';
         frame.style.opacity = '1';
+        try {
+          frame.contentWindow?.postMessage({ type: 'unmute' }, '*');
+          frame.contentWindow?.postMessage({ action: 'unmute' }, '*');
+          frame.contentWindow?.postMessage({ type: 'setMuted', value: false }, '*');
+        } catch (_) {}
       };
       frame.src = url;
 
@@ -10221,6 +10234,11 @@
       frame.onload = () => {
         if (loader) loader.style.opacity = '0';
         frame.style.opacity = '1';
+        try {
+          frame.contentWindow?.postMessage({ type: 'unmute' }, '*');
+          frame.contentWindow?.postMessage({ action: 'unmute' }, '*');
+          frame.contentWindow?.postMessage({ type: 'setMuted', value: false }, '*');
+        } catch (_) {}
       };
       if (typeof window._adblock_pushRecovery === 'function') window._adblock_pushRecovery(url);
       _autoLoadIframeSinhalaSub();

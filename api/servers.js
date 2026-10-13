@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     const e = episode || 1;
     
     urls = [
-      `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&muted=false&nextEpisode=true&episodeSelector=true`,
+      `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true`,
       `https://moviesapi.to/tv/${id}/${s}/${e}`,
       `https://autoembed.co/tv/tmdb/${id}-${s}-${e}`,
       `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`,
@@ -31,7 +31,7 @@ export default async function handler(req, res) {
   } else {
     // Movie
     urls = [
-      `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&muted=false`,
+      `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true`,
       `https://moviesapi.to/movie/${id}`,
       `https://autoembed.co/movie/tmdb/${id}`,
       `https://embed.smashystream.com/playere.php?tmdb=${id}`,
