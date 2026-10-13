@@ -7890,7 +7890,7 @@
           `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=true&showNextEpisode=1`,
           `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=sin`,
           `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true`,
-          `https://vidspark.to/tv/${id}/${s}/${e}?theme=E8C97A&autoplay=true`,
+          `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true`,
           `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}&autoplay=1`,
           `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
           `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
@@ -7901,7 +7901,7 @@
           `https://vidlove.cc/embed/movie/${id}?autoplay=true`,
           `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=sin`,
           `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true`,
-          `https://vidspark.to/movie/${id}?theme=E8C97A&autoplay=true`,
+          `https://cdn.vidspark.to/movie/${id}?autoplay=true`,
           `https://embed.smashystream.com/playere.php?tmdb=${id}&autoplay=1`,
           `https://vidnest.fun/movie/${id}?autoplay=1`,
           `https://vixsrc.to/movie/${id}?autoplay=1`
@@ -8954,13 +8954,17 @@
       const isBufferingEvent = (pState === 'buffer') ||
         (evName === 'waiting' || evName === 'buffering' || evName === 'buffer' || evName === 'stalled') ||
         (d.data && (d.data.event === 'waiting' || d.data.event === 'buffering' || d.data.player_status === 'buffering' || d.data.player_status === 'waiting'));
-      const isExplicitPause = (evName === 'pause' || evName === 'paused') || (d.data && d.data.paused === true) || (d.paused === true) || (pState === 'pause');
+      const isExplicitPause = (evName === 'pause' || evName === 'paused') ||
+        (d.data && d.data.paused === true) ||
+        (d.paused === true) ||
+        (pState === 'pause') ||
+        (isVidSpark && (evName === 'pause' || (evName === 'playerstatus' && d.paused === true)));
       let isExplicitPlay  = !isExplicitPause && !isBufferingEvent && (
         (evName === 'play' || evName === 'playing') ||
         (d.paused === false && evName !== 'pause' && evName !== 'paused' && !isBufferingEvent) ||
         (d.data && d.data.paused === false && evName !== 'pause' && evName !== 'paused' && !isBufferingEvent) ||
         (pState === 'play') ||
-        (isVidSpark && (evName === 'timeupdate' || evName === 'play' || (evName === 'playerstatus' && d.paused === false)))
+        (isVidSpark && (evName === 'play' || (evName === 'playerstatus' && d.paused === false)))
       );
 
       if (isExplicitPause) {
@@ -8970,25 +8974,26 @@
       // Check for advancing playback vs stalled buffer position
       if (!isExplicitPause && !isBufferingEvent && ct !== null) {
         if (typeof window._externalCurrentTime === 'number' && window._externalCurrentTime > 0) {
-          if (ct > (window._externalCurrentTime + 0.08)) {
+          if (ct > (window._externalCurrentTime + 0.04)) {
             // Time is clearly advancing -> video has started/continued playing!
             isExplicitPlay = true;
             _markBufferState(false);
             window._ctStallStartTime = null;
-          } else if (Math.abs(ct - window._externalCurrentTime) < 0.02) {
+          } else if (Math.abs(ct - window._externalCurrentTime) < 0.04) {
             // Position unchanged across messages
             if (!window._ctStallStartTime) {
               window._ctStallStartTime = Date.now();
-            } else if (Date.now() - window._ctStallStartTime > 2800) {
-              // Same position for > 2.8s while supposed to be playing -> mark buffering!
+            } else if (Date.now() - window._ctStallStartTime > 1600) {
+              // Same position for > 1.6s while supposed to be playing -> mark buffering!
               _markBufferState(true);
+              isExplicitPlay = false;
             }
           } else {
             window._ctStallStartTime = null;
           }
         } else if (window._externalCurrentTime === 0) {
-          // Progress restored on load/refresh: if time is advancing or event is timeupdate/play/vidspark, unpause!
-          if (ct > 0 || evName === 'play' || evName === 'timeupdate' || pState === 'play' || isVidSpark) {
+          // Progress restored on load/refresh: if time is advancing or event is play, unpause!
+          if (ct > 0 || evName === 'play' || (isVidSpark && d.paused === false)) {
             isExplicitPlay = true;
             _markBufferState(false);
             window._ctStallStartTime = null;
@@ -8998,10 +9003,6 @@
             window._externalCurrentTime = ct;
             window._subPausedElapsed = Math.round(ct * 1000);
           }
-        } else if (isVidSpark && (evName === 'timeupdate' || evName === 'play')) {
-          isExplicitPlay = true;
-          _markBufferState(false);
-          window._ctStallStartTime = null;
         }
       }
 
