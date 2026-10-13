@@ -2441,11 +2441,13 @@
       transform: translateZ(9999px) !important;
     }
     .player-container.idle-fs .player-fs-overlay-btn {
-      opacity: 0.2;
+      opacity: 0 !important;
+      pointer-events: none !important;
     }
-    .player-container:hover .player-fs-overlay-btn,
-    .player-container:active .player-fs-overlay-btn {
+    .player-container:not(.idle-fs):hover .player-fs-overlay-btn,
+    .player-container:not(.idle-fs):active .player-fs-overlay-btn {
       opacity: 1 !important;
+      pointer-events: auto !important;
     }
 
     /* ── Floating Subtitle Sync Bar ──────────────────────────────────── */
@@ -5019,19 +5021,58 @@
       color: #fff;
     }
 
-    /* In fullscreen, hide home icon, but keep close and fullscreen controls accessible */
+    /* Fullscreen controls transitions */
+    #playerClose,
+    #playerFullscreenBtn,
+    #topbarWatchPartyBtn,
+    .player-fs-overlay-btn,
+    .sub-sync-bar,
+    #skipIntroBtn,
+    #skipInfoBadge {
+      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    /* In fullscreen, hide home icon */
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #playerHome {
       display: none !important;
     }
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #playerClose {
+
+    /* In fullscreen, keep close, fullscreen and watch party elevated */
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #playerClose,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #playerFullscreenBtn,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #topbarWatchPartyBtn {
       display: flex !important;
       z-index: 2147483647 !important;
       transform: translateZ(9999px) !important;
+      opacity: 1;
     }
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #playerFullscreenBtn {
-      display: flex !important;
-      z-index: 2147483647 !important;
-      transform: translateZ(9999px) !important;
+
+    /* Automatically hide watchparty, x mark (close), fullscreen marks, and overlay within 2 seconds when idle in fullscreen */
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs #playerClose,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs #playerFullscreenBtn,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs #topbarWatchPartyBtn,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs .player-fs-overlay-btn,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs .sub-sync-bar,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs #skipIntroBtn,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs #skipInfoBadge,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs .popup-home {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      transform: translateY(-12px) translateZ(9999px) !important;
+    }
+
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs .player-fs-overlay-btn {
+      transform: translateY(12px) translateZ(9999px) !important;
+    }
+
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs .sub-sync-bar {
+      transform: translateX(-50%) translateY(14px) translateZ(9999px) !important;
+    }
+
+    /* Hide mouse cursor when idle in fullscreen */
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs * {
+      cursor: none !important;
     }
 
     /* ── WISHLIST BUTTON ON CARD ──────────────────────────────────────── */
@@ -10074,6 +10115,13 @@
         _lastIframeSubCueText = null;
         _attachSubOverlayToActiveWrap();
         _mxsApplySubStyle();
+
+        if (!isFs && container) {
+          container.classList.remove('idle-fs');
+          clearTimeout(_fsBtnIdleTimer);
+        } else if (isFs) {
+          _pokePlayerFsControls();
+        }
       }
       document.addEventListener('fullscreenchange', _handleFullscreenChange);
       document.addEventListener('webkitfullscreenchange', _handleFullscreenChange);
@@ -10117,23 +10165,25 @@
       });
     }
 
-    // Idle timer for fullscreen overlay button
+    // Idle timer for fullscreen overlay button & controls (auto-hide within 2 seconds)
     let _fsBtnIdleTimer = null;
     function _pokePlayerFsControls() {
       const pCont = document.getElementById('playerContainer');
-      if (pCont) {
-        pCont.classList.remove('idle-fs');
-        clearTimeout(_fsBtnIdleTimer);
+      if (!pCont) return;
+      pCont.classList.remove('idle-fs');
+      clearTimeout(_fsBtnIdleTimer);
+      const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || pCont.classList.contains('is-fullscreen') || document.body.classList.contains('is-fullscreen'));
+      if (isFs) {
         _fsBtnIdleTimer = setTimeout(() => {
           pCont.classList.add('idle-fs');
-        }, 3200);
+        }, 2000);
       }
     }
-    const _pContEl = document.getElementById('playerContainer');
-    if (_pContEl) {
-      _pContEl.addEventListener('mousemove', _pokePlayerFsControls);
-      _pContEl.addEventListener('touchstart', _pokePlayerFsControls, { passive: true });
-    }
+
+    // Attach listeners on document and playerContainer so mouse movements and touches are always caught
+    ['mousemove', 'pointermove', 'mousedown', 'touchstart', 'touchmove', 'keydown'].forEach(evt => {
+      document.addEventListener(evt, _pokePlayerFsControls, { passive: true });
+    });
 
     let _fsHandlersSetup = false;
     function _setupMaxFullscreenHandlers() {
