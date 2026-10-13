@@ -2270,6 +2270,15 @@
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
       position: relative;
     }
+    .player-container:fullscreen,
+    .player-container:-webkit-full-screen {
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: 100vw !important;
+      max-height: 100vh !important;
+      border-radius: 0 !important;
+      background: #000 !important;
+    }
 
     #playerFrame {
       width: 100%;
@@ -7667,8 +7676,9 @@
       let urls = [], labels = [];
 
       if (type === 'tv') {
+        const tvSubParam = `&sub_file=https%3A%2F%2Fmovies.hackystreaming.online%2Fapi%2Fsubtitles%3Fid%3D${id}%26type%3Dtv%26season%3D${s}%26episode%3D${e}%26format%3Dvtt&sub_label=Sinhala%20%F0%9F%87%B1%F0%9F%87%B0`;
         urls = [
-          `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false&nextEpisode=true&episodeSelector=true`,
+          `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false&nextEpisode=true&episodeSelector=true${tvSubParam}`,
           `https://moviesapi.to/tv/${id}/${s}/${e}`,
           `https://autoembed.co/tv/tmdb/${id}-${s}-${e}`,
           `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`,
@@ -7683,8 +7693,9 @@
         ];
         labels = ['HackyMax ✦', 'Nova', 'Cosmos', 'Nebula', 'Titan', 'Infinity', 'Zenith', 'Hyperion', 'Vortex', 'OmniPlay', 'Orbit', 'Stellar'];
       } else {
+        const movieSubParam = `&sub_file=https%3A%2F%2Fmovies.hackystreaming.online%2Fapi%2Fsubtitles%3Fid%3D${id}%26type%3Dmovie%26format%3Dvtt&sub_label=Sinhala%20%F0%9F%87%B1%F0%9F%87%B0`;
         urls = [
-          `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false`,
+          `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false${movieSubParam}`,
           `https://moviesapi.to/movie/${id}`,
           `https://autoembed.co/movie/tmdb/${id}`,
           `https://embed.smashystream.com/playere.php?tmdb=${id}`,
@@ -8416,10 +8427,85 @@
       return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
-    // RAF loop — renders current cue with zero redundant DOM writes
+    // ── Universal External Player PostMessage Sync ────────────────────────
     let _lastIframeSubCueText = null;
+
+    function _extractTimeFromMessage(eventData) {
+      if (eventData == null) return null;
+
+      if (typeof eventData === 'string') {
+        const str = eventData.trim();
+        if (str.startsWith('{') || str.startsWith('[')) {
+          try {
+            const parsed = JSON.parse(str);
+            const res = _extractTimeFromMessage(parsed);
+            if (res !== null) return res;
+          } catch (_) {}
+        }
+        const m = str.match(/(?:current_?time|time|position|pos|seek)[:=\s]+(\d+(?:\.\d+)?)/i);
+        if (m && m[1]) {
+          const val = parseFloat(m[1]);
+          if (!isNaN(val) && val >= 0) return { time: val, event: 'timeupdate' };
+        }
+        if (/^\d+(\.\d+)?$/.test(str)) {
+          const val = parseFloat(str);
+          if (!isNaN(val) && val >= 0) return { time: val, event: 'timeupdate' };
+        }
+        return null;
+      }
+
+      if (typeof eventData !== 'object') return null;
+
+      const d = eventData;
+      let t = null;
+      let evt = d.event || d.type || d.action || '';
+
+      const candidateKeys = ['currentTime', 'current_time', 'time', 'position', 'pos', 'seconds', 'offset'];
+      for (const k of candidateKeys) {
+        if (typeof d[k] === 'number' && !isNaN(d[k]) && d[k] >= 0) {
+          t = d[k];
+          break;
+        }
+      }
+
+      if (t === null) {
+        const sub = d.data || d.payload || d.info || d.detail;
+        if (sub) {
+          if (typeof sub === 'number' && !isNaN(sub) && sub >= 0) {
+            t = sub;
+          } else if (typeof sub === 'object') {
+            for (const k of candidateKeys) {
+              if (typeof sub[k] === 'number' && !isNaN(sub[k]) && sub[k] >= 0) {
+                t = sub[k];
+                break;
+              }
+            }
+            if (sub.event) evt = sub.event;
+            else if (sub.type) evt = sub.type;
+          } else if (typeof sub === 'string') {
+            const res = _extractTimeFromMessage(sub);
+            if (res) return res;
+          }
+        }
+      }
+
+      if (t === null && typeof d.value === 'number' && !isNaN(d.value) && d.value >= 0) {
+        t = d.value;
+      }
+
+      if (t !== null) {
+        return { time: t, event: String(evt) };
+      }
+      return null;
+    }
+
+    // RAF loop — renders current cue smoothly at 60fps
     function _subLoop() {
-      if (!_subStartTime || !_subCues.length) return;
+      if (!_subStartTime || !_subCues.length || !_subActive) return;
+      if (window._externalIsPaused) {
+        _subRaf = requestAnimationFrame(_subLoop);
+        return;
+      }
       const elapsed = (Date.now() - _subStartTime) + _subOffset;
       const cue = _subCues.find(c => elapsed >= c.start && elapsed < c.end);
       const newText = cue ? cue.text : '';
@@ -8438,65 +8524,49 @@
         _subStatusLine._lastSec = secs;
         const mm = String(Math.floor(secs / 60)).padStart(2, '0');
         const ss = String(secs % 60).padStart(2, '0');
-        _subStatusLine.textContent = `${mm}:${ss}`;
+        const isLive = !!(window._lastExternalMsgTime && (Date.now() - window._lastExternalMsgTime < 4000));
+        _subStatusLine.textContent = isLive ? `⚡ Live-Sync (${mm}:${ss})` : `${mm}:${ss}`;
       }
       _subRaf = requestAnimationFrame(_subLoop);
     }
 
     function _stopSubLoop() {
       if (_subRaf) { cancelAnimationFrame(_subRaf); _subRaf = null; }
-      _subText.classList.remove('active');
+      if (_subText) _subText.classList.remove('active');
     }
 
-    // ── External Player PostMessage Sync (VidLink / Nova auto-sync) ────────
     window.addEventListener('message', (event) => {
       if (!event || !event.data) return;
       let d = event.data;
       if (typeof d === 'string') {
         try { d = JSON.parse(d); } catch (_) {}
       }
-      if (!d || typeof d !== 'object') return;
 
-      // Extract playback position from VidLink PLAYER_EVENT or generic player
-      let ct = null;
-      let evt = '';
-      if (d.type === 'PLAYER_EVENT' && d.data) {
-        ct = typeof d.data.currentTime === 'number' ? d.data.currentTime : null;
-        evt = d.data.event || '';
-      } else if (typeof d.currentTime === 'number') {
-        ct = d.currentTime;
-        evt = d.event || '';
-      } else if (d.data && typeof d.data.currentTime === 'number') {
-        ct = d.data.currentTime;
-        evt = d.data.event || '';
-      }
-
-      if (d.type === 'PLAYER_EVENT' || d.type === 'play' || d.type === 'playTriggered' || evt === 'play') {
-        try {
-          const frame = document.getElementById('playerFrame');
-          if (frame && frame.contentWindow) {
-            frame.contentWindow.postMessage({ type: 'unmute' }, '*');
-            frame.contentWindow.postMessage({ action: 'unmute' }, '*');
-            frame.contentWindow.postMessage({ type: 'setMuted', value: false }, '*');
-          }
-        } catch (_) {}
-      }
-
-      if (typeof ct === 'number') {
-        window._externalCurrentTime = ct;
-
-        // When external player sends active timestamps, shut down manual wall-clock timer
-        if (_subStartTime) {
-          _subStartTime = null;
-          _stopSubLoop();
+      // Check pause / play states across any player
+      const rawEvt = (d && (d.event || d.type || d.action || (d.data && d.data.event))) || '';
+      if (typeof rawEvt === 'string') {
+        if (/pause/i.test(rawEvt)) {
+          window._externalIsPaused = true;
+        } else if (/play|playing/i.test(rawEvt)) {
+          window._externalIsPaused = false;
         }
+      }
+
+      const extracted = _extractTimeFromMessage(d);
+      if (extracted && typeof extracted.time === 'number') {
+        const ct = extracted.time;
+        window._externalCurrentTime = ct;
+        window._lastExternalMsgTime = Date.now();
+
+        // Re-anchor the wall-clock baseline to the player's exact playback position
+        _subStartTime = Date.now() - (ct * 1000);
+        _subActive = true;
 
         if (!_maxMode && _subLoaded && _subCues && _subCues.length) {
-          _subActive = true;
+          // Immediately check cue at this exact millisecond
           const ms = Math.floor(ct * 1000) + _subOffset;
           const cue = _subCues.find(c => ms >= c.start && ms < c.end);
           const newText = cue ? cue.text : '';
-
           if (newText !== _lastIframeSubCueText) {
             _lastIframeSubCueText = newText;
             if (newText) {
@@ -8507,13 +8577,9 @@
             }
           }
 
-          // Throttled time counter update
-          const secs = Math.floor(ct);
-          if (_subStatusLine && _subStatusLine._lastSec !== secs) {
-            _subStatusLine._lastSec = secs;
-            const mm = String(Math.floor(secs / 60)).padStart(2, '0');
-            const ss = String(secs % 60).padStart(2, '0');
-            _subStatusLine.textContent = `⚡ Live-Sync (${mm}:${ss})`;
+          // Ensure RAF loop continues running smoothly at 60fps between messages
+          if (!_subRaf) {
+            _subRaf = requestAnimationFrame(_subLoop);
           }
 
           // Auto-hide manual Start button once live events are received
@@ -8524,7 +8590,7 @@
           const msg = document.getElementById('subPanelMsg');
           if (msg && !msg._hasLiveSyncNotice) {
             msg._hasLiveSyncNotice = true;
-            msg.innerHTML = `✅ <strong style="color:var(--gold)">${_escHtml(_subFileName)}</strong> loaded — <em>${_subCues.length} cues</em>.<br><span style="color:#2ECC71;font-size:0.85em;font-weight:700;">⚡ Live-Sync active — Auto-syncs on skip/seek!</span>`;
+            msg.innerHTML = `✅ <strong style="color:var(--gold)">${_escHtml(_subFileName)}</strong> loaded — <em>${_subCues.length} cues</em>.<br><span style="color:#2ECC71;font-size:0.85em;font-weight:700;">⚡ Live-Sync active — Auto-syncs across players!</span>`;
           }
         }
       }
@@ -9631,14 +9697,24 @@
       }
     }
 
-    document.addEventListener('fullscreenchange', () => {
+    function _handleFullscreenChange() {
+      const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+      const frame = document.getElementById('playerFrame');
+      const container = document.getElementById('playerContainer');
+      // If the iframe itself entered fullscreen (e.g. user clicked fullscreen inside VidLink),
+      // elevate fullscreen to #playerContainer so #subOverlay renders directly over the video!
+      if (fsEl && fsEl === frame && container) {
+        if (container.requestFullscreen) {
+          container.requestFullscreen().catch(() => {});
+        } else if (container.webkitRequestFullscreen) {
+          container.webkitRequestFullscreen();
+        }
+      }
       _attachSubOverlayToActiveWrap();
       _mxsApplySubStyle();
-    });
-    document.addEventListener('webkitfullscreenchange', () => {
-      _attachSubOverlayToActiveWrap();
-      _mxsApplySubStyle();
-    });
+    }
+    document.addEventListener('fullscreenchange', _handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', _handleFullscreenChange);
 
     // Keyboard shortcuts: Space = Play/Pause, Left = -10s, Right = +10s, Up/Down = Volume, M = Mute, F = Fullscreen
     document.addEventListener('keydown', (e) => {
@@ -10351,6 +10427,14 @@
         _attachSubOverlayToActiveWrap();
       };
       if (typeof window._adblock_pushRecovery === 'function') window._adblock_pushRecovery(url);
+
+      // Clean start for the new server
+      window._externalCurrentTime = 0;
+      window._lastExternalMsgTime = null;
+      window._externalIsPaused = false;
+      _subStartTime = Date.now();
+      _lastIframeSubCueText = null;
+
       _autoLoadIframeSinhalaSub();
     }
 

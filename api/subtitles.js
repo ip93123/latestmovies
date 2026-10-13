@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+
 // Subtitle API & Proxy — handles subtitle catalog (Sinhala & OpenSubtitles) and proxying
 
 // Predefined Sinhala Subtitle Mapping
@@ -81,11 +84,21 @@ const LANG_MAP = {
   si: { label: 'Sinhala', flag: '🇱🇰' },
 };
 
+function srtToVtt(srt) {
+  let vtt = 'WEBVTT\n\n';
+  srt = srt.replace(/^\uFEFF/, '');
+  srt = srt.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  vtt += srt.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, '$1.$2');
+  return vtt;
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
 
-  // Mode 1: Proxy remote subtitle file (CORS / charset bypass)
-  const { url } = req.query;
+  const { id, imdb, type = 'movie', season = 1, episode = 1, format, vtt, url } = req.query;
+  const isVtt = format === 'vtt' || vtt === '1' || vtt === 'true' || (req.url && req.url.includes('.vtt'));
+
+  // Mode 1: Proxy remote subtitle file (CORS / charset bypass / VTT conversion)
   if (url) {
     try {
       const fetchRes = await fetch(url, {
@@ -99,8 +112,13 @@ export default async function handler(req, res) {
         return res.status(fetchRes.status).send('Failed to fetch subtitle');
       }
 
-      const text = await fetchRes.text();
-      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      let text = await fetchRes.text();
+      if (isVtt && !text.startsWith('WEBVTT')) {
+        text = srtToVtt(text);
+        res.setHeader('Content-Type', 'text/vtt; charset=utf-8');
+      } else {
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      }
       res.setHeader('Cache-Control', 'public, max-age=86400');
       return res.status(200).send(text);
     } catch (err) {
@@ -108,8 +126,26 @@ export default async function handler(req, res) {
     }
   }
 
-  // Mode 2: Get available subtitle tracks catalog for movie or episode
-  let { id, imdb, type = 'movie', season = 1, episode = 1 } = req.query;
+  // Mode 2: Serve local subtitle directly as WebVTT for embed players (VidLink, etc.)
+  if (id && isVtt) {
+    const subKey = type === 'tv' ? `${id}_S${season}_E${episode}` : `${id}`;
+    const localSub = SUBTITLE_MAP[subKey] || SUBTITLE_MAP[id] || null;
+    if (localSub) {
+      try {
+        const filePath = path.join(process.cwd(), localSub);
+        if (fs.existsSync(filePath)) {
+          const srtContent = fs.readFileSync(filePath, 'utf8');
+          res.setHeader('Content-Type', 'text/vtt; charset=utf-8');
+          res.setHeader('Cache-Control', 'public, max-age=86400');
+          return res.status(200).send(srtToVtt(srtContent));
+        }
+      } catch (err) {
+        console.error('[VTT serving error]', err);
+      }
+    }
+  }
+
+  // Mode 3: Get available subtitle tracks catalog for movie or episode
   if (!id && !imdb) {
     return res.status(400).json({ error: 'Missing id, imdb, or url parameter' });
   }
