@@ -2039,79 +2039,91 @@
     }
     .category-card {
       position: relative;
-      flex: 0 0 260px;
-      height: 135px;
+      flex: 0 0 270px;
+      height: 140px;
       border-radius: 14px;
       overflow: hidden;
       cursor: pointer;
-      background: #0E121E;
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: #090C16;
+      border: 1px solid rgba(255, 255, 255, 0.14);
       transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
       user-select: none;
     }
     .category-card:hover {
       transform: translateY(-4px) scale(1.02);
-      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.65), 0 0 24px var(--cat-accent, rgba(232, 201, 122, 0.35));
-      border-color: rgba(255, 255, 255, 0.38);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.75), 0 0 25px var(--cat-accent, rgba(232, 201, 122, 0.4));
+      border-color: rgba(255, 255, 255, 0.4);
     }
     .category-card img {
       position: absolute;
       right: 0;
       top: 0;
-      width: 65%;
+      width: 68%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.45s ease, filter 0.3s ease;
-      filter: brightness(0.9);
+      object-position: center 25%;
+      transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease;
+      filter: brightness(1.05) contrast(1.05) saturate(1.08);
+      z-index: 1;
     }
     .category-card:hover img {
       transform: scale(1.08);
-      filter: brightness(1.05);
+      filter: brightness(1.15) contrast(1.1) saturate(1.15);
     }
     .category-card-overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(90deg, #0A0D18 0%, rgba(10, 13, 24, 0.94) 45%, rgba(10, 13, 24, 0.38) 75%, transparent 100%);
+      z-index: 2;
+      background: linear-gradient(90deg, #070912 0%, #070912 28%, rgba(7, 9, 18, 0.88) 48%, rgba(7, 9, 18, 0.22) 74%, transparent 100%);
+      pointer-events: none;
+    }
+    .category-card-tint {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background: radial-gradient(circle at 82% 50%, var(--cat-accent, #6366F1) 0%, transparent 70%);
+      opacity: 0.18;
       pointer-events: none;
     }
     .category-card-content {
       position: absolute;
       inset: 0;
-      z-index: 2;
-      padding: 1.1rem 1.2rem;
+      z-index: 3;
+      padding: 1.1rem 1.25rem;
       display: flex;
       flex-direction: column;
       justify-content: center;
       pointer-events: none;
     }
     .category-card-native {
-      font-size: 1.4rem;
+      font-size: 1.45rem;
       font-weight: 800;
       color: #FFFFFF;
       line-height: 1.15;
       margin-bottom: 2px;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95);
       letter-spacing: -0.2px;
     }
     .category-card-sub {
-      font-size: 0.82rem;
+      font-size: 0.84rem;
       font-weight: 600;
-      color: rgba(255, 255, 255, 0.75);
+      color: rgba(255, 255, 255, 0.85);
       letter-spacing: 0.3px;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
     }
     .category-card-badge {
       display: inline-block;
-      font-size: 0.64rem;
+      font-size: 0.65rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.6px;
       margin-top: 8px;
-      padding: 0.22rem 0.55rem;
+      padding: 0.24rem 0.6rem;
       border-radius: 5px;
-      background: rgba(0, 0, 0, 0.45);
+      background: rgba(0, 0, 0, 0.55);
       backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.25);
       width: fit-content;
       color: var(--cat-accent, #E8C97A);
     }
@@ -2241,30 +2253,145 @@
     @keyframes catSpin {
       to { transform: rotate(360deg); }
     }
+    /* ── Category Dedicated Page Grid (8 columns x 10 rows) ────────── */
+    .cat-page-content {
+      max-width: 1720px;
+      margin: 0 auto;
+      padding: 1.8rem 2.5rem 5rem 2.5rem;
+    }
+    #categoryGrid {
+      display: grid !important;
+      grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
+      gap: 1.25rem 0.95rem !important;
+      overflow: visible !important;
+      padding: 0.5rem 0 2rem 0 !important;
+      margin: 0 !important;
+      width: 100% !important;
+    }
+    #categoryGrid .movie-card {
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      flex: none !important;
+      margin: 0 !important;
+    }
+    @media (max-width: 1650px) {
+      #categoryGrid {
+        grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+        gap: 1.15rem 0.85rem !important;
+      }
+    }
+    @media (max-width: 1400px) {
+      #categoryGrid {
+        grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+        gap: 1.05rem 0.8rem !important;
+      }
+    }
+    @media (max-width: 1150px) {
+      #categoryGrid {
+        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+        gap: 1rem 0.75rem !important;
+      }
+    }
+    @media (max-width: 900px) {
+      #categoryGrid {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 0.9rem 0.65rem !important;
+      }
+    }
+    @media (max-width: 650px) {
+      #categoryGrid {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 0.75rem 0.5rem !important;
+      }
+    }
+    @media (max-width: 440px) {
+      #categoryGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.65rem 0.45rem !important;
+      }
+    }
+
+    /* ── Category Page Bottom Pagination Bar ────────────────────────── */
     .cat-pagination-wrap {
       display: flex;
+      align-items: center;
       justify-content: center;
-      margin-top: 3.5rem;
+      gap: 0.65rem;
+      margin-top: 3rem;
+      flex-wrap: wrap;
+      user-select: none;
     }
-    .cat-load-more-btn {
-      background: linear-gradient(135deg, rgba(232, 201, 122, 0.18) 0%, rgba(245, 158, 11, 0.25) 100%);
-      color: var(--gold, #E8C97A);
-      border: 1px solid rgba(232, 201, 122, 0.45);
-      font-size: 0.95rem;
-      font-weight: 800;
-      padding: 0.85rem 2.5rem;
-      border-radius: 30px;
+    .cat-page-nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #fff;
+      padding: 0.65rem 1.35rem;
+      border-radius: 26px;
+      font-size: 0.88rem;
+      font-weight: 700;
       cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
       font-family: inherit;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
     }
-    .cat-load-more-btn:hover {
+    .cat-page-nav-btn:hover:not(:disabled) {
       background: var(--gold, #E8C97A);
+      border-color: var(--gold, #E8C97A);
       color: #07090F;
       transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(232, 201, 122, 0.5);
+      box-shadow: 0 8px 24px rgba(232, 201, 122, 0.4);
     }
+    .cat-page-nav-btn:disabled {
+      opacity: 0.32;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .cat-page-numbers {
+      display: flex;
+      align-items: center;
+      gap: 0.42rem;
+      flex-wrap: wrap;
+    }
+    .cat-page-btn {
+      min-width: 40px;
+      height: 40px;
+      padding: 0 0.6rem;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .cat-page-btn:hover {
+      background: rgba(232, 201, 122, 0.2);
+      border-color: var(--gold, #E8C97A);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+    .cat-page-btn.active {
+      background: var(--gold, #E8C97A);
+      border-color: var(--gold, #E8C97A);
+      color: #07090F;
+      font-weight: 800;
+      box-shadow: 0 3px 14px rgba(232, 201, 122, 0.45);
+    }
+    .cat-page-ellipsis {
+      color: rgba(255, 255, 255, 0.45);
+      padding: 0 0.35rem;
+      font-size: 0.95rem;
+    }
+
     @media (max-width: 768px) {
       .category-card {
         flex: 0 0 215px;
@@ -6421,7 +6548,19 @@
         <span>Loading titles…</span>
       </div>
       <div class="cat-pagination-wrap" id="catPaginationWrap" style="display:none">
-        <button class="cat-load-more-btn" id="catLoadMoreBtn">Load More Titles ▾</button>
+        <button class="cat-page-nav-btn" id="catPrevPageBtn" onclick="changeCategoryPage(-1)" title="Previous Page">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span>Previous</span>
+        </button>
+        <div class="cat-page-numbers" id="catPageNumbers"></div>
+        <button class="cat-page-nav-btn" id="catNextPageBtn" onclick="changeCategoryPage(1)" title="Next Page">
+          <span>Next</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
       </div>
     </div>
   </div>
@@ -7966,7 +8105,8 @@
           return `
             <div class="category-card" data-cat-type="language" data-cat-key="${l.code}" style="--cat-accent:${l.accent}">
               <img src="${l.img}" alt="${l.sub}" loading="lazy" onerror="this.style.display='none'">
-              <div class="category-card-overlay" style="background:${l.gradient}"></div>
+              <div class="category-card-overlay"></div>
+              <div class="category-card-tint"></div>
               <div class="category-card-content">
                 <div class="category-card-native">${l.title}</div>
                 <div class="category-card-sub">${l.sub}</div>
@@ -7981,7 +8121,8 @@
           return `
             <div class="category-card" data-cat-type="genre" data-cat-key="${g.id}" style="--cat-accent:${g.accent}">
               <img src="${g.img}" alt="${g.title}" loading="lazy" onerror="this.style.display='none'">
-              <div class="category-card-overlay" style="background:${g.gradient}"></div>
+              <div class="category-card-overlay"></div>
+              <div class="category-card-tint"></div>
               <div class="category-card-content">
                 <div class="category-card-native">${g.title}</div>
                 <div class="category-card-sub">${g.sub}</div>
@@ -8018,16 +8159,6 @@
       }
       if (tabTv) {
         tabTv.onclick = () => switchCategoryMediaType('tv');
-      }
-
-      // Wire up load more button
-      const loadMoreBtn = document.getElementById('catLoadMoreBtn');
-      if (loadMoreBtn) {
-        loadMoreBtn.onclick = () => {
-          if (!_isCatLoading && _currentCatPage < _currentCatTotalPages) {
-            loadCategoryTitles(_currentCatPage + 1, true);
-          }
-        };
       }
     }
 
@@ -8075,7 +8206,7 @@
         } catch (_) {}
       }
 
-      await loadCategoryTitles(1, false);
+      await loadCategoryTitles(1);
     }
 
     function closeCategoryPage(pushHistory = true) {
@@ -8103,53 +8234,66 @@
       if (tabMovie) tabMovie.classList.toggle('active', mediaType === 'movie');
       if (tabTv) tabTv.classList.toggle('active', mediaType === 'tv');
 
-      await loadCategoryTitles(1, false);
+      await loadCategoryTitles(1);
     }
 
-    async function loadCategoryTitles(page = 1, append = false) {
+    async function loadCategoryTitles(page = 1) {
       if (_isCatLoading) return;
       _isCatLoading = true;
 
       const grid = document.getElementById('categoryGrid');
       const loader = document.getElementById('catLoader');
       const paginationWrap = document.getElementById('catPaginationWrap');
-      const loadMoreBtn = document.getElementById('catLoadMoreBtn');
 
-      if (!append && grid) grid.innerHTML = '';
+      if (grid) grid.innerHTML = '';
       if (loader) loader.style.display = 'flex';
       if (paginationWrap) paginationWrap.style.display = 'none';
 
       try {
         let results = [];
-        let totalPages = 1;
+        let tmdbTotalPages = 1;
+
+        // Fetch 4 TMDB pages in parallel for this view page (e.g. viewPage 1 = tmdb pages 1,2,3,4 -> ~80 titles)
+        const startTmdbPage = (page - 1) * 4 + 1;
+        const pageIndices = [startTmdbPage, startTmdbPage + 1, startTmdbPage + 2, startTmdbPage + 3];
 
         if (_currentCatType === 'language') {
           // Special handling for Sinhala ('si'): combine Sinhala subtitle catalog if on page 1 of movies
           if (_currentCatKey === 'si' && _currentCatMediaType === 'movie' && page === 1) {
             try {
               const fetchSinsub = await Promise.all(
-                SINSUB_MOVIE_IDS.slice(0, 12).map(id => tmdb(`/movie/${id}?language=en-US`).catch(() => null))
+                SINSUB_MOVIE_IDS.slice(0, 16).map(id => tmdb(`/movie/${id}?language=en-US`).catch(() => null))
               );
               const validSubs = fetchSinsub.filter(m => m && m.id);
               results.push(...validSubs);
             } catch (_) {}
           }
 
-          const tmdbData = await tmdb(`/discover/${_currentCatMediaType}?with_original_language=${_currentCatKey}&page=${page}&sort_by=popularity.desc`);
-          if (tmdbData && tmdbData.results) {
-            results.push(...tmdbData.results);
-            totalPages = tmdbData.total_pages || 1;
-          }
+          const fetchPromises = pageIndices.map(p =>
+            tmdb(`/discover/${_currentCatMediaType}?with_original_language=${_currentCatKey}&page=${p}&sort_by=popularity.desc`).catch(() => null)
+          );
+          const responses = await Promise.all(fetchPromises);
+          responses.forEach(tmdbData => {
+            if (tmdbData && tmdbData.results) {
+              results.push(...tmdbData.results);
+              if (tmdbData.total_pages) tmdbTotalPages = Math.max(tmdbTotalPages, tmdbData.total_pages);
+            }
+          });
         } else if (_currentCatType === 'genre') {
           let genreId = _currentCatKey;
           if (_currentCatMediaType === 'tv' && _currentCatItemData && _currentCatItemData.tvId) {
             genreId = _currentCatItemData.tvId;
           }
-          const tmdbData = await tmdb(`/discover/${_currentCatMediaType}?with_genres=${genreId}&page=${page}&sort_by=popularity.desc`);
-          if (tmdbData && tmdbData.results) {
-            results.push(...tmdbData.results);
-            totalPages = tmdbData.total_pages || 1;
-          }
+          const fetchPromises = pageIndices.map(p =>
+            tmdb(`/discover/${_currentCatMediaType}?with_genres=${genreId}&page=${p}&sort_by=popularity.desc`).catch(() => null)
+          );
+          const responses = await Promise.all(fetchPromises);
+          responses.forEach(tmdbData => {
+            if (tmdbData && tmdbData.results) {
+              results.push(...tmdbData.results);
+              if (tmdbData.total_pages) tmdbTotalPages = Math.max(tmdbTotalPages, tmdbData.total_pages);
+            }
+          });
         }
 
         // Deduplicate items by ID
@@ -8162,30 +8306,21 @@
           }
         });
 
+        // 4 TMDB pages per view page (each TMDB page has 20 items = 80 titles)
+        const totalViewPages = Math.min(100, Math.max(1, Math.ceil(tmdbTotalPages / 4)));
         _currentCatPage = page;
-        _currentCatTotalPages = totalPages;
+        _currentCatTotalPages = totalViewPages;
 
         if (grid) {
           const cardsHtml = uniqueResults.map(m => buildCard(m, null, _currentCatMediaType, null)).join('');
-          if (append) {
-            grid.innerHTML += cardsHtml;
-          } else {
-            grid.innerHTML = cardsHtml || `<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--muted)">No titles found in this category.</div>`;
-          }
+          grid.innerHTML = cardsHtml || `<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--muted)">No titles found in this category.</div>`;
           addCardListeners(grid, '.movie-card');
         }
 
-        if (paginationWrap && loadMoreBtn) {
-          if (page < totalPages) {
-            paginationWrap.style.display = 'flex';
-            loadMoreBtn.textContent = `Load More Titles (${page}/${Math.min(totalPages, 50)}) ▾`;
-          } else {
-            paginationWrap.style.display = 'none';
-          }
-        }
+        renderCategoryPagination(page, totalViewPages);
       } catch (err) {
         console.warn('loadCategoryTitles failed:', err);
-        if (grid && !append) {
+        if (grid) {
           grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--muted)">Failed to load category titles. Please try again.</div>`;
         }
       } finally {
@@ -8193,6 +8328,64 @@
         if (loader) loader.style.display = 'none';
       }
     }
+
+    function renderCategoryPagination(currentPage, totalPages) {
+      const paginationWrap = document.getElementById('catPaginationWrap');
+      const prevBtn = document.getElementById('catPrevPageBtn');
+      const nextBtn = document.getElementById('catNextPageBtn');
+      const numbersWrap = document.getElementById('catPageNumbers');
+
+      if (!paginationWrap || !numbersWrap) return;
+
+      if (totalPages <= 1) {
+        paginationWrap.style.display = 'none';
+        return;
+      }
+
+      paginationWrap.style.display = 'flex';
+      if (prevBtn) prevBtn.disabled = (currentPage <= 1);
+      if (nextBtn) nextBtn.disabled = (currentPage >= totalPages);
+
+      let pages = [];
+      if (totalPages <= 7) {
+        for (let i = 1; i <= totalPages; i++) pages.push(i);
+      } else {
+        if (currentPage <= 4) {
+          pages = [1, 2, 3, 4, 5, '...', totalPages];
+        } else if (currentPage >= totalPages - 3) {
+          pages = [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+        } else {
+          pages = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+        }
+      }
+
+      numbersWrap.innerHTML = pages.map(p => {
+        if (p === '...') {
+          return `<span class="cat-page-ellipsis">…</span>`;
+        }
+        const isActive = (p === currentPage);
+        return `<button class="cat-page-btn ${isActive ? 'active' : ''}" onclick="setCategoryPage(${p})" ${isActive ? 'aria-current="page"' : ''}>${p}</button>`;
+      }).join('');
+    }
+
+    function changeCategoryPage(delta) {
+      const target = _currentCatPage + delta;
+      if (target >= 1 && target <= _currentCatTotalPages && target !== _currentCatPage) {
+        setCategoryPage(target);
+      }
+    }
+    window.changeCategoryPage = changeCategoryPage;
+
+    function setCategoryPage(pageNum) {
+      if (_isCatLoading || pageNum === _currentCatPage) return;
+      _currentCatPage = pageNum;
+      loadCategoryTitles(pageNum);
+      const overlay = document.getElementById('categoryViewOverlay');
+      if (overlay) {
+        overlay.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+    window.setCategoryPage = setCategoryPage;
 
     // ── GENRE DATA ────────────────────────────────────────────────────────────
     const MOVIE_GENRES = [
@@ -9755,12 +9948,24 @@
       }
     }
 
+    function _getFirstDialogueCue() {
+      if (!_subCues || !_subCues.length) return null;
+      // Skip intro site credits, sync notices, release names
+      const dialogueCue = _subCues.find(c => {
+        const t = (c.text || '').toLowerCase();
+        const isMeta = t.includes('auto-sync') || t.includes('උපසිරැසි සක්‍රියයි') || t.includes('hacky max') || t.includes('baiscope') || t.includes('cineru') || t.includes('subz.lk') || t.includes('zoom.lk') || t.includes('subtitle by') || t.includes('sync by');
+        return !isMeta;
+      });
+      return dialogueCue || _subCues[0];
+    }
+    window._getFirstDialogueCue = _getFirstDialogueCue;
+
     function _jumpToFirstDialogueCue() {
       if (!_subCues || !_subCues.length) return;
-      const firstCue = _subCues[0];
-      if (firstCue) {
-        const sec = firstCue.start / 1000;
-        _subStartTime = Date.now() - firstCue.start;
+      const targetCue = _getFirstDialogueCue() || _subCues[0];
+      if (targetCue) {
+        const sec = Math.max(0, (targetCue.start / 1000) - 0.2);
+        _subStartTime = Date.now() - (sec * 1000);
         _subOffset = 0;
         window._subPausedElapsed = null;
         window._externalCurrentTime = sec;
@@ -9770,9 +9975,9 @@
         _sendIframeCmd('seek', sec);
         _sendIframeCmd('play');
         _updateSubSyncOffsetBadge();
-        const mm = String(Math.floor(firstCue.start / 60000)).padStart(2, '0');
-        const ss = String(Math.floor((firstCue.start % 60000) / 1000)).padStart(2, '0');
-        _showSubToast(`⏩ Jumped to dialogue line (${mm}:${ss})`, 2500);
+        const mm = String(Math.floor(targetCue.start / 60000)).padStart(2, '0');
+        const ss = String(Math.floor((targetCue.start % 60000) / 1000)).padStart(2, '0');
+        _showSubToast(`⏩ Jumped to spoken dialogue (${mm}:${ss})`, 3000);
         _subActive = true;
         if (!_subRaf) _subRaf = requestAnimationFrame(_subLoop);
       }
@@ -9813,12 +10018,12 @@
       // Watchdog: If movie is supposed to be playing and has live messages, but no message arrived in > 1000ms:
       if (!window._externalIsPaused && hasLiveFeed) {
         const silence = now - window._lastExternalMsgTime;
-        if (silence > 1000) {
+        if (silence > 1500) {
           // Freeze subtitles at current confirmed playback second during buffer/stall
           _markBufferState(true);
         }
-        if (silence > 2200) {
-          // If silence persists > 2.2s, player is paused: lock paused state permanently until resumed
+        if (silence > 3800) {
+          // If silence persists > 3.8s, player is paused: lock paused state permanently until resumed
           window._externalIsPaused = true;
           window._subPausedElapsed = (window._bufferFreezeElapsed != null)
             ? window._bufferFreezeElapsed
@@ -10162,6 +10367,13 @@
             });
           }
         }
+      }
+
+      // If time is clearly advancing, player is actively playing — unpause immediately!
+      if (window._externalIsPaused && ct !== null && (ct > (window._externalCurrentTime || 0) + 0.04 || isVidyNova)) {
+        window._externalIsPaused = false;
+        window._subPausedElapsed = null;
+        _setSubSyncBarPaused(false);
       }
 
       // ── CASE 4: CURRENTLY PAUSED ─────────────────────────────────────
@@ -11975,7 +12187,7 @@
       const activeBtn = document.querySelector('.player-server-btn.active');
       const curServerLabel = activeBtn ? activeBtn.textContent.toLowerCase() : '';
       const curFrameSrc = (frameEl && frameEl.src) ? frameEl.src.toLowerCase() : '';
-      const isAutoplayPlayer = curFrameSrc.includes('spark') || curFrameSrc.includes('vidspark') || curFrameSrc.includes('nova') || curFrameSrc.includes('vidy') || curServerLabel.includes('spark') || curServerLabel.includes('nova') || curServerLabel.includes('vidy');
+      const isAutoplayPlayer = curFrameSrc.includes('spark') || curFrameSrc.includes('vidspark') || curFrameSrc.includes('nova') || curFrameSrc.includes('vidy') || curFrameSrc.includes('hackymax') || curServerLabel.includes('spark') || curServerLabel.includes('nova') || curServerLabel.includes('vidy') || curServerLabel.includes('hackymax');
 
       // If cues are already loaded for THIS video/episode, IMMEDIATELY resume the loop and re-render
       if (_subCues && _subCues.length > 0 && window._currentLoadedSubKey === subKey) {
@@ -12091,11 +12303,11 @@
             _updateSubSyncOffsetBadge();
 
             // Display clear announcement badge showing dialogue start point
-            const firstCue = parsedCues[0];
-            if (firstCue && firstCue.start > 20000) {
-              const mm = String(Math.floor(firstCue.start / 60000)).padStart(2, '0');
-              const ss = String(Math.floor((firstCue.start % 60000) / 1000)).padStart(2, '0');
-              _showSubToast(`🇱🇰 <strong>Sinhala Subtitles Active</strong> (${parsedCues.length} cues)<br><span style="color:var(--gold);font-size:0.86em;">Spoken dialogue starts at ${mm}:${ss}</span> <button onclick="_jumpToFirstDialogueCue()" style="margin-left:8px;padding:3px 10px;border-radius:4px;background:var(--gold);color:#000;font-weight:700;border:none;cursor:pointer;font-size:0.82em;">⏩ Jump</button>`, 8000);
+            const firstDialogue = (typeof _getFirstDialogueCue === 'function' ? _getFirstDialogueCue() : null) || parsedCues[0];
+            if (firstDialogue && firstDialogue.start > 15000) {
+              const mm = String(Math.floor(firstDialogue.start / 60000)).padStart(2, '0');
+              const ss = String(Math.floor((firstDialogue.start % 60000) / 1000)).padStart(2, '0');
+              _showSubToast(`🇱🇰 <strong>Sinhala Subtitles Active</strong> (${parsedCues.length} cues)<br><span style="color:var(--gold);font-size:0.86em;font-weight:700;">Spoken dialogue starts at ${mm}:${ss}</span> <button onclick="_jumpToFirstDialogueCue()" style="margin-left:8px;padding:3px 10px;border-radius:4px;background:var(--gold);color:#000;font-weight:700;border:none;cursor:pointer;font-size:0.82em;">⏩ Jump to ${mm}:${ss}</button>`, 10000);
               const statusTxt = document.getElementById('subSyncStatusText');
               if (statusTxt) statusTxt.textContent = `Dialogue at ${mm}:${ss}`;
             } else {
