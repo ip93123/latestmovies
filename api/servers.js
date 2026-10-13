@@ -14,8 +14,8 @@ export default async function handler(req, res) {
     
     urls = [
       `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&muted=false&nextEpisode=true&episodeSelector=true`,
-      `https://moviesapi.club/tv/${id}-${s}-${e}`,
-      `https://player.autoembed.cc/embed/tv/${id}/${s}/${e}`,
+      `https://moviesapi.to/tv/${id}/${s}/${e}`,
+      `https://autoembed.co/tv/tmdb/${id}-${s}-${e}`,
       `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`,
       `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`,
       `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=1&mute=0&showNextEpisode=1`,
@@ -32,8 +32,8 @@ export default async function handler(req, res) {
     // Movie
     urls = [
       `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&muted=false`,
-      `https://moviesapi.club/movie/${id}`,
-      `https://player.autoembed.cc/embed/movie/${id}`,
+      `https://moviesapi.to/movie/${id}`,
+      `https://autoembed.co/movie/tmdb/${id}`,
       `https://embed.smashystream.com/playere.php?tmdb=${id}`,
       `https://www.2embed.cc/embed/${id}`,
       `https://vidlove.cc/embed/movie/${id}?autoplay=1&mute=0`,
