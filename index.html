@@ -3246,6 +3246,30 @@
       outline-offset: 1px;
     }
 
+    /* ── Nova (Vidy) Server button (Vibrant Rose/Ruby theme) ──────── */
+    .player-server-btn.nova-btn,
+    .modal-stream-pill.nova-btn {
+      background: linear-gradient(135deg, #F43F5E 0%, #E11D48 100%) !important;
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      border: 1px solid rgba(255, 255, 255, 0.25) !important;
+      letter-spacing: normal;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+      box-shadow: none !important;
+    }
+    .player-server-btn.nova-btn:hover,
+    .modal-stream-pill.nova-btn:hover {
+      box-shadow: none !important;
+      transform: translateY(-1px);
+      filter: brightness(1.1);
+    }
+    .player-server-btn.nova-btn.active {
+      box-shadow: none !important;
+      border-color: #FDA4AF !important;
+      outline: 2px solid rgba(253, 164, 175, 0.5) !important;
+      outline-offset: 1px;
+    }
+
     /* ── Silver Theme for Non-PostMessage Fallback Players ─────────── */
     .player-server-btn.silver-btn,
     .modal-stream-pill.silver-btn {
@@ -6008,7 +6032,8 @@
       <div id="skipInfoBadge">Intro: <span id="skipInfoText"></span></div>
 
       <iframe id="playerFrame" src="about:blank"
-        allow="autoplay *; encrypted-media *; picture-in-picture *; web-share *"
+        allow="autoplay *; encrypted-media *; fullscreen *; picture-in-picture *; web-share *"
+        allowfullscreen
         frameborder="0"></iframe>
       <!-- Fullscreen Invisible Mouse Catcher Overlay (wakes up controls on any cursor movement over iframe) -->
       <div id="fsMouseCatcher"></div>
@@ -7974,8 +7999,8 @@
       if (lbl.includes('vortex') || lbl.includes('videasy')) return ' vortex-btn';
       if (lbl.includes('infinity')) return ' infinity-btn';
       if (lbl.includes('spark') || lbl.includes('vidspark')) return ' spark-btn';
+      if (lbl.includes('nova') || lbl.includes('vidy')) return ' nova-btn';
       if (lbl.includes('nebula') || lbl.includes('smashy')) return ' smashystream-btn';
-      if (lbl.includes('nova') || lbl.includes('moviesapi')) return ' moviesapi-btn';
       if (lbl.includes('cosmos') || lbl.includes('autoembed')) return ' autoembed-btn';
       if (lbl.includes('titan') || lbl.includes('2embed')) return ' twoembed-btn';
       return ' silver-btn';
@@ -8008,22 +8033,24 @@
           `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=sin`,
           `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true`,
           `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true`,
+          `https://vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true`,
           `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}&autoplay=1`,
           `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
           `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
         ];
-        labels = ['HackyMax', 'Vortex', 'Infinity', 'Spark', 'Nebula', 'Zenith', 'Hyperion'];
+        labels = ['HackyMax', 'Vortex', 'Infinity', 'Spark', 'Nova', 'Nebula', 'Zenith', 'Hyperion'];
       } else {
         urls = [
           `https://vidlove.cc/embed/movie/${id}?autoplay=true`,
           `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=sin`,
           `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true`,
           `https://cdn.vidspark.to/movie/${id}?autoplay=true`,
+          `https://vidy.st/movie/${id}?color=E8C97A&autoplay=true`,
           `https://embed.smashystream.com/playere.php?tmdb=${id}&autoplay=1`,
           `https://vidnest.fun/movie/${id}?autoplay=1`,
           `https://vixsrc.to/movie/${id}?autoplay=1`
         ];
-        labels = ['HackyMax', 'Vortex', 'Infinity', 'Spark', 'Nebula', 'Zenith', 'Hyperion'];
+        labels = ['HackyMax', 'Vortex', 'Infinity', 'Spark', 'Nova', 'Nebula', 'Zenith', 'Hyperion'];
       }
       return { urls, labels };
     }
