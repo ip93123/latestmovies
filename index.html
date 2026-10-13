@@ -3075,7 +3075,9 @@
       outline-offset: 1px;
     }
 
-    /* ── Videasy Server button (Electric Cyan theme) ───────────────── */
+    /* ── Vortex Server button (Electric Cyan theme) ───────────────── */
+    .player-server-btn.vortex-btn,
+    .modal-stream-pill.vortex-btn,
     .player-server-btn.videasy-btn,
     .modal-stream-pill.videasy-btn {
       background: linear-gradient(135deg, #06B6D4 0%, #0891B2 100%) !important;
@@ -3086,12 +3088,15 @@
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
       box-shadow: none !important;
     }
+    .player-server-btn.vortex-btn:hover,
+    .modal-stream-pill.vortex-btn:hover,
     .player-server-btn.videasy-btn:hover,
     .modal-stream-pill.videasy-btn:hover {
       box-shadow: none !important;
       transform: translateY(-1px);
       filter: brightness(1.1);
     }
+    .player-server-btn.vortex-btn.active,
     .player-server-btn.videasy-btn.active {
       box-shadow: none !important;
       border-color: #67E8F9 !important;
@@ -7832,9 +7837,9 @@
     function getServerBtnClass(label) {
       const lbl = (label || '').toLowerCase();
       if (lbl.includes('hackymax')) return ' hackymax-btn';
+      if (lbl.includes('vortex') || lbl.includes('videasy')) return ' vortex-btn';
       if (lbl.includes('infinity')) return ' infinity-btn';
       if (lbl.includes('spark') || lbl.includes('vidspark')) return ' spark-btn';
-      if (lbl.includes('videasy')) return ' videasy-btn';
       if (lbl.includes('nebula') || lbl.includes('smashy')) return ' smashystream-btn';
       if (lbl.includes('nova') || lbl.includes('moviesapi')) return ' moviesapi-btn';
       if (lbl.includes('cosmos') || lbl.includes('autoembed')) return ' autoembed-btn';
@@ -7866,25 +7871,25 @@
       if (type === 'tv') {
         urls = [
           `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=true&showNextEpisode=1`,
+          `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=sin`,
           `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true`,
           `https://vidspark.to/tv/${id}/${s}/${e}?theme=E8C97A&autoplay=true`,
-          `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1`,
           `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}&autoplay=1`,
           `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
           `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
         ];
-        labels = ['HackyMax', 'Infinity', 'Spark', 'Videasy', 'Nebula', 'Zenith', 'Hyperion'];
+        labels = ['HackyMax', 'Vortex', 'Infinity', 'Spark', 'Nebula', 'Zenith', 'Hyperion'];
       } else {
         urls = [
           `https://vidlove.cc/embed/movie/${id}?autoplay=true`,
+          `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=sin`,
           `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true`,
           `https://vidspark.to/movie/${id}?theme=E8C97A&autoplay=true`,
-          `https://player.videasy.ws/embed/movie/${id}?autoplay=1`,
           `https://embed.smashystream.com/playere.php?tmdb=${id}&autoplay=1`,
           `https://vidnest.fun/movie/${id}?autoplay=1`,
           `https://vixsrc.to/movie/${id}?autoplay=1`
         ];
-        labels = ['HackyMax', 'Infinity', 'Spark', 'Videasy', 'Nebula', 'Zenith', 'Hyperion'];
+        labels = ['HackyMax', 'Vortex', 'Infinity', 'Spark', 'Nebula', 'Zenith', 'Hyperion'];
       }
       return { urls, labels };
     }
@@ -12546,7 +12551,8 @@
             { type: 'PLAY' },
             { action: 'PLAY' },
             { method: 'play' },
-            { command: 'play' }
+            { command: 'play' },
+            { player: true, action: 'play' }
           ];
           msgs.forEach(m => {
             try { cw.postMessage(m, '*'); } catch (_) {}
@@ -12560,7 +12566,8 @@
             { type: 'PAUSE' },
             { action: 'PAUSE' },
             { method: 'pause' },
-            { command: 'pause' }
+            { command: 'pause' },
+            { player: true, action: 'pause' }
           ];
           msgs.forEach(m => {
             try { cw.postMessage(m, '*'); } catch (_) {}
@@ -12576,7 +12583,8 @@
             { action: 'setTime', time: sec },
             { type: 'setcurrenttime', time: sec },
             { type: 'playerseek', time: sec },
-            { type: 'skip', time: sec }
+            { type: 'skip', time: sec },
+            { player: true, action: 'seek' + Math.round(sec) }
           ];
           msgs.forEach(m => {
             try { cw.postMessage(m, '*'); } catch (_) {}
