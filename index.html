@@ -3051,6 +3051,30 @@
       outline-offset: 1px;
     }
 
+    /* ── Spark (VidSpark) Server button (Vibrant Violet theme) ────── */
+    .player-server-btn.spark-btn,
+    .modal-stream-pill.spark-btn {
+      background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%) !important;
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      border: 1px solid rgba(255, 255, 255, 0.25) !important;
+      letter-spacing: normal;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+      box-shadow: none !important;
+    }
+    .player-server-btn.spark-btn:hover,
+    .modal-stream-pill.spark-btn:hover {
+      box-shadow: none !important;
+      transform: translateY(-1px);
+      filter: brightness(1.1);
+    }
+    .player-server-btn.spark-btn.active {
+      box-shadow: none !important;
+      border-color: #C4B5FD !important;
+      outline: 2px solid rgba(196, 181, 253, 0.5) !important;
+      outline-offset: 1px;
+    }
+
     /* ── SmashyStream Server button (Green theme) ────────────────────── */
     .player-server-btn.smashystream-btn,
     .modal-stream-pill.smashystream-btn {
@@ -7785,6 +7809,7 @@
       const lbl = (label || '').toLowerCase();
       if (lbl.includes('hackymax')) return ' hackymax-btn';
       if (lbl.includes('infinity')) return ' infinity-btn';
+      if (lbl.includes('spark') || lbl.includes('vidspark')) return ' spark-btn';
       if (lbl.includes('nebula') || lbl.includes('smashy')) return ' smashystream-btn';
       if (lbl.includes('nova') || lbl.includes('moviesapi')) return ' moviesapi-btn';
       if (lbl.includes('cosmos') || lbl.includes('autoembed')) return ' autoembed-btn';
@@ -7817,20 +7842,22 @@
         urls = [
           `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=false&showNextEpisode=1`,
           `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false&nextEpisode=true&episodeSelector=true`,
+          `https://vidspark.to/tv/${id}/${s}/${e}?theme=E8C97A`,
           `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`,
           `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
           `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
         ];
-        labels = ['HackyMax', 'Infinity', 'Nebula', 'Zenith', 'Hyperion'];
+        labels = ['HackyMax', 'Infinity', 'Spark', 'Nebula', 'Zenith', 'Hyperion'];
       } else {
         urls = [
           `https://vidlove.cc/embed/movie/${id}?autoplay=false`,
           `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=false`,
+          `https://vidspark.to/movie/${id}?theme=E8C97A`,
           `https://embed.smashystream.com/playere.php?tmdb=${id}`,
           `https://vidnest.fun/movie/${id}?autoplay=1`,
           `https://vixsrc.to/movie/${id}?autoplay=1`
         ];
-        labels = ['HackyMax', 'Infinity', 'Nebula', 'Zenith', 'Hyperion'];
+        labels = ['HackyMax', 'Infinity', 'Spark', 'Nebula', 'Zenith', 'Hyperion'];
       }
       return { urls, labels };
     }
@@ -8706,7 +8733,7 @@
         if (isLive) {
           badge.style.background = 'rgba(16, 185, 129, 0.2)';
           badge.style.color = '#10B981';
-          statusTxt.textContent = '⚡ HackyMax Auto-Synced';
+          statusTxt.textContent = '⚡ Auto-Synced';
         } else {
           badge.style.background = 'rgba(232, 201, 122, 0.12)';
           badge.style.color = 'var(--gold, #E8C97A)';
@@ -8788,7 +8815,9 @@
 
       // Identify event type
       let evName = '';
-      if (d.type === 'PLAYER_EVENT' && d.data && d.data.event) {
+      if (d.source === 'vidspark-player' && d.event) {
+        evName = String(d.event).toLowerCase();
+      } else if (d.type === 'PLAYER_EVENT' && d.data && d.data.event) {
         evName = String(d.data.event).toLowerCase();
       } else if (d.event) {
         evName = String(d.event).toLowerCase();
@@ -8882,7 +8911,7 @@
       }
 
       // ── CASE 3: SEEKED WHILE PAUSED ──────────────────────────────────
-      if (evName === 'seeked' && ct !== null) {
+      if ((evName === 'seeked' || evName === 'seek') && ct !== null) {
         if (window._externalIsPaused) {
           window._subPausedElapsed = Math.round(ct * 1000);
           window._externalCurrentTime = ct;
@@ -10930,7 +10959,7 @@
       _lastIframeSubCueText = null;
 
       const sName = btn ? btn.textContent.trim() : 'Server';
-      const isAutoLive = sName.toLowerCase().includes('hackymax') || sName.toLowerCase().includes('infinity') || sName.toLowerCase().includes('nebula');
+      const isAutoLive = sName.toLowerCase().includes('hackymax') || sName.toLowerCase().includes('infinity') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nebula');
       _markSubSyncAutoLive(isAutoLive);
       _showSubToast(`Switched to <strong>${_escHtml(sName)}</strong> • Sinhala Subtitles Active`, 3200);
 
@@ -12419,21 +12448,26 @@
       try {
         const cw = frame.contentWindow;
         if (cmd === 'play') {
-          cw.postMessage({ type: 'play' }, '*');
           cw.postMessage({ action: 'play' }, '*');
+          cw.postMessage({ type: 'play' }, '*');
           cw.postMessage({ event: 'play' }, '*');
+          cw.postMessage(JSON.stringify({ action: 'play' }), '*');
           cw.postMessage(JSON.stringify({ event: 'play' }), '*');
           cw.postMessage(JSON.stringify({ type: 'play' }), '*');
         } else if (cmd === 'pause') {
-          cw.postMessage({ type: 'pause' }, '*');
           cw.postMessage({ action: 'pause' }, '*');
+          cw.postMessage({ type: 'pause' }, '*');
           cw.postMessage({ event: 'pause' }, '*');
+          cw.postMessage(JSON.stringify({ action: 'pause' }), '*');
           cw.postMessage(JSON.stringify({ event: 'pause' }), '*');
           cw.postMessage(JSON.stringify({ type: 'pause' }), '*');
         } else if (cmd === 'seek') {
           const sec = typeof payload === 'number' ? payload : 0;
-          cw.postMessage({ type: 'seek', currentTime: sec, time: sec }, '*');
+          cw.postMessage({ action: 'seek', time: sec }, '*');
           cw.postMessage({ action: 'seek', time: sec, currentTime: sec }, '*');
+          cw.postMessage({ type: 'seek', currentTime: sec, time: sec }, '*');
+          cw.postMessage({ type: 'SET_TIME', time: sec }, '*');
+          cw.postMessage(JSON.stringify({ action: 'seek', time: sec }), '*');
           cw.postMessage(JSON.stringify({ event: 'seek', time: sec, currentTime: sec }), '*');
         }
       } catch (_) {}
@@ -12519,7 +12553,9 @@
         );
         const overlayOpen = document.getElementById('playerOverlay')?.classList.contains('open');
 
-        if (id && (!isSameMedia || !overlayOpen) && (data.type === 'state' || data.type === 'play' || data.type === 'heartbeat')) {
+        const isSameServer = (typeof _activeServerIndex === 'number' && _activeServerIndex === targetServerIdx);
+
+        if (id && (!isSameMedia || !overlayOpen || !isSameServer) && (data.type === 'state' || data.type === 'play' || data.type === 'heartbeat')) {
           window._currentPlayingId = id;
           window._currentPlayingType = type;
           window._currentPlayingSeason = season;
