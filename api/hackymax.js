@@ -101,6 +101,8 @@ const SUBTITLE_MAP = {
   '646097': '/Subtitle/646097.srt',
   // Varavu (2026)
   '1542187': '/Subtitle/1542187.srt',
+  // Thudakkam (2026)
+  '1506736': '/Subtitle/1506736.srt',
 };
 
 const VIDLOVE_HEADERS = {

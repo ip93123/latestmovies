@@ -5,6 +5,7 @@ import path from 'path';
 
 // Predefined Sinhala Subtitle Mapping
 const SUBTITLE_MAP = {
+  '1506736': '/Subtitle/1506736.srt', // Thudakkam (2026)
   '646097': '/Subtitle/646097.srt', // Rebel Ridge (2024)
   '1542187': '/Subtitle/1542187.srt', // Varavu (2026)
   '1071215': '/Subtitle/1071215.srt', // Thanksgiving (2023)
