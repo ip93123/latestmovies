@@ -5,6 +5,8 @@ import path from 'path';
 
 // Predefined Sinhala Subtitle Mapping
 const SUBTITLE_MAP = {
+  '1235877': '/Subtitle/1235877.srt', // Jana Nayagan (2026)
+  '869227': '/Subtitle/869227.srt', // Super Sharanya (2022)
   '1506736': '/Subtitle/1506736.srt', // Thudakkam (2026)
   '646097': '/Subtitle/646097.srt', // Rebel Ridge (2024)
   '1542187': '/Subtitle/1542187.srt', // Varavu (2026)
