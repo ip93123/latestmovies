@@ -97,6 +97,10 @@ const SUBTITLE_MAP = {
   '1071215': '/Subtitle/1071215.srt',
   // Toxic (2026)
   '1213243': '/Subtitle/1213243.srt',
+  // Rebel Ridge (2024)
+  '646097': '/Subtitle/646097.srt',
+  // Varavu (2026)
+  '1542187': '/Subtitle/1542187.srt',
 };
 
 const VIDLOVE_HEADERS = {
