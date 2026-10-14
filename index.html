@@ -3101,7 +3101,7 @@
       box-shadow: none !important;
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
-      font-size: var(--sub-size, calc(clamp(1.6rem, 3.4vw, 2.85rem) * 0.75));
+      font-size: var(--sub-size, clamp(1.05rem, 2.0vw, 1.55rem));
       font-weight: 700;
       color: var(--sub-color, #ffffff);
       text-shadow: var(--sub-shadow, 0 2px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.95), 1px 1px 2px #000, -1px -1px 2px #000, 2px 2px 3px #000, -2px -2px 3px #000);
@@ -3126,7 +3126,7 @@
     }
 
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, #maxPlayerWrap:fullscreen, #maxPlayerWrap:-webkit-full-screen) #subText {
-      font-size: var(--sub-size, calc(clamp(1.9rem, 3.8vw, 3.2rem) * 0.85)) !important;
+      font-size: var(--sub-size, clamp(1.2rem, 2.2vw, 1.8rem)) !important;
       font-weight: 700 !important;
       background: var(--sub-bg, transparent) !important;
       border: none !important;
@@ -3615,7 +3615,8 @@
         padding-bottom: max(60px, 14%) !important;
       }
       #subText {
-        font-size: clamp(14px, 4vw, 22px) !important;
+        font-size: clamp(12px, 3.2vw, 16px) !important;
+        line-height: 1.35 !important;
       }
 
       /* Sin Sub & Sections on Mobile */
@@ -6287,6 +6288,9 @@
     .device-tv .wp-tab-btn {
       padding: 0.8rem 1.2rem !important;
       font-size: 1rem !important;
+    }
+    .device-tv #subText {
+      font-size: clamp(1.3rem, 2.3vw, 1.9rem) !important;
     }
   </style>
 </head>
@@ -11310,16 +11314,16 @@
     // ════════════════════════════════════════════════════════════════════════
     const MXS_KEY = 'hacky_mxs_v1';
     let _mxsSettings = {
-      subColor: '#ffffff', subSize: 75, subBg: '#000000', subBgOp: 0,
+      subColor: '#ffffff', subSize: 100, subBg: '#000000', subBgOp: 0,
       subPos: 'bottom', subShadow: true, speed: 1, quality: 'auto',
       autoNext: true, autoNextCountdown: true, autoSub: true
     };
     try {
       const saved = JSON.parse(localStorage.getItem(MXS_KEY) || '{}');
       Object.assign(_mxsSettings, saved);
-      // Migrate previous 100% default to 75%
-      if (saved.subSize === 100 || saved.subSize === undefined) {
-        _mxsSettings.subSize = 75;
+      // Migrate previous legacy default sizes to 100% calibrated standard size
+      if (saved.subSize === 75 || saved.subSize === undefined) {
+        _mxsSettings.subSize = 100;
       }
       // Migrate previous 85% default background opacity to 0% (transparent, no black box)
       if (saved.subBgOp === undefined || saved.subBgOp === 85) {
@@ -11345,8 +11349,8 @@
         ? '0 2px 4px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.95), 1px 1px 2px #000, -1px -1px 2px #000'
         : 'none';
 
-      const scale = Math.max(50, Math.min(200, +_mxsSettings.subSize || 75)) / 100;
-      const sizeVal = `calc(clamp(1.6rem, 3.4vw, 2.85rem) * ${scale})`;
+      const scale = Math.max(50, Math.min(200, +_mxsSettings.subSize || 100)) / 100;
+      const sizeVal = `calc(clamp(1.05rem, 2.0vw, 1.55rem) * ${scale})`;
 
       const targets = [el, wrap, document.documentElement].filter(Boolean);
       targets.forEach(t => {
