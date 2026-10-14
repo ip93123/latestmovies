@@ -9188,10 +9188,12 @@
     async function getModalServerUrls(id, type, season, episode) {
       const s = season || 1;
       const e = episode || 1;
+      const subKey = (type === 'tv') ? `${id}_S${s}_E${e}` : String(id);
+      const hasSinhalaSub = !!(typeof SUBTITLE_MAP !== 'undefined' && (SUBTITLE_MAP[subKey] || SUBTITLE_MAP[String(id)]));
 
       // Try the backend API first (hides URLs from source code when deployed)
       try {
-        const res = await fetch(`/api/servers?id=${id}&type=${type}&season=${s}&episode=${e}&_t=${Date.now()}`);
+        const res = await fetch(`/api/servers?id=${id}&type=${type}&season=${s}&episode=${e}&hasSub=${hasSinhalaSub ? '1' : '0'}&_t=${Date.now()}`);
         if (res.ok) {
           const data = await res.json();
           if (data.urls && data.urls.length > 0) {
@@ -9207,30 +9209,58 @@
       let urls = [], labels = [];
 
       if (type === 'tv') {
-        urls = [
-          `https://vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&sub=false&subtitles=false&cc=false&subLang=none`,
-          `https://vidstuck.xyz/embed/tv/${id}/${s}/${e}?branding=HackyMax&color=E8C97A&autoplay=true&nextEpisode=true&autoplayNextEpisode=true&episodeSelector=true&subtitle=none&sub=false`,
-          `https://player.cinezo.live/embed/tv/${id}/${s}/${e}?autoplay=true&opacity=0&fontsize=0&fontcolor=transparent&primarycolor=e8b86d&secondarycolor=0a0a12`,
-          `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=true&showNextEpisode=1&sub=false&subtitles=false`,
-          `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=none&sub=0&subtitles=false`,
-          `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&sub.mode=manual`,
-          `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true&sub=false`,
-          `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
-          `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
-        ];
+        if (hasSinhalaSub) {
+          urls = [
+            `https://vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&sub=false&subtitles=false&cc=false&subLang=none`,
+            `https://vidstuck.xyz/embed/tv/${id}/${s}/${e}?branding=HackyMax&color=E8C97A&autoplay=true&nextEpisode=true&autoplayNextEpisode=true&episodeSelector=true&subtitle=none&sub=false`,
+            `https://player.cinezo.live/embed/tv/${id}/${s}/${e}?autoplay=true&opacity=0&fontsize=0&fontcolor=transparent&primarycolor=e8b86d&secondarycolor=0a0a12`,
+            `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=true&showNextEpisode=1&sub=false&subtitles=false`,
+            `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=bre&sub=0&subtitles=false`,
+            `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&sub.mode=manual`,
+            `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true&sub=false`,
+            `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
+            `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
+          ];
+        } else {
+          urls = [
+            `https://vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&sub=true&subLang=en`,
+            `https://vidstuck.xyz/embed/tv/${id}/${s}/${e}?branding=HackyMax&color=E8C97A&autoplay=true&nextEpisode=true&autoplayNextEpisode=true&episodeSelector=true&subtitle=en&sub=true`,
+            `https://player.cinezo.live/embed/tv/${id}/${s}/${e}?autoplay=true&opacity=1&fontsize=20&fontcolor=ffffff&primarycolor=e8b86d&secondarycolor=0a0a12`,
+            `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=true&showNextEpisode=1&sub=true`,
+            `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=en&sub=1`,
+            `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&sub.mode=auto&sub.lang=en`,
+            `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true&sub=true`,
+            `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
+            `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
+          ];
+        }
         labels = ['HackyMax', 'Nebula', 'Cinezo', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Zenith', 'Hyperion'];
       } else {
-        urls = [
-          `https://vidy.st/movie/${id}?color=E8C97A&autoplay=true&sub=false&subtitles=false&cc=false&subLang=none`,
-          `https://vidstuck.xyz/embed/movie/${id}?branding=HackyMax&color=E8C97A&autoplay=true&subtitle=none&sub=false`,
-          `https://player.cinezo.live/embed/movie/${id}?autoplay=true&opacity=0&fontsize=0&fontcolor=transparent&primarycolor=e8b86d&secondarycolor=0a0a12`,
-          `https://vidlove.cc/embed/movie/${id}?autoplay=true&sub=false&subtitles=false`,
-          `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=none&sub=0&subtitles=false`,
-          `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&sub.mode=manual`,
-          `https://cdn.vidspark.to/movie/${id}?autoplay=true&sub=false`,
-          `https://vidnest.fun/movie/${id}?autoplay=1`,
-          `https://vixsrc.to/movie/${id}?autoplay=1`
-        ];
+        if (hasSinhalaSub) {
+          urls = [
+            `https://vidy.st/movie/${id}?color=E8C97A&autoplay=true&sub=false&subtitles=false&cc=false&subLang=none`,
+            `https://vidstuck.xyz/embed/movie/${id}?branding=HackyMax&color=E8C97A&autoplay=true&subtitle=none&sub=false`,
+            `https://player.cinezo.live/embed/movie/${id}?autoplay=true&opacity=0&fontsize=0&fontcolor=transparent&primarycolor=e8b86d&secondarycolor=0a0a12`,
+            `https://vidlove.cc/embed/movie/${id}?autoplay=true&sub=false&subtitles=false`,
+            `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=bre&sub=0&subtitles=false`,
+            `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&sub.mode=manual`,
+            `https://cdn.vidspark.to/movie/${id}?autoplay=true&sub=false`,
+            `https://vidnest.fun/movie/${id}?autoplay=1`,
+            `https://vixsrc.to/movie/${id}?autoplay=1`
+          ];
+        } else {
+          urls = [
+            `https://vidy.st/movie/${id}?color=E8C97A&autoplay=true&sub=true&subLang=en`,
+            `https://vidstuck.xyz/embed/movie/${id}?branding=HackyMax&color=E8C97A&autoplay=true&subtitle=en&sub=true`,
+            `https://player.cinezo.live/embed/movie/${id}?autoplay=true&opacity=1&fontsize=20&fontcolor=ffffff&primarycolor=e8b86d&secondarycolor=0a0a12`,
+            `https://vidlove.cc/embed/movie/${id}?autoplay=true&sub=true`,
+            `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=en&sub=1`,
+            `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&sub.mode=auto&sub.lang=en`,
+            `https://cdn.vidspark.to/movie/${id}?autoplay=true&sub=true`,
+            `https://vidnest.fun/movie/${id}?autoplay=1`,
+            `https://vixsrc.to/movie/${id}?autoplay=1`
+          ];
+        }
         labels = ['HackyMax', 'Nebula', 'Cinezo', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Zenith', 'Hyperion'];
       }
       return { urls, labels };
@@ -12635,6 +12665,23 @@
             console.log(`[Iframe Subtitles] Auto-started ${parsedCues.length} Sinhala cues for ${subKey}`);
           }
         }
+      } else {
+        // No Sinhala subtitle for this movie/show — deactivate overlay and let player's internal English subtitle play!
+        _stopSubLoop();
+        _subCues = [];
+        _subActive = false;
+        _subLoaded = false;
+        window._currentLoadedSubKey = null;
+        if (_subText) {
+          _subText.innerHTML = '';
+          _subText.classList.remove('active');
+        }
+        _showSubSyncBar(false);
+        if (_subToggleBtn) {
+          _subToggleBtn.style.opacity = '0.45';
+          _subToggleBtn.classList.remove('active');
+          _subToggleBtn.title = 'No Sinhala subtitles available (Default English subtitles active)';
+        }
       }
     }
 
@@ -12800,7 +12847,17 @@
 
       const isAutoLive = sName.toLowerCase().includes('hackymax') || sName.toLowerCase().includes('infinity') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck') || sName.toLowerCase().includes('cinezo');
       _markSubSyncAutoLive(isAutoLive);
-      _showSubToast(`Switched to <strong>${_escHtml(sName)}</strong> • Sinhala Subtitles Active`, 3200);
+
+      const rawSubId = _currentModalId || window._currentPlayingId || (window._currentModalItem && window._currentModalItem.id) || new URLSearchParams(window.location.search).get('m') || new URLSearchParams(window.location.search).get('s');
+      const activeSubId = rawSubId ? (String(rawSubId).includes('-') ? (parseInt(rawSubId, 10) || rawSubId) : rawSubId) : null;
+      const subKey = (_currentModalType === 'tv') ? `${activeSubId}_S${_selectedSeason || 1}_E${_selectedEpisode || 1}` : String(activeSubId);
+      const hasSinhalaSub = !!(activeSubId && typeof SUBTITLE_MAP !== 'undefined' && (SUBTITLE_MAP[subKey] || SUBTITLE_MAP[String(activeSubId)]));
+
+      if (hasSinhalaSub) {
+        _showSubToast(`Switched to <strong>${_escHtml(sName)}</strong> • Sinhala Subtitles Active`, 3200);
+      } else {
+        _showSubToast(`Switched to <strong>${_escHtml(sName)}</strong>`, 2400);
+      }
 
       _autoLoadIframeSinhalaSub();
     }
