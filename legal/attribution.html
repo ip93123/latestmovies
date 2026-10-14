@@ -8,6 +8,7 @@
   <style>
     :root {
       --gold: #E8C97A;
+      --green: #2ECC71;
       --red: #E74C3C;
       --dark: #07090F;
       --dark2: #0D1117;
@@ -58,9 +59,13 @@
       color: var(--gold);
     }
     h2 {
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       margin-top: 2rem;
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     p { margin-bottom: 1rem; color: var(--muted); }
     ul { margin-bottom: 1rem; padding-left: 2rem; color: var(--muted); }
@@ -78,6 +83,28 @@
     .disclaimer-box strong {
       color: var(--red);
     }
+
+    .credit-card {
+      background: var(--dark2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      transition: border-color 0.2s ease;
+    }
+    .credit-card:hover {
+      border-color: rgba(232, 201, 122, 0.3);
+    }
+    .credit-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--green);
+      background: rgba(46, 204, 113, 0.12);
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-bottom: 6px;
+    }
   </style>
 </head>
 <body>
@@ -86,20 +113,46 @@
     <a href="../index.html" class="back-link">← Back to Home</a>
   </header>
   <div class="container">
-    <h1>Source Attribution</h1>
+    <h1>Source Attribution & Credits</h1>
     
     <div class="disclaimer-box">
       <strong>IMPORTANT DISCLAIMER:</strong> Hacky Max does <strong>NOT</strong> host, upload, or store any movies, TV series, or media files on our own servers. This website solely uses third-party streaming links and acts as a search engine/directory for legally available content across the web. This project is strictly for <strong>educational purposes</strong>.
     </div>
 
     <div class="content">
-      <p>Hacky Max is an educational project powered by several fantastic third-party APIs. We are grateful to the following services:</p>
-<h2>The Movie Database (TMDB)</h2>
-<p>We use the TMDB API for movie and TV show metadata, posters, and imagery. This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
-<h2>JustWatch</h2>
-<p>Streaming availability data is provided by JustWatch (via TMDB). We link directly to official streaming platforms.</p>
-<h2>OMDb API</h2>
-<p>Additional metadata and ratings are sourced from the OMDb API.</p>
+      <p>Hacky Max is an educational project powered by community open databases and third-party APIs. We sincerely thank and credit the following platforms and communities:</p>
+
+      <div class="credit-card">
+        <span class="credit-tag">🇱🇰 SINHALA SUBTITLE COMMUNITY</span>
+        <h2>Baiscope.lk (බයිස්කෝප් සිංහලෙන්)</h2>
+        <p>Sinhala subtitles for various films and TV series are respectfully sourced and credited to the dedicated translator community at <a href="https://www.baiscope.lk" target="_blank" rel="noopener noreferrer"><strong>Baiscope.lk</strong></a>. All translation authorship, original credits, and intellectual appreciation belong entirely to the individual volunteer translators and creators who contribute their valuable time to the Sri Lankan community.</p>
+      </div>
+
+      <div class="credit-card">
+        <span class="credit-tag">🇱🇰 SINHALA SUBTITLE COMMUNITY</span>
+        <h2>Zoom.lk (සූම් සිංහල උපසිරැසි)</h2>
+        <p>Sinhala subtitles and community translations are also gratefully acknowledged and credited to the talented creators at <a href="https://zoom.lk" target="_blank" rel="noopener noreferrer"><strong>Zoom.lk</strong></a>. We respect their copyright and authorship notices retained inside the subtitle files and encourage users to support their platform.</p>
+      </div>
+
+      <div class="credit-card">
+        <h2>The Movie Database (TMDB)</h2>
+        <p>We use the TMDB API for movie and TV show metadata, posters, backdrops, and imagery. This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+      </div>
+
+      <div class="credit-card">
+        <h2>JustWatch</h2>
+        <p>Streaming availability data is provided by JustWatch (via TMDB). We link directly to official streaming platforms.</p>
+      </div>
+
+      <div class="credit-card">
+        <h2>OMDb API</h2>
+        <p>Additional metadata, IMDb ratings, and Rotten Tomatoes scores are sourced from the OMDb API.</p>
+      </div>
+
+      <div class="credit-card">
+        <h2>OpenSubtitles</h2>
+        <p>Default international subtitles and multi-language subtitle tracks are sourced through OpenSubtitles community catalogs.</p>
+      </div>
     </div>
   </div>
 </body>
