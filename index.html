@@ -3733,6 +3733,30 @@
       outline-offset: 1px;
     }
 
+    /* ── VidStuck Server button (Electric Indigo theme) ───────────── */
+    .player-server-btn.vidstuck-btn,
+    .modal-stream-pill.vidstuck-btn {
+      background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%) !important;
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      border: 1px solid rgba(255, 255, 255, 0.25) !important;
+      letter-spacing: normal;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+      box-shadow: none !important;
+    }
+    .player-server-btn.vidstuck-btn:hover,
+    .modal-stream-pill.vidstuck-btn:hover {
+      box-shadow: none !important;
+      transform: translateY(-1px);
+      filter: brightness(1.1);
+    }
+    .player-server-btn.vidstuck-btn.active {
+      box-shadow: none !important;
+      border-color: #A5B4FC !important;
+      outline: 2px solid rgba(165, 180, 252, 0.5) !important;
+      outline-offset: 1px;
+    }
+
     /* ── Vortex Server button (Electric Cyan theme) ───────────────── */
     .player-server-btn.vortex-btn,
     .modal-stream-pill.vortex-btn,
@@ -9143,6 +9167,7 @@
       if (lbl.includes('vortex') || lbl.includes('videasy')) return ' vortex-btn';
       if (lbl.includes('infinity')) return ' infinity-btn';
       if (lbl.includes('spark') || lbl.includes('vidspark')) return ' spark-btn';
+      if (lbl.includes('vidstuck') || lbl.includes('stuck')) return ' vidstuck-btn';
       if (lbl.includes('nova') || lbl.includes('vidy')) return ' nova-btn';
       if (lbl.includes('nebula') || lbl.includes('smashy')) return ' smashystream-btn';
       if (lbl.includes('cosmos') || lbl.includes('autoembed')) return ' autoembed-btn';
@@ -9178,11 +9203,12 @@
           `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=sin`,
           `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true`,
           `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true`,
+          `https://vidstuck.xyz/embed/tv/${id}/${s}/${e}?branding=HackyMax&color=E8C97A&autoplay=true&nextEpisode=true&autoplayNextEpisode=true&episodeSelector=true`,
           `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}&autoplay=1`,
           `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
           `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
         ];
-        labels = ['HackyMax', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Nebula', 'Zenith', 'Hyperion'];
+        labels = ['HackyMax', 'Nova', 'Vortex', 'Infinity', 'Spark', 'VidStuck', 'Nebula', 'Zenith', 'Hyperion'];
       } else {
         urls = [
           `https://vidy.st/movie/${id}?color=E8C97A&autoplay=true&sub=false&subtitles=false&cc=false`,
@@ -9190,11 +9216,12 @@
           `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=sin`,
           `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true`,
           `https://cdn.vidspark.to/movie/${id}?autoplay=true`,
+          `https://vidstuck.xyz/embed/movie/${id}?branding=HackyMax&color=E8C97A&autoplay=true`,
           `https://embed.smashystream.com/playere.php?tmdb=${id}&autoplay=1`,
           `https://vidnest.fun/movie/${id}?autoplay=1`,
           `https://vixsrc.to/movie/${id}?autoplay=1`
         ];
-        labels = ['HackyMax', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Nebula', 'Zenith', 'Hyperion'];
+        labels = ['HackyMax', 'Nova', 'Vortex', 'Infinity', 'Spark', 'VidStuck', 'Nebula', 'Zenith', 'Hyperion'];
       }
       return { urls, labels };
     }
@@ -10251,20 +10278,40 @@
       const now = Date.now();
       const hasLiveFeed = !!(window._lastExternalMsgTime && (now - window._lastExternalMsgTime < 180000));
 
-      // Watchdog: If movie is supposed to be playing and has live messages, but no message arrived in > 1000ms:
+      // Watchdog: If movie is supposed to be playing and has live messages, but no message arrived:
       if (!window._externalIsPaused && hasLiveFeed) {
+        const frameEl = document.getElementById('playerFrame');
+        const isCurVidStuck = (frameEl && frameEl.src && frameEl.src.includes('vidstuck')) ||
+          (window._currentActiveServer && window._currentActiveServer.toLowerCase().includes('vidstuck'));
+        const bufferThreshold = isCurVidStuck ? 1350 : 1500;
+        const pauseThreshold = isCurVidStuck ? 2200 : 3800;
+
         const silence = now - window._lastExternalMsgTime;
-        if (silence > 1500) {
+        if (silence > bufferThreshold) {
           // Freeze subtitles at current confirmed playback second during buffer/stall
           _markBufferState(true);
         }
-        if (silence > 3800) {
-          // If silence persists > 3.8s, player is paused: lock paused state permanently until resumed
+        if (silence > pauseThreshold) {
+          // If silence persists, player is paused: lock paused state permanently until resumed
           window._externalIsPaused = true;
           window._subPausedElapsed = (window._bufferFreezeElapsed != null)
             ? window._bufferFreezeElapsed
             : Math.round((window._externalCurrentTime || 0) * 1000);
           _setSubSyncBarPaused(true);
+
+          // Broadcast pause to Watch Party guests
+          if (typeof WP !== 'undefined' && WP && WP.isHost && WP.code && typeof _broadcast === 'function') {
+            _broadcast({
+              type: 'pause',
+              ct: _getPlaybackTime(),
+              ts: Date.now(),
+              mId: window._currentPlayingId || _currentModalId,
+              mType: window._currentPlayingType || _currentModalType,
+              season: window._currentPlayingSeason || (typeof _selectedSeason !== 'undefined' && _selectedSeason) || 1,
+              episode: window._currentPlayingEpisode || (typeof _selectedEpisode !== 'undefined' && _selectedEpisode) || 1,
+              serverIndex: typeof _activeServerIndex === 'number' ? _activeServerIndex : 0
+            });
+          }
         }
       }
 
@@ -10359,7 +10406,12 @@
       let evName = '';
       const isVidSpark = (d.source === 'vidspark-player' || d.source === 'moviesapi-player');
       const isVidyNova = (d.type === 'PLAYER_EVENT' && d.data && d.data.currentTime !== undefined) || (d.type === 'MEDIA_DATA');
-      if (isVidSpark && d.event) {
+      const isVidStuck = (d.type === 'VIDEO_PROGRESS' || d.type === 'VIDEO_ENDED') || (event.origin && event.origin.includes('vidstuck'));
+      if (d.type === 'VIDEO_PROGRESS') {
+        evName = 'timeupdate';
+      } else if (d.type === 'VIDEO_ENDED') {
+        evName = 'pause';
+      } else if (isVidSpark && d.event) {
         evName = String(d.event).toLowerCase();
       } else if (d.type === 'PLAYER_EVENT' && d.data) {
         if (d.data.player_status) {
@@ -10380,6 +10432,7 @@
         (evName === 'waiting' || evName === 'buffering' || evName === 'buffer' || evName === 'stalled') ||
         (d.data && (d.data.event === 'waiting' || d.data.event === 'buffering' || d.data.player_status === 'buffering' || d.data.player_status === 'waiting'));
       const isExplicitPause = (evName === 'pause' || evName === 'paused') ||
+        (d.type === 'VIDEO_ENDED') ||
         (d.data && d.data.paused === true) ||
         (d.paused === true) ||
         (pState === 'pause') ||
@@ -10427,7 +10480,7 @@
           }
         } else if (window._externalCurrentTime === 0 || window._externalCurrentTime == null) {
           // Progress restored on load/refresh: if time is advancing or event is play/timeupdate, unpause!
-          if (ct > 0 || evName === 'play' || evName === 'timeupdate' || isVidyNova || (isVidSpark && d.paused === false)) {
+          if (ct > 0 || evName === 'play' || evName === 'timeupdate' || isVidyNova || isVidStuck || (isVidSpark && d.paused === false)) {
             isExplicitPlay = true;
             _markBufferState(false);
             window._externalIsPaused = false;
@@ -10606,7 +10659,7 @@
       }
 
       // If time is clearly advancing, player is actively playing — unpause immediately!
-      if (window._externalIsPaused && ct !== null && (ct > (window._externalCurrentTime || 0) + 0.04 || isVidyNova)) {
+      if (window._externalIsPaused && ct !== null && (ct > (window._externalCurrentTime || 0) + 0.04 || isVidyNova || isVidStuck)) {
         window._externalIsPaused = false;
         window._subPausedElapsed = null;
         _setSubSyncBarPaused(false);
@@ -12426,7 +12479,7 @@
       const activeBtn = document.querySelector('.player-server-btn.active');
       const curServerLabel = activeBtn ? activeBtn.textContent.toLowerCase() : '';
       const curFrameSrc = (frameEl && frameEl.src) ? frameEl.src.toLowerCase() : '';
-      const isAutoplayPlayer = curFrameSrc.includes('spark') || curFrameSrc.includes('vidspark') || curFrameSrc.includes('nova') || curFrameSrc.includes('vidy') || curFrameSrc.includes('hackymax') || curServerLabel.includes('spark') || curServerLabel.includes('nova') || curServerLabel.includes('vidy') || curServerLabel.includes('hackymax');
+      const isAutoplayPlayer = curFrameSrc.includes('spark') || curFrameSrc.includes('vidspark') || curFrameSrc.includes('nova') || curFrameSrc.includes('vidy') || curFrameSrc.includes('hackymax') || curFrameSrc.includes('vidstuck') || curServerLabel.includes('spark') || curServerLabel.includes('nova') || curServerLabel.includes('vidy') || curServerLabel.includes('hackymax') || curServerLabel.includes('vidstuck');
 
       // If cues are already loaded for THIS video/episode, IMMEDIATELY resume the loop and re-render
       if (_subCues && _subCues.length > 0 && window._currentLoadedSubKey === subKey) {
@@ -12593,8 +12646,8 @@
       _destroyMax();
       window._externalCurrentTime = 0;
       window._lastExternalMsgTime = null;
-      const isAutoplayUrl = (url && (url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy'))) ||
-        (labels && labels[_activeServerIndex] && (labels[_activeServerIndex].toLowerCase().includes('spark') || labels[_activeServerIndex].toLowerCase().includes('nova') || labels[_activeServerIndex].toLowerCase().includes('vidy')));
+      const isAutoplayUrl = (url && (url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || url.includes('vidstuck'))) ||
+        (labels && labels[_activeServerIndex] && (labels[_activeServerIndex].toLowerCase().includes('spark') || labels[_activeServerIndex].toLowerCase().includes('nova') || labels[_activeServerIndex].toLowerCase().includes('vidy') || labels[_activeServerIndex].toLowerCase().includes('vidstuck')));
       window._externalIsPaused = !isAutoplayUrl;
       window._isStreamBuffering = false;
       window._bufferFreezeElapsed = null;
@@ -12716,7 +12769,7 @@
       if (typeof window._adblock_pushRecovery === 'function') window._adblock_pushRecovery(url);
 
       const sName = btn ? btn.textContent.trim() : 'Server';
-      const isAutoplayServer = url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy');
+      const isAutoplayServer = url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || url.includes('vidstuck') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck');
       window._externalCurrentTime = 0;
       window._lastExternalMsgTime = null;
       window._externalIsPaused = !isAutoplayServer;
@@ -12727,7 +12780,7 @@
       _subStartTime = Date.now();
       _lastIframeSubCueText = null;
 
-      const isAutoLive = sName.toLowerCase().includes('hackymax') || sName.toLowerCase().includes('infinity') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy');
+      const isAutoLive = sName.toLowerCase().includes('hackymax') || sName.toLowerCase().includes('infinity') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck');
       _markSubSyncAutoLive(isAutoLive);
       _showSubToast(`Switched to <strong>${_escHtml(sName)}</strong> • Sinhala Subtitles Active`, 3200);
 
@@ -14560,6 +14613,13 @@
               let resumeUrl = frame.src.replace(/autoplay=false/gi, 'autoplay=true').replace(/autoplay=0/gi, 'autoplay=1');
               resumeUrl = resumeUrl.replace(/startAt=\d+/gi, `startAt=${Math.round(target)}`).replace(/time=\d+/gi, `time=${Math.round(target)}`);
               frame.src = resumeUrl;
+            } else if (frame && frame.src && frame.src.includes('vidstuck.xyz')) {
+              if (frame.src.includes('progress=')) {
+                frame.src = frame.src.replace(/progress=\d+/gi, `progress=${Math.round(target)}`);
+              } else {
+                const sep = frame.src.includes('?') ? '&' : '?';
+                frame.src = `${frame.src}${sep}progress=${Math.round(target)}`;
+              }
             }
           }
           window._externalCurrentTime = target;
@@ -14605,6 +14665,13 @@
             let resumeUrl = frame.src.replace(/autoplay=false/gi, 'autoplay=true').replace(/autoplay=0/gi, 'autoplay=1');
             resumeUrl = resumeUrl.replace(/startAt=\d+/gi, `startAt=${Math.round(target)}`).replace(/time=\d+/gi, `time=${Math.round(target)}`);
             frame.src = resumeUrl;
+          } else if (frame && frame.src && frame.src.includes('vidstuck.xyz')) {
+            if (frame.src.includes('progress=')) {
+              frame.src = frame.src.replace(/progress=\d+/gi, `progress=${Math.round(target)}`);
+            } else {
+              const sep = frame.src.includes('?') ? '&' : '?';
+              frame.src = `${frame.src}${sep}progress=${Math.round(target)}`;
+            }
           }
         }
 
@@ -14660,6 +14727,15 @@
           WP._lastHardSeek = Date.now();
         } else {
           _sendIframeCmd('seek', target);
+          const frame = document.getElementById('playerFrame');
+          if (frame && frame.src && frame.src.includes('vidstuck.xyz')) {
+            if (frame.src.includes('progress=')) {
+              frame.src = frame.src.replace(/progress=\d+/gi, `progress=${Math.round(target)}`);
+            } else {
+              const sep = frame.src.includes('?') ? '&' : '?';
+              frame.src = `${frame.src}${sep}progress=${Math.round(target)}`;
+            }
+          }
         }
 
         window._externalCurrentTime = target;

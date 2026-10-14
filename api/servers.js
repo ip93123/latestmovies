@@ -18,11 +18,12 @@ export default async function handler(req, res) {
       `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=sin`,
       `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true`,
       `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true`,
+      `https://vidstuck.xyz/embed/tv/${id}/${s}/${e}?branding=HackyMax&color=E8C97A&autoplay=true&nextEpisode=true&autoplayNextEpisode=true&episodeSelector=true`,
       `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}&autoplay=1`,
       `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
       `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
     ];
-    labels = ['HackyMax', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Nebula', 'Zenith', 'Hyperion'];
+    labels = ['HackyMax', 'Nova', 'Vortex', 'Infinity', 'Spark', 'VidStuck', 'Nebula', 'Zenith', 'Hyperion'];
 
   } else {
     // Movie
@@ -32,11 +33,12 @@ export default async function handler(req, res) {
       `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=sin`,
       `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true`,
       `https://cdn.vidspark.to/movie/${id}?autoplay=true`,
+      `https://vidstuck.xyz/embed/movie/${id}?branding=HackyMax&color=E8C97A&autoplay=true`,
       `https://embed.smashystream.com/playere.php?tmdb=${id}&autoplay=1`,
       `https://vidnest.fun/movie/${id}?autoplay=1`,
       `https://vixsrc.to/movie/${id}?autoplay=1`
     ];
-    labels = ['HackyMax', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Nebula', 'Zenith', 'Hyperion'];
+    labels = ['HackyMax', 'Nova', 'Vortex', 'Infinity', 'Spark', 'VidStuck', 'Nebula', 'Zenith', 'Hyperion'];
   }
 
   // Prevent caching so new server labels appear instantly
