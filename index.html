@@ -3011,13 +3011,17 @@
       max-width: 100vw !important;
       max-height: 100vh !important;
       border-radius: 0 !important;
-      background: #000 !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      overflow: visible !important;
     }
 
     #playerFrame {
       width: 100%;
       height: 100%;
       border: none;
+      background: transparent !important;
       transition: opacity 0.3s;
       position: relative;
       z-index: 1; /* explicit low z-index so #subOverlay can paint above the iframe compositing layer */
@@ -3029,7 +3033,7 @@
       position: absolute;
       bottom: 72px;
       right: 24px;
-      z-index: 720;
+      z-index: 35 !important;
       padding: 10px 22px;
       background: rgba(20,20,20,0.85);
       border: 2px solid var(--gold);
@@ -3066,7 +3070,7 @@
       position: absolute;
       bottom: 72px;
       left: 24px;
-      z-index: 720;
+      z-index: 35 !important;
       padding: 6px 14px;
       background: rgba(0,0,0,0.7);
       border-radius: 20px;
@@ -3081,7 +3085,10 @@
       position: absolute;
       inset: 0;
       pointer-events: none !important;
-      z-index: 2147483647 !important; /* above all iframe compositing and hardware surfaces */
+      z-index: 25 !important; /* safe z-index above playerFrame (z-index 1), avoids 32-bit TV compositor overflow */
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
@@ -3091,7 +3098,7 @@
     }
     #subText {
       position: relative;
-      z-index: 2147483647 !important;
+      z-index: 26 !important;
       pointer-events: none !important;
       max-width: 90%;
       text-align: center;
@@ -3120,7 +3127,10 @@
       position: absolute !important;
       inset: 0 !important;
       pointer-events: none !important;
-      z-index: 2147483647 !important;
+      z-index: 25 !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
       padding-bottom: 7% !important;
       display: flex !important;
     }
@@ -3137,7 +3147,7 @@
       -webkit-backdrop-filter: none !important;
       padding: 0.15rem 0.5rem !important;
       text-shadow: 0 2px 4px rgba(0,0,0,1), 0 0 14px rgba(0,0,0,0.95), 1px 1px 3px #000, -1px -1px 3px #000, 2px 2px 4px #000, -2px -2px 4px #000 !important;
-      z-index: 2147483647 !important;
+      z-index: 26 !important;
     }
 
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, #maxPlayerWrap:fullscreen, #maxPlayerWrap:-webkit-full-screen) #subText.active {
@@ -3160,7 +3170,7 @@
       justify-content: center;
       cursor: pointer;
       pointer-events: auto;
-      z-index: 2147483647 !important;
+      z-index: 40 !important;
       transition: opacity 0.25s, transform 0.2s, background 0.2s, border-color 0.2s;
       user-select: none;
     }
@@ -3171,7 +3181,7 @@
     }
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) .player-fs-overlay-btn {
       display: flex !important;
-      z-index: 2147483647 !important;
+      z-index: 40 !important;
     }
     .player-container.idle-fs .player-fs-overlay-btn {
       opacity: 0 !important;
@@ -3199,7 +3209,7 @@
       box-shadow: 0 6px 25px rgba(0, 0, 0, 0.8), 0 0 15px rgba(232, 201, 122, 0.2);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
-      z-index: 2147483647 !important;
+      z-index: 50 !important;
       pointer-events: none;
       opacity: 0;
       transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
@@ -4106,7 +4116,7 @@
       background: rgba(0,0,0,0.88);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
-      z-index: 2147483647 !important;
+      z-index: 10000 !important;
       display: none;
       align-items: center;
       justify-content: center;
@@ -5949,7 +5959,7 @@
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #playerClose,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #topbarWatchPartyBtn {
       display: flex !important;
-      z-index: 2147483647 !important;
+      z-index: 45 !important;
       opacity: 1;
     }
 
@@ -6852,7 +6862,7 @@
     .tv-mode #playerOverlay {
       padding: 1.5rem !important;
       gap: 1.2rem !important;
-      background: #04060c !important;
+      background: #000000 !important;
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
       transition: none !important;
@@ -6863,18 +6873,33 @@
       height: 84vh !important;
       max-width: 96vw !important;
       max-height: 84vh !important;
-      border-radius: 10px !important;
-      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      border-radius: 0 !important;
+      border: none !important;
+      overflow: visible !important;
+      box-shadow: none !important;
+      background: transparent !important;
       transform: none !important;
       will-change: auto !important;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.9) !important;
       animation: none !important;
       transition: none !important;
     }
     .device-tv #playerFrame,
     .tv-mode #playerFrame {
+      border-radius: 0 !important;
+      border: none !important;
+      background: transparent !important;
       transition: none !important;
       opacity: 1 !important;
+    }
+    .device-tv #subOverlay,
+    .tv-mode #subOverlay {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      z-index: 25 !important;
+      pointer-events: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
     }
     .device-tv .player-server-bar,
     .tv-mode .player-server-bar {
@@ -7516,7 +7541,7 @@
 
       <!-- Loading Spinner -->
       <div id="playerLoading"
-        style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#000;z-index:10;pointer-events:none;transition:opacity 0.3s;opacity:0;">
+        style="position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);z-index:10;pointer-events:none;transition:opacity 0.3s;opacity:0;">
         <div
           style="width:40px;height:40px;border:4px solid rgba(255,255,255,0.1);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;">
         </div>
@@ -12514,6 +12539,20 @@
       }
     }
 
+    function _setPlayerLoading(show) {
+      const loader = document.getElementById('playerLoading');
+      if (!loader) return;
+      if (show) {
+        loader.style.display = 'flex';
+        loader.style.opacity = '1';
+        loader.style.pointerEvents = 'auto';
+      } else {
+        loader.style.opacity = '0';
+        loader.style.display = 'none';
+        loader.style.pointerEvents = 'none';
+      }
+    }
+
     function _updateFsIcons() {
       const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
       const enter = document.querySelector('.max-fs-enter');
@@ -12705,21 +12744,18 @@
         });
         _maxVideo.addEventListener('playing', () => {
           _markBufferState(false);
-          const loader = document.getElementById('playerLoading');
-          if (loader) loader.style.opacity = '0';
+          _setPlayerLoading(false);
         });
         _maxVideo.addEventListener('waiting', () => {
           _markBufferState(true);
-          const loader = document.getElementById('playerLoading');
-          if (loader) loader.style.opacity = '1';
+          _setPlayerLoading(true);
         });
         _maxVideo.addEventListener('stalled', () => {
           _markBufferState(true);
         });
         _maxVideo.addEventListener('canplay', () => {
           _markBufferState(false);
-          const loader = document.getElementById('playerLoading');
-          if (loader) loader.style.opacity = '0';
+          _setPlayerLoading(false);
         });
         _maxVideo.addEventListener('pause', () => {
           if (_maxWrap) _maxWrap.classList.remove('playing');
@@ -12805,8 +12841,8 @@
       // Consolidated fullscreen change handler
       function _handleFullscreenChange() {
         if (typeof _updateFsIcons === 'function') _updateFsIcons();
-        const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
         const container = document.getElementById('playerContainer');
+        const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || (container && container.classList.contains('is-fullscreen')) || document.body.classList.contains('is-fullscreen'));
         if (container) {
           container.classList.toggle('is-fullscreen', isFs);
         }
@@ -12872,21 +12908,28 @@
 
     function _togglePlayerFullscreen() {
       const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
-      if (!fsEl) {
-        const isTv = (window.DEVICE && window.DEVICE.isTV) || _tvMode || document.body.classList.contains('tv-mode') || document.body.classList.contains('device-tv');
-        const frame = document.getElementById('playerFrame');
-        if (isTv && frame && frame.style.display !== 'none' && (frame.requestFullscreen || frame.webkitRequestFullscreen)) {
-          // On Smart TV, request fullscreen directly on the iframe!
-          // This avoids the TV hardware video plane blackout completely!
-          if (frame.requestFullscreen) return frame.requestFullscreen().catch(() => {});
-          if (frame.webkitRequestFullscreen) return frame.webkitRequestFullscreen();
+      const wrap = document.getElementById('playerContainer') || document.body;
+      const isCssFs = wrap && wrap.classList.contains('is-fullscreen');
+      if (!fsEl && !isCssFs) {
+        if (wrap && wrap.requestFullscreen) {
+          wrap.requestFullscreen().catch(() => {
+            if (wrap) wrap.classList.add('is-fullscreen');
+            document.body.classList.add('is-fullscreen');
+            if (typeof _handleFullscreenChange === 'function') _handleFullscreenChange();
+          });
+        } else if (wrap && wrap.webkitRequestFullscreen) {
+          wrap.webkitRequestFullscreen();
+        } else if (wrap) {
+          wrap.classList.add('is-fullscreen');
+          document.body.classList.add('is-fullscreen');
+          if (typeof _handleFullscreenChange === 'function') _handleFullscreenChange();
         }
-        const wrap = document.getElementById('playerContainer') || document.body;
-        if (wrap && wrap.requestFullscreen) wrap.requestFullscreen().catch(() => {});
-        else if (wrap && wrap.webkitRequestFullscreen) wrap.webkitRequestFullscreen();
       } else {
         if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
         else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        if (wrap) wrap.classList.remove('is-fullscreen');
+        document.body.classList.remove('is-fullscreen');
+        if (typeof _handleFullscreenChange === 'function') _handleFullscreenChange();
       }
     }
 
@@ -13726,7 +13769,7 @@
         _lastIframeSubCueText = null;
       }
       frame.style.display = '';
-      if (loader) loader.style.opacity = '1';
+      _setPlayerLoading(true);
       if (isTvDevice) {
         frame.style.opacity = '1';
         frame.style.transition = 'none';
@@ -13734,7 +13777,7 @@
         frame.style.opacity = '0';
       }
       frame.onload = () => {
-        if (loader) loader.style.opacity = '0';
+        _setPlayerLoading(false);
         frame.style.opacity = '1';
         _attachSubOverlayToActiveWrap();
         // If server does not send postMessages (like Spark), ensure subtitle clock unpauses
@@ -13862,7 +13905,7 @@
 
       _destroyMax();
       frame.style.display = '';
-      if (loader) loader.style.opacity = '1';
+      _setPlayerLoading(true);
       if (isTvDevice) {
         frame.style.opacity = '1';
         frame.style.transition = 'none';
@@ -13871,7 +13914,7 @@
       }
       frame.src = url;
       frame.onload = () => {
-        if (loader) loader.style.opacity = '0';
+        _setPlayerLoading(false);
         frame.style.opacity = '1';
         _attachSubOverlayToActiveWrap();
         setTimeout(() => {
@@ -13953,6 +13996,7 @@
     function closePlayerInternal() {
       const isTvDevice = (window.DEVICE && window.DEVICE.isTV) || _tvMode || document.body.classList.contains('tv-mode') || document.body.classList.contains('device-tv');
       const onPlayerClosed = () => {
+        _setPlayerLoading(false);
         document.getElementById('playerOverlay').classList.remove('open');
         const frame = document.getElementById('playerFrame');
         frame.src = '';
@@ -16721,8 +16765,7 @@
         }
         const overlay = document.getElementById('playerOverlay');
         if (overlay) overlay.classList.add('open');
-        const loader = document.getElementById('playerLoading');
-        if (loader) loader.style.opacity = '1';
+        _setPlayerLoading(true);
         // Note: Do NOT playStream here yet!
         // We wait for host connection state so we know whether host is paused or playing!
       }
