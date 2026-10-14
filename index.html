@@ -3733,9 +3733,11 @@
       outline-offset: 1px;
     }
 
-    /* ── VidStuck Server button (Electric Indigo theme) ───────────── */
+    /* ── Nebula (VidStuck) Server button (Electric Indigo theme) ───────────── */
     .player-server-btn.vidstuck-btn,
-    .modal-stream-pill.vidstuck-btn {
+    .modal-stream-pill.vidstuck-btn,
+    .player-server-btn.nebula-btn,
+    .modal-stream-pill.nebula-btn {
       background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%) !important;
       color: #ffffff !important;
       font-weight: 700 !important;
@@ -3745,12 +3747,15 @@
       box-shadow: none !important;
     }
     .player-server-btn.vidstuck-btn:hover,
-    .modal-stream-pill.vidstuck-btn:hover {
+    .modal-stream-pill.vidstuck-btn:hover,
+    .player-server-btn.nebula-btn:hover,
+    .modal-stream-pill.nebula-btn:hover {
       box-shadow: none !important;
       transform: translateY(-1px);
       filter: brightness(1.1);
     }
-    .player-server-btn.vidstuck-btn.active {
+    .player-server-btn.vidstuck-btn.active,
+    .player-server-btn.nebula-btn.active {
       box-shadow: none !important;
       border-color: #A5B4FC !important;
       outline: 2px solid rgba(165, 180, 252, 0.5) !important;
@@ -3786,9 +3791,11 @@
       outline-offset: 1px;
     }
 
-    /* ── SmashyStream Server button (Green theme) ────────────────────── */
+    /* ── Cosmos (SmashyStream) Server button (Green theme) ────────────────────── */
     .player-server-btn.smashystream-btn,
-    .modal-stream-pill.smashystream-btn {
+    .modal-stream-pill.smashystream-btn,
+    .player-server-btn.cosmos-btn,
+    .modal-stream-pill.cosmos-btn {
       background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
       color: #ffffff !important;
       font-weight: 700 !important;
@@ -3796,12 +3803,15 @@
       box-shadow: none !important;
     }
     .player-server-btn.smashystream-btn:hover,
-    .modal-stream-pill.smashystream-btn:hover {
+    .modal-stream-pill.smashystream-btn:hover,
+    .player-server-btn.cosmos-btn:hover,
+    .modal-stream-pill.cosmos-btn:hover {
       box-shadow: none !important;
       transform: translateY(-1px);
       filter: brightness(1.1);
     }
-    .player-server-btn.smashystream-btn.active {
+    .player-server-btn.smashystream-btn.active,
+    .player-server-btn.cosmos-btn.active {
       box-shadow: none !important;
       border-color: #6EE7B7 !important;
       outline: 2px solid rgba(110, 231, 183, 0.5) !important;
@@ -9167,10 +9177,10 @@
       if (lbl.includes('vortex') || lbl.includes('videasy')) return ' vortex-btn';
       if (lbl.includes('infinity')) return ' infinity-btn';
       if (lbl.includes('spark') || lbl.includes('vidspark')) return ' spark-btn';
-      if (lbl.includes('vidstuck') || lbl.includes('stuck')) return ' vidstuck-btn';
+      if (lbl.includes('nebula') || lbl.includes('vidstuck') || lbl.includes('stuck')) return ' nebula-btn vidstuck-btn';
       if (lbl.includes('nova') || lbl.includes('vidy')) return ' nova-btn';
-      if (lbl.includes('nebula') || lbl.includes('smashy')) return ' smashystream-btn';
-      if (lbl.includes('cosmos') || lbl.includes('autoembed')) return ' autoembed-btn';
+      if (lbl.includes('cosmos') || lbl.includes('smashy')) return ' cosmos-btn smashystream-btn';
+      if (lbl.includes('autoembed')) return ' autoembed-btn';
       if (lbl.includes('titan') || lbl.includes('2embed')) return ' twoembed-btn';
       return ' silver-btn';
     }
@@ -9198,30 +9208,30 @@
 
       if (type === 'tv') {
         urls = [
-          `https://vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&sub=false&subtitles=false&cc=false`,
+          `https://vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&sub=false&subtitles=false&cc=false&subLang=none`,
           `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=true&showNextEpisode=1`,
-          `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=sin`,
-          `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true`,
+          `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=sin&sub=0`,
+          `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&sub.mode=manual`,
           `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true`,
-          `https://vidstuck.xyz/embed/tv/${id}/${s}/${e}?branding=HackyMax&color=E8C97A&autoplay=true&nextEpisode=true&autoplayNextEpisode=true&episodeSelector=true`,
+          `https://vidstuck.xyz/embed/tv/${id}/${s}/${e}?branding=HackyMax&color=E8C97A&autoplay=true&nextEpisode=true&autoplayNextEpisode=true&episodeSelector=true&subtitle=none&sub=false`,
           `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}&autoplay=1`,
           `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
           `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
         ];
-        labels = ['HackyMax', 'Nova', 'Vortex', 'Infinity', 'Spark', 'VidStuck', 'Nebula', 'Zenith', 'Hyperion'];
+        labels = ['HackyMax', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Nebula', 'Cosmos', 'Zenith', 'Hyperion'];
       } else {
         urls = [
-          `https://vidy.st/movie/${id}?color=E8C97A&autoplay=true&sub=false&subtitles=false&cc=false`,
+          `https://vidy.st/movie/${id}?color=E8C97A&autoplay=true&sub=false&subtitles=false&cc=false&subLang=none`,
           `https://vidlove.cc/embed/movie/${id}?autoplay=true`,
-          `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=sin`,
-          `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true`,
+          `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=sin&sub=0`,
+          `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&sub.mode=manual`,
           `https://cdn.vidspark.to/movie/${id}?autoplay=true`,
-          `https://vidstuck.xyz/embed/movie/${id}?branding=HackyMax&color=E8C97A&autoplay=true`,
+          `https://vidstuck.xyz/embed/movie/${id}?branding=HackyMax&color=E8C97A&autoplay=true&subtitle=none&sub=false`,
           `https://embed.smashystream.com/playere.php?tmdb=${id}&autoplay=1`,
           `https://vidnest.fun/movie/${id}?autoplay=1`,
           `https://vixsrc.to/movie/${id}?autoplay=1`
         ];
-        labels = ['HackyMax', 'Nova', 'Vortex', 'Infinity', 'Spark', 'VidStuck', 'Nebula', 'Zenith', 'Hyperion'];
+        labels = ['HackyMax', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Nebula', 'Cosmos', 'Zenith', 'Hyperion'];
       }
       return { urls, labels };
     }
@@ -10282,7 +10292,7 @@
       if (!window._externalIsPaused && hasLiveFeed) {
         const frameEl = document.getElementById('playerFrame');
         const isCurVidStuck = (frameEl && frameEl.src && frameEl.src.includes('vidstuck')) ||
-          (window._currentActiveServer && window._currentActiveServer.toLowerCase().includes('vidstuck'));
+          (window._currentActiveServer && (window._currentActiveServer.toLowerCase().includes('vidstuck') || window._currentActiveServer.toLowerCase().includes('nebula')));
         const bufferThreshold = isCurVidStuck ? 1350 : 1500;
         const pauseThreshold = isCurVidStuck ? 2200 : 3800;
 
@@ -10379,33 +10389,38 @@
       }
       if (typeof d !== 'object' || d === null) return;
 
+      // Special handling for Vidy / Nova MEDIA_DATA (periodic local history sync)
+      // Vidy broadcasts { type: "MEDIA_DATA", data: "<serialized local history>" } every ~1s.
+      // It is NOT a live player timeupdate event and must NEVER cause seek jumps or unpause playback.
+      if (d.type === 'MEDIA_DATA') {
+        if ((window._externalCurrentTime == null || window._externalCurrentTime === 0) && !_subActive && d.data) {
+          try {
+            const hist = typeof d.data === 'string' ? JSON.parse(d.data) : d.data;
+            if (hist && typeof hist === 'object') {
+              const activeId = window._currentPlayingId || _currentModalId;
+              for (const k of Object.keys(hist)) {
+                if (!activeId || k.includes(String(activeId))) {
+                  const item = hist[k];
+                  if (item && item.progress && typeof item.progress.watched === 'number' && item.progress.watched > 0) {
+                    window._externalCurrentTime = item.progress.watched;
+                    break;
+                  }
+                }
+              }
+            }
+          } catch (_) {}
+        }
+        return; // CRITICAL: Stop processing here! Do NOT let MEDIA_DATA enter live playback/seek logic.
+      }
+
       // Extract time from message if present
       let extracted = _extractTimeFromMessage(d);
       let ct = (extracted && typeof extracted.time === 'number') ? extracted.time : null;
 
-      // Special handling for Vidy / Nova MEDIA_DATA (periodic local history sync)
-      if (ct === null && d.type === 'MEDIA_DATA' && d.data) {
-        try {
-          const hist = typeof d.data === 'string' ? JSON.parse(d.data) : d.data;
-          if (hist && typeof hist === 'object') {
-            const activeId = window._currentPlayingId || _currentModalId;
-            for (const k of Object.keys(hist)) {
-              if (!activeId || k.includes(String(activeId))) {
-                const item = hist[k];
-                if (item && item.progress && typeof item.progress.watched === 'number') {
-                  ct = item.progress.watched;
-                  break;
-                }
-              }
-            }
-          }
-        } catch (_) {}
-      }
-
       // Identify event type
       let evName = '';
       const isVidSpark = (d.source === 'vidspark-player' || d.source === 'moviesapi-player');
-      const isVidyNova = (d.type === 'PLAYER_EVENT' && d.data && d.data.currentTime !== undefined) || (d.type === 'MEDIA_DATA');
+      const isVidyNova = (d.type === 'PLAYER_EVENT' && d.data && typeof d.data.currentTime === 'number');
       const isVidStuck = (d.type === 'VIDEO_PROGRESS' || d.type === 'VIDEO_ENDED') || (event.origin && event.origin.includes('vidstuck'));
       if (d.type === 'VIDEO_PROGRESS') {
         evName = 'timeupdate';
@@ -10659,7 +10674,7 @@
       }
 
       // If time is clearly advancing, player is actively playing — unpause immediately!
-      if (window._externalIsPaused && ct !== null && (ct > (window._externalCurrentTime || 0) + 0.04 || isVidyNova || isVidStuck)) {
+      if (window._externalIsPaused && ct !== null && (ct > (window._externalCurrentTime || 0) + 0.04)) {
         window._externalIsPaused = false;
         window._subPausedElapsed = null;
         _setSubSyncBarPaused(false);
@@ -12382,8 +12397,7 @@
               if (isArabic) return; // Strict elimination of Arabic tracks
 
               const isSin = l === 'si' || l === 'sin' || l === 'sinhala' || lbl.includes('sinhala');
-              const isEn = l === 'en' || l === 'eng' || l === 'english' || lbl.includes('english');
-              if ((isSin || isEn) && !_mxsTracks.some(e => e.url === tr.url)) {
+              if (isSin && !_mxsTracks.some(e => e.url === tr.url)) {
                 _mxsTracks.push(tr);
               }
             });
@@ -12391,11 +12405,8 @@
         }
       } catch (_) {}
 
-      // AUTO-SELECTION RULE:
-      // 1. MUST prefer Sinhala first (local SUBTITLE_MAP or OpenSubtitles Sinhala)
-      // 2. ONLY if Sinhala is NOT available or fails, then English should appear!
+      // AUTO-SELECTION RULE: Enforce Sinhala track only (English subtitles removed)
       const sinhalaTrack = _mxsTracks.find(t => t.lang === 'si' || t.lang === 'sin' || (t.label && t.label.toLowerCase().includes('sinhala')));
-      const englishTracks = _mxsTracks.filter(t => t.lang === 'en' || t.lang === 'eng' || (t.label && t.label.toLowerCase().includes('english')));
 
       if (sinhalaTrack && sinhalaTrack.url) {
         // Enforce Sinhala as default!
@@ -12409,20 +12420,6 @@
         } else {
           _mxsRenderTracks();
           return;
-        }
-      }
-
-      // If no Sinhala track, or Sinhala failed, try English fallback tracks
-      if (!_subLoaded || !_subCues.length) {
-        for (const enTrack of englishTracks) {
-          if (enTrack && enTrack.url) {
-            _mxsActiveTrackId = enTrack.id;
-            const ok = await _loadMaxSubtitleFromUrl(enTrack.url);
-            if (ok) {
-              _mxsRenderTracks();
-              return;
-            }
-          }
         }
       }
 

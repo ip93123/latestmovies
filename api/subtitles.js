@@ -78,8 +78,6 @@ const SUBTITLE_MAP = {
 };
 
 const LANG_MAP = {
-  eng: { label: 'English', flag: '🇬🇧' },
-  en: { label: 'English', flag: '🇬🇧' },
   sin: { label: 'Sinhala', flag: '🇱🇰' },
   si: { label: 'Sinhala', flag: '🇱🇰' },
 };
@@ -192,7 +190,7 @@ export default async function handler(req, res) {
     } catch (_) {}
   }
 
-  // Priority 2: Query OpenSubtitles for English and Sinhala tracks ONLY
+  // Priority 2: Query OpenSubtitles for Sinhala track ONLY (English removed per request)
   if (resolvedImdb) {
     try {
       const openSubPath = type === 'tv'
@@ -221,20 +219,6 @@ export default async function handler(req, res) {
             });
           }
         }
-
-        // Add English track
-        const enSubs = rawSubs.filter(s => (s.lang === 'eng' || s.lang === 'en') && isNotArabic(s));
-        if (enSubs.length > 0) {
-          tracks.push({
-            id: 'english',
-            lang: 'en',
-            label: 'English 🇬🇧',
-            url: enSubs[0].url,
-            isDefault: !tracks.some(t => t.lang === 'si'), // Default to English only if no Sinhala subtitle
-            source: 'opensubtitles'
-          });
-        }
-        // Strictly NO other languages (Arabic, Persian, etc. are eliminated)
       }
     } catch (_) {}
   }
@@ -243,7 +227,7 @@ export default async function handler(req, res) {
   return res.status(200).json({
     id,
     imdb: resolvedImdb,
-    defaultLang: localSinhalaSub ? 'si' : (tracks.some(t => t.lang === 'en') ? 'en' : null),
+    defaultLang: tracks.length > 0 ? 'si' : null,
     tracks
   });
 }
