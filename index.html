@@ -9210,6 +9210,7 @@
         urls = [
           `https://vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&sub=false&subtitles=false&cc=false&subLang=none`,
           `https://vidstuck.xyz/embed/tv/${id}/${s}/${e}?branding=HackyMax&color=E8C97A&autoplay=true&nextEpisode=true&autoplayNextEpisode=true&episodeSelector=true&subtitle=none&sub=false`,
+          `https://player.cinezo.live/embed/tv/${id}/${s}/${e}?autoplay=true&opacity=0&fontsize=0&fontcolor=transparent&primarycolor=e8b86d&secondarycolor=0a0a12`,
           `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=true&showNextEpisode=1&sub=false&subtitles=false`,
           `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=none&sub=0&subtitles=false`,
           `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&sub.mode=manual`,
@@ -9217,11 +9218,12 @@
           `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
           `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
         ];
-        labels = ['HackyMax', 'Nebula', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Zenith', 'Hyperion'];
+        labels = ['HackyMax', 'Nebula', 'Cinezo', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Zenith', 'Hyperion'];
       } else {
         urls = [
           `https://vidy.st/movie/${id}?color=E8C97A&autoplay=true&sub=false&subtitles=false&cc=false&subLang=none`,
           `https://vidstuck.xyz/embed/movie/${id}?branding=HackyMax&color=E8C97A&autoplay=true&subtitle=none&sub=false`,
+          `https://player.cinezo.live/embed/movie/${id}?autoplay=true&opacity=0&fontsize=0&fontcolor=transparent&primarycolor=e8b86d&secondarycolor=0a0a12`,
           `https://vidlove.cc/embed/movie/${id}?autoplay=true&sub=false&subtitles=false`,
           `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=none&sub=0&subtitles=false`,
           `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&sub.mode=manual`,
@@ -9229,7 +9231,7 @@
           `https://vidnest.fun/movie/${id}?autoplay=1`,
           `https://vixsrc.to/movie/${id}?autoplay=1`
         ];
-        labels = ['HackyMax', 'Nebula', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Zenith', 'Hyperion'];
+        labels = ['HackyMax', 'Nebula', 'Cinezo', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Zenith', 'Hyperion'];
       }
       return { urls, labels };
     }
@@ -12505,7 +12507,7 @@
       const activeBtn = document.querySelector('.player-server-btn.active');
       const curServerLabel = activeBtn ? activeBtn.textContent.toLowerCase() : '';
       const curFrameSrc = (frameEl && frameEl.src) ? frameEl.src.toLowerCase() : '';
-      const isAutoplayPlayer = curFrameSrc.includes('spark') || curFrameSrc.includes('vidspark') || curFrameSrc.includes('nova') || curFrameSrc.includes('vidy') || curFrameSrc.includes('hackymax') || curFrameSrc.includes('vidstuck') || curFrameSrc.includes('nebula') || curFrameSrc.includes('videasy') || curFrameSrc.includes('vortex') || curServerLabel.includes('spark') || curServerLabel.includes('nova') || curServerLabel.includes('vidy') || curServerLabel.includes('hackymax') || curServerLabel.includes('vidstuck') || curServerLabel.includes('nebula') || curServerLabel.includes('videasy') || curServerLabel.includes('vortex');
+      const isAutoplayPlayer = curFrameSrc.includes('spark') || curFrameSrc.includes('vidspark') || curFrameSrc.includes('nova') || curFrameSrc.includes('vidy') || curFrameSrc.includes('hackymax') || curFrameSrc.includes('vidstuck') || curFrameSrc.includes('nebula') || curFrameSrc.includes('videasy') || curFrameSrc.includes('vortex') || curFrameSrc.includes('cinezo') || curServerLabel.includes('spark') || curServerLabel.includes('nova') || curServerLabel.includes('vidy') || curServerLabel.includes('hackymax') || curServerLabel.includes('vidstuck') || curServerLabel.includes('nebula') || curServerLabel.includes('videasy') || curServerLabel.includes('vortex') || curServerLabel.includes('cinezo');
 
       // If cues are already loaded for THIS video/episode, IMMEDIATELY resume the loop and re-render
       if (_subCues && _subCues.length > 0 && window._currentLoadedSubKey === subKey) {
@@ -12662,8 +12664,8 @@
       _destroyMax();
       window._externalCurrentTime = 0;
       window._lastExternalMsgTime = null;
-      const isAutoplayUrl = (url && (url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || url.includes('vidstuck') || url.includes('nebula') || url.includes('videasy') || url.includes('vortex'))) ||
-        (labels && labels[_activeServerIndex] && (labels[_activeServerIndex].toLowerCase().includes('spark') || labels[_activeServerIndex].toLowerCase().includes('nova') || labels[_activeServerIndex].toLowerCase().includes('vidy') || labels[_activeServerIndex].toLowerCase().includes('vidstuck') || labels[_activeServerIndex].toLowerCase().includes('nebula') || labels[_activeServerIndex].toLowerCase().includes('videasy') || labels[_activeServerIndex].toLowerCase().includes('vortex')));
+      const isAutoplayUrl = (url && (url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || url.includes('vidstuck') || url.includes('nebula') || url.includes('videasy') || url.includes('vortex') || url.includes('cinezo'))) ||
+        (labels && labels[_activeServerIndex] && (labels[_activeServerIndex].toLowerCase().includes('spark') || labels[_activeServerIndex].toLowerCase().includes('nova') || labels[_activeServerIndex].toLowerCase().includes('vidy') || labels[_activeServerIndex].toLowerCase().includes('vidstuck') || labels[_activeServerIndex].toLowerCase().includes('nebula') || labels[_activeServerIndex].toLowerCase().includes('videasy') || labels[_activeServerIndex].toLowerCase().includes('vortex') || labels[_activeServerIndex].toLowerCase().includes('cinezo')));
       window._externalIsPaused = !isAutoplayUrl;
       window._isStreamBuffering = false;
       window._bufferFreezeElapsed = null;
@@ -12720,7 +12722,7 @@
       overlay.classList.add('open');
 
       const curLabel = labels && labels[_activeServerIndex] ? labels[_activeServerIndex] : 'Server';
-      const isInitAutoLive = curLabel.toLowerCase().includes('hackymax') || curLabel.toLowerCase().includes('infinity') || curLabel.toLowerCase().includes('spark') || curLabel.toLowerCase().includes('nebula') || curLabel.toLowerCase().includes('vortex');
+      const isInitAutoLive = curLabel.toLowerCase().includes('hackymax') || curLabel.toLowerCase().includes('infinity') || curLabel.toLowerCase().includes('spark') || curLabel.toLowerCase().includes('nebula') || curLabel.toLowerCase().includes('vortex') || curLabel.toLowerCase().includes('cinezo');
       _markSubSyncAutoLive(isInitAutoLive);
 
       // ── Auto-load & auto-start Sinhala subtitle for iframe (VidLink, etc.) ────────
@@ -12785,7 +12787,7 @@
       if (typeof window._adblock_pushRecovery === 'function') window._adblock_pushRecovery(url);
 
       const sName = btn ? btn.textContent.trim() : 'Server';
-      const isAutoplayServer = url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || url.includes('vidstuck') || url.includes('nebula') || url.includes('videasy') || url.includes('vortex') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('videasy') || sName.toLowerCase().includes('vortex');
+      const isAutoplayServer = url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || url.includes('vidstuck') || url.includes('nebula') || url.includes('videasy') || url.includes('vortex') || url.includes('cinezo') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('videasy') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('cinezo');
       window._externalCurrentTime = 0;
       window._lastExternalMsgTime = null;
       window._externalIsPaused = !isAutoplayServer;
@@ -12796,7 +12798,7 @@
       _subStartTime = Date.now();
       _lastIframeSubCueText = null;
 
-      const isAutoLive = sName.toLowerCase().includes('hackymax') || sName.toLowerCase().includes('infinity') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck');
+      const isAutoLive = sName.toLowerCase().includes('hackymax') || sName.toLowerCase().includes('infinity') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck') || sName.toLowerCase().includes('cinezo');
       _markSubSyncAutoLive(isAutoLive);
       _showSubToast(`Switched to <strong>${_escHtml(sName)}</strong> • Sinhala Subtitles Active`, 3200);
 
