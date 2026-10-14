@@ -3045,13 +3045,13 @@
       z-index: 2147483647 !important;
       max-width: 90%;
       text-align: center;
-      padding: 0.25rem 0.95rem;
-      background: var(--sub-bg, rgba(7, 9, 15, 0.92)) !important;
-      border: 1px solid rgba(255, 255, 255, 0.12) !important;
-      border-radius: 8px !important;
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.65) !important;
-      backdrop-filter: blur(8px) !important;
-      -webkit-backdrop-filter: blur(8px) !important;
+      padding: 0.1rem 0.4rem;
+      background: var(--sub-bg, transparent) !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
       font-size: var(--sub-size, calc(clamp(1.6rem, 3.4vw, 2.85rem) * 0.75));
       font-weight: 700;
       color: var(--sub-color, #ffffff);
@@ -3079,13 +3079,13 @@
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, #maxPlayerWrap:fullscreen, #maxPlayerWrap:-webkit-full-screen) #subText {
       font-size: var(--sub-size, calc(clamp(1.9rem, 3.8vw, 3.2rem) * 0.85)) !important;
       font-weight: 700 !important;
-      background: var(--sub-bg, rgba(7, 9, 15, 0.92)) !important;
-      border: 1px solid rgba(255, 255, 255, 0.12) !important;
-      border-radius: 8px !important;
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.65) !important;
-      backdrop-filter: blur(8px) !important;
-      -webkit-backdrop-filter: blur(8px) !important;
-      padding: 0.35rem 1.15rem !important;
+      background: var(--sub-bg, transparent) !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      padding: 0.15rem 0.5rem !important;
       text-shadow: 0 2px 4px rgba(0,0,0,1), 0 0 14px rgba(0,0,0,0.95), 1px 1px 3px #000, -1px -1px 3px #000, 2px 2px 4px #000, -2px -2px 4px #000 !important;
       z-index: 2147483647 !important;
       transform: translateZ(9999px) !important;
@@ -11014,7 +11014,7 @@
     // ════════════════════════════════════════════════════════════════════════
     const MXS_KEY = 'hacky_mxs_v1';
     let _mxsSettings = {
-      subColor: '#ffffff', subSize: 75, subBg: '#000000', subBgOp: 85,
+      subColor: '#ffffff', subSize: 75, subBg: '#000000', subBgOp: 0,
       subPos: 'bottom', subShadow: true, speed: 1, quality: 'auto',
       autoNext: true, autoNextCountdown: true, autoSub: true
     };
@@ -11025,11 +11025,12 @@
       if (saved.subSize === 100 || saved.subSize === undefined) {
         _mxsSettings.subSize = 75;
       }
-      if (saved.subBgOp === undefined || saved.subBgOp === 0) {
-        _mxsSettings.subBgOp = 85;
+      // Migrate previous 85% default background opacity to 0% (transparent, no black box)
+      if (saved.subBgOp === undefined || saved.subBgOp === 85) {
+        _mxsSettings.subBgOp = 0;
       }
     } catch (_) {}
-    if (typeof _mxsSettings.subBgOp !== 'number') _mxsSettings.subBgOp = 85;
+    if (typeof _mxsSettings.subBgOp !== 'number') _mxsSettings.subBgOp = 0;
 
     function _mxsSave() {
       try { localStorage.setItem(MXS_KEY, JSON.stringify(_mxsSettings)); } catch (_) {}
