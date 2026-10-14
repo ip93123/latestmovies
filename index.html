@@ -1874,7 +1874,7 @@
 
     .modal-streams {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
       gap: .45rem;
       margin-bottom: 1.5rem;
     }
@@ -1883,24 +1883,51 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: .4rem;
-      padding: .45rem .6rem;
+      gap: .35rem;
+      padding: .45rem .45rem;
       border-radius: 8px;
-      font-size: .75rem;
-      font-weight: 700;
+      font-size: .73rem;
+      font-weight: 600;
       border: 1px solid transparent;
       transition: transform .2s, opacity .2s, box-shadow .2s;
       cursor: pointer;
       text-decoration: none;
       white-space: nowrap;
       width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      box-sizing: border-box;
+      text-align: center;
+      overflow: hidden;
+      line-height: 1.25;
+    }
+
+    .modal-stream-pill img {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      object-fit: cover;
+      flex-shrink: 0;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .modal-stream-pill .pill-label,
+    .modal-stream-pill > span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+      max-width: 100%;
+      display: inline-block;
+      vertical-align: middle;
       text-align: center;
     }
 
     .modal-stream-pill:hover {
       transform: translateY(-2px);
-      opacity: .85;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      opacity: .88;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
     }
 
     /* Mobile: 2 columns */
@@ -1912,7 +1939,7 @@
 
       .modal-stream-pill {
         font-size: .72rem;
-        padding: .5rem .4rem;
+        padding: .45rem .35rem;
       }
     }
 
@@ -7272,39 +7299,39 @@
     const PROVIDERS = {
       // Netflix
       8: { name: 'Netflix', short: 'NF', cls: 'netflix', color: '#E50914', bg: 'rgba(229,9,20,0.15)', border: 'rgba(229,9,20,0.4)' },
-      1796: { name: 'Netflix with Ads', short: 'NF', cls: 'netflix', color: '#E50914', bg: 'rgba(229,9,20,0.15)', border: 'rgba(229,9,20,0.4)' },
+      1796: { name: 'Netflix (Ads)', short: 'NF', cls: 'netflix', color: '#E50914', bg: 'rgba(229,9,20,0.15)', border: 'rgba(229,9,20,0.4)' },
       // Amazon
-      9: { name: 'Prime Video Alt', short: 'PV', cls: 'prime', color: '#00A8E1', bg: 'rgba(0,168,225,0.15)', border: 'rgba(0,168,225,0.4)' },
+      9: { name: 'Prime Video', short: 'PV', cls: 'prime', color: '#00A8E1', bg: 'rgba(0,168,225,0.15)', border: 'rgba(0,168,225,0.4)' },
       119: { name: 'Prime Video', short: 'PV', cls: 'prime', color: '#00A8E1', bg: 'rgba(0,168,225,0.15)', border: 'rgba(0,168,225,0.4)' },
       10: { name: 'Amazon Video', short: 'AV', cls: 'prime', color: '#00A8E1', bg: 'rgba(0,168,225,0.15)', border: 'rgba(0,168,225,0.4)' },
       533: { name: 'Arthaus', short: 'ART', cls: 'prime', color: '#00A8E1', bg: 'rgba(0,168,225,0.15)', border: 'rgba(0,168,225,0.4)' },
-      613: { name: 'Prime Free Ads', short: 'PVF', cls: 'prime', color: '#00A8E1', bg: 'rgba(0,168,225,0.15)', border: 'rgba(0,168,225,0.4)' },
-      2100: { name: 'Prime with Ads', short: 'PVA', cls: 'prime', color: '#00A8E1', bg: 'rgba(0,168,225,0.15)', border: 'rgba(0,168,225,0.4)' },
-      1898: { name: 'Amazon MX Player', short: 'MX', cls: 'prime', color: '#00A8E1', bg: 'rgba(0,168,225,0.15)', border: 'rgba(0,168,225,0.4)' },
+      613: { name: 'Prime Free', short: 'PVF', cls: 'prime', color: '#00A8E1', bg: 'rgba(0,168,225,0.15)', border: 'rgba(0,168,225,0.4)' },
+      2100: { name: 'Prime (Ads)', short: 'PVA', cls: 'prime', color: '#00A8E1', bg: 'rgba(0,168,225,0.15)', border: 'rgba(0,168,225,0.4)' },
+      1898: { name: 'MX Player', short: 'MX', cls: 'prime', color: '#00A8E1', bg: 'rgba(0,168,225,0.15)', border: 'rgba(0,168,225,0.4)' },
       // Disney
       337: { name: 'Disney+', short: 'D+', cls: 'disney', color: '#6B9FFF', bg: 'rgba(17,60,166,0.15)', border: 'rgba(17,60,166,0.5)' },
-      122: { name: 'Disney+ Alt', short: 'D+', cls: 'disney', color: '#6B9FFF', bg: 'rgba(17,60,166,0.15)', border: 'rgba(17,60,166,0.5)' },
+      122: { name: 'Disney+', short: 'D+', cls: 'disney', color: '#6B9FFF', bg: 'rgba(17,60,166,0.15)', border: 'rgba(17,60,166,0.5)' },
       508: { name: 'DisneyNow', short: 'DN', cls: 'disney', color: '#6B9FFF', bg: 'rgba(17,60,166,0.15)', border: 'rgba(17,60,166,0.5)' },
       // HBO / Max
       1899: { name: 'Max', short: 'MAX', cls: 'hbo', color: '#C87FFF', bg: 'rgba(160,32,240,0.15)', border: 'rgba(160,32,240,0.4)' },
-      1825: { name: 'Max Amazon', short: 'MAX', cls: 'hbo', color: '#C87FFF', bg: 'rgba(160,32,240,0.15)', border: 'rgba(160,32,240,0.4)' },
-      2472: { name: 'Max Amazon Alt', short: 'MAX', cls: 'hbo', color: '#C87FFF', bg: 'rgba(160,32,240,0.15)', border: 'rgba(160,32,240,0.4)' },
-      2284: { name: 'Max U-NEXT', short: 'MAX', cls: 'hbo', color: '#C87FFF', bg: 'rgba(160,32,240,0.15)', border: 'rgba(160,32,240,0.4)' },
+      1825: { name: 'Max (Amz)', short: 'MAX', cls: 'hbo', color: '#C87FFF', bg: 'rgba(160,32,240,0.15)', border: 'rgba(160,32,240,0.4)' },
+      2472: { name: 'Max', short: 'MAX', cls: 'hbo', color: '#C87FFF', bg: 'rgba(160,32,240,0.15)', border: 'rgba(160,32,240,0.4)' },
+      2284: { name: 'Max (U-Next)', short: 'MAX', cls: 'hbo', color: '#C87FFF', bg: 'rgba(160,32,240,0.15)', border: 'rgba(160,32,240,0.4)' },
       // Hulu
       15: { name: 'Hulu', short: 'HU', cls: 'hulu', color: '#1CE783', bg: 'rgba(28,231,131,0.15)', border: 'rgba(28,231,131,0.4)' },
       // Apple
-      2: { name: 'Apple TV Store', short: 'ATV', cls: 'apple', color: '#fff', bg: 'rgba(255,255,255,0.08)', border: 'rgba(255,255,255,0.2)' },
+      2: { name: 'Apple TV', short: 'ATV', cls: 'apple', color: '#fff', bg: 'rgba(255,255,255,0.08)', border: 'rgba(255,255,255,0.2)' },
       350: { name: 'Apple TV+', short: 'ATV', cls: 'apple', color: '#fff', bg: 'rgba(255,255,255,0.08)', border: 'rgba(255,255,255,0.2)' },
-      2243: { name: 'Apple TV Amazon', short: 'ATV', cls: 'apple', color: '#fff', bg: 'rgba(255,255,255,0.08)', border: 'rgba(255,255,255,0.2)' },
+      2243: { name: 'Apple TV (Amz)', short: 'ATV', cls: 'apple', color: '#fff', bg: 'rgba(255,255,255,0.08)', border: 'rgba(255,255,255,0.2)' },
       // Paramount
-      187: { name: 'Paramount Pics', short: 'PAR', cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)', border: 'rgba(0,134,206,0.4)' },
+      187: { name: 'Paramount', short: 'PAR', cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)', border: 'rgba(0,134,206,0.4)' },
       531: { name: 'Paramount+', short: 'P+', cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)', border: 'rgba(0,134,206,0.4)' },
-      582: { name: 'Paramount+ Amazon', short: 'P+', cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)', border: 'rgba(0,134,206,0.4)' },
-      633: { name: 'Paramount+ Roku', short: 'P+', cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)', border: 'rgba(0,134,206,0.4)' },
-      1853: { name: 'Paramount+ Apple', short: 'P+', cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)', border: 'rgba(0,134,206,0.4)' },
-      2303: { name: 'Paramount+ Premium', short: 'P+', cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)', border: 'rgba(0,134,206,0.4)' },
-      2580: { name: 'Paramount+ Ads', short: 'P+', cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)', border: 'rgba(0,134,206,0.4)' },
-      2616: { name: 'Paramount+ Essntl', short: 'P+', cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)', border: 'rgba(0,134,206,0.4)' },
+      582: { name: 'P+ Amazon', short: 'P+', cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)', border: 'rgba(0,134,206,0.4)' },
+      633: { name: 'P+ Roku', short: 'P+', cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)', border: 'rgba(0,134,206,0.4)' },
+      1853: { name: 'P+ Apple', short: 'P+', cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)', border: 'rgba(0,134,206,0.4)' },
+      2303: { name: 'P+ Premium', short: 'P+', cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)', border: 'rgba(0,134,206,0.4)' },
+      2580: { name: 'P+ Ads', short: 'P+', cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)', border: 'rgba(0,134,206,0.4)' },
+      2616: { name: 'P+ Essential', short: 'P+', cls: 'paramount', color: '#0086CE', bg: 'rgba(0,134,206,0.15)', border: 'rgba(0,134,206,0.4)' },
       // Peacock
       386: { name: 'Peacock', short: 'PCK', cls: 'peacock', color: '#E86803', bg: 'rgba(232,104,3,0.15)', border: 'rgba(232,104,3,0.4)' },
       387: { name: 'Peacock Free', short: 'PCK', cls: 'peacock', color: '#E86803', bg: 'rgba(232,104,3,0.15)', border: 'rgba(232,104,3,0.4)' },
@@ -7316,29 +7343,29 @@
       37: { name: 'Showtime', short: 'SHO', cls: 'default', color: '#C41230', bg: 'rgba(196,18,48,0.15)', border: 'rgba(196,18,48,0.4)' },
       // Discovery+
       524: { name: 'Discovery+', short: 'DIS', cls: 'default', color: '#0B6FC2', bg: 'rgba(11,111,194,0.15)', border: 'rgba(11,111,194,0.4)' },
-      510: { name: 'Discovery+ Alt', short: 'DIS', cls: 'default', color: '#0B6FC2', bg: 'rgba(11,111,194,0.15)', border: 'rgba(11,111,194,0.4)' },
-      520: { name: 'Discovery+ Alt2', short: 'DIS', cls: 'default', color: '#0B6FC2', bg: 'rgba(11,111,194,0.15)', border: 'rgba(11,111,194,0.4)' },
-      584: { name: 'Discovery+ Amazon', short: 'DIS', cls: 'default', color: '#0B6FC2', bg: 'rgba(11,111,194,0.15)', border: 'rgba(11,111,194,0.4)' },
+      510: { name: 'Discovery+', short: 'DIS', cls: 'default', color: '#0B6FC2', bg: 'rgba(11,111,194,0.15)', border: 'rgba(11,111,194,0.4)' },
+      520: { name: 'Discovery+', short: 'DIS', cls: 'default', color: '#0B6FC2', bg: 'rgba(11,111,194,0.15)', border: 'rgba(11,111,194,0.4)' },
+      584: { name: 'Discovery+ (Amz)', short: 'DIS', cls: 'default', color: '#0B6FC2', bg: 'rgba(11,111,194,0.15)', border: 'rgba(11,111,194,0.4)' },
       // AMC
       526: { name: 'AMC+', short: 'AMC', cls: 'default', color: '#EF3F2F', bg: 'rgba(239,63,47,0.15)', border: 'rgba(239,63,47,0.4)' },
-      528: { name: 'AMC+ Amazon', short: 'AMC', cls: 'default', color: '#EF3F2F', bg: 'rgba(239,63,47,0.15)', border: 'rgba(239,63,47,0.4)' },
-      1854: { name: 'AMC+ Apple TV', short: 'AMC', cls: 'default', color: '#EF3F2F', bg: 'rgba(239,63,47,0.15)', border: 'rgba(239,63,47,0.4)' },
-      635: { name: 'AMC+ Roku', short: 'AMC', cls: 'default', color: '#EF3F2F', bg: 'rgba(239,63,47,0.15)', border: 'rgba(239,63,47,0.4)' },
-      2561: { name: 'AMC+ Channels', short: 'AMC', cls: 'default', color: '#EF3F2F', bg: 'rgba(239,63,47,0.15)', border: 'rgba(239,63,47,0.4)' },
+      528: { name: 'AMC+ (Amz)', short: 'AMC', cls: 'default', color: '#EF3F2F', bg: 'rgba(239,63,47,0.15)', border: 'rgba(239,63,47,0.4)' },
+      1854: { name: 'AMC+ (Apple)', short: 'AMC', cls: 'default', color: '#EF3F2F', bg: 'rgba(239,63,47,0.15)', border: 'rgba(239,63,47,0.4)' },
+      635: { name: 'AMC+ (Roku)', short: 'AMC', cls: 'default', color: '#EF3F2F', bg: 'rgba(239,63,47,0.15)', border: 'rgba(239,63,47,0.4)' },
+      2561: { name: 'AMC+', short: 'AMC', cls: 'default', color: '#EF3F2F', bg: 'rgba(239,63,47,0.15)', border: 'rgba(239,63,47,0.4)' },
       // Starz
       43: { name: 'Starz', short: 'STZ', cls: 'default', color: '#0067B0', bg: 'rgba(0,103,176,0.15)', border: 'rgba(0,103,176,0.4)' },
       630: { name: 'StarzPlay', short: 'STZ', cls: 'default', color: '#0067B0', bg: 'rgba(0,103,176,0.15)', border: 'rgba(0,103,176,0.4)' },
-      634: { name: 'Starz Roku', short: 'STZ', cls: 'default', color: '#0067B0', bg: 'rgba(0,103,176,0.15)', border: 'rgba(0,103,176,0.4)' },
-      1794: { name: 'Starz Amazon', short: 'STZ', cls: 'default', color: '#0067B0', bg: 'rgba(0,103,176,0.15)', border: 'rgba(0,103,176,0.4)' },
-      1855: { name: 'Starz Apple TV', short: 'STZ', cls: 'default', color: '#0067B0', bg: 'rgba(0,103,176,0.15)', border: 'rgba(0,103,176,0.4)' },
+      634: { name: 'Starz (Roku)', short: 'STZ', cls: 'default', color: '#0067B0', bg: 'rgba(0,103,176,0.15)', border: 'rgba(0,103,176,0.4)' },
+      1794: { name: 'Starz (Amz)', short: 'STZ', cls: 'default', color: '#0067B0', bg: 'rgba(0,103,176,0.15)', border: 'rgba(0,103,176,0.4)' },
+      1855: { name: 'Starz (Apple)', short: 'STZ', cls: 'default', color: '#0067B0', bg: 'rgba(0,103,176,0.15)', border: 'rgba(0,103,176,0.4)' },
       // Mubi
       11: { name: 'MUBI', short: 'MU', cls: 'default', color: '#48C4C4', bg: 'rgba(72,196,196,0.15)', border: 'rgba(72,196,196,0.4)' },
       // Tubi
-      73: { name: 'Tubi TV', short: 'TUB', cls: 'default', color: '#FF5500', bg: 'rgba(255,85,0,0.15)', border: 'rgba(255,85,0,0.4)' },
+      73: { name: 'Tubi', short: 'TUB', cls: 'default', color: '#FF5500', bg: 'rgba(255,85,0,0.15)', border: 'rgba(255,85,0,0.4)' },
       // YouTube / Google
       3: { name: 'Google Play', short: 'GP', cls: 'default', color: '#FF0000', bg: 'rgba(255,0,0,0.12)', border: 'rgba(255,0,0,0.35)' },
       192: { name: 'YouTube', short: 'YT', cls: 'default', color: '#FF0000', bg: 'rgba(255,0,0,0.12)', border: 'rgba(255,0,0,0.35)' },
-      188: { name: 'YouTube Premium', short: 'YT', cls: 'default', color: '#FF0000', bg: 'rgba(255,0,0,0.12)', border: 'rgba(255,0,0,0.35)' },
+      188: { name: 'YouTube Prem', short: 'YT', cls: 'default', color: '#FF0000', bg: 'rgba(255,0,0,0.12)', border: 'rgba(255,0,0,0.35)' },
       235: { name: 'YouTube Free', short: 'YT', cls: 'default', color: '#FF0000', bg: 'rgba(255,0,0,0.12)', border: 'rgba(255,0,0,0.35)' },
       2528: { name: 'YouTube TV', short: 'YTTV', cls: 'default', color: '#FF0000', bg: 'rgba(255,0,0,0.12)', border: 'rgba(255,0,0,0.35)' },
       // Plex
@@ -7348,24 +7375,24 @@
       332: { name: 'Fandango Free', short: 'FDG', cls: 'default', color: '#4DA3E0', bg: 'rgba(77,163,224,0.15)', border: 'rgba(77,163,224,0.4)' },
       // MGM
       1757: { name: 'MGM+', short: 'MGM', cls: 'default', color: '#0F7A3A', bg: 'rgba(15,122,58,0.15)', border: 'rgba(15,122,58,0.4)' },
-      583: { name: 'MGM+ Amazon', short: 'MGM', cls: 'default', color: '#0F7A3A', bg: 'rgba(15,122,58,0.15)', border: 'rgba(15,122,58,0.4)' },
-      636: { name: 'MGM+ Roku', short: 'MGM', cls: 'default', color: '#0F7A3A', bg: 'rgba(15,122,58,0.15)', border: 'rgba(15,122,58,0.4)' },
-      2141: { name: 'MGM+ Amazon Alt', short: 'MGM', cls: 'default', color: '#0F7A3A', bg: 'rgba(15,122,58,0.15)', border: 'rgba(15,122,58,0.4)' },
-      2142: { name: 'MGM+ Apple TV', short: 'MGM', cls: 'default', color: '#0F7A3A', bg: 'rgba(15,122,58,0.15)', border: 'rgba(15,122,58,0.4)' },
+      583: { name: 'MGM+ (Amz)', short: 'MGM', cls: 'default', color: '#0F7A3A', bg: 'rgba(15,122,58,0.15)', border: 'rgba(15,122,58,0.4)' },
+      636: { name: 'MGM+ (Roku)', short: 'MGM', cls: 'default', color: '#0F7A3A', bg: 'rgba(15,122,58,0.15)', border: 'rgba(15,122,58,0.4)' },
+      2141: { name: 'MGM+ (Amz)', short: 'MGM', cls: 'default', color: '#0F7A3A', bg: 'rgba(15,122,58,0.15)', border: 'rgba(15,122,58,0.4)' },
+      2142: { name: 'MGM+ (Apple)', short: 'MGM', cls: 'default', color: '#0F7A3A', bg: 'rgba(15,122,58,0.15)', border: 'rgba(15,122,58,0.4)' },
       // BritBox
       151: { name: 'BritBox', short: 'BB', cls: 'default', color: '#1380A1', bg: 'rgba(19,128,161,0.15)', border: 'rgba(19,128,161,0.4)' },
       // Curiosity
-      390: { name: 'Curiosity Stream', short: 'CS', cls: 'default', color: '#F5A623', bg: 'rgba(245,166,35,0.15)', border: 'rgba(245,166,35,0.4)' },
-      2060: { name: 'Curiosity Apple', short: 'CS', cls: 'default', color: '#F5A623', bg: 'rgba(245,166,35,0.15)', border: 'rgba(245,166,35,0.4)' },
+      390: { name: 'Curiosity', short: 'CS', cls: 'default', color: '#F5A623', bg: 'rgba(245,166,35,0.15)', border: 'rgba(245,166,35,0.4)' },
+      2060: { name: 'Curiosity (Apple)', short: 'CS', cls: 'default', color: '#F5A623', bg: 'rgba(245,166,35,0.15)', border: 'rgba(245,166,35,0.4)' },
       // Pluto
       300: { name: 'Pluto TV', short: 'PLT', cls: 'default', color: '#FFEA00', bg: 'rgba(255,234,0,0.12)', border: 'rgba(255,234,0,0.35)' },
-      1965: { name: 'Pluto TV Live', short: 'PLT', cls: 'default', color: '#FFEA00', bg: 'rgba(255,234,0,0.12)', border: 'rgba(255,234,0,0.35)' },
+      1965: { name: 'Pluto TV', short: 'PLT', cls: 'default', color: '#FFEA00', bg: 'rgba(255,234,0,0.12)', border: 'rgba(255,234,0,0.35)' },
       // Shudder
       99: { name: 'Shudder', short: 'SHD', cls: 'default', color: '#AF0025', bg: 'rgba(175,0,37,0.15)', border: 'rgba(175,0,37,0.4)' },
       // Acorn TV
       87: { name: 'Acorn TV', short: 'ACN', cls: 'default', color: '#5C4033', bg: 'rgba(92,64,51,0.15)', border: 'rgba(92,64,51,0.4)' },
-      2034: { name: 'Acorn TV Apple', short: 'ACN', cls: 'default', color: '#5C4033', bg: 'rgba(92,64,51,0.15)', border: 'rgba(92,64,51,0.4)' },
-      2048: { name: 'Sundance Now Apple', short: 'SUN', cls: 'default', color: '#5C4033', bg: 'rgba(92,64,51,0.15)', border: 'rgba(92,64,51,0.4)' },
+      2034: { name: 'Acorn TV (Apple)', short: 'ACN', cls: 'default', color: '#5C4033', bg: 'rgba(92,64,51,0.15)', border: 'rgba(92,64,51,0.4)' },
+      2048: { name: 'Sundance (Apple)', short: 'SUN', cls: 'default', color: '#5C4033', bg: 'rgba(92,64,51,0.15)', border: 'rgba(92,64,51,0.4)' },
       // Sky
       29: { name: 'Sky Go', short: 'SKY', cls: 'default', color: '#0000FF', bg: 'rgba(0,0,255,0.15)', border: 'rgba(0,0,255,0.4)' },
       210: { name: 'Sky Standard', short: 'SKY', cls: 'default', color: '#0000FF', bg: 'rgba(0,0,255,0.15)', border: 'rgba(0,0,255,0.4)' },
@@ -7512,9 +7539,9 @@
       if (flatrate && flatrate.length) {
         flatrate.forEach(p => {
           const info = getProviderInfo(p.provider_id);
-          const logo = p.logo_path ? `<img src="${IMG}w45${p.logo_path}" style="width:18px;height:18px;border-radius:4px;object-fit:cover" alt="">` : '';
+          const logo = p.logo_path ? `<img src="${IMG}w45${p.logo_path}" alt="">` : '';
           const url = PLATFORM_URLS[p.provider_id] || `https://www.google.com/search?q=watch+on+${encodeURIComponent(info.name)}`;
-          html += `<a class="modal-stream-pill" style="background:${info.bg};border-color:${info.border};color:${info.color}" href="${url}" target="_blank" rel="noopener">${logo} ${info.name}</a>`;
+          html += `<a class="modal-stream-pill" style="background:${info.bg};border-color:${info.border};color:${info.color}" href="${url}" target="_blank" rel="noopener" title="${info.name}">${logo}<span class="pill-label">${info.name}</span></a>`;
         });
       }
       return html || '<div class="no-stream">Not available for streaming in your region</div>';
@@ -9681,17 +9708,17 @@
             const lbl = allLabels[i] || `Server ${i + 1}`;
             const cls = getServerBtnClass(lbl);
             const style = cls ? 'border:none;cursor:pointer' : `background:${colors[i % colors.length] || '#6B7280'};color:#fff;border:none;cursor:pointer`;
-            return `<button class="modal-stream-pill modal-play-btn${cls}" data-server="${i}" style="${style}">${lbl}</button>`;
+            return `<button class="modal-stream-pill modal-play-btn${cls}" data-server="${i}" style="${style}" title="${lbl}"><span class="pill-label">${lbl}</span></button>`;
           }).join('');
 
           if (hiddenUrls.length > 0) {
-            playBtnsHtml += `<button class="modal-stream-pill" id="showMoreServersBtn" style="background:var(--dark3);color:#fff;border:1px solid rgba(255,255,255,0.2);cursor:pointer">➕ ${hiddenUrls.length} More</button>`;
+            playBtnsHtml += `<button class="modal-stream-pill" id="showMoreServersBtn" style="background:var(--dark3);color:#fff;border:1px solid rgba(255,255,255,0.2);cursor:pointer" title="More Servers"><span class="pill-label">➕ ${hiddenUrls.length} More</span></button>`;
             playBtnsHtml += hiddenUrls.map((u, i) => {
               const idx = i + maxVisible;
               const lbl = allLabels[idx] || `Server ${idx + 1}`;
               const cls = getServerBtnClass(lbl);
               const style = cls ? 'border:none;cursor:pointer;display:none' : `background:${colors[idx % colors.length] || '#6B7280'};color:#fff;border:none;cursor:pointer;display:none`;
-              return `<button class="modal-stream-pill modal-play-btn extra-server-btn${cls}" data-server="${idx}" style="${style}">${lbl}</button>`;
+              return `<button class="modal-stream-pill modal-play-btn extra-server-btn${cls}" data-server="${idx}" style="${style}" title="${lbl}"><span class="pill-label">${lbl}</span></button>`;
             }).join('');
           }
 
