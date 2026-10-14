@@ -823,10 +823,10 @@
       flex: 0 0 200px;
     }
 
-    /* ── LATEST MOVIES 3-ROW GRID ─────────────────────────────────────────── */
+    /* ── LATEST MOVIES 2-ROW GRID ─────────────────────────────────────────── */
     #moviesGrid:not(.expanded) {
       display: grid;
-      grid-template-rows: repeat(3, auto);
+      grid-template-rows: repeat(2, auto);
       grid-auto-flow: column;
       grid-auto-columns: 200px;
       gap: 1.5rem 1.25rem;
@@ -6811,7 +6811,7 @@
       <li><a href="javascript:void(0)" onclick="openCategoryPage('tvshows', 'all', '📺 TV Series', 'Explore top rated &amp; popular TV series')">TV Series</a></li>
       <li><a href="javascript:void(0)" onclick="openCategoryPage('toprated', 'all', '⭐ Top Rated All Time', 'Highest rated movies & series of all time')">Top Rated</a></li>
       <li><a href="javascript:void(0)" onclick="openCategoryPage('fourk', 'all', '💎 4K Ultra HD Picks', 'Cinematic 4K Ultra HD resolution titles with immersive clarity')">4K</a></li>
-      <li><a href="#sinsub" style="color:#2ECC71;font-weight:700;" title="Sinhala Subtitled Movies">🇱🇰 Subtitle</a></li>
+      <li><a href="javascript:void(0)" onclick="openCategoryPage('language', 'si', '🇱🇰 Sinhala Subtitles', 'Movies &amp; TV Series with Sinhala Subtitles')" style="color:#2ECC71;font-weight:700;" title="Sinhala Subtitled Movies">🇱🇰 Subtitle</a></li>
       <li><a href="javascript:void(0)" id="navWishlistLink" onclick="openWishlist()" title="WishList">WishList</a></li>
     </ul>
     <div style="display:flex;align-items:center;gap:10px;">
@@ -6854,7 +6854,7 @@
       <ul class="mobile-nav-list">
         <li><a href="#trending" onclick="window.toggleMobileNav(false)"><span>🔥 Trending</span><span style="opacity:0.4;">›</span></a></li>
         <li><a href="#categories" onclick="window.toggleMobileNav(false)"><span>🏷️ Categories</span><span style="opacity:0.4;">›</span></a></li>
-        <li><a href="#sinsub" onclick="window.toggleMobileNav(false)" style="color:#2ECC71;"><span>🇱🇰 Subtitle (Sinhala)</span><span class="mobile-sub-tag">SUB</span></a></li>
+        <li><a href="javascript:void(0)" onclick="window.toggleMobileNav(false); openCategoryPage('language', 'si', '🇱🇰 Sinhala Subtitles', 'Movies &amp; TV Series with Sinhala Subtitles')" style="color:#2ECC71;"><span>🇱🇰 Subtitle (Sinhala)</span><span class="mobile-sub-tag">SUB</span></a></li>
         <li><a href="javascript:void(0)" onclick="window.toggleMobileNav(false); openCategoryPage('movies', 'all', '🎬 Movies', 'Explore latest &amp; popular movies')"><span>🎬 Movies</span><span style="opacity:0.4;">›</span></a></li>
         <li><a href="javascript:void(0)" onclick="window.toggleMobileNav(false); openCategoryPage('tvshows', 'all', '📺 TV Series', 'Explore top rated &amp; popular TV series')"><span>📺 TV Series</span><span style="opacity:0.4;">›</span></a></li>
         <li><a href="javascript:void(0)" onclick="window.toggleMobileNav(false); openCategoryPage('toprated', 'all', '⭐ Top Rated All Time', 'Highest rated movies & series of all time')"><span>🌟 Top Rated</span><span style="opacity:0.4;">›</span></a></li>
@@ -6925,25 +6925,6 @@
       <button class="scroll-btn scroll-left" onclick="scrollRow('trendingRow', -1)">❮</button>
       <div class="trending-row" id="trendingRow"></div>
       <button class="scroll-btn scroll-right" onclick="scrollRow('trendingRow', 1)">❯</button>
-    </div>
-  </section>
-
-  <!-- SIN SUB (SINHALA SUBTITLES) SECTION -->
-  <section id="sinsub" style="background:var(--dark1);border-top:1px solid rgba(46,204,113,0.15);border-bottom:1px solid rgba(46,204,113,0.15);">
-    <div class="section-header">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:1.6rem;">🇱🇰</span>
-        <div>
-          <h2 class="section-title" style="margin:0;"><span style="color:#2ECC71;">Sinhala Subtitle</span> Movies</h2>
-          <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);font-family:'Inter',sans-serif;letter-spacing:0.5px;">සිංහල උපසිරැසි සහිත චිත්‍රපට (Sinhala Subtitled Movies)</div>
-        </div>
-      </div>
-      <span class="see-all" onclick="toggleExpand('sinsubRow', this)">View all →</span>
-    </div>
-    <div class="scroll-wrapper">
-      <button class="scroll-btn scroll-left" onclick="scrollRow('sinsubRow', -1)">❮</button>
-      <div class="trending-row" id="sinsubRow"></div>
-      <button class="scroll-btn scroll-right" onclick="scrollRow('sinsubRow', 1)">❯</button>
     </div>
   </section>
 
@@ -14157,7 +14138,7 @@
         trailerObs.observe(document.getElementById('trailers'));
       }
 
-      const sectionsToObserve = ['trending', 'sinsub', 'categories', 'movies', 'tvshows'];
+      const sectionsToObserve = ['trending', 'categories', 'movies', 'tvshows'];
       sectionsToObserve.forEach(id => {
         const el = document.getElementById(id);
         if (el) observer.observe(el);
