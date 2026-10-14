@@ -6126,7 +6126,10 @@
           on every element that uses it) */
     .device-tv *,
     .device-tv *::before,
-    .device-tv *::after {
+    .device-tv *::after,
+    .tv-mode *,
+    .tv-mode *::before,
+    .tv-mode *::after {
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
     }
@@ -6295,6 +6298,43 @@
     }
     .device-tv #subText {
       font-size: clamp(1.3rem, 2.3vw, 1.9rem) !important;
+    }
+
+    /* ─── TV MODAL ANTI-CRASH STYLES ─── */
+    .device-tv #modal,
+    .tv-mode #modal {
+      background: rgba(5, 7, 12, 0.96) !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      transition: none !important;
+    }
+
+    .device-tv .modal-box,
+    .tv-mode .modal-box {
+      background: #0d1117 !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.9) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      transform: none !important;
+      will-change: auto !important;
+      animation: none !important;
+      transition: none !important;
+    }
+
+    .device-tv .modal-poster img,
+    .tv-mode .modal-poster img {
+      transform: none !important;
+      transition: none !important;
+      will-change: auto !important;
+    }
+
+    .device-tv .cast-card,
+    .tv-mode .cast-card,
+    .device-tv .cast-avatar,
+    .tv-mode .cast-avatar {
+      transform: none !important;
+      transition: none !important;
     }
   </style>
 </head>
@@ -9703,11 +9743,27 @@
 
       // Instant placeholder poster from the clicked card
       const clickedCard = document.querySelector(`.movie-card[data-id="${id}"], .trending-card[data-id="${id}"]`);
-      const placeholderSrc = clickedCard ? clickedCard.querySelector('img').src : '';
+      const placeholderSrc = clickedCard && clickedCard.querySelector('img') ? clickedCard.querySelector('img').src : '';
       document.getElementById('modalPoster').src = placeholderSrc;
       const _epInfoReset = document.getElementById('modalEpInfo');
       if (_epInfoReset) { _epInfoReset.style.display = 'none'; _epInfoReset.innerHTML = ''; }
-      gsap.fromTo('#modalBox', { scale: .92, opacity: 0, y: 30 }, { scale: 1, opacity: 1, y: 0, duration: .45, ease: 'power3.out' });
+
+      const isTvDevice = (window.DEVICE && window.DEVICE.isTV) || _tvMode || document.body.classList.contains('tv-mode') || document.body.classList.contains('device-tv');
+      if (isTvDevice) {
+        // Skip 3D GSAP transform animations on TV — prevents GPU out-of-memory renderer crash
+        const mBox = document.getElementById('modalBox');
+        if (mBox) {
+          mBox.style.opacity = '1';
+          mBox.style.transform = 'none';
+        }
+        // Temporarily hide category view layer behind modal to free GPU texture memory
+        const catOverlay = document.getElementById('categoryViewOverlay');
+        if (catOverlay && catOverlay.classList.contains('open')) {
+          catOverlay.style.visibility = 'hidden';
+        }
+      } else {
+        gsap.fromTo('#modalBox', { scale: .92, opacity: 0, y: 30 }, { scale: 1, opacity: 1, y: 0, duration: .45, ease: 'power3.out' });
+      }
 
       try {
         const [details, watchData, credits, videoData] = await Promise.all([
@@ -9724,7 +9780,8 @@
         _currentModalItem = details;
         const title = details.title || details.name || '';
         const year = (details.release_date || details.first_air_date || '').slice(0, 4);
-        const poster = details.poster_path ? `${IMG}w500${details.poster_path}` : '';
+        const posterSize = isTvDevice ? 'w342' : 'w500';
+        const poster = details.poster_path ? `${IMG}${posterSize}${details.poster_path}` : '';
         document.getElementById('modalType').textContent = type === 'movie' ? 'Movie' : 'TV Show';
         document.getElementById('modalTitle').textContent = title;
         document.getElementById('modalPoster').src = poster;
@@ -9834,8 +9891,8 @@
           document.getElementById('modalRent').innerHTML = buildRentPills(rentBuy);
         }
 
-        // Cast — photo cards (6 per row)
-        const castList = (credits && credits.cast ? credits.cast : []).slice(0, 18);
+        // Cast — limit to 6 on TV to prevent memory exhaustion, 18 on desktop
+        const castList = (credits && credits.cast ? credits.cast : []).slice(0, isTvDevice ? 6 : 18);
         const castEl = document.getElementById('modalCast');
         if (castList.length) {
           castEl.innerHTML = castList.map(c => {
@@ -10024,13 +10081,53 @@
     document.getElementById('modalHome').addEventListener('click', goHome);
 
     function closeModalInternal() {
+      const isTvDevice = (window.DEVICE && window.DEVICE.isTV) || _tvMode || document.body.classList.contains('tv-mode') || document.body.classList.contains('device-tv');
+      const catOverlay = document.getElementById('categoryViewOverlay');
+      const isCatOpen = catOverlay && catOverlay.classList.contains('open');
+      if (isCatOpen) {
+        catOverlay.style.visibility = '';
+      }
+
+      if (isTvDevice) {
+        document.getElementById('modal').classList.remove('open');
+        document.getElementById('modalFrame')?.remove();
+        if (!isCatOpen && window.scrollY < 300) {
+          heroTimer = setInterval(() => setHero((heroIdx + 1) % heroMovies.length), 15000);
+          if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
+            try { ytPlayer.playVideo(); } catch (e) { }
+          }
+        }
+        const pOverlay = document.getElementById('playerOverlay');
+        if (!pOverlay || !pOverlay.classList.contains('open')) {
+          _currentModalId = null;
+        }
+        document.getElementById('modalEpChooser').style.display = 'none';
+        try {
+          const u = new URL(window.location.href);
+          if (u.searchParams.has('m') || u.searchParams.has('s')) {
+            u.searchParams.delete('m');
+            u.searchParams.delete('s');
+            if (isCatOpen) {
+              history.replaceState({
+                ui: 'category',
+                catType: _currentCatType,
+                catKey: _currentCatKey,
+                title: _currentCatItemData?.title,
+                sub: _currentCatItemData?.sub
+              }, '', u.toString());
+            } else {
+              history.replaceState({ ui: 'home' }, '', u.toString());
+            }
+          }
+        } catch (e) { }
+        return;
+      }
+
       gsap.to('#modalBox', {
         scale: 0.92, opacity: 0, y: 20, duration: 0.3, ease: 'power3.in', onComplete: () => {
           document.getElementById('modal').classList.remove('open');
           document.getElementById('modalFrame')?.remove();
           // Resume hero rotation and YT background only if category overlay is NOT open and we are at the top
-          const catOverlay = document.getElementById('categoryViewOverlay');
-          const isCatOpen = catOverlay && catOverlay.classList.contains('open');
           if (!isCatOpen && window.scrollY < 300) {
             heroTimer = setInterval(() => setHero((heroIdx + 1) % heroMovies.length), 15000);
             if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
@@ -13465,7 +13562,13 @@
         if (state.ui === 'modal') {
           if (modal && !modal.classList.contains('open')) {
             modal.classList.add('open');
-            try { gsap.fromTo('#modalBox', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3 }); } catch (ex) { }
+            const isTvDevice = (window.DEVICE && window.DEVICE.isTV) || _tvMode || document.body.classList.contains('tv-mode') || document.body.classList.contains('device-tv');
+            if (!isTvDevice) {
+              try { gsap.fromTo('#modalBox', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3 }); } catch (ex) { }
+            } else {
+              const mBox = document.getElementById('modalBox');
+              if (mBox) { mBox.style.opacity = '1'; mBox.style.transform = 'none'; }
+            }
           }
         } else if (state.ui !== 'player') {
           if (modal && modal.classList.contains('open')) {
@@ -13684,7 +13787,7 @@
     }
 
     function addCardListeners(container, selector) {
-      const isTV = window.DEVICE && window.DEVICE.isTV;
+      const isTV = (window.DEVICE && window.DEVICE.isTV) || _tvMode || document.body.classList.contains('tv-mode') || document.body.classList.contains('device-tv');
 
       if (!isTV) {
         // Read accent color once per batch — avoids getComputedStyle on every mousemove
@@ -13745,7 +13848,7 @@
 
     function spawnParticles(el) {
       // Skip on TV — 10 DOM nodes + GSAP animations per click overloads weak CPUs
-      if (window.DEVICE && window.DEVICE.isTV) return;
+      if ((window.DEVICE && window.DEVICE.isTV) || _tvMode || document.body.classList.contains('tv-mode') || document.body.classList.contains('device-tv')) return;
       const rect = el.getBoundingClientRect();
       const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
       const a1 = getComputedStyle(document.documentElement).getPropertyValue('--accent1').trim() || '232,201,122';
@@ -13919,8 +14022,9 @@
       const ua = navigator.userAgent || '';
       const platform = navigator.platform || '';
 
-      // ── TV detection (check first — some TV UAs also match "Android") ──────
+      // ── TV detection (comprehensive for all Smart TVs & Android TV browsers) ──────
       const tvSignals = [
+        /TV/i,             // Matches Android TV, GoogleTV, AppleTV, SmartTV, any TV
         /SmartTV/i, /Smart-TV/i, /HbbTV/i, /SMART-TV/i,
         /Tizen/i,          // Samsung
         /Web0S/i, /webOS/i, // LG
@@ -13928,19 +14032,23 @@
         /Viera/i,          // Panasonic
         /NetCast/i,        // LG older
         /PhilipsTV/i,
-        /AFTS/i, /AFTB/i, /AFTM/i, /AFTT/i, /AFTN/i, // Amazon Fire TV
+        /AFT/i, /FireTV/i, /Fire TV/i, /Silk/i, // Amazon Fire TV
         /Roku/i,
         /AppleTV/i, /Apple TV/i,
-        /CrKey/i,          // Chromecast
+        /CrKey/i, /Chromecast/i, /GoogleTV/i,
         /Vizio/i,
         /VIDAA/i,          // Hisense
         /OpenTV/i,
-        /MiBOX/i, /Xiaomi.*TV/i,
+        /MiBOX/i, /Xiaomi.*TV/i, /MiTV/i,
         /OPR.*TV/i, /OPR.*SmartTV/i,
+        /TV Bro/i, /BrowseHere/i, /JioPages/i,
+        /TCL/i, /Skyworth/i, /Changhong/i, /Haier/i, /Sharp/i,
+        /LargeScreen/i
       ];
       const isTV = tvSignals.some(r => r.test(ua))
-        // Fire TV sticks report as Android but have very large "screens" and no touch
-        || (/Android/i.test(ua) && !('ontouchstart' in window) && window.screen.width >= 1280 && window.screen.height >= 720 && navigator.maxTouchPoints === 0);
+        || (/Android/i.test(ua) && !/Mobile/i.test(ua)) // Android without Mobile is Android TV / Large screen
+        || (/Android/i.test(ua) && window.screen.width >= 1280 && window.screen.height >= 720 && navigator.maxTouchPoints === 0)
+        || (new URLSearchParams(window.location.search).get('tv') === '1');
 
       // ── Mobile detection ──────────────────────────────────────────────────
       const mobileSignals = [
@@ -14005,9 +14113,15 @@
       _tvMode = true;
     }
     function enableTvMode() {
-      if (_tvMode) return;
+      if (_tvMode && document.body.classList.contains('device-tv')) return;
       _tvMode = true;
+      if (window.DEVICE) {
+        window.DEVICE.isTV = true;
+        window.DEVICE.type = 'tv';
+      }
       document.body.classList.add('tv-mode');
+      document.body.classList.add('device-tv');
+      document.body.classList.remove('device-pc', 'device-mobile');
     }
 
     function getVisibleFocusables() {
