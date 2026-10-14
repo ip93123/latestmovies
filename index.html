@@ -10434,18 +10434,26 @@
     function _checkPlayPause(obj, depth = 0) {
       if (!obj || depth > 2) return null;
       if (typeof obj === 'string') {
-        if (/\b(?:buffer|buffering|waiting|stalled)\b/i.test(obj)) return 'buffer';
-        if (/\b(?:pause|paused)\b/i.test(obj)) return 'pause';
-        if (/\b(?:play|playing|resumed?)\b/i.test(obj)) return 'play';
+        if (/(?:buffer|waiting|stalled?|loading|seeking)/i.test(obj)) return 'buffer';
+        if (/(?:pause|paused|ended)/i.test(obj)) return 'pause';
+        if (/(?:play|playing|resumed?)/i.test(obj)) return 'play';
         return null;
       }
       if (typeof obj === 'object') {
-        const evt = String(obj.event || obj.type || obj.action || obj.state || obj.status || obj.player_status || '');
-        if (/\b(?:buffer|buffering|waiting|stalled)\b/i.test(evt)) return 'buffer';
+        const evt = String(obj.event || obj.type || obj.action || obj.state || obj.status || obj.player_status || obj.event_name || '');
+        if (/(?:buffer|waiting|stalled?|loading|seeking)/i.test(evt)) return 'buffer';
         if (obj.paused === true) return 'pause';
+        if (/(?:pause|paused|ended)/i.test(evt)) return 'pause';
+        if (obj.data) {
+          const sub = _checkPlayPause(obj.data, depth + 1);
+          if (sub === 'buffer' || sub === 'pause') return sub;
+        }
+        if (obj.detail) {
+          const sub = _checkPlayPause(obj.detail, depth + 1);
+          if (sub === 'buffer' || sub === 'pause') return sub;
+        }
         if (obj.paused === false && (obj.event === 'play' || obj.type === 'play' || obj.event === 'timeupdate')) return 'play';
-        if (/\b(?:pause|paused)\b/i.test(evt)) return 'pause';
-        if (/\b(?:play|playing|resumed?)\b/i.test(evt)) return 'play';
+        if (/(?:play|playing|resumed?)/i.test(evt)) return 'play';
         if (obj.data) {
           const sub = _checkPlayPause(obj.data, depth + 1);
           if (sub) return sub;
@@ -10582,12 +10590,19 @@
             ? window._externalCurrentTime
             : (_subStartTime ? Math.max(0, (Date.now() - _subStartTime) / 1000) : 0);
           window._bufferFreezeElapsed = Math.round(freezeSec * 1000);
+          _setSubSyncBarPaused(true);
         }
       } else {
         if (window._isStreamBuffering) {
           window._isStreamBuffering = false;
+          // Re-anchor _subStartTime to the exact resume second so subtitles do not drift after buffering
+          const resumeSec = (typeof window._externalCurrentTime === 'number' && window._externalCurrentTime > 0)
+            ? window._externalCurrentTime
+            : (window._bufferFreezeElapsed != null ? window._bufferFreezeElapsed / 1000 : 0);
+          _subStartTime = Date.now() - (resumeSec * 1000);
           window._bufferFreezeElapsed = null;
           window._ctStallStartTime = null;
+          _setSubSyncBarPaused(false);
         }
       }
     }
@@ -10604,8 +10619,8 @@
         const frameEl = document.getElementById('playerFrame');
         const isCurVidStuck = (frameEl && frameEl.src && frameEl.src.includes('vidstuck')) ||
           (window._currentActiveServer && (window._currentActiveServer.toLowerCase().includes('vidstuck') || window._currentActiveServer.toLowerCase().includes('nebula')));
-        const bufferThreshold = isCurVidStuck ? 1350 : 1500;
-        const pauseThreshold = isCurVidStuck ? 2200 : 3800;
+        const bufferThreshold = isCurVidStuck ? 750 : 850;
+        const pauseThreshold = isCurVidStuck ? 2000 : 2500;
 
         const silence = now - window._lastExternalMsgTime;
         if (silence > bufferThreshold) {
@@ -10755,8 +10770,9 @@
 
       const pState = _checkPlayPause(d);
       const isBufferingEvent = (pState === 'buffer') ||
-        (evName === 'waiting' || evName === 'buffering' || evName === 'buffer' || evName === 'stalled') ||
-        (d.data && (d.data.event === 'waiting' || d.data.event === 'buffering' || d.data.player_status === 'buffering' || d.data.player_status === 'waiting'));
+        /(?:buffer|waiting|stalled?|loading|seeking)/i.test(evName) ||
+        (d.data && /(?:buffer|waiting|stalled?|loading|seeking)/i.test(String(d.data.event || d.data.player_status || d.data.type || d.data.action || ''))) ||
+        (d.detail && /(?:buffer|waiting|stalled?|loading|seeking)/i.test(String(d.detail.event || d.detail.state || '')));
       const isExplicitPause = (evName === 'pause' || evName === 'paused') ||
         (d.type === 'VIDEO_ENDED') ||
         (d.data && d.data.paused === true) ||
@@ -10771,9 +10787,11 @@
         (isVidSpark && (evName === 'play' || (evName === 'playerstatus' && d.paused === false)))
       );
 
-      if (isExplicitPause) {
+      if (isExplicitPause || isBufferingEvent) {
         isExplicitPlay = false;
       }
+
+      const nowMs = Date.now();
 
       // Check for advancing playback vs stalled buffer position
       if (!isExplicitPause && !isBufferingEvent && ct !== null) {
@@ -10785,11 +10803,11 @@
             window._externalIsPaused = false;
             window._ctStallStartTime = null;
           } else if (Math.abs(ct - window._externalCurrentTime) < 0.03) {
-            // Position unchanged across messages
+            // Position unchanged across messages -> video has stalled or entered buffer!
             if (!window._ctStallStartTime) {
-              window._ctStallStartTime = Date.now();
-            } else if (Date.now() - window._ctStallStartTime > 1000) {
-              // Same position for > 1s while supposed to be playing -> mark buffering / paused!
+              window._ctStallStartTime = nowMs;
+            } else if (nowMs - window._ctStallStartTime >= 300) {
+              // Same position for >= 300ms while supposed to be playing -> freeze immediately!
               _markBufferState(true);
               isExplicitPlay = false;
             }
@@ -10797,7 +10815,7 @@
             // User sought or jumped!
             _markBufferState(false);
             window._externalIsPaused = false;
-            _subStartTime = Date.now() - (ct * 1000);
+            _subStartTime = nowMs - (ct * 1000);
             window._subPausedElapsed = null;
             window._externalCurrentTime = ct;
             isExplicitPlay = true;
@@ -10825,6 +10843,7 @@
         _markBufferState(true);
         if (ct !== null && ct > 0) {
           window._externalCurrentTime = ct;
+          window._bufferFreezeElapsed = Math.round(ct * 1000);
         }
         return;
       }
@@ -13066,6 +13085,8 @@
       overlay.classList.add('open');
 
       const curLabel = labels && labels[_activeServerIndex] ? labels[_activeServerIndex] : 'Server';
+      window._currentActiveServer = curLabel;
+      window._currentActiveServerUrl = url;
       const isInitAutoLive = curLabel.toLowerCase().includes('hackymax') || curLabel.toLowerCase().includes('infinity') || curLabel.toLowerCase().includes('spark') || curLabel.toLowerCase().includes('nebula') || curLabel.toLowerCase().includes('vortex') || curLabel.toLowerCase().includes('cinezo');
       _markSubSyncAutoLive(isInitAutoLive);
 
@@ -13131,6 +13152,8 @@
       if (typeof window._adblock_pushRecovery === 'function') window._adblock_pushRecovery(url);
 
       const sName = btn ? btn.textContent.trim() : 'Server';
+      window._currentActiveServer = sName;
+      window._currentActiveServerUrl = url;
       const isAutoplayServer = url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || url.includes('vidstuck') || url.includes('nebula') || url.includes('videasy') || url.includes('vortex') || url.includes('cinezo') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('videasy') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('cinezo');
       window._externalCurrentTime = 0;
       window._lastExternalMsgTime = null;
