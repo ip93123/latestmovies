@@ -8,6 +8,7 @@ const SUBTITLE_MAP = {
   '1506736': '/Subtitle/1506736.srt', // Thudakkam (2026)
   '646097': '/Subtitle/646097.srt', // Rebel Ridge (2024)
   '1542187': '/Subtitle/1542187.srt', // Varavu (2026)
+  '1419406': '/Subtitle/1419406.srt', // The Shadow's Edge (2025)
   '1071215': '/Subtitle/1071215.srt', // Thanksgiving (2023)
   '1213243': '/Subtitle/1213243.srt', // Toxic (2026)
   '1479832': '/Subtitle/1479832.srt', // DC (2026)

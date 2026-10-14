@@ -8066,6 +8066,7 @@
       '1506736', // Thudakkam (2026)
       '646097',  // Rebel Ridge (2024)
       '1542187', // Varavu (2026)
+      '1419406', // The Shadow's Edge (2025)
       '1071215', // Thanksgiving (2023)
       '1213243', // Toxic (2026)
       '1479832', // DC (2026)
@@ -8119,9 +8120,9 @@
       languages: [
         {
           code: 'si',
-          title: 'සිංහල',
-          sub: 'Sinhala',
-          badge: '🇱🇰 Sinhala Sub',
+          title: '🇱🇰 Sinhala Subtitles',
+          sub: 'Sinhala Subtitle Movies',
+          badge: '🇱🇰 Sin Sub',
           accent: '#059669',
           gradient: 'linear-gradient(135deg, rgba(5,150,105,0.88) 0%, rgba(6,78,59,0.95) 100%)',
           img: 'https://image.tmdb.org/t/p/w780/gDyLcjvmdAhmYqjCMwZ9PndnAVm.jpg'
@@ -8349,8 +8350,8 @@
             item = CATEGORIES_DATA.genres.find(x => String(x.id) === String(catKey));
           }
           if (item) {
-            const displayTitle = catType === 'language' ? `${item.title} · ${item.sub}` : item.title;
-            const displaySub = catType === 'language' ? `Top Rated & Popular ${item.sub} Movies and Series` : item.sub;
+            const displayTitle = catType === 'language' ? (catKey === 'si' ? '🇱🇰 Sinhala Subtitles' : `${item.title} · ${item.sub}`) : item.title;
+            const displaySub = catType === 'language' ? (catKey === 'si' ? 'Movies & TV Series with Sinhala Subtitles' : `Top Rated & Popular ${item.sub} Movies and Series`) : item.sub;
             openCategoryPage(catType, catKey, displayTitle, displaySub, true);
           }
         };
@@ -11062,6 +11063,7 @@
       '1506736': '/Subtitle/1506736.srt', // Thudakkam (2026)
       '646097':  '/Subtitle/646097.srt',  // Rebel Ridge (2024)
       '1542187': '/Subtitle/1542187.srt', // Varavu (2026)
+      '1419406': '/Subtitle/1419406.srt', // The Shadow's Edge (2025)
       '1071215': '/Subtitle/1071215.srt', // Thanksgiving (2023)
       '1213243': '/Subtitle/1213243.srt', // Toxic (2026)
       '1479832': '/Subtitle/1479832.srt', // DC (2026)
