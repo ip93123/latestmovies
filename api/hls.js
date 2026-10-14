@@ -93,6 +93,10 @@ const SUBTITLE_MAP = {
   '41727_S4_E6': '/Subtitle/Banshee/S04E06.srt',
   '41727_S4_E7': '/Subtitle/Banshee/S04E07.srt',
   '41727_S4_E8': '/Subtitle/Banshee/S04E08.srt',
+  // Thanksgiving (2023)
+  '1071215': '/Subtitle/1071215.srt',
+  // Toxic (2026)
+  '1213243': '/Subtitle/1213243.srt',
 };
 
 const VIDLOVE_HEADERS = {

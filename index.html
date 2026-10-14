@@ -12465,8 +12465,9 @@
     }
 
     async function _autoLoadIframeSinhalaSub() {
-      const activeId = _currentModalId || window._currentPlayingId || (window._currentModalItem && window._currentModalItem.id) || new URLSearchParams(window.location.search).get('m') || new URLSearchParams(window.location.search).get('s');
-      if (!activeId) return;
+      const rawActiveId = _currentModalId || window._currentPlayingId || (window._currentModalItem && window._currentModalItem.id) || new URLSearchParams(window.location.search).get('m') || new URLSearchParams(window.location.search).get('s');
+      if (!rawActiveId) return;
+      const activeId = String(rawActiveId).includes('-') ? (parseInt(rawActiveId, 10) || rawActiveId) : rawActiveId;
       _currentModalId = activeId;
       window._currentPlayingId = activeId;
       _attachSubOverlayToActiveWrap();
