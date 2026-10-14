@@ -134,7 +134,12 @@ export default async function handler(req, res) {
       try {
         const filePath = path.join(process.cwd(), localSub);
         if (fs.existsSync(filePath)) {
-          const srtContent = fs.readFileSync(filePath, 'utf8');
+          const buf = fs.readFileSync(filePath);
+          let srtContent = (buf[0] === 0xFF && buf[1] === 0xFE)
+            ? buf.toString('utf16le')
+            : buf.toString('utf8');
+          if (srtContent.charCodeAt(0) === 0xFEFF) srtContent = srtContent.slice(1);
+          srtContent = srtContent.replace(/\x00/g, '');
           res.setHeader('Content-Type', 'text/vtt; charset=utf-8');
           res.setHeader('Cache-Control', 'public, max-age=86400');
           return res.status(200).send(srtToVtt(srtContent));

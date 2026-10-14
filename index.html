@@ -9915,8 +9915,11 @@
 
     // Parse WebVTT → cues
     function parseVtt(vtt) {
+      if (!vtt) return [];
+      if (vtt.charCodeAt(0) === 0xFEFF) vtt = vtt.slice(1);
+      vtt = vtt.replace(/\x00/g, '');
       const cues = [];
-      const blocks = vtt.replace(/\r\n/g, '\n').split(/\n\n+/);
+      const blocks = vtt.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split(/\n\n+/);
       for (const block of blocks) {
         const lines = block.trim().split('\n');
         const timingIdx = lines.findIndex(l => l.includes('-->'));
@@ -9932,6 +9935,9 @@
 
     // Parse SRT → cues
     function parseSrt(srt) {
+      if (!srt) return [];
+      if (srt.charCodeAt(0) === 0xFEFF) srt = srt.slice(1);
+      srt = srt.replace(/\x00/g, '');
       const cues = [];
       const blocks = srt.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split(/\n\n+/);
       for (const block of blocks) {
@@ -12108,6 +12114,29 @@
       _maxSubRaf = requestAnimationFrame(_maxSubLoop);
     }
 
+    // Safe subtitle fetcher with automatic UTF-8/UTF-16LE/UTF-16BE decoding & null-byte stripping
+    async function _fetchSubtitleTextSafe(url) {
+      if (!url) return null;
+      let res = null;
+      try { res = await fetch(url); } catch (_) {}
+      if (!res || !res.ok) {
+        try { res = await fetch(`/api/subtitles?url=${encodeURIComponent(url)}`); } catch (_) {}
+      }
+      if (!res || !res.ok) return null;
+      try {
+        const buf = await res.arrayBuffer();
+        let dec = new TextDecoder('utf-8');
+        const u8 = new Uint8Array(buf);
+        if (u8.length >= 2 && u8[0] === 0xFF && u8[1] === 0xFE) dec = new TextDecoder('utf-16le');
+        else if (u8.length >= 2 && u8[0] === 0xFE && u8[1] === 0xFF) dec = new TextDecoder('utf-16be');
+        let text = dec.decode(buf);
+        if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+        return text.replace(/\x00/g, '');
+      } catch (_) {
+        try { return await res.text(); } catch (_) { return null; }
+      }
+    }
+
     // Automatically load & parse subtitle file from URL into Max Player
     let _lastLoadedSubUrl = null;
     async function _loadMaxSubtitleFromUrl(subUrl) {
@@ -12116,17 +12145,8 @@
         return true;
       }
       try {
-        let res = null;
-        try {
-          res = await fetch(subUrl);
-        } catch (_) {}
-        if (!res || !res.ok) {
-          // Fallback to local proxy if CORS prevented direct fetch
-          res = await fetch(`/api/subtitles?url=${encodeURIComponent(subUrl)}`);
-        }
-        if (!res.ok) return false;
-
-        const text = await res.text();
+        const text = await _fetchSubtitleTextSafe(subUrl);
+        if (!text) return false;
 
         // ── Strict Arabic / Persian / Urdu script elimination ──
         // Only Sinhala and English are allowed. Reject any subtitle containing Arabic characters.
@@ -12524,10 +12544,7 @@
       let subLabel = 'Sinhala 🇱🇰';
 
       if (localSub) {
-        try {
-          const r = await fetch(localSub);
-          if (r.ok) srtText = await r.text();
-        } catch (_) {}
+        srtText = await _fetchSubtitleTextSafe(localSub);
       }
 
       // If not in local SUBTITLE_MAP, query /api/subtitles for Sinhala track
@@ -12546,15 +12563,8 @@
                 return l === 'si' || l === 'sin' || l === 'sinhala' || lbl.includes('sinhala');
               });
               if (sinTr && sinTr.url) {
-                let subRes = null;
-                try { subRes = await fetch(sinTr.url); } catch (_) {}
-                if (!subRes || !subRes.ok) {
-                  try { subRes = await fetch(`/api/subtitles?url=${encodeURIComponent(sinTr.url)}`); } catch (_) {}
-                }
-                if (subRes && subRes.ok) {
-                  srtText = await subRes.text();
-                  subLabel = sinTr.label || 'Sinhala 🇱🇰';
-                }
+                srtText = await _fetchSubtitleTextSafe(sinTr.url);
+                if (srtText) subLabel = sinTr.label || 'Sinhala 🇱🇰';
               }
             }
           }
