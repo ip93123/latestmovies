@@ -6135,7 +6135,8 @@
     }
 
     /* 2. Remove GPU layers from cards — preserve-3d + will-change eats VRAM */
-    .device-tv .movie-card {
+    .device-tv .movie-card,
+    .tv-mode .movie-card {
       transform-style: flat !important;
       will-change: auto !important;
       contain: layout style !important;    /* faster layout recalc */
@@ -6146,33 +6147,54 @@
 
     /* 3. Remove all box-shadow complexity on cards (no neon glow) */
     .device-tv .movie-card,
-    .device-tv .movie-card:hover {
+    .device-tv .movie-card:hover,
+    .tv-mode .movie-card,
+    .tv-mode .movie-card:hover {
       box-shadow: 0 2px 8px rgba(0,0,0,0.5) !important;
       border-color: rgba(255,255,255,0.12) !important;
-    }
-
-    /* 4. Kill card image hover zoom (transform on images = compositing) */
-    .device-tv .card-poster img,
-    .device-tv .movie-card:hover .card-poster img {
       transform: none !important;
       transition: none !important;
     }
 
-    /* 5. Stop ALL CSS keyframe animations (orbs, pulses, scroll-line, badge) */
+    /* 4. Kill card image hover zoom (transform on images = compositing) */
+    .device-tv .card-poster img,
+    .device-tv .movie-card:hover .card-poster img,
+    .tv-mode .card-poster img,
+    .tv-mode .movie-card:hover .card-poster img {
+      transform: none !important;
+      transition: none !important;
+      filter: none !important;
+    }
+
+    /* 5. Stop ALL CSS keyframe animations (orbs, pulses, scroll-line, badge, shimmer, ripple) */
     .device-tv body::before,
     .device-tv body::after,
     .device-tv .scroll-line,
     .device-tv .hero-badge span,
     .device-tv .badge-new-episode,
     .device-tv .sk,
-    .device-tv .rating-ring-fg {
+    .device-tv .rating-ring-fg,
+    .device-tv .topbar-wp-dot,
+    .device-tv #wpHudDot,
+    .device-tv .mxs-ripple,
+    .tv-mode body::before,
+    .tv-mode body::after,
+    .tv-mode .scroll-line,
+    .tv-mode .hero-badge span,
+    .tv-mode .badge-new-episode,
+    .tv-mode .sk,
+    .tv-mode .rating-ring-fg,
+    .tv-mode .topbar-wp-dot,
+    .tv-mode #wpHudDot {
       animation: none !important;
     }
 
     /* 6. Simplify nav — solid background, no blur */
-    .device-tv nav {
+    .device-tv nav,
+    .tv-mode nav {
       background: rgba(7,9,15,0.98) !important;
       transition: none !important;
+      backdrop-filter: none !important;
     }
 
     /* 7. Remove transition from all cards/buttons (no CSS transitions on TV) */
@@ -6181,28 +6203,152 @@
     .device-tv .btn-secondary,
     .device-tv .stream-filter-btn,
     .device-tv .card-overlay,
-    .device-tv .card-play {
+    .device-tv .card-play,
+    .device-tv .trending-card,
+    .tv-mode .movie-card,
+    .tv-mode .btn-primary,
+    .tv-mode .btn-secondary,
+    .tv-mode .stream-filter-btn,
+    .tv-mode .card-overlay,
+    .tv-mode .card-play,
+    .tv-mode .trending-card {
       transition: none !important;
     }
 
     /* 8. Make card overlay/play always slightly visible for TV focus */
-    .device-tv .card-overlay { opacity: 0 !important; }
-    .device-tv .movie-card:focus .card-overlay { opacity: 1 !important; }
-    .device-tv .movie-card:focus .card-play {
+    .device-tv .card-overlay,
+    .tv-mode .card-overlay { opacity: 0 !important; }
+    .device-tv .movie-card:focus .card-overlay,
+    .tv-mode .movie-card:focus .card-overlay { opacity: 1 !important; }
+    .device-tv .movie-card:focus .card-play,
+    .tv-mode .movie-card:focus .card-play {
       transform: translate(-50%, -50%) scale(1) !important;
     }
-    .device-tv .card-play { transition: none !important; box-shadow: none !important; }
 
-    /* 9. Remove ambient body pseudo-element orbs entirely */
+    /* 9. Remove glowing play button box-shadow entirely (GPU filter layer) */
+    .device-tv .card-play,
+    .tv-mode .card-play {
+      transition: none !important;
+      box-shadow: none !important;
+      will-change: auto !important;
+    }
+
+    /* 10. Remove ambient body pseudo-element orbs entirely */
     .device-tv body::before,
-    .device-tv body::after { display: none !important; }
+    .device-tv body::after,
+    .tv-mode body::before,
+    .tv-mode body::after { display: none !important; }
 
-    /* 10. Remove stream logo backdrop-filter */
-    .device-tv .card-stream-logo { backdrop-filter: none !important; }
+    /* 11. Remove stream logo backdrop-filter */
+    .device-tv .card-stream-logo,
+    .tv-mode .card-stream-logo { backdrop-filter: none !important; }
     /* Show stream logos always on TV (no hover) */
-    .device-tv .card-stream-logos { opacity: 1 !important; }
+    .device-tv .card-stream-logos,
+    .tv-mode .card-stream-logos { opacity: 1 !important; }
 
-    /* 11. TV sizing — bigger text, bigger buttons for 10-foot UI */
+    /* 12. Skeleton loader — solid colour, no shimmer animation (background-size shift = GPU) */
+    .device-tv .sk,
+    .tv-mode .sk {
+      animation: none !important;
+      background: var(--dark3) !important;
+      background-image: none !important;
+    }
+
+    /* 13. Category cards (Language & Genre) — strip ALL heavy effects */
+    .device-tv .category-card,
+    .tv-mode .category-card {
+      transition: none !important;
+      transform: none !important;
+      will-change: auto !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5) !important;
+    }
+    .device-tv .category-card:hover,
+    .tv-mode .category-card:hover {
+      transform: none !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5) !important;
+    }
+    .device-tv .category-card img,
+    .tv-mode .category-card img {
+      transition: none !important;
+      transform: none !important;
+      filter: none !important;
+    }
+    .device-tv .category-card:hover img,
+    .tv-mode .category-card:hover img {
+      transform: none !important;
+      filter: none !important;
+    }
+    /* Category card tint uses radial-gradient — keep it but kill the blur badge */
+    .device-tv .category-card-badge,
+    .tv-mode .category-card-badge {
+      backdrop-filter: none !important;
+      background: rgba(0,0,0,0.7) !important;
+    }
+    /* Kill category card focus animation on TV */
+    .device-tv .category-card:focus,
+    .tv-mode .category-card:focus {
+      outline: 4px solid var(--gold) !important;
+      transform: none !important;
+      box-shadow: 0 0 0 4px rgba(232,201,122,0.35) !important;
+    }
+
+    /* 14. Badge "NEW EPISODE" — remove pulsing box-shadow animation */
+    .device-tv .badge-new-episode,
+    .tv-mode .badge-new-episode {
+      animation: none !important;
+      box-shadow: none !important;
+    }
+
+    /* 15. Trending cards — kill transforms/transitions */
+    .device-tv .trending-card,
+    .tv-mode .trending-card {
+      transform: none !important;
+      transition: none !important;
+      will-change: auto !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4) !important;
+    }
+
+    /* 16. Hero section — flatten backdrop, kill hero image filter */
+    .device-tv .hero-bg,
+    .tv-mode .hero-bg {
+      filter: none !important;
+      will-change: auto !important;
+    }
+    .device-tv .hero-gradient,
+    .tv-mode .hero-gradient {
+      background: linear-gradient(90deg, rgba(7,9,15,1) 40%, rgba(7,9,15,0.4) 100%),
+                  linear-gradient(0deg, rgba(7,9,15,1) 0%, transparent 40%) !important;
+    }
+
+    /* 17. Genre pills — no hover transforms or complex box-shadows */
+    .device-tv .genre-pill,
+    .tv-mode .genre-pill {
+      transition: none !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    /* 18. Category view overlay — kill entrance animation */
+    .device-tv .category-view-overlay,
+    .tv-mode .category-view-overlay {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    /* 19. Rating ring — no animation, just static */
+    .device-tv .rating-ring-fg,
+    .tv-mode .rating-ring-fg {
+      transition: none !important;
+    }
+
+    /* 20. Remove scroll-btn blur */
+    .device-tv .scroll-btn,
+    .tv-mode .scroll-btn {
+      backdrop-filter: none !important;
+      background: rgba(7,9,15,0.95) !important;
+    }
+
+    /* 21. TV sizing — bigger text, bigger buttons for 10-foot UI */
     .device-tv .card-title { font-size: 1rem; }
     .device-tv .hero-title { font-size: 7rem; }
     .device-tv .btn-primary,
@@ -6210,30 +6356,45 @@
     .device-tv .nav-links a { font-size: 1rem; }
     .device-tv .section-title { font-size: 2.8rem; }
 
-    /* 12. Gold focus ring for remote navigation — must be visible at 10 feet */
+    /* 22. Gold focus ring for remote navigation — must be visible at 10 feet */
     .device-tv *:focus {
       outline: 4px solid var(--gold) !important;
       outline-offset: 4px !important;
       box-shadow: 0 0 0 6px rgba(232,201,122,0.25) !important;
     }
 
-    /* 13. Remove scroll-btn blur */
-    .device-tv .scroll-btn {
+    /* 23. Focused movie card on TV: simple gold outline, no scale/glow */
+    .device-tv .movie-card:focus,
+    .tv-mode .movie-card:focus {
+      outline: 4px solid var(--gold) !important;
+      outline-offset: 2px !important;
+      transform: none !important;
+      box-shadow: 0 0 0 4px rgba(232,201,122,0.25) !important;
+      z-index: 20;
+    }
+    .tv-mode button:focus,
+    .tv-mode a:focus {
+      outline: 3px solid var(--gold) !important;
+    }
+
+    /* 24. WL toast: solid bg, no blur */
+    .device-tv .wl-toast,
+    .tv-mode .wl-toast {
       backdrop-filter: none !important;
-      background: rgba(7,9,15,0.95) !important;
-    }
-
-    /* 14. Hero gradient simplify */
-    .device-tv .hero-gradient {
-      background: linear-gradient(90deg, rgba(7,9,15,1) 40%, rgba(7,9,15,0.4) 100%),
-                  linear-gradient(0deg, rgba(7,9,15,1) 0%, transparent 40%) !important;
-    }
-
-    /* 15. Rating ring — no animation, just static */
-    .device-tv .rating-ring-fg {
+      background: rgba(15,21,32,0.98) !important;
       transition: none !important;
     }
 
+    /* 25. type-badge / card-badge: solid bg, no blur */
+    .device-tv .type-badge,
+    .device-tv .card-badge,
+    .tv-mode .type-badge,
+    .tv-mode .card-badge {
+      backdrop-filter: none !important;
+      background: rgba(7,9,15,0.9) !important;
+    }
+
+    /* ─── TV SMART TV PLAYER UI OPTIMIZATIONS ─── */
     /* 16. Smart TV Player UI Optimizations */
     .device-tv #playerOverlay,
     .tv-mode #playerOverlay {
@@ -6379,6 +6540,14 @@
     .tv-mode .cast-avatar {
       transform: none !important;
       transition: none !important;
+    }
+
+    /* ─── GLOBAL TV ANIMATION KILL ─── All remaining animations off */
+    .device-tv *,
+    .tv-mode * {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
     }
   </style>
 </head>
