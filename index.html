@@ -823,10 +823,10 @@
       flex: 0 0 200px;
     }
 
-    /* ── LATEST MOVIES 2-ROW GRID ─────────────────────────────────────────── */
+    /* ── LATEST MOVIES 3-ROW GRID ─────────────────────────────────────────── */
     #moviesGrid:not(.expanded) {
       display: grid;
-      grid-template-rows: repeat(2, auto);
+      grid-template-rows: repeat(3, auto);
       grid-auto-flow: column;
       grid-auto-columns: 200px;
       gap: 1.5rem 1.25rem;
@@ -841,6 +841,28 @@
     }
 
     #moviesGrid:not(.expanded) .movie-card {
+      width: 200px;
+      flex: none;
+    }
+
+    /* ── LATEST TV SHOWS 2-ROW GRID ─────────────────────────────────────────── */
+    #tvGrid:not(.expanded) {
+      display: grid;
+      grid-template-rows: repeat(2, auto);
+      grid-auto-flow: column;
+      grid-auto-columns: 200px;
+      gap: 1.5rem 1.25rem;
+      overflow-x: auto;
+      overflow-y: hidden;
+      align-content: start;
+      scrollbar-width: none;
+    }
+
+    #tvGrid:not(.expanded)::-webkit-scrollbar {
+      display: none;
+    }
+
+    #tvGrid:not(.expanded) .movie-card {
       width: 200px;
       flex: none;
     }
@@ -5376,11 +5398,13 @@
         flex: 0 0 150px;
       }
 
-      #moviesGrid:not(.expanded) {
+      #moviesGrid:not(.expanded),
+      #tvGrid:not(.expanded) {
         grid-auto-columns: 150px;
         gap: 1rem .85rem;
       }
-      #moviesGrid:not(.expanded) .movie-card {
+      #moviesGrid:not(.expanded) .movie-card,
+      #tvGrid:not(.expanded) .movie-card {
         width: 150px;
       }
 
@@ -5575,11 +5599,13 @@
         flex: 0 0 130px;
       }
 
-      #moviesGrid:not(.expanded) {
+      #moviesGrid:not(.expanded),
+      #tvGrid:not(.expanded) {
         grid-auto-columns: 130px;
         gap: .8rem .7rem;
       }
-      #moviesGrid:not(.expanded) .movie-card {
+      #moviesGrid:not(.expanded) .movie-card,
+      #tvGrid:not(.expanded) .movie-card {
         width: 130px;
       }
 
@@ -6957,20 +6983,6 @@
     </div>
   </section>
 
-  <!-- TRAILERS SECTION -->
-  <section id="trailers" style="background:var(--dark2)">
-    <div class="section-header">
-      <h2 class="section-title">🎬 Now <span>Showing</span></h2>
-      <span class="see-all" id="trailersViewAll" onclick="this.style.display='none'" style="display:none">View all →</span>
-    </div>
-    <div class="trailer-filter-bar" id="trailerFilterBar"></div>
-    <div class="scroll-wrapper">
-      <button class="scroll-btn scroll-left" onclick="scrollRow('trailerRow', -1)">❮</button>
-      <div class="trailer-row" id="trailerRow"></div>
-      <button class="scroll-btn scroll-right" onclick="scrollRow('trailerRow', 1)">❯</button>
-    </div>
-  </section>
-
   <section id="tvshows">
     <div class="section-header">
       <h2 class="section-title">📺 Latest <span>TV Shows</span></h2>
@@ -7000,6 +7012,20 @@
       <button class="scroll-btn scroll-left" onclick="scrollRow('tvGrid', -1)">❮</button>
       <div class="cards-grid" id="tvGrid"></div>
       <button class="scroll-btn scroll-right" onclick="scrollRow('tvGrid', 1)">❯</button>
+    </div>
+  </section>
+
+  <!-- TRAILERS SECTION (NOW SHOWING) — AT BOTTOM BEFORE FOOTER -->
+  <section id="trailers" style="background:var(--dark2)">
+    <div class="section-header">
+      <h2 class="section-title">🎬 Now <span>Showing</span></h2>
+      <span class="see-all" id="trailersViewAll" onclick="this.style.display='none'" style="display:none">View all →</span>
+    </div>
+    <div class="trailer-filter-bar" id="trailerFilterBar"></div>
+    <div class="scroll-wrapper">
+      <button class="scroll-btn scroll-left" onclick="scrollRow('trailerRow', -1)">❮</button>
+      <div class="trailer-row" id="trailerRow"></div>
+      <button class="scroll-btn scroll-right" onclick="scrollRow('trailerRow', 1)">❯</button>
     </div>
   </section>
 
@@ -8689,8 +8715,8 @@
     async function loadDiscoverMovies() {
       const grid = document.getElementById('moviesGrid');
       const isTV = window.DEVICE && window.DEVICE.isTV;
-      const cardLimit = isTV ? 16 : 40;
-      grid.innerHTML = Array.from({ length: isTV ? 8 : 16 }, () =>
+      const cardLimit = isTV ? 24 : 60;
+      grid.innerHTML = Array.from({ length: isTV ? 12 : 24 }, () =>
         `<div class="movie-card"><div class="card-poster sk" style="aspect-ratio:2/3"></div><div class="card-info"><div class="sk" style="height:14px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:60%"></div></div></div>`
       ).join('');
 
@@ -8702,11 +8728,12 @@
       if (_activeMovieYear)  params += `&primary_release_year=${_activeMovieYear}`;
       if (_activeMovieLang)  params += `&with_original_language=${_activeMovieLang}`;
 
-      const [d1, d2] = await Promise.all([
+      const [d1, d2, d3] = await Promise.all([
         tmdb(`/discover/movie?${params}&page=1`),
-        tmdb(`/discover/movie?${params}&page=2`)
+        tmdb(`/discover/movie?${params}&page=2`),
+        tmdb(`/discover/movie?${params}&page=3`)
       ]);
-      const combined = [...(d1?.results || []), ...(d2?.results || [])];
+      const combined = [...(d1?.results || []), ...(d2?.results || []), ...(d3?.results || [])];
       const seen = new Set();
       const unique = combined.filter(m => m && m.id && !seen.has(m.id) && seen.add(m.id));
       const movies = unique.slice(0, cardLimit);
@@ -8720,20 +8747,26 @@
     async function loadDiscoverTV() {
       const grid = document.getElementById('tvGrid');
       const isTV = window.DEVICE && window.DEVICE.isTV;
-      const cardLimit = isTV ? 10 : 20;
-      grid.innerHTML = Array.from({ length: isTV ? 8 : 15 }, () =>
+      const cardLimit = isTV ? 16 : 40;
+      grid.innerHTML = Array.from({ length: isTV ? 8 : 16 }, () =>
         `<div class="movie-card"><div class="card-poster sk" style="aspect-ratio:2/3"></div><div class="card-info"><div class="sk" style="height:14px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:60%"></div></div></div>`
       ).join('');
 
       if (!_activeTvGenre && !_activeTvYear && !_activeTvLang) { loadTV('on_the_air'); return; }
 
-      let params = 'sort_by=popularity.desc&page=1';
+      let params = 'sort_by=popularity.desc';
       if (_activeTvGenre) params += `&with_genres=${_activeTvGenre}`;
       if (_activeTvYear)  params += `&first_air_date_year=${_activeTvYear}`;
       if (_activeTvLang)  params += `&with_original_language=${_activeTvLang}`;
 
-      const data = await tmdb(`/discover/tv?${params}`);
-      const shows = (data.results || []).slice(0, cardLimit);
+      const [d1, d2] = await Promise.all([
+        tmdb(`/discover/tv?${params}&page=1`),
+        tmdb(`/discover/tv?${params}&page=2`)
+      ]);
+      const combined = [...(d1?.results || []), ...(d2?.results || [])];
+      const seen = new Set();
+      const unique = combined.filter(s => s && s.id && !seen.has(s.id) && seen.add(s.id));
+      const shows = unique.slice(0, cardLimit);
       const watchDatas = await Promise.all(shows.map(s => getWatch(s.id, 'tv')));
       grid.innerHTML = shows.map((s, i) => buildCard(s, null, 'tv', watchDatas[i])).join('');
       animateGrid(grid);
@@ -8747,14 +8780,15 @@
 
     async function loadMovies(type = 'now_playing') {
       const isTV = window.DEVICE && window.DEVICE.isTV;
-      const cardLimit = isTV ? 16 : 40;
+      const cardLimit = isTV ? 24 : 60;
       const grid = document.getElementById('moviesGrid');
-      grid.innerHTML = Array.from({ length: isTV ? 8 : 16 }, () => `<div class="movie-card"><div class="card-poster sk" style="aspect-ratio:2/3"></div><div class="card-info"><div class="sk" style="height:14px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:60%"></div></div></div>`).join('');
-      const [d1, d2] = await Promise.all([
+      grid.innerHTML = Array.from({ length: isTV ? 12 : 24 }, () => `<div class="movie-card"><div class="card-poster sk" style="aspect-ratio:2/3"></div><div class="card-info"><div class="sk" style="height:14px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:60%"></div></div></div>`).join('');
+      const [d1, d2, d3] = await Promise.all([
         tmdb(`/movie/${type}?language=en-US&page=1`),
-        tmdb(`/movie/${type}?language=en-US&page=2`)
+        tmdb(`/movie/${type}?language=en-US&page=2`),
+        tmdb(`/movie/${type}?language=en-US&page=3`)
       ]);
-      const combined = [...(d1?.results || []), ...(d2?.results || [])];
+      const combined = [...(d1?.results || []), ...(d2?.results || []), ...(d3?.results || [])];
       const seen = new Set();
       const unique = combined.filter(m => m && m.id && !seen.has(m.id) && seen.add(m.id));
       const movies = unique.slice(0, cardLimit);
@@ -8771,11 +8805,17 @@
 
     async function loadTV(type = 'on_the_air') {
       const isTV = window.DEVICE && window.DEVICE.isTV;
-      const cardLimit = isTV ? 10 : 20;
+      const cardLimit = isTV ? 16 : 40;
       const grid = document.getElementById('tvGrid');
-      grid.innerHTML = Array.from({ length: isTV ? 8 : 15 }, () => `<div class="movie-card"><div class="card-poster sk" style="aspect-ratio:2/3"></div><div class="card-info"><div class="sk" style="height:14px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:60%"></div></div></div>`).join('');
-      const data = await tmdb(`/tv/${type}?language=en-US&page=1`);
-      const shows = (data.results || []).slice(0, cardLimit);
+      grid.innerHTML = Array.from({ length: isTV ? 8 : 16 }, () => `<div class="movie-card"><div class="card-poster sk" style="aspect-ratio:2/3"></div><div class="card-info"><div class="sk" style="height:14px;margin-bottom:8px"></div><div class="sk" style="height:12px;width:60%"></div></div></div>`).join('');
+      const [d1, d2] = await Promise.all([
+        tmdb(`/tv/${type}?language=en-US&page=1`),
+        tmdb(`/tv/${type}?language=en-US&page=2`)
+      ]);
+      const combined = [...(d1?.results || []), ...(d2?.results || [])];
+      const seen = new Set();
+      const unique = combined.filter(s => s && s.id && !seen.has(s.id) && seen.add(s.id));
+      const shows = unique.slice(0, cardLimit);
 
       let showDetails = shows;
       if (!isTV) {
