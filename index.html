@@ -6235,52 +6235,96 @@
     }
 
     /* 16. Smart TV Player UI Optimizations */
-    .device-tv #playerOverlay {
+    .device-tv #playerOverlay,
+    .tv-mode #playerOverlay {
       padding: 1.5rem !important;
       gap: 1.2rem !important;
-      background: rgba(4, 6, 12, 0.99) !important;
+      background: #04060c !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      transition: none !important;
     }
-    .device-tv .player-container {
+    .device-tv .player-container,
+    .tv-mode .player-container {
       width: 96vw !important;
       height: 84vh !important;
       max-width: 96vw !important;
       max-height: 84vh !important;
       border-radius: 10px !important;
       border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      transform: none !important;
+      will-change: auto !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.9) !important;
+      animation: none !important;
+      transition: none !important;
     }
-    .device-tv .player-server-bar {
+    .device-tv #playerFrame,
+    .tv-mode #playerFrame {
+      transition: none !important;
+      opacity: 1 !important;
+    }
+    .device-tv .player-server-bar,
+    .tv-mode .player-server-bar {
       max-width: 96vw !important;
       gap: 0.8rem !important;
       padding: 0.4rem 0 !important;
     }
-    .device-tv .player-server-btn {
+    .device-tv .player-server-btn,
+    .tv-mode .player-server-btn {
       padding: 0.55rem 1.4rem !important;
       font-size: 1.05rem !important;
       border-radius: 50px !important;
+      transform: none !important;
+      transition: none !important;
     }
-    .device-tv .player-close {
+    .device-tv .player-close,
+    .tv-mode .player-close {
       width: 48px !important;
       height: 48px !important;
       font-size: 1.4rem !important;
       top: 1.2rem !important;
       right: 1.5rem !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      transform: none !important;
+      transition: none !important;
     }
-    .device-tv .topbar-wp-btn {
+    .device-tv .topbar-wp-btn,
+    .tv-mode .topbar-wp-btn {
       height: 48px !important;
       padding: 0 1.2rem !important;
       font-size: 1rem !important;
       top: 1.2rem !important;
       right: 5.2rem !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      transform: none !important;
+      transition: none !important;
     }
-    .device-tv #playerHome {
+    .device-tv .topbar-sub-btn,
+    .tv-mode .topbar-sub-btn {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      transform: none !important;
+      transition: none !important;
+    }
+    .device-tv #playerHome,
+    .tv-mode #playerHome {
       width: 48px !important;
       height: 48px !important;
       top: 1.2rem !important;
       left: 1.5rem !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      transform: none !important;
+      transition: none !important;
     }
-    .device-tv .player-ep-btn {
+    .device-tv .player-ep-btn,
+    .tv-mode .player-ep-btn {
       padding: 0.6rem 1.4rem !important;
       font-size: 1rem !important;
+      transform: none !important;
+      transition: none !important;
     }
     .device-tv #wpModalBox {
       width: 580px !important;
@@ -10058,17 +10102,23 @@
       }
       // 2. Close modal if open
       const modal = document.getElementById('modal');
-      if (modal && modal.classList.contains('open')) {
-        modal.classList.remove('open');
-        _currentModalId = null;
-        const epChooser = document.getElementById('modalEpChooser');
-        if (epChooser) epChooser.style.display = 'none';
+      if (modal) {
+        modal.style.display = '';
+        if (modal.classList.contains('open')) {
+          modal.classList.remove('open');
+          _currentModalId = null;
+          const epChooser = document.getElementById('modalEpChooser');
+          if (epChooser) epChooser.style.display = 'none';
+        }
       }
       // 3. Close category overlay if open
       const catOverlay = document.getElementById('categoryViewOverlay');
-      if (catOverlay && catOverlay.classList.contains('open')) {
-        catOverlay.classList.remove('open');
-        document.body.style.overflow = '';
+      if (catOverlay) {
+        catOverlay.style.display = '';
+        if (catOverlay.classList.contains('open')) {
+          catOverlay.classList.remove('open');
+          document.body.style.overflow = '';
+        }
       }
       // 4. Reset history to a clean page state (no player/modal/category in stack)
       try {
@@ -13158,6 +13208,17 @@
       if (typeof _destroyHeroPlayer === 'function') _destroyHeroPlayer();
       const heroVideo = document.getElementById('heroVideoContainer');
       if (heroVideo) heroVideo.innerHTML = '';
+      if (typeof ytPlayer !== 'undefined' && ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+        try { ytPlayer.pauseVideo(); } catch (_) { }
+      }
+
+      const isTvDevice = (window.DEVICE && window.DEVICE.isTV) || _tvMode || document.body.classList.contains('tv-mode') || document.body.classList.contains('device-tv');
+
+      // Hide heavy modal & category surfaces while video plays to liberate GPU texture VRAM on Smart TVs
+      const modalEl = document.getElementById('modal');
+      if (modalEl) modalEl.style.display = 'none';
+      const catOverlay = document.getElementById('categoryViewOverlay');
+      if (catOverlay) catOverlay.style.display = 'none';
 
       const overlay = document.getElementById('playerOverlay');
       const frame = document.getElementById('playerFrame');
@@ -13193,7 +13254,12 @@
       }
       frame.style.display = '';
       if (loader) loader.style.opacity = '1';
-      frame.style.opacity = '0';
+      if (isTvDevice) {
+        frame.style.opacity = '1';
+        frame.style.transition = 'none';
+      } else {
+        frame.style.opacity = '0';
+      }
       frame.onload = () => {
         if (loader) loader.style.opacity = '0';
         frame.style.opacity = '1';
@@ -13253,13 +13319,30 @@
 
       // ── Auto-load & auto-start Sinhala subtitle for iframe (VidLink, etc.) ────────
       if (_currentModalId) {
-        _autoLoadIframeSinhalaSub();
+        if (isTvDevice) {
+          setTimeout(() => {
+            if (document.getElementById('playerOverlay')?.classList.contains('open')) {
+              _autoLoadIframeSinhalaSub();
+            }
+          }, 800);
+        } else {
+          _autoLoadIframeSinhalaSub();
+        }
       }
 
       // ── Skip Intro — TV only, load + start wall-clock timer ──────────────
       if (_currentModalType === 'tv' && _currentModalId && typeof window._loadSkipIntro === 'function') {
-        window._loadSkipIntro(_currentModalId, _selectedSeason || 1, _selectedEpisode || 1);
-        window._startSkipTimer && window._startSkipTimer();
+        if (isTvDevice) {
+          setTimeout(() => {
+            if (document.getElementById('playerOverlay')?.classList.contains('open')) {
+              window._loadSkipIntro(_currentModalId, _selectedSeason || 1, _selectedEpisode || 1);
+              window._startSkipTimer && window._startSkipTimer();
+            }
+          }, 600);
+        } else {
+          window._loadSkipIntro(_currentModalId, _selectedSeason || 1, _selectedEpisode || 1);
+          window._startSkipTimer && window._startSkipTimer();
+        }
       } else if (typeof window._resetSkipIntro === 'function') {
         window._resetSkipIntro(); // hide on movies
       }
@@ -13267,12 +13350,19 @@
       // will trigger popstate and auto-reopen this video.
       if (typeof window._adblock_pushRecovery === 'function') window._adblock_pushRecovery(url);
 
-      // Only animate open if the player wasn't already visible
-      if (!wasAlreadyOpen) {
+      // Only animate open if the player wasn't already visible (and skip transforms on TV to prevent hole-punching crash)
+      if (isTvDevice) {
+        const pc = document.querySelector('.player-container');
+        if (pc) {
+          pc.style.transform = 'none';
+          pc.style.opacity = '1';
+          pc.style.willChange = 'auto';
+        }
+      } else if (!wasAlreadyOpen) {
         gsap.fromTo('.player-container', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'power3.out' });
       }
       // TV remote: auto-focus the UI buttons so the user isn't trapped in the cross-origin iframe!
-      if (_tvMode) {
+      if (_tvMode || isTvDevice) {
         setTimeout(() => {
           const focusTarget = document.getElementById('playerPrevEp')?.offsetParent
             ? document.getElementById('playerPrevEp')
@@ -13295,11 +13385,17 @@
       }
       const frame  = document.getElementById('playerFrame');
       const loader = document.getElementById('playerLoading');
+      const isTvDevice = (window.DEVICE && window.DEVICE.isTV) || _tvMode || document.body.classList.contains('tv-mode') || document.body.classList.contains('device-tv');
 
       _destroyMax();
       frame.style.display = '';
       if (loader) loader.style.opacity = '1';
-      frame.style.opacity = '0';
+      if (isTvDevice) {
+        frame.style.opacity = '1';
+        frame.style.transition = 'none';
+      } else {
+        frame.style.opacity = '0';
+      }
       frame.src = url;
       frame.onload = () => {
         if (loader) loader.style.opacity = '0';
@@ -13382,37 +13478,65 @@
     });
 
     function closePlayerInternal() {
-      gsap.to('.player-container', {
-        scale: 0.9, opacity: 0, duration: 0.3, ease: 'power3.in', onComplete: () => {
-          document.getElementById('playerOverlay').classList.remove('open');
-          const frame = document.getElementById('playerFrame');
-          frame.src = '';
-          frame.style.display = ''; // restore visibility for next open
-          _destroyMax();            // teardown Max player + hls.js
-          _stopSubLoop();
-          _subCues = [];
-          window._currentLoadedSubKey = null;
-          _showSubSyncBar(false);
-          const badge = document.getElementById('subToastBadge');
-          if (badge) badge.classList.remove('show');
-          const epBar = document.getElementById('playerEpBar');
-          if (epBar) epBar.classList.remove('visible');
-          if (document.fullscreenElement) {
-            document.exitFullscreen().catch(() => { });
-          } else if (document.webkitFullscreenElement) {
-            document.webkitExitFullscreen();
-          }
-          // Restore Watch Party elements to body if they were attached inside player
-          const wpModal = document.getElementById('wpModal');
-          const wpHud = document.getElementById('wpHud');
-          const wpNotif = document.getElementById('wpNotif');
-          const wpGuestLock = document.getElementById('wpGuestLock');
-          if (wpModal && wpModal.parentElement !== document.body) document.body.appendChild(wpModal);
-          if (wpHud && wpHud.parentElement !== document.body) document.body.appendChild(wpHud);
-          if (wpNotif && wpNotif.parentElement !== document.body) document.body.appendChild(wpNotif);
-          if (wpGuestLock && wpGuestLock.parentElement !== document.body) document.body.appendChild(wpGuestLock);
+      const isTvDevice = (window.DEVICE && window.DEVICE.isTV) || _tvMode || document.body.classList.contains('tv-mode') || document.body.classList.contains('device-tv');
+      const onPlayerClosed = () => {
+        document.getElementById('playerOverlay').classList.remove('open');
+        const frame = document.getElementById('playerFrame');
+        frame.src = '';
+        frame.style.display = ''; // restore visibility for next open
+        _destroyMax();            // teardown Max player + hls.js
+        _stopSubLoop();
+        _subCues = [];
+        window._currentLoadedSubKey = null;
+        _showSubSyncBar(false);
+        const badge = document.getElementById('subToastBadge');
+        if (badge) badge.classList.remove('show');
+        const epBar = document.getElementById('playerEpBar');
+        if (epBar) epBar.classList.remove('visible');
+        if (document.fullscreenElement) {
+          document.exitFullscreen().catch(() => { });
+        } else if (document.webkitFullscreenElement) {
+          document.webkitExitFullscreen();
         }
-      });
+        // Restore modal & category view overlays display
+        const modalEl = document.getElementById('modal');
+        if (modalEl && modalEl.classList.contains('open')) {
+          modalEl.style.display = '';
+        }
+        const catOverlay = document.getElementById('categoryViewOverlay');
+        if (catOverlay && catOverlay.classList.contains('open')) {
+          catOverlay.style.display = '';
+        }
+        // Restore Watch Party elements to body if they were attached inside player
+        const wpModal = document.getElementById('wpModal');
+        const wpHud = document.getElementById('wpHud');
+        const wpNotif = document.getElementById('wpNotif');
+        const wpGuestLock = document.getElementById('wpGuestLock');
+        if (wpModal && wpModal.parentElement !== document.body) document.body.appendChild(wpModal);
+        if (wpHud && wpHud.parentElement !== document.body) document.body.appendChild(wpHud);
+        if (wpNotif && wpNotif.parentElement !== document.body) document.body.appendChild(wpNotif);
+        if (wpGuestLock && wpGuestLock.parentElement !== document.body) document.body.appendChild(wpGuestLock);
+
+        if (isTvDevice) {
+          setTimeout(() => {
+            const focusTarget = document.getElementById('modalHeroPlayBtn') || document.getElementById('modalClose');
+            if (focusTarget && focusTarget.offsetParent) focusTarget.focus();
+          }, 120);
+        }
+      };
+
+      if (isTvDevice) {
+        const pc = document.querySelector('.player-container');
+        if (pc) {
+          pc.style.transform = 'none';
+          pc.style.opacity = '1';
+        }
+        onPlayerClosed();
+      } else {
+        gsap.to('.player-container', {
+          scale: 0.9, opacity: 0, duration: 0.3, ease: 'power3.in', onComplete: onPlayerClosed
+        });
+      }
     }
 
     document.getElementById('playerOverlay').addEventListener('click', e => {
