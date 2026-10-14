@@ -17,15 +17,19 @@ export default async function handler(req, res) {
     return res.status(403).json({ error: 'Endpoint not permitted' });
   }
 
-  const url = `https://api.themoviedb.org/3${target}`;
+  const hasToken = !!process.env.TMDB_TOKEN;
+  const sep = target.includes('?') ? '&' : '?';
+  const url = hasToken
+    ? `https://api.themoviedb.org/3${target}`
+    : `https://api.themoviedb.org/3${target}${sep}api_key=8265bd1679663a7ea12ac168da84d2e8`;
+
+  const headers = { 'Content-Type': 'application/json' };
+  if (hasToken) {
+    headers['Authorization'] = `Bearer ${process.env.TMDB_TOKEN}`;
+  }
 
   try {
-    const fetchRes = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${process.env.TMDB_TOKEN}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    const fetchRes = await fetch(url, { headers });
     
     if (!fetchRes.ok) {
       return res.status(fetchRes.status).json({ error: 'Failed to fetch from TMDB' });
