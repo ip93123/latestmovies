@@ -6807,13 +6807,12 @@
     <ul class="nav-links">
       <li><a href="#trending">Trending</a></li>
       <li><a href="#categories">Categories</a></li>
-      <li><a href="#movies">Movies</a></li>
-      <li><a href="#tvshows">TV Shows</a></li>
+      <li><a href="javascript:void(0)" onclick="openCategoryPage('movies', 'all', '🎬 Movies', 'Explore latest &amp; popular movies')">Movies</a></li>
+      <li><a href="javascript:void(0)" onclick="openCategoryPage('tvshows', 'all', '📺 TV Series', 'Explore top rated &amp; popular TV series')">TV Series</a></li>
       <li><a href="javascript:void(0)" onclick="openCategoryPage('toprated', 'all', '⭐ Top Rated All Time', 'Highest rated movies & series of all time')">Top Rated</a></li>
       <li><a href="javascript:void(0)" onclick="openCategoryPage('fourk', 'all', '💎 4K Ultra HD Picks', 'Cinematic 4K Ultra HD resolution titles with immersive clarity')">4K</a></li>
       <li><a href="#sinsub" style="color:#2ECC71;font-weight:700;" title="Sinhala Subtitled Movies">🇱🇰 Subtitle</a></li>
       <li><a href="javascript:void(0)" id="navWishlistLink" onclick="openWishlist()" title="WishList">WishList</a></li>
-
     </ul>
     <div style="display:flex;align-items:center;gap:10px;">
       <div class="nav-search" id="navSearch">
@@ -6856,8 +6855,8 @@
         <li><a href="#trending" onclick="window.toggleMobileNav(false)"><span>🔥 Trending</span><span style="opacity:0.4;">›</span></a></li>
         <li><a href="#categories" onclick="window.toggleMobileNav(false)"><span>🏷️ Categories</span><span style="opacity:0.4;">›</span></a></li>
         <li><a href="#sinsub" onclick="window.toggleMobileNav(false)" style="color:#2ECC71;"><span>🇱🇰 Subtitle (Sinhala)</span><span class="mobile-sub-tag">SUB</span></a></li>
-        <li><a href="#movies" onclick="window.toggleMobileNav(false)"><span>🎬 Latest Movies</span><span style="opacity:0.4;">›</span></a></li>
-        <li><a href="#tvshows" onclick="window.toggleMobileNav(false)"><span>📺 TV Shows</span><span style="opacity:0.4;">›</span></a></li>
+        <li><a href="javascript:void(0)" onclick="window.toggleMobileNav(false); openCategoryPage('movies', 'all', '🎬 Movies', 'Explore latest &amp; popular movies')"><span>🎬 Movies</span><span style="opacity:0.4;">›</span></a></li>
+        <li><a href="javascript:void(0)" onclick="window.toggleMobileNav(false); openCategoryPage('tvshows', 'all', '📺 TV Series', 'Explore top rated &amp; popular TV series')"><span>📺 TV Series</span><span style="opacity:0.4;">›</span></a></li>
         <li><a href="javascript:void(0)" onclick="window.toggleMobileNav(false); openCategoryPage('toprated', 'all', '⭐ Top Rated All Time', 'Highest rated movies & series of all time')"><span>🌟 Top Rated</span><span style="opacity:0.4;">›</span></a></li>
         <li><a href="javascript:void(0)" onclick="window.toggleMobileNav(false); openCategoryPage('fourk', 'all', '💎 4K Ultra HD Picks', 'Cinematic 4K Ultra HD resolution titles with immersive clarity')"><span>💎 4K Ultra HD</span><span style="opacity:0.4;">›</span></a></li>
         <li><a href="javascript:void(0)" onclick="window.toggleMobileNav(false); openWishlist();"><span>💖 WishList</span><span style="opacity:0.4;">›</span></a></li>
@@ -8371,11 +8370,15 @@
     async function openCategoryPage(catType, catKey, title, sub, pushHistory = true) {
       _currentCatType = catType;
       _currentCatKey = catKey;
-      _currentCatMediaType = 'movie'; // default to Movies
+      _currentCatMediaType = (catType === 'tvshows' || catType === 'tv' || catType === 'series') ? 'tv' : 'movie';
       _currentCatPage = 1;
 
       // Find metadata
-      if (catType === 'toprated') {
+      if (catType === 'movies' || catType === 'movie') {
+        _currentCatItemData = { title: title || '🎬 Movies', sub: sub || 'Explore latest & popular movies' };
+      } else if (catType === 'tvshows' || catType === 'tv' || catType === 'series') {
+        _currentCatItemData = { title: title || '📺 TV Series', sub: sub || 'Explore top rated & popular TV series' };
+      } else if (catType === 'toprated') {
         _currentCatItemData = { title: title || '⭐ Top Rated All Time', sub: sub || 'Highest rated movies & series of all time' };
       } else if (catType === 'fourk' || catType === '4k') {
         _currentCatItemData = { title: title || '💎 4K Ultra HD Picks', sub: sub || 'Cinematic 4K Ultra HD resolution titles with immersive clarity' };
@@ -8400,8 +8403,8 @@
       // Reset media tabs
       const tabMovie = document.getElementById('catTabMovie');
       const tabTv = document.getElementById('catTabTv');
-      if (tabMovie) tabMovie.classList.add('active');
-      if (tabTv) tabTv.classList.remove('active');
+      if (tabMovie) tabMovie.classList.toggle('active', _currentCatMediaType === 'movie');
+      if (tabTv) tabTv.classList.toggle('active', _currentCatMediaType === 'tv');
 
       // Clear previous grid
       const grid = document.getElementById('categoryGrid');
@@ -8461,6 +8464,26 @@
       _currentCatMediaType = mediaType;
       _currentCatPage = 1;
 
+      // When switching in dedicated movies / tv shows category view
+      if (_currentCatType === 'movies' || _currentCatType === 'tvshows' || _currentCatType === 'movie' || _currentCatType === 'tv') {
+        if (mediaType === 'tv') {
+          _currentCatType = 'tvshows';
+          _currentCatItemData = { title: '📺 TV Series', sub: 'Explore top rated & popular TV series' };
+        } else {
+          _currentCatType = 'movies';
+          _currentCatItemData = { title: '🎬 Movies', sub: 'Explore latest & popular movies' };
+        }
+        const titleEl = document.getElementById('catPageTitle');
+        const subEl = document.getElementById('catPageSub');
+        if (titleEl) titleEl.textContent = _currentCatItemData.title;
+        if (subEl) subEl.textContent = _currentCatItemData.sub;
+        try {
+          const u = new URL(window.location.origin + window.location.pathname);
+          u.searchParams.set('cat', _currentCatType);
+          history.replaceState({ ui: 'category', catType: _currentCatType, catKey: 'all', title: _currentCatItemData.title, sub: _currentCatItemData.sub }, '', u.toString());
+        } catch (_) {}
+      }
+
       const tabMovie = document.getElementById('catTabMovie');
       const tabTv = document.getElementById('catTabTv');
       if (tabMovie) tabMovie.classList.toggle('active', mediaType === 'movie');
@@ -8489,7 +8512,29 @@
         const startTmdbPage = (page - 1) * 4 + 1;
         const pageIndices = [startTmdbPage, startTmdbPage + 1, startTmdbPage + 2, startTmdbPage + 3];
 
-        if (_currentCatType === 'toprated') {
+        if (_currentCatType === 'movies' || _currentCatType === 'movie') {
+          const fetchPromises = pageIndices.map(p =>
+            tmdb(`/discover/movie?sort_by=popularity.desc&page=${p}&language=en-US`).catch(() => null)
+          );
+          const responses = await Promise.all(fetchPromises);
+          responses.forEach(tmdbData => {
+            if (tmdbData && tmdbData.results) {
+              results.push(...tmdbData.results.map(m => ({ ...m, _type: 'movie' })));
+              if (tmdbData.total_pages) tmdbTotalPages = Math.max(tmdbTotalPages, tmdbData.total_pages);
+            }
+          });
+        } else if (_currentCatType === 'tvshows' || _currentCatType === 'tv' || _currentCatType === 'series') {
+          const fetchPromises = pageIndices.map(p =>
+            tmdb(`/discover/tv?sort_by=popularity.desc&page=${p}&language=en-US`).catch(() => null)
+          );
+          const responses = await Promise.all(fetchPromises);
+          responses.forEach(tmdbData => {
+            if (tmdbData && tmdbData.results) {
+              results.push(...tmdbData.results.map(m => ({ ...m, _type: 'tv' })));
+              if (tmdbData.total_pages) tmdbTotalPages = Math.max(tmdbTotalPages, tmdbData.total_pages);
+            }
+          });
+        } else if (_currentCatType === 'toprated') {
           const fetchPromises = pageIndices.map(p =>
             tmdb(`/${_currentCatMediaType}/top_rated?page=${p}&language=en-US`).catch(() => null)
           );
@@ -14030,7 +14075,13 @@
         setTimeout(() => {
           let displayTitle = 'Category';
           let displaySub = 'Explore top rated & popular titles';
-          if (catParam === 'toprated') {
+          if (catParam === 'movies' || catParam === 'movie') {
+            displayTitle = '🎬 Movies';
+            displaySub = 'Explore latest & popular movies';
+          } else if (catParam === 'tvshows' || catParam === 'tv' || catParam === 'series') {
+            displayTitle = '📺 TV Series';
+            displaySub = 'Explore top rated & popular TV series';
+          } else if (catParam === 'toprated') {
             displayTitle = '⭐ Top Rated All Time';
             displaySub = 'Highest rated movies & series of all time';
           } else if (catParam === 'fourk' || catParam === '4k') {
