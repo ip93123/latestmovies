@@ -2864,21 +2864,20 @@
       align-items: center;
       justify-content: center;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(15, 20, 32, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.25);
       font-size: 1.1rem;
       cursor: pointer;
       color: var(--text);
       line-height: 1;
       z-index: 99999 !important;
-      backdrop-filter: blur(8px);
       transition: all 0.2s;
     }
 
     .player-close:hover {
-      background: rgba(239, 68, 68, 0.25);
+      background: rgba(239, 68, 68, 0.85);
       border-color: #EF4444;
-      color: #EF4444;
+      color: #ffffff;
       transform: scale(1.08);
     }
 
@@ -2892,8 +2891,8 @@
       padding: 0 0.85rem;
       height: 36px;
       border-radius: 50px;
-      background: rgba(168, 85, 247, 0.16);
-      border: 1px solid rgba(168, 85, 247, 0.45);
+      background: rgba(36, 16, 68, 0.95);
+      border: 1px solid rgba(168, 85, 247, 0.6);
       color: #E9D5FF;
       font-family: 'Inter', sans-serif;
       font-size: 0.78rem;
@@ -2901,9 +2900,7 @@
       letter-spacing: 0.3px;
       cursor: pointer;
       z-index: 99999 !important;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 0 16px rgba(168, 85, 247, 0.22);
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.2s;
     }
 
     .topbar-wp-btn:hover {
@@ -3155,8 +3152,8 @@
       width: 42px;
       height: 42px;
       border-radius: 8px;
-      background: rgba(13, 17, 23, 0.85);
-      border: 1px solid rgba(232, 201, 122, 0.45);
+      background: rgba(13, 17, 23, 0.95);
+      border: 1px solid rgba(232, 201, 122, 0.55);
       color: var(--gold, #E8C97A);
       display: flex;
       align-items: center;
@@ -3164,9 +3161,6 @@
       cursor: pointer;
       pointer-events: auto;
       z-index: 2147483647 !important;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.65);
       transition: opacity 0.25s, transform 0.2s, background 0.2s, border-color 0.2s;
       user-select: none;
     }
@@ -6688,6 +6682,9 @@
       font-size: 1.4rem !important;
       top: 1.2rem !important;
       right: 1.5rem !important;
+      background: #11141e !important;
+      border: 1px solid rgba(255, 255, 255, 0.3) !important;
+      box-shadow: none !important;
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
       transform: none !important;
@@ -6700,6 +6697,23 @@
       font-size: 1rem !important;
       top: 1.2rem !important;
       right: 5.2rem !important;
+      background: #11141e !important;
+      border: 1px solid rgba(168, 85, 247, 0.4) !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      transform: none !important;
+      transition: none !important;
+    }
+    .device-tv .player-fs-overlay-btn,
+    .tv-mode .player-fs-overlay-btn {
+      width: 48px !important;
+      height: 48px !important;
+      bottom: 1.2rem !important;
+      right: 1.5rem !important;
+      background: #11141e !important;
+      border: 1px solid rgba(232, 201, 122, 0.4) !important;
+      box-shadow: none !important;
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
       transform: none !important;
@@ -12766,24 +12780,16 @@
           _pokePlayerFsControls();
         }
 
-        // Ensure Watch Party elements stay on top in fullscreen or player overlay
+        // Ensure Watch Party elements stay on top in fullscreen only when active
         const fsTarget = document.fullscreenElement || document.webkitFullscreenElement;
         const wpModal = document.getElementById('wpModal');
         const wpHud = document.getElementById('wpHud');
         const wpNotif = document.getElementById('wpNotif');
         const wpGuestLock = document.getElementById('wpGuestLock');
-        const pOverlay = document.getElementById('playerOverlay');
 
         if (isFs && fsTarget) {
-          if (wpModal && wpModal.parentElement !== fsTarget) fsTarget.appendChild(wpModal);
-          if (wpHud && wpHud.parentElement !== fsTarget) fsTarget.appendChild(wpHud);
-          if (wpNotif && wpNotif.parentElement !== fsTarget) fsTarget.appendChild(wpNotif);
-          if (wpGuestLock && wpGuestLock.parentElement !== fsTarget) fsTarget.appendChild(wpGuestLock);
-        } else if (pOverlay && pOverlay.classList.contains('open')) {
-          if (wpModal && wpModal.parentElement !== pOverlay) pOverlay.appendChild(wpModal);
-          if (wpHud && wpHud.parentElement !== pOverlay) pOverlay.appendChild(wpHud);
-          if (wpNotif && wpNotif.parentElement !== pOverlay) pOverlay.appendChild(wpNotif);
-          if (wpGuestLock && wpGuestLock.parentElement !== pOverlay) pOverlay.appendChild(wpGuestLock);
+          if (wpModal && wpModal.classList.contains('active') && wpModal.parentElement !== fsTarget) fsTarget.appendChild(wpModal);
+          if (wpHud && wpHud.classList.contains('active') && wpHud.parentElement !== fsTarget) fsTarget.appendChild(wpHud);
         } else {
           if (wpModal && wpModal.parentElement !== document.body) document.body.appendChild(wpModal);
           if (wpHud && wpHud.parentElement !== document.body) document.body.appendChild(wpHud);
@@ -12815,6 +12821,14 @@
     function _togglePlayerFullscreen() {
       const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
       if (!fsEl) {
+        const isTv = (window.DEVICE && window.DEVICE.isTV) || _tvMode || document.body.classList.contains('tv-mode') || document.body.classList.contains('device-tv');
+        const frame = document.getElementById('playerFrame');
+        if (isTv && frame && frame.style.display !== 'none' && (frame.requestFullscreen || frame.webkitRequestFullscreen)) {
+          // On Smart TV, request fullscreen directly on the iframe!
+          // This avoids the TV hardware video plane blackout completely!
+          if (frame.requestFullscreen) return frame.requestFullscreen().catch(() => {});
+          if (frame.webkitRequestFullscreen) return frame.webkitRequestFullscreen();
+        }
         const wrap = document.getElementById('playerContainer') || document.body;
         if (wrap && wrap.requestFullscreen) wrap.requestFullscreen().catch(() => {});
         else if (wrap && wrap.webkitRequestFullscreen) wrap.webkitRequestFullscreen();
