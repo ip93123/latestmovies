@@ -3529,10 +3529,36 @@
         left: auto !important;
       }
 
-      /* Player Controls on Mobile */
+      /* Player Controls & Layout on Mobile */
+      #playerOverlay {
+        padding: 0.5rem !important;
+        gap: 0.6rem !important;
+        justify-content: center !important;
+      }
+      .player-container {
+        width: 96vw !important;
+        max-width: 100% !important;
+        height: auto !important;
+        aspect-ratio: 16 / 9 !important;
+        max-height: 72vh !important;
+        border-radius: 8px !important;
+      }
+      .player-server-bar {
+        max-width: 96vw !important;
+        gap: 0.4rem !important;
+        padding: 0.2rem 0 !important;
+      }
       .player-server-btn {
         font-size: 0.72rem !important;
         padding: 0.3rem 0.65rem !important;
+      }
+      .player-ep-bar {
+        max-width: 96vw !important;
+        gap: 0.4rem !important;
+      }
+      .player-ep-btn {
+        font-size: 0.72rem !important;
+        padding: 0.28rem 0.65rem !important;
       }
       .player-close {
         top: 0.6rem !important;
@@ -3601,6 +3627,55 @@
       }
       .trending-row {
         gap: 0.85rem !important;
+      }
+    }
+
+    /* Mobile Landscape Fullscreen Feel */
+    @media (max-height: 520px) and (orientation: landscape) {
+      #playerOverlay {
+        padding: 0 !important;
+        gap: 0 !important;
+      }
+      .player-container {
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+        border-radius: 0 !important;
+      }
+      .player-server-bar {
+        position: absolute !important;
+        top: 6px !important;
+        left: 48px !important;
+        max-width: calc(100vw - 120px) !important;
+        z-index: 720 !important;
+        background: rgba(7, 9, 15, 0.85) !important;
+        border-radius: 20px !important;
+        padding: 2px 8px !important;
+      }
+      .player-ep-bar {
+        position: absolute !important;
+        bottom: 8px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        z-index: 720 !important;
+        background: rgba(7, 9, 15, 0.85) !important;
+        border-radius: 20px !important;
+        padding: 2px 8px !important;
+      }
+    }
+
+    /* Large Displays (4K, Ultra-wide Desktops) */
+    @media (min-width: 1600px) {
+      .player-container {
+        max-width: 1480px;
+        height: 82vh;
+      }
+    }
+    @media (min-width: 2200px) {
+      .player-container {
+        max-width: 1880px;
+        height: 84vh;
       }
     }
 
@@ -3947,12 +4022,13 @@
       background: rgba(0,0,0,0.88);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
-      z-index: 100000;
+      z-index: 2147483647 !important;
       display: none;
       align-items: center;
       justify-content: center;
+      transform: translateZ(99999px) !important;
     }
-    #wpModal.active { display: flex; }
+    #wpModal.active { display: flex !important; }
     #wpModalBox {
       background: linear-gradient(160deg, #0D1117 0%, #161B24 60%, #1a1040 100%);
       border: 1px solid rgba(168,85,247,0.25);
@@ -3995,15 +4071,16 @@
     #wpHud {
       position: fixed;
       top: 72px; right: 18px;
-      z-index: 9999;
+      z-index: 2147483646 !important;
       display: none;
       flex-direction: column;
       align-items: flex-end;
       gap: 6px;
       pointer-events: auto;
       user-select: none;
+      transform: translateZ(99999px) !important;
     }
-    #wpHud.active { display: flex; }
+    #wpHud.active { display: flex !important; }
     .wp-hud-badge {
       background: rgba(10,7,25,0.85);
       backdrop-filter: blur(12px);
@@ -4101,7 +4178,7 @@
     #wpNotif {
       position: fixed;
       bottom: 90px;
-      left: 50%; transform: translateX(-50%);
+      left: 50%; transform: translateX(-50%) translateZ(99999px) !important;
       background: rgba(10,7,25,0.92);
       backdrop-filter: blur(10px);
       border: 1px solid rgba(168,85,247,0.3);
@@ -4111,7 +4188,7 @@
       font-family: 'Inter', sans-serif;
       font-size: 0.85rem;
       font-weight: 500;
-      z-index: 999999;
+      z-index: 2147483646 !important;
       display: none;
       pointer-events: none;
       white-space: nowrap;
@@ -4125,13 +4202,14 @@
     /* ── Guest locked overlay when host pauses ── */
     #wpGuestLock {
       position: fixed; inset: 0;
-      z-index: 99998;
+      z-index: 2147483645 !important;
       display: none;
       align-items: center;
       justify-content: center;
       pointer-events: none;
+      transform: translateZ(99999px) !important;
     }
-    #wpGuestLock.active { display: flex; }
+    #wpGuestLock.active { display: flex !important; }
     .wp-guest-lock-badge {
       background: rgba(0,0,0,0.7);
       backdrop-filter: blur(8px);
@@ -6146,6 +6224,69 @@
     /* 15. Rating ring — no animation, just static */
     .device-tv .rating-ring-fg {
       transition: none !important;
+    }
+
+    /* 16. Smart TV Player UI Optimizations */
+    .device-tv #playerOverlay {
+      padding: 1.5rem !important;
+      gap: 1.2rem !important;
+      background: rgba(4, 6, 12, 0.99) !important;
+    }
+    .device-tv .player-container {
+      width: 96vw !important;
+      height: 84vh !important;
+      max-width: 96vw !important;
+      max-height: 84vh !important;
+      border-radius: 10px !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    }
+    .device-tv .player-server-bar {
+      max-width: 96vw !important;
+      gap: 0.8rem !important;
+      padding: 0.4rem 0 !important;
+    }
+    .device-tv .player-server-btn {
+      padding: 0.55rem 1.4rem !important;
+      font-size: 1.05rem !important;
+      border-radius: 50px !important;
+    }
+    .device-tv .player-close {
+      width: 48px !important;
+      height: 48px !important;
+      font-size: 1.4rem !important;
+      top: 1.2rem !important;
+      right: 1.5rem !important;
+    }
+    .device-tv .topbar-wp-btn {
+      height: 48px !important;
+      padding: 0 1.2rem !important;
+      font-size: 1rem !important;
+      top: 1.2rem !important;
+      right: 5.2rem !important;
+    }
+    .device-tv #playerHome {
+      width: 48px !important;
+      height: 48px !important;
+      top: 1.2rem !important;
+      left: 1.5rem !important;
+    }
+    .device-tv .player-ep-btn {
+      padding: 0.6rem 1.4rem !important;
+      font-size: 1rem !important;
+    }
+    .device-tv #wpModalBox {
+      width: 580px !important;
+      max-width: 85vw !important;
+      padding: 2.2rem !important;
+      font-size: 1.05rem !important;
+    }
+    .device-tv .wp-action-btn {
+      padding: 1rem 1.5rem !important;
+      font-size: 1.1rem !important;
+    }
+    .device-tv .wp-tab-btn {
+      padding: 0.8rem 1.2rem !important;
+      font-size: 1rem !important;
     }
   </style>
 </head>
@@ -11993,6 +12134,31 @@
         } else if (isFs) {
           _pokePlayerFsControls();
         }
+
+        // Ensure Watch Party elements stay on top in fullscreen or player overlay
+        const fsTarget = document.fullscreenElement || document.webkitFullscreenElement;
+        const wpModal = document.getElementById('wpModal');
+        const wpHud = document.getElementById('wpHud');
+        const wpNotif = document.getElementById('wpNotif');
+        const wpGuestLock = document.getElementById('wpGuestLock');
+        const pOverlay = document.getElementById('playerOverlay');
+
+        if (isFs && fsTarget) {
+          if (wpModal && wpModal.parentElement !== fsTarget) fsTarget.appendChild(wpModal);
+          if (wpHud && wpHud.parentElement !== fsTarget) fsTarget.appendChild(wpHud);
+          if (wpNotif && wpNotif.parentElement !== fsTarget) fsTarget.appendChild(wpNotif);
+          if (wpGuestLock && wpGuestLock.parentElement !== fsTarget) fsTarget.appendChild(wpGuestLock);
+        } else if (pOverlay && pOverlay.classList.contains('open')) {
+          if (wpModal && wpModal.parentElement !== pOverlay) pOverlay.appendChild(wpModal);
+          if (wpHud && wpHud.parentElement !== pOverlay) pOverlay.appendChild(wpHud);
+          if (wpNotif && wpNotif.parentElement !== pOverlay) pOverlay.appendChild(wpNotif);
+          if (wpGuestLock && wpGuestLock.parentElement !== pOverlay) pOverlay.appendChild(wpGuestLock);
+        } else {
+          if (wpModal && wpModal.parentElement !== document.body) document.body.appendChild(wpModal);
+          if (wpHud && wpHud.parentElement !== document.body) document.body.appendChild(wpHud);
+          if (wpNotif && wpNotif.parentElement !== document.body) document.body.appendChild(wpNotif);
+          if (wpGuestLock && wpGuestLock.parentElement !== document.body) document.body.appendChild(wpGuestLock);
+        }
       }
       document.addEventListener('fullscreenchange', _handleFullscreenChange);
       document.addEventListener('webkitfullscreenchange', _handleFullscreenChange);
@@ -13005,6 +13171,15 @@
           } else if (document.webkitFullscreenElement) {
             document.webkitExitFullscreen();
           }
+          // Restore Watch Party elements to body if they were attached inside player
+          const wpModal = document.getElementById('wpModal');
+          const wpHud = document.getElementById('wpHud');
+          const wpNotif = document.getElementById('wpNotif');
+          const wpGuestLock = document.getElementById('wpGuestLock');
+          if (wpModal && wpModal.parentElement !== document.body) document.body.appendChild(wpModal);
+          if (wpHud && wpHud.parentElement !== document.body) document.body.appendChild(wpHud);
+          if (wpNotif && wpNotif.parentElement !== document.body) document.body.appendChild(wpNotif);
+          if (wpGuestLock && wpGuestLock.parentElement !== document.body) document.body.appendChild(wpGuestLock);
         }
       });
     }
@@ -13707,6 +13882,8 @@
 
     function getVisibleFocusables() {
       const vw = window.innerWidth;
+      const wpModal = document.getElementById('wpModal');
+      const isWpOpen = wpModal && wpModal.classList.contains('active');
       const modal = document.getElementById('modal');
       const isModalOpen = modal && modal.classList.contains('open');
       const playerOverlay = document.getElementById('playerOverlay');
@@ -13715,7 +13892,9 @@
       const isCatOpen = catOverlay && catOverlay.classList.contains('open');
 
       return [...document.querySelectorAll(FOCUSABLE_SEL)].filter(el => {
-        if (isPlayerOpen) {
+        if (isWpOpen) {
+          if (!el.closest('#wpModal')) return false;
+        } else if (isPlayerOpen) {
           if (!el.closest('#playerOverlay')) return false;
         } else if (isModalOpen) {
           if (!el.closest('#modal')) return false;
@@ -13726,7 +13905,8 @@
         }
         if (el.closest('#searchOverlay:not(.open)') ||
           el.closest('#modal:not(.open)') ||
-          el.closest('#playerOverlay:not(.open)')) return false;
+          el.closest('#playerOverlay:not(.open)') ||
+          el.closest('#wpModal:not(.active)')) return false;
         const r = el.getBoundingClientRect();
         // Element must have dimensions and not be far off-screen horizontally
         return r.width > 0 && r.height > 0 && r.right >= -vw && r.left <= vw * 2;
@@ -13833,11 +14013,20 @@
         return;
       }
 
-      // Back button → dismiss overlays in order: player → modal → category → search
+      // Back button → dismiss overlays in order: watchParty → player → modal → category → search
       if (TV_BACK.has(key)) {
         // Don't intercept Escape/Backspace inside text inputs
         if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
         e.preventDefault();
+        const wpModal = document.getElementById('wpModal');
+        if (wpModal && wpModal.classList.contains('active')) {
+          wpModal.classList.remove('active');
+          const fs = document.fullscreenElement || document.webkitFullscreenElement;
+          if (!fs && wpModal.parentElement !== document.body) {
+            document.body.appendChild(wpModal);
+          }
+          return;
+        }
         const playerOverlay = document.getElementById('playerOverlay');
         if (playerOverlay && playerOverlay.classList.contains('open')) {
           document.getElementById('playerClose').click(); return;
@@ -15082,7 +15271,16 @@
         hudLeaveBtn.innerHTML = WP.isHost ? '<span>🛑</span> End Party' : '<span>🚪</span> Leave Party';
       }
       const wpHud = document.getElementById('wpHud');
-      if (wpHud) wpHud.classList.add('active');
+      if (wpHud) {
+        wpHud.classList.add('active');
+        const fsElem = document.fullscreenElement || document.webkitFullscreenElement;
+        const playerOverlay = document.getElementById('playerOverlay');
+        if (fsElem && wpHud.parentElement !== fsElem) {
+          fsElem.appendChild(wpHud);
+        } else if (playerOverlay && playerOverlay.classList.contains('open') && wpHud.parentElement !== playerOverlay) {
+          playerOverlay.appendChild(wpHud);
+        }
+      }
 
       // Update active dots safely
       const topbarDot = document.getElementById('topbarWpActiveDot');
@@ -15337,6 +15535,17 @@
       const activeView = document.getElementById('wpActiveView');
       if (!modal) return;
 
+      // Always guarantee Watch Party modal is on the active top layer
+      const fsElem = document.fullscreenElement || document.webkitFullscreenElement;
+      const playerOverlay = document.getElementById('playerOverlay');
+      if (fsElem && fsElem !== modal && !fsElem.contains(modal)) {
+        fsElem.appendChild(modal);
+      } else if (playerOverlay && playerOverlay.classList.contains('open') && modal.parentElement !== playerOverlay) {
+        playerOverlay.appendChild(modal);
+      } else if (!fsElem && (!playerOverlay || !playerOverlay.classList.contains('open')) && modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+      }
+
       if (WP.code) {
         if (setupView) setupView.style.display = 'none';
         if (activeView) activeView.style.display = 'block';
@@ -15532,11 +15741,22 @@
       if (topbarWpBtn) topbarWpBtn.addEventListener('click', _onWpClick);
 
       const closeBtn = document.getElementById('wpCloseBtn');
-      if (closeBtn) closeBtn.onclick = () => document.getElementById('wpModal').classList.remove('active');
+      if (closeBtn) closeBtn.onclick = () => {
+        const modal = document.getElementById('wpModal');
+        if (modal) {
+          modal.classList.remove('active');
+          const fs = document.fullscreenElement || document.webkitFullscreenElement;
+          if (!fs && modal.parentElement !== document.body) document.body.appendChild(modal);
+        }
+      };
 
       const modalEl = document.getElementById('wpModal');
       if (modalEl) modalEl.onclick = e => {
-        if (e.target === modalEl) modalEl.classList.remove('active');
+        if (e.target === modalEl) {
+          modalEl.classList.remove('active');
+          const fs = document.fullscreenElement || document.webkitFullscreenElement;
+          if (!fs && modalEl.parentElement !== document.body) document.body.appendChild(modalEl);
+        }
       };
 
       const endBtn = document.getElementById('wpEndPartyBtn');
