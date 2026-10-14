@@ -2870,7 +2870,7 @@
       cursor: pointer;
       color: var(--text);
       line-height: 1;
-      z-index: 710;
+      z-index: 99999 !important;
       backdrop-filter: blur(8px);
       transition: all 0.2s;
     }
@@ -2900,7 +2900,7 @@
       font-weight: 700;
       letter-spacing: 0.3px;
       cursor: pointer;
-      z-index: 710;
+      z-index: 99999 !important;
       backdrop-filter: blur(10px);
       box-shadow: 0 0 16px rgba(168, 85, 247, 0.22);
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -3083,7 +3083,7 @@
     #subOverlay {
       position: absolute;
       inset: 0;
-      pointer-events: none;
+      pointer-events: none !important;
       z-index: 2147483647 !important; /* above all iframe compositing and hardware surfaces */
       display: flex;
       flex-direction: column;
@@ -3091,11 +3091,11 @@
       align-items: center;
       padding-bottom: 6%;
       box-sizing: border-box;
-      transform: translateZ(9999px) !important; /* Force separate GPU compositing layer above accelerated iframe */
     }
     #subText {
       position: relative;
       z-index: 2147483647 !important;
+      pointer-events: none !important;
       max-width: 90%;
       text-align: center;
       padding: 0.1rem 0.4rem;
@@ -3115,7 +3115,6 @@
       display: none;
       transition: color 0.15s, font-size 0.15s;
       user-select: none;
-      transform: translateZ(9999px) !important;
     }
     #subText.active { display: inline-block !important; }
 
@@ -3123,15 +3122,16 @@
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, #maxPlayerWrap:fullscreen, #maxPlayerWrap:-webkit-full-screen) #subOverlay {
       position: absolute !important;
       inset: 0 !important;
+      pointer-events: none !important;
       z-index: 2147483647 !important;
       padding-bottom: 7% !important;
       display: flex !important;
-      transform: translateZ(9999px) !important;
     }
 
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, #maxPlayerWrap:fullscreen, #maxPlayerWrap:-webkit-full-screen) #subText {
       font-size: var(--sub-size, clamp(1.2rem, 2.2vw, 1.8rem)) !important;
       font-weight: 700 !important;
+      pointer-events: none !important;
       background: var(--sub-bg, transparent) !important;
       border: none !important;
       border-radius: 0 !important;
@@ -3141,7 +3141,6 @@
       padding: 0.15rem 0.5rem !important;
       text-shadow: 0 2px 4px rgba(0,0,0,1), 0 0 14px rgba(0,0,0,0.95), 1px 1px 3px #000, -1px -1px 3px #000, 2px 2px 4px #000, -2px -2px 4px #000 !important;
       z-index: 2147483647 !important;
-      transform: translateZ(9999px) !important;
     }
 
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, #maxPlayerWrap:fullscreen, #maxPlayerWrap:-webkit-full-screen) #subText.active {
@@ -3169,18 +3168,16 @@
       -webkit-backdrop-filter: blur(10px);
       box-shadow: 0 4px 18px rgba(0, 0, 0, 0.65);
       transition: opacity 0.25s, transform 0.2s, background 0.2s, border-color 0.2s;
-      transform: translateZ(9999px);
       user-select: none;
     }
     .player-fs-overlay-btn:hover {
       background: rgba(232, 201, 122, 0.22);
       border-color: #E8C97A;
-      transform: scale(1.1) translateZ(9999px);
+      transform: scale(1.1);
     }
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) .player-fs-overlay-btn {
       display: flex !important;
       z-index: 2147483647 !important;
-      transform: translateZ(9999px) !important;
     }
     .player-container.idle-fs .player-fs-overlay-btn {
       opacity: 0 !important;
@@ -3197,7 +3194,7 @@
       position: absolute;
       top: 22px;
       left: 50%;
-      transform: translateX(-50%) translateY(-20px) translateZ(9999px);
+      transform: translateX(-50%) translateY(-20px);
       background: rgba(11, 14, 23, 0.94);
       border: 1px solid rgba(232, 201, 122, 0.65);
       color: #fff;
@@ -3219,7 +3216,7 @@
     }
     .sub-toast-badge.show {
       opacity: 1;
-      transform: translateX(-50%) translateY(0) translateZ(9999px);
+      transform: translateX(-50%) translateY(0);
     }
 
     /* Suppress any browser native/in-band stream cues so they never clash with custom sub overlay */
@@ -4031,7 +4028,6 @@
       display: none;
       align-items: center;
       justify-content: center;
-      transform: translateZ(99999px) !important;
     }
     #wpModal.active { display: flex !important; }
     #wpModalBox {
@@ -4083,7 +4079,6 @@
       gap: 6px;
       pointer-events: auto;
       user-select: none;
-      transform: translateZ(99999px) !important;
     }
     #wpHud.active { display: flex !important; }
     .wp-hud-badge {
@@ -4183,7 +4178,8 @@
     #wpNotif {
       position: fixed;
       bottom: 90px;
-      left: 50%; transform: translateX(-50%) translateZ(99999px) !important;
+      left: 50%;
+      transform: translateX(-50%) !important;
       background: rgba(10,7,25,0.92);
       backdrop-filter: blur(10px);
       border: 1px solid rgba(168,85,247,0.3);
@@ -4212,7 +4208,6 @@
       align-items: center;
       justify-content: center;
       pointer-events: none;
-      transform: translateZ(99999px) !important;
     }
     #wpGuestLock.active { display: flex !important; }
     .wp-guest-lock-badge {
@@ -5821,12 +5816,12 @@
       position: absolute;
       inset: 0;
       z-index: 2000;
-      pointer-events: none;
-      background: transparent;
+      pointer-events: none !important;
+      display: none !important;
     }
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs #fsMouseCatcher {
-      pointer-events: auto !important; /* Catches any cursor movement/touch over iframe when idle */
-      cursor: default !important;
+      pointer-events: none !important;
+      display: none !important;
     }
 
     /* In fullscreen, keep close and watch party elevated when active (not idle) */
@@ -5834,7 +5829,6 @@
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #topbarWatchPartyBtn {
       display: flex !important;
       z-index: 2147483647 !important;
-      transform: translateZ(9999px) !important;
       opacity: 1;
     }
 
@@ -5843,7 +5837,7 @@
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) .player-fs-overlay-btn {
       opacity: 1 !important;
       pointer-events: auto !important;
-      transform: translateY(0) translateZ(9999px) !important;
+      transform: translateY(0) !important;
     }
 
     /* Automatically hide watchparty, x mark (close), fullscreen marks, and overlay within 2 seconds when idle in fullscreen */
@@ -5855,11 +5849,11 @@
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs .popup-home {
       opacity: 0 !important;
       pointer-events: none !important;
-      transform: translateY(-12px) translateZ(9999px) !important;
+      transform: translateY(-12px) !important;
     }
 
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs .player-fs-overlay-btn {
-      transform: translateY(12px) translateZ(9999px) !important;
+      transform: translateY(12px) !important;
     }
 
     /* Hide mouse cursor when idle in fullscreen */
@@ -7283,6 +7277,30 @@
           <path d="M9 21V12h6v9" />
         </svg></button>
 
+      <iframe id="playerFrame" src="about:blank"
+        allow="autoplay *; encrypted-media *; fullscreen *; picture-in-picture *; web-share *"
+        allowfullscreen
+        frameborder="0"></iframe>
+
+      <!-- Subtitle Overlay (rendered on top of iframe, click-through) -->
+      <div id="subOverlay"><span id="subText"></span></div>
+
+      <!-- Loading Spinner -->
+      <div id="playerLoading"
+        style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#000;z-index:10;pointer-events:none;transition:opacity 0.3s;opacity:0;">
+        <div
+          style="width:40px;height:40px;border:4px solid rgba(255,255,255,0.1);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;">
+        </div>
+      </div>
+
+      <!-- Skip Intro / Skip Credits Button -->
+      <button id="skipIntroBtn">⏭ Skip Intro</button>
+      <div id="skipInfoBadge">Intro: <span id="skipInfoText"></span></div>
+
+      <!-- Subtitle File Loader (hidden input) -->
+      <input type="file" id="subFileInput" accept=".srt,.vtt,.ass,.ssa" style="display:none">
+
+      <!-- Watch Party button (always top layer) -->
       <button class="topbar-wp-btn" id="topbarWatchPartyBtn" title="Watch Party — Watch together with friends">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
           <circle cx="9" cy="7" r="4"/>
@@ -7293,28 +7311,10 @@
         <span>Watch Party</span>
         <span class="topbar-wp-dot" id="topbarWpActiveDot"></span>
       </button>
-      <!-- Subtitle File Loader (always visible) -->
-      <input type="file" id="subFileInput" accept=".srt,.vtt,.ass,.ssa" style="display:none">
 
+      <!-- Player Close Button (always top layer) -->
       <button class="player-close" id="playerClose">&#10005;</button>
-      <div id="playerLoading"
-        style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#000;z-index:10;pointer-events:none;transition:opacity 0.3s;opacity:0;">
-        <div
-          style="width:40px;height:40px;border:4px solid rgba(255,255,255,0.1);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;">
-        </div>
-      </div>
-      <!-- Skip Intro / Skip Credits Button -->
-      <button id="skipIntroBtn">⏭ Skip Intro</button>
-      <div id="skipInfoBadge">Intro: <span id="skipInfoText"></span></div>
 
-      <iframe id="playerFrame" src="about:blank"
-        allow="autoplay *; encrypted-media *; fullscreen *; picture-in-picture *; web-share *"
-        allowfullscreen
-        frameborder="0"></iframe>
-      <!-- Fullscreen Invisible Mouse Catcher Overlay (wakes up controls on any cursor movement over iframe) -->
-      <div id="fsMouseCatcher"></div>
-      <!-- Subtitle Overlay (rendered on top of iframe) -->
-      <div id="subOverlay"><span id="subText"></span></div>
       <!-- Dedicated High-Z-Index Fullscreen Button (ensures Sinhala subtitles remain visible) -->
       <button class="player-fs-overlay-btn" id="playerFsOverlayBtn" title="Full Screen (with Sinhala Subtitles)">
         <svg id="fsBtnIconEnter" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
