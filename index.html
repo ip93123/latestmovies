@@ -10929,13 +10929,22 @@
     // ── Universal External Player PostMessage Sync ────────────────────────
     let _lastIframeSubCueText = null;
 
+    function _isHackyMaxServer() {
+      const curServer = (window._currentActiveServer || '').toLowerCase();
+      const frame = document.getElementById('playerFrame');
+      const curSrc = (frame && frame.src) ? frame.src.toLowerCase() : '';
+      return _activeServerIndex === 0 ||
+             curServer.includes('hackymax') ||
+             curSrc.includes('vidy.st');
+    }
+    window._isHackyMaxServer = _isHackyMaxServer;
+
     function _extractTimeFromMessage(eventData, depth = 0) {
-      if (eventData == null || depth > 5) return null;
+      if (eventData == null || depth > 4) return null;
 
       if (typeof eventData === 'number') {
-        if (!isNaN(eventData) && eventData >= 0) {
-          const sec = eventData > 86400 ? eventData / 1000 : eventData;
-          return { time: sec, event: 'timeupdate' };
+        if (!isNaN(eventData) && eventData >= 0 && eventData < 43200) {
+          return { time: eventData, event: 'timeupdate' };
         }
         return null;
       }
@@ -10949,17 +10958,11 @@
             if (res !== null) return res;
           } catch (_) {}
         }
-        const m = str.match(/(?:current_?time|position|pos|seek|seconds?|time|watched)[:=\s]+(\d+(?:\.\d+)?)/i);
+        const m = str.match(/(?:current_?time|player_progress|watched)[:=\s]+(\d+(?:\.\d+)?)/i);
         if (m && m[1]) {
           const val = parseFloat(m[1]);
-          if (!isNaN(val) && val >= 0) {
-            return { time: val > 86400 ? val / 1000 : val, event: 'timeupdate' };
-          }
-        }
-        if (/^\d+(\.\d+)?$/.test(str)) {
-          const val = parseFloat(str);
-          if (!isNaN(val) && val >= 0) {
-            return { time: val > 86400 ? val / 1000 : val, event: 'timeupdate' };
+          if (!isNaN(val) && val >= 0 && val < 43200) {
+            return { time: val, event: 'timeupdate' };
           }
         }
         return null;
@@ -10969,44 +10972,49 @@
 
       const d = eventData;
 
-      // Special check: Vidy progress object { progress: { watched: number } }
-      if (d.progress && typeof d.progress === 'object' && typeof d.progress.watched === 'number') {
-        return { time: d.progress.watched, event: 'timeupdate' };
+      // Reject non-playback noise (ads, pings, telemetry, logs)
+      const evType = String(d.type || d.event || d.action || '').toLowerCase();
+      if (/^(?:ping|pong|heartbeat|ad|ads|vast|telemetry|metric|analytics|resize|log|ready)$/i.test(evType)) {
+        return null;
       }
 
-      // Special check: Videasy (Vortex) progress object { player_progress: number, player_status: string }
-      if (typeof d.player_progress === 'number' && !isNaN(d.player_progress) && d.player_progress >= 0) {
+      // Vidy progress object: { progress: { watched: number } }
+      if (d.progress && typeof d.progress === 'object' && typeof d.progress.watched === 'number') {
+        const w = d.progress.watched;
+        if (w >= 0 && w < 43200) return { time: w, event: 'timeupdate' };
+      }
+
+      // Videasy progress object: { player_progress: number }
+      if (typeof d.player_progress === 'number' && !isNaN(d.player_progress) && d.player_progress >= 0 && d.player_progress < 43200) {
         return { time: d.player_progress, event: String(d.player_status || 'timeupdate') };
       }
 
-      // Priority 1: High-confidence exact time keys (currentTime, timestamp, player_progress, etc.)
-      const exactTimeKeys = ['currenttime', 'current_time', 'timestamp', 'time', 'position', 'pos', 'seconds', 'second', 'offset', 'value', 'watched', 'player_progress', 'playerprogress'];
-
-      // 1. Direct key match (case-insensitive)
+      // High-confidence video currentTime keys
+      const highConfidenceKeys = ['currenttime', 'current_time', 'player_progress', 'playerprogress', 'watched'];
       for (const key of Object.keys(d)) {
         const kLow = key.toLowerCase();
-        if (exactTimeKeys.includes(kLow) && typeof d[key] === 'number' && !isNaN(d[key]) && d[key] >= 0) {
-          let sec = d[key];
-          if (sec > 86400 || d.unit === 'ms' || d.units === 'ms' || d.unit === 'milliseconds') {
-            sec = sec / 1000;
+        if (highConfidenceKeys.includes(kLow) && typeof d[key] === 'number' && !isNaN(d[key]) && d[key] >= 0 && d[key] < 43200) {
+          return { time: d[key], event: String(d.event || d.type || d.action || 'timeupdate') };
+        }
+      }
+
+      // Secondary keys: only if duration exists or type/event indicates video playback
+      const isVideoContext = (typeof d.duration === 'number') || /(?:timeupdate|progress|video)/i.test(evType);
+      if (isVideoContext) {
+        const secKeys = ['position', 'pos', 'seconds', 'second', 'time'];
+        for (const key of Object.keys(d)) {
+          const kLow = key.toLowerCase();
+          if (secKeys.includes(kLow) && typeof d[key] === 'number' && !isNaN(d[key]) && d[key] >= 0 && d[key] < 43200) {
+            return { time: d[key], event: String(d.event || d.type || d.action || 'timeupdate') };
           }
-          return { time: sec, event: String(d.event || d.type || d.action || 'timeupdate') };
         }
       }
 
-      // 2. Inspect nested wrapper objects commonly used by players (VidLink, Vidy, Plyr, JWPlayer, Vimeo, etc.)
-      const wrappers = ['data', 'detail', 'payload', 'player', 'state', 'info', 'media', 'plyr', 'video'];
+      // Inspect nested player wrappers (data, payload, detail, player)
+      const wrappers = ['data', 'payload', 'detail', 'player', 'state', 'video'];
       for (const w of wrappers) {
-        if (d[w] != null) {
+        if (d[w] != null && typeof d[w] === 'object') {
           const res = _extractTimeFromMessage(d[w], depth + 1);
-          if (res) return res;
-        }
-      }
-
-      // 3. Fallback: inspect any remaining object properties (excluding progress)
-      for (const key of Object.keys(d)) {
-        if (key.toLowerCase() !== 'progress' && typeof d[key] === 'object' && d[key] !== null) {
-          const res = _extractTimeFromMessage(d[key], depth + 1);
           if (res) return res;
         }
       }
@@ -11061,11 +11069,9 @@
         cw.postMessage({ type: 'player:listen' }, '*');
         cw.postMessage({ action: 'getTime' }, '*');
         cw.postMessage({ action: 'getStatus' }, '*');
-        cw.postMessage(JSON.stringify({ action: 'getStatus' }), '*');
-        cw.postMessage({ player: true, action: 'getTime' }, '*');
       } catch (_) {}
     }
-    setInterval(_pingIframeForTimeEvents, 1200);
+    setInterval(_pingIframeForTimeEvents, 4000);
 
     // ── Floating Subtitle Toast System ───────────────────────────────────
     let _subToastTimer = null;
@@ -11190,35 +11196,27 @@
       }
     }
 
-    // RAF loop — renders current cue smoothly at 60fps
+    // RAF loop — renders current cue smoothly at 60fps (Single Source of Truth for Subtitle DOM)
     function _subLoop() {
       if (!_subStartTime || !_subCues.length || !_subActive) return;
 
       const now = Date.now();
-      const hasLiveFeed = !!(window._lastExternalMsgTime && (now - window._lastExternalMsgTime < 180000));
+      const isHackyMax = _isHackyMaxServer();
 
-      // Watchdog: If movie is supposed to be playing and has live messages, but no message arrived:
-      if (!window._externalIsPaused && hasLiveFeed) {
-        const frameEl = document.getElementById('playerFrame');
-        const isCurVidStuck = (frameEl && frameEl.src && frameEl.src.includes('vidstuck')) ||
-          (window._currentActiveServer && (window._currentActiveServer.toLowerCase().includes('vidstuck') || window._currentActiveServer.toLowerCase().includes('nebula')));
-        const bufferThreshold = isCurVidStuck ? 750 : 850;
-        const pauseThreshold = isCurVidStuck ? 2000 : 2500;
-
+      // Watchdog: ONLY for HackyMax, because HackyMax streams continuous timeupdates.
+      // Other players (Nebula, Cinezo, Nova, Vortex, Infinity, Spark, Zenith) run via continuous wall-clock!
+      if (isHackyMax && !window._externalIsPaused && window._lastExternalMsgTime) {
         const silence = now - window._lastExternalMsgTime;
-        if (silence > bufferThreshold) {
-          // Freeze subtitles at current confirmed playback second during buffer/stall
+        if (silence > 4000) {
           _markBufferState(true);
         }
-        if (silence > pauseThreshold) {
-          // If silence persists, player is paused: lock paused state permanently until resumed
+        if (silence > 7000) {
           window._externalIsPaused = true;
           window._subPausedElapsed = (window._bufferFreezeElapsed != null)
             ? window._bufferFreezeElapsed
             : Math.round((window._externalCurrentTime || 0) * 1000);
           _setSubSyncBarPaused(true);
 
-          // Broadcast pause to Watch Party guests
           if (typeof WP !== 'undefined' && WP && WP.isHost && WP.code && typeof _broadcast === 'function') {
             _broadcast({
               type: 'pause',
@@ -11238,7 +11236,6 @@
       if (window._externalIsPaused) {
         elapsed = (window._subPausedElapsed != null ? window._subPausedElapsed : 0) + _subOffset;
       } else if (window._isStreamBuffering) {
-        // BUFFERING: Keep subtitles locked at the exact buffer timestamp!
         elapsed = (window._bufferFreezeElapsed != null
           ? window._bufferFreezeElapsed
           : ((window._externalCurrentTime || 0) * 1000)) + _subOffset;
@@ -11278,7 +11275,7 @@
           _subStatusLine.textContent = `⏸ Paused (${mm}:${ss})`;
           _subStatusLine.style.color = 'rgba(255,255,255,0.7)';
         } else {
-          _subStatusLine.textContent = hasLiveFeed ? `⚡ Live-Sync (${mm}:${ss})` : `${mm}:${ss}`;
+          _subStatusLine.textContent = isHackyMax ? `⚡ Live-Sync (${mm}:${ss})` : `⏱ Smooth Sync (${mm}:${ss})`;
           _subStatusLine.style.color = '';
         }
       }
@@ -11298,39 +11295,26 @@
       }
       if (typeof d !== 'object' || d === null) return;
 
-      // Special handling for Vidy / Nova MEDIA_DATA (periodic local history sync)
-      // Vidy broadcasts { type: "MEDIA_DATA", data: "<serialized local history>" } every ~1s.
-      // It is NOT a live player timeupdate event and must NEVER cause seek jumps or unpause playback.
-      if (d.type === 'MEDIA_DATA') {
-        if ((window._externalCurrentTime == null || window._externalCurrentTime === 0) && !_subActive && d.data) {
-          try {
-            const hist = typeof d.data === 'string' ? JSON.parse(d.data) : d.data;
-            if (hist && typeof hist === 'object') {
-              const activeId = window._currentPlayingId || _currentModalId;
-              for (const k of Object.keys(hist)) {
-                if (!activeId || k.includes(String(activeId))) {
-                  const item = hist[k];
-                  if (item && item.progress && typeof item.progress.watched === 'number' && item.progress.watched > 0) {
-                    window._externalCurrentTime = item.progress.watched;
-                    break;
-                  }
-                }
-              }
-            }
-          } catch (_) {}
-        }
-        return; // CRITICAL: Stop processing here! Do NOT let MEDIA_DATA enter live playback/seek logic.
+      // Filter out non-playback messages (ads, analytics, heartbeats, logs, resizing, etc.)
+      const msgType = String(d.type || d.event || d.action || '').toLowerCase();
+      if (/^(?:ping|pong|heartbeat|ad|ads|vast|telemetry|metric|analytics|resize|log|ready)$/i.test(msgType)) {
+        return;
       }
+
+      // Special handling for Vidy / Nova MEDIA_DATA (periodic local history sync)
+      if (d.type === 'MEDIA_DATA') {
+        return;
+      }
+
+      const isHackyMax = _isHackyMaxServer();
 
       // Extract time from message if present
       let extracted = _extractTimeFromMessage(d);
-      let ct = (extracted && typeof extracted.time === 'number') ? extracted.time : null;
+      let ct = (extracted && typeof extracted.time === 'number' && !isNaN(extracted.time) && extracted.time >= 0 && extracted.time < 43200) ? extracted.time : null;
 
       // Identify event type
       let evName = '';
       const isVidSpark = (d.source === 'vidspark-player' || d.source === 'moviesapi-player');
-      const isVidyNova = (d.type === 'PLAYER_EVENT' && d.data && (typeof d.data.currentTime === 'number' || typeof d.data.player_progress === 'number'));
-      const isVidStuck = (d.type === 'VIDEO_PROGRESS' || d.type === 'VIDEO_ENDED') || (event.origin && event.origin.includes('vidstuck'));
       if (d.type === 'VIDEO_PROGRESS') {
         evName = 'timeupdate';
       } else if (d.type === 'VIDEO_ENDED') {
@@ -11352,29 +11336,22 @@
       }
 
       const pState = _checkPlayPause(d);
-      const isBufferingEvent = (pState === 'buffer') ||
-        /(?:buffer|waiting|stalled?|loading|seeking)/i.test(evName) ||
-        (d.data && /(?:buffer|waiting|stalled?|loading|seeking)/i.test(String(d.data.event || d.data.player_status || d.data.type || d.data.action || ''))) ||
-        (d.detail && /(?:buffer|waiting|stalled?|loading|seeking)/i.test(String(d.detail.event || d.detail.state || '')));
+      const isBufferingEvent = isHackyMax && ((pState === 'buffer') ||
+        /(?:buffer|waiting|stalled?|loading)/i.test(evName) ||
+        (d.data && /(?:buffer|waiting|stalled?|loading)/i.test(String(d.data.event || d.data.player_status || ''))));
+
       const isExplicitPause = (evName === 'pause' || evName === 'paused') ||
         (d.type === 'VIDEO_ENDED') ||
         (d.data && d.data.paused === true) ||
         (d.paused === true) ||
-        (pState === 'pause') ||
-        (isVidSpark && (evName === 'pause' || (evName === 'playerstatus' && d.paused === true)));
-      let isExplicitPlay  = !isExplicitPause && !isBufferingEvent && (
+        (pState === 'pause');
+
+      let isExplicitPlay = !isExplicitPause && !isBufferingEvent && (
         (evName === 'play' || evName === 'playing') ||
-        (d.paused === false && evName !== 'pause' && evName !== 'paused' && !isBufferingEvent) ||
-        (d.data && d.data.paused === false && evName !== 'pause' && evName !== 'paused' && !isBufferingEvent) ||
-        (pState === 'play') ||
-        (isVidSpark && (evName === 'play' || (evName === 'playerstatus' && d.paused === false)))
+        (d.paused === false && evName !== 'pause' && evName !== 'paused') ||
+        (d.data && d.data.paused === false && evName !== 'pause' && evName !== 'paused') ||
+        (pState === 'play')
       );
-
-      if (isExplicitPause || isBufferingEvent) {
-        isExplicitPlay = false;
-      }
-
-      const nowMs = Date.now();
 
       const isWpGuestLocked = typeof WP !== 'undefined' && WP && !WP.isHost && (
         WP.hostConn ||
@@ -11382,7 +11359,6 @@
         window._wpHostPaused === true
       );
 
-      // If guest is in Watch Party and host is paused: NEVER allow local iframe to unpause!
       if (isWpGuestLocked && (window._externalIsPaused || window._wpHostPaused)) {
         window._externalIsPaused = true;
         if (ct !== null && window._subPausedElapsed == null) {
@@ -11396,52 +11372,7 @@
         return;
       }
 
-      // Check for advancing playback vs stalled buffer position
-      if (!isExplicitPause && !isBufferingEvent && ct !== null) {
-        if (typeof window._externalCurrentTime === 'number' && window._externalCurrentTime > 0) {
-          if (ct > (window._externalCurrentTime + 0.03)) {
-            // Time is clearly advancing -> video has started/continued playing!
-            isExplicitPlay = true;
-            _markBufferState(false);
-            window._externalIsPaused = false;
-            window._ctStallStartTime = null;
-          } else if (Math.abs(ct - window._externalCurrentTime) < 0.03) {
-            // Position unchanged across messages -> video has stalled or entered buffer!
-            if (!window._ctStallStartTime) {
-              window._ctStallStartTime = nowMs;
-            } else if (nowMs - window._ctStallStartTime >= 300) {
-              // Same position for >= 300ms while supposed to be playing -> freeze immediately!
-              _markBufferState(true);
-              isExplicitPlay = false;
-            }
-          } else if (Math.abs(ct - window._externalCurrentTime) > 1.5) {
-            // User sought or jumped!
-            _markBufferState(false);
-            window._externalIsPaused = false;
-            _subStartTime = nowMs - (ct * 1000);
-            window._subPausedElapsed = null;
-            window._externalCurrentTime = ct;
-            isExplicitPlay = true;
-          } else {
-            window._ctStallStartTime = null;
-          }
-        } else if (window._externalCurrentTime === 0 || window._externalCurrentTime == null) {
-          // Progress restored on load/refresh: if time is advancing or event is play/timeupdate, unpause!
-          if (ct > 0 || evName === 'play' || evName === 'timeupdate' || isVidyNova || isVidStuck || (isVidSpark && d.paused === false)) {
-            isExplicitPlay = true;
-            _markBufferState(false);
-            window._externalIsPaused = false;
-            window._ctStallStartTime = null;
-            window._externalCurrentTime = ct;
-            window._subPausedElapsed = null;
-          } else {
-            window._externalCurrentTime = ct;
-            window._subPausedElapsed = Math.round(ct * 1000);
-          }
-        }
-      }
-
-      // ── BUFFERING EVENT ──────────────────────────────────────────────
+      // ── BUFFERING EVENT (HackyMax only) ──────────────────────────────
       if (isBufferingEvent) {
         _markBufferState(true);
         if (ct !== null && ct > 0) {
@@ -11451,7 +11382,7 @@
         return;
       }
 
-      // ── CASE 1: PAUSE EVENT ──────────────────────────────────────────
+      // ── PAUSE EVENT ──────────────────────────────────────────────────
       if (isExplicitPause) {
         window._externalIsPaused = true;
         _markBufferState(false);
@@ -11463,23 +11394,6 @@
         }
         _setSubSyncBarPaused(true);
 
-        // Immediately update subtitle to frozen frame
-        if (!_maxMode && _subLoaded && _subCues && _subCues.length && window._subPausedElapsed != null) {
-          const ms = window._subPausedElapsed + _subOffset;
-          const cue = _subCues.find(c => ms >= c.start && ms < c.end);
-          const newText = cue ? cue.text : '';
-          if (newText !== _lastIframeSubCueText) {
-            _lastIframeSubCueText = newText;
-            if (newText) {
-              _subText.innerHTML = newText.replace(/\n/g, '<br>');
-              _subText.classList.add('active');
-            } else {
-              _subText.classList.remove('active');
-            }
-          }
-        }
-
-        // Broadcast pause to Watch Party guests
         if (typeof WP !== 'undefined' && WP && WP.isHost && WP.code && typeof _broadcast === 'function') {
           _broadcast({
             type: 'pause',
@@ -11492,36 +11406,27 @@
             serverIndex: typeof _activeServerIndex === 'number' ? _activeServerIndex : 0
           });
         }
-        return; // CRITICAL: Stop processing here so time updates or auto-unpause never trigger!
+        return;
       }
 
-      // ── CASE 2: PLAY EVENT ───────────────────────────────────────────
+      // ── PLAY EVENT ───────────────────────────────────────────────────
       if (isExplicitPlay) {
         _markBufferState(false);
-        if (ct !== null && ct > 0) {
-          _subStartTime = Date.now() - (ct * 1000);
-          window._subPausedElapsed = null;
-          window._externalCurrentTime = ct;
-        } else if (window._externalIsPaused && window._subPausedElapsed != null && window._subPausedElapsed > 0) {
-          _subStartTime = Date.now() - window._subPausedElapsed;
-          window._subPausedElapsed = null;
-        } else if (ct !== null) {
-          _subStartTime = Date.now() - (ct * 1000);
-          window._subPausedElapsed = null;
-          window._externalCurrentTime = ct;
-        } else {
-          _subStartTime = Date.now();
-          window._subPausedElapsed = null;
-        }
         window._externalIsPaused = false;
         window._lastExternalMsgTime = Date.now();
+        if (ct !== null && ct > 0) {
+          _subStartTime = Date.now() - (ct * 1000);
+          window._externalCurrentTime = ct;
+        } else if (window._subPausedElapsed != null && window._subPausedElapsed > 0) {
+          _subStartTime = Date.now() - window._subPausedElapsed;
+        } else if (!_subStartTime) {
+          _subStartTime = Date.now();
+        }
+        window._subPausedElapsed = null;
         _subActive = true;
         _setSubSyncBarPaused(false);
-        if (!_subRaf) {
-          _subRaf = requestAnimationFrame(_subLoop);
-        }
+        if (!_subRaf) _subRaf = requestAnimationFrame(_subLoop);
 
-        // Broadcast play to Watch Party guests
         if (typeof WP !== 'undefined' && WP && WP.isHost && WP.code && typeof _broadcast === 'function') {
           _broadcast({
             type: 'play',
@@ -11536,135 +11441,67 @@
         }
       }
 
-      // ── CASE 3: SEEKED WHILE PAUSED ──────────────────────────────────
-      if ((evName === 'seeked' || evName === 'seek') && ct !== null) {
-        _markBufferState(false);
-        _subActive = true;
-        if (window._externalIsPaused) {
-          window._subPausedElapsed = Math.round(ct * 1000);
-          window._externalCurrentTime = ct;
-          if (!_maxMode && _subLoaded && _subCues && _subCues.length) {
-            const ms = window._subPausedElapsed + _subOffset;
-            const cue = _subCues.find(c => ms >= c.start && ms < c.end);
-            const newText = cue ? cue.text : '';
-            if (newText !== _lastIframeSubCueText) {
-              _lastIframeSubCueText = newText;
-              if (newText) {
-                _subText.innerHTML = newText.replace(/\n/g, '<br>');
-                _subText.classList.add('active');
-              } else {
-                _subText.classList.remove('active');
-              }
-            }
-          }
-          if (!_subRaf) _subRaf = requestAnimationFrame(_subLoop);
-          // Broadcast seek to Watch Party guests
-          if (typeof WP !== 'undefined' && WP && WP.isHost && WP.code && typeof _broadcast === 'function') {
-            _broadcast({
-              type: 'seek',
-              ct: ct,
-              ts: Date.now(),
-              mId: window._currentPlayingId || _currentModalId,
-              mType: window._currentPlayingType || _currentModalType,
-              season: window._currentPlayingSeason || (typeof _selectedSeason !== 'undefined' && _selectedSeason) || 1,
-              episode: window._currentPlayingEpisode || (typeof _selectedEpisode !== 'undefined' && _selectedEpisode) || 1,
-              serverIndex: typeof _activeServerIndex === 'number' ? _activeServerIndex : 0
-            });
-          }
-          return; // Remain paused after seek
-        } else {
-          _subStartTime = Date.now() - (ct * 1000);
-          window._subPausedElapsed = null;
-          window._externalCurrentTime = ct;
-          if (!_maxMode && _subLoaded && _subCues && _subCues.length) {
-            const ms = Math.floor(ct * 1000) + _subOffset;
-            const cue = _subCues.find(c => ms >= c.start && ms < c.end);
-            const newText = cue ? cue.text : '';
-            if (newText !== _lastIframeSubCueText) {
-              _lastIframeSubCueText = newText;
-              if (newText) {
-                _subText.innerHTML = newText.replace(/\n/g, '<br>');
-                _subText.classList.add('active');
-              } else {
-                _subText.classList.remove('active');
-              }
-            }
-          }
-          if (!_subRaf) _subRaf = requestAnimationFrame(_subLoop);
-          if (typeof WP !== 'undefined' && WP && WP.isHost && WP.code && typeof _broadcast === 'function') {
-            _broadcast({
-              type: 'seek',
-              ct: ct,
-              ts: Date.now(),
-              mId: window._currentPlayingId || _currentModalId,
-              mType: window._currentPlayingType || _currentModalType,
-              season: window._currentPlayingSeason || (typeof _selectedSeason !== 'undefined' && _selectedSeason) || 1,
-              episode: window._currentPlayingEpisode || (typeof _selectedEpisode !== 'undefined' && _selectedEpisode) || 1,
-              serverIndex: typeof _activeServerIndex === 'number' ? _activeServerIndex : 0
-            });
-          }
-        }
-      }
-
-      // If time is clearly advancing, player is actively playing — unpause immediately!
-      if (window._externalIsPaused && ct !== null && (ct > (window._externalCurrentTime || 0) + 0.04)) {
-        window._externalIsPaused = false;
-        window._subPausedElapsed = null;
-        _setSubSyncBarPaused(false);
-      }
-
-      // ── CASE 4: CURRENTLY PAUSED ─────────────────────────────────────
-      if (window._externalIsPaused) {
-        // If we are currently paused and did not receive an explicit play event,
-        // stay paused! Do NOT allow background time updates or heartbeats to unpause us.
-        return;
-      }
-
-      // ── CASE 5: TIME UPDATE (ACTIVE PLAYBACK) ────────────────────────
+      // ── TIME UPDATE / CUE DRIFT CORRECTION ───────────────────────────
       if (ct !== null) {
         window._lastExternalMsgTime = Date.now();
 
-        // If video was buffering and time has advanced, unpause buffer state!
+        if (window._externalIsPaused) {
+          // If player was paused and time moved forward by > 0.5s, unpause
+          if (ct > (window._externalCurrentTime || 0) + 0.5) {
+            window._externalIsPaused = false;
+            window._subPausedElapsed = null;
+            _setSubSyncBarPaused(false);
+          } else {
+            // Still paused, just record the position if scrubbed
+            window._externalCurrentTime = ct;
+            window._subPausedElapsed = Math.round(ct * 1000);
+            return;
+          }
+        }
+
         if (window._isStreamBuffering) {
-          if (typeof window._externalCurrentTime === 'number' && ct > (window._externalCurrentTime + 0.05)) {
+          if (ct > (window._externalCurrentTime || 0) + 0.1) {
             _markBufferState(false);
           }
         }
 
-        if (!window._isStreamBuffering) {
-          window._externalCurrentTime = ct;
-          _subStartTime = Date.now() - (ct * 1000);
-          _subActive = true;
+        window._externalCurrentTime = ct;
+
+        // Current estimated playback second from the running wall clock
+        const currentSubSec = _subStartTime ? Math.max(0, (Date.now() - _subStartTime) / 1000) : 0;
+        const drift = Math.abs(ct - currentSubSec);
+
+        if (isHackyMax) {
+          // HackyMax sends granular updates (~250-1000ms).
+          // Only re-anchor if drift is notable (> 0.75s) to avoid micro-jitter blinking!
+          if (!_subStartTime || drift > 0.75) {
+            _subStartTime = Date.now() - (ct * 1000);
+            window._subPausedElapsed = null;
+          }
+        } else {
+          // Other players (Nebula, Cinezo, Vortex, etc.) send messages sparsely (every 2-5s).
+          // Only re-anchor if drift is substantial (> 2.0s), meaning the user scrubbed/seeked in the player!
+          if (!_subStartTime || drift > 2.0) {
+            _subStartTime = Date.now() - (ct * 1000);
+            window._subPausedElapsed = null;
+          }
         }
+
+        _subActive = true;
         _markSubSyncAutoLive(true);
 
-        if (!_maxMode && _subLoaded && _subCues && _subCues.length) {
-          const ms = Math.floor(ct * 1000) + _subOffset;
-          const cue = _subCues.find(c => ms >= c.start && ms < c.end);
-          const newText = cue ? cue.text : '';
-          if (newText !== _lastIframeSubCueText) {
-            _lastIframeSubCueText = newText;
-            if (newText) {
-              _subText.innerHTML = newText.replace(/\n/g, '<br>');
-              _subText.classList.add('active');
-            } else {
-              _subText.classList.remove('active');
-            }
-          }
+        if (!_subRaf) {
+          _subRaf = requestAnimationFrame(_subLoop);
+        }
 
-          if (!_subRaf) {
-            _subRaf = requestAnimationFrame(_subLoop);
-          }
+        if (_subStartBtn && _subStartBtn.style.display !== 'none') {
+          _subStartBtn.style.display = 'none';
+        }
 
-          if (_subStartBtn && _subStartBtn.style.display !== 'none') {
-            _subStartBtn.style.display = 'none';
-          }
-
-          const msg = document.getElementById('subPanelMsg');
-          if (msg && !msg._hasLiveSyncNotice) {
-            msg._hasLiveSyncNotice = true;
-            msg.innerHTML = `✅ <strong style="color:var(--gold)">${_escHtml(_subFileName)}</strong> loaded — <em>${_subCues.length} cues</em>.<br><span style="color:#2ECC71;font-size:0.85em;font-weight:700;">⚡ Live-Sync active — Auto-syncs across players!</span>`;
-          }
+        const msg = document.getElementById('subPanelMsg');
+        if (msg && !msg._hasLiveSyncNotice) {
+          msg._hasLiveSyncNotice = true;
+          msg.innerHTML = `✅ <strong style="color:var(--gold)">${_escHtml(_subFileName)}</strong> loaded — <em>${_subCues.length} cues</em>.<br><span style="color:#2ECC71;font-size:0.85em;font-weight:700;">⚡ Sync active — Auto-syncs across players!</span>`;
         }
       }
     });
@@ -13491,15 +13328,9 @@
           : 0;
         _subStartTime = Date.now() - (resumeSec * 1000);
         _subOffset = 0;
-        if (isAutoplayPlayer) {
-          window._externalIsPaused = false;
-          window._subPausedElapsed = null;
-          _setSubSyncBarPaused(false);
-        } else {
-          window._subPausedElapsed = Math.round(resumeSec * 1000);
-          window._externalIsPaused = true;
-          _setSubSyncBarPaused(true);
-        }
+        window._externalIsPaused = false;
+        window._subPausedElapsed = null;
+        _setSubSyncBarPaused(false);
         _stopSubLoop();
         _lastIframeSubCueText = null;
         _subActive = true;
@@ -13572,15 +13403,9 @@
               : 0;
             _subStartTime = Date.now() - (resumeSec * 1000);
             _subOffset = 0;
-            if (isAutoplayPlayer) {
-              window._externalIsPaused = false;
-              window._subPausedElapsed = null;
-              _setSubSyncBarPaused(false);
-            } else {
-              window._subPausedElapsed = Math.round(resumeSec * 1000);
-              window._externalIsPaused = true;
-              _setSubSyncBarPaused(true);
-            }
+            window._externalIsPaused = false;
+            window._subPausedElapsed = null;
+            _setSubSyncBarPaused(false);
             _stopSubLoop();
             _lastIframeSubCueText = null;
             _subRaf = requestAnimationFrame(_subLoop);
