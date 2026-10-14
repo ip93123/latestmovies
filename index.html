@@ -9211,7 +9211,7 @@
           `https://vidy.st/tv/${id}/${s}/${e}?color=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&autoplayNextEpisode=true&sub=false&subtitles=false&cc=false&subLang=none`,
           `https://vidstuck.xyz/embed/tv/${id}/${s}/${e}?branding=HackyMax&color=E8C97A&autoplay=true&nextEpisode=true&autoplayNextEpisode=true&episodeSelector=true&subtitle=none&sub=false`,
           `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=true&showNextEpisode=1&sub=false&subtitles=false`,
-          `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=sin&sub=0`,
+          `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=none&sub=0&subtitles=false`,
           `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&sub.mode=manual`,
           `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true&sub=false`,
           `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
@@ -9223,7 +9223,7 @@
           `https://vidy.st/movie/${id}?color=E8C97A&autoplay=true&sub=false&subtitles=false&cc=false&subLang=none`,
           `https://vidstuck.xyz/embed/movie/${id}?branding=HackyMax&color=E8C97A&autoplay=true&subtitle=none&sub=false`,
           `https://vidlove.cc/embed/movie/${id}?autoplay=true&sub=false&subtitles=false`,
-          `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=sin&sub=0`,
+          `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=none&sub=0&subtitles=false`,
           `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&sub.mode=manual`,
           `https://cdn.vidspark.to/movie/${id}?autoplay=true&sub=false`,
           `https://vidnest.fun/movie/${id}?autoplay=1`,
@@ -10088,9 +10088,13 @@
         return { time: d.progress.watched, event: 'timeupdate' };
       }
 
-      // Priority 1: High-confidence exact time keys (currentTime, timestamp, etc.)
-      // Note: 'progress' is NOT included here because progress in HTML5 video is a ratio (0.0 to 1.0 or percentage), NOT seconds.
-      const exactTimeKeys = ['currenttime', 'current_time', 'timestamp', 'time', 'position', 'pos', 'seconds', 'second', 'offset', 'value', 'watched'];
+      // Special check: Videasy (Vortex) progress object { player_progress: number, player_status: string }
+      if (typeof d.player_progress === 'number' && !isNaN(d.player_progress) && d.player_progress >= 0) {
+        return { time: d.player_progress, event: String(d.player_status || 'timeupdate') };
+      }
+
+      // Priority 1: High-confidence exact time keys (currentTime, timestamp, player_progress, etc.)
+      const exactTimeKeys = ['currenttime', 'current_time', 'timestamp', 'time', 'position', 'pos', 'seconds', 'second', 'offset', 'value', 'watched', 'player_progress', 'playerprogress'];
 
       // 1. Direct key match (case-insensitive)
       for (const key of Object.keys(d)) {
@@ -10424,7 +10428,7 @@
       // Identify event type
       let evName = '';
       const isVidSpark = (d.source === 'vidspark-player' || d.source === 'moviesapi-player');
-      const isVidyNova = (d.type === 'PLAYER_EVENT' && d.data && typeof d.data.currentTime === 'number');
+      const isVidyNova = (d.type === 'PLAYER_EVENT' && d.data && (typeof d.data.currentTime === 'number' || typeof d.data.player_progress === 'number'));
       const isVidStuck = (d.type === 'VIDEO_PROGRESS' || d.type === 'VIDEO_ENDED') || (event.origin && event.origin.includes('vidstuck'));
       if (d.type === 'VIDEO_PROGRESS') {
         evName = 'timeupdate';
@@ -12497,8 +12501,7 @@
       const frameEl = document.getElementById('playerFrame');
       const activeBtn = document.querySelector('.player-server-btn.active');
       const curServerLabel = activeBtn ? activeBtn.textContent.toLowerCase() : '';
-      const curFrameSrc = (frameEl && frameEl.src) ? frameEl.src.toLowerCase() : '';
-      const isAutoplayPlayer = curFrameSrc.includes('spark') || curFrameSrc.includes('vidspark') || curFrameSrc.includes('nova') || curFrameSrc.includes('vidy') || curFrameSrc.includes('hackymax') || curFrameSrc.includes('vidstuck') || curServerLabel.includes('spark') || curServerLabel.includes('nova') || curServerLabel.includes('vidy') || curServerLabel.includes('hackymax') || curServerLabel.includes('vidstuck');
+      const isAutoplayPlayer = curFrameSrc.includes('spark') || curFrameSrc.includes('vidspark') || curFrameSrc.includes('nova') || curFrameSrc.includes('vidy') || curFrameSrc.includes('hackymax') || curFrameSrc.includes('vidstuck') || curFrameSrc.includes('nebula') || curFrameSrc.includes('videasy') || curFrameSrc.includes('vortex') || curServerLabel.includes('spark') || curServerLabel.includes('nova') || curServerLabel.includes('vidy') || curServerLabel.includes('hackymax') || curServerLabel.includes('vidstuck') || curServerLabel.includes('nebula') || curServerLabel.includes('videasy') || curServerLabel.includes('vortex');
 
       // If cues are already loaded for THIS video/episode, IMMEDIATELY resume the loop and re-render
       if (_subCues && _subCues.length > 0 && window._currentLoadedSubKey === subKey) {
@@ -12655,8 +12658,8 @@
       _destroyMax();
       window._externalCurrentTime = 0;
       window._lastExternalMsgTime = null;
-      const isAutoplayUrl = (url && (url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || url.includes('vidstuck'))) ||
-        (labels && labels[_activeServerIndex] && (labels[_activeServerIndex].toLowerCase().includes('spark') || labels[_activeServerIndex].toLowerCase().includes('nova') || labels[_activeServerIndex].toLowerCase().includes('vidy') || labels[_activeServerIndex].toLowerCase().includes('vidstuck')));
+      const isAutoplayUrl = (url && (url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || url.includes('vidstuck') || url.includes('nebula') || url.includes('videasy') || url.includes('vortex'))) ||
+        (labels && labels[_activeServerIndex] && (labels[_activeServerIndex].toLowerCase().includes('spark') || labels[_activeServerIndex].toLowerCase().includes('nova') || labels[_activeServerIndex].toLowerCase().includes('vidy') || labels[_activeServerIndex].toLowerCase().includes('vidstuck') || labels[_activeServerIndex].toLowerCase().includes('nebula') || labels[_activeServerIndex].toLowerCase().includes('videasy') || labels[_activeServerIndex].toLowerCase().includes('vortex')));
       window._externalIsPaused = !isAutoplayUrl;
       window._isStreamBuffering = false;
       window._bufferFreezeElapsed = null;
@@ -12778,7 +12781,7 @@
       if (typeof window._adblock_pushRecovery === 'function') window._adblock_pushRecovery(url);
 
       const sName = btn ? btn.textContent.trim() : 'Server';
-      const isAutoplayServer = url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || url.includes('vidstuck') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck');
+      const isAutoplayServer = url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || url.includes('vidstuck') || url.includes('nebula') || url.includes('videasy') || url.includes('vortex') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('videasy') || sName.toLowerCase().includes('vortex');
       window._externalCurrentTime = 0;
       window._lastExternalMsgTime = null;
       window._externalIsPaused = !isAutoplayServer;
