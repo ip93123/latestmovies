@@ -3317,8 +3317,8 @@
 
     .topbar-sub-btn {
       position: absolute;
-      top: 1.7rem;
-      right: 17.8rem;
+      top: 1.5rem;
+      right: 14.2rem;
       display: inline-flex;
       align-items: center;
       gap: 0.45rem;
@@ -3333,7 +3333,7 @@
       font-weight: 700;
       letter-spacing: 0.3px;
       cursor: pointer;
-      z-index: 710;
+      z-index: 99999 !important;
       backdrop-filter: blur(10px);
       box-shadow: 0 0 16px rgba(232, 201, 122, 0.2);
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -3607,11 +3607,13 @@
       width: 52px;
       height: 54px;
     }
+    #playerContainer.idle-fs:not(.sub-panel-open) .player-sub-overlay-btn,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs:not(.sub-panel-open) .player-sub-overlay-btn {
       opacity: 0 !important;
       pointer-events: none !important;
       transform: translateY(12px) !important;
     }
+    #playerContainer:not(.idle-fs) .player-sub-overlay-btn,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) .player-sub-overlay-btn {
       opacity: 0.95 !important;
       pointer-events: auto !important;
@@ -3660,11 +3662,13 @@
       width: 56px;
       height: 54px;
     }
+    #playerContainer.idle-fs:not(.sub-panel-open) .player-fs-overlay-btn,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs:not(.sub-panel-open) .player-fs-overlay-btn {
       opacity: 0 !important;
       pointer-events: none !important;
       transform: translateY(12px) !important;
     }
+    #playerContainer:not(.idle-fs) .player-fs-overlay-btn,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) .player-fs-overlay-btn {
       opacity: 0.95 !important;
       pointer-events: auto !important;
@@ -5099,6 +5103,30 @@
       font-family: "Font Awesome 6 Free" !important;
       font-weight: 900 !important;
       color: #ffffff !important;
+    }
+
+    /* ── Bolt (VidBolt) Server button (Electric Amber / Lightning Bolt theme) ────── */
+    .player-server-btn.bolt-btn,
+    .modal-stream-pill.bolt-btn {
+      background: linear-gradient(135deg, #F97316 0%, #EA580C 100%) !important;
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      border: 1px solid rgba(255, 255, 255, 0.25) !important;
+      letter-spacing: normal;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+      box-shadow: none !important;
+    }
+    .player-server-btn.bolt-btn:hover,
+    .modal-stream-pill.bolt-btn:hover {
+      box-shadow: none !important;
+      transform: translateY(-1px);
+      filter: brightness(1.1);
+    }
+    .player-server-btn.bolt-btn.active {
+      box-shadow: none !important;
+      border-color: #FDBA74 !important;
+      outline: 2px solid rgba(253, 186, 116, 0.5) !important;
+      outline-offset: 1px;
     }
 
     /* ── Silver Theme for Non-PostMessage Fallback Players ─────────── */
@@ -6993,6 +7021,7 @@
     /* Fullscreen controls transitions */
     #playerClose,
     #topbarWatchPartyBtn,
+    #subToggleBtn,
     .player-fs-overlay-btn,
     .player-sub-overlay-btn,
     #skipIntroBtn,
@@ -7029,16 +7058,23 @@
       pointer-events: none !important;
     }
 
-    /* In fullscreen, keep close and watch party elevated when active (not idle) */
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #playerClose,
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #topbarWatchPartyBtn {
+    /* Keep close, watch party, and sinhala sub button elevated when active (not idle) */
+    #playerClose,
+    #topbarWatchPartyBtn,
+    #subToggleBtn {
       display: flex !important;
       z-index: 45 !important;
-      opacity: 1;
     }
 
+    #playerContainer:not(.idle-fs) #playerClose,
+    #playerContainer:not(.idle-fs) #topbarWatchPartyBtn,
+    #playerContainer:not(.idle-fs) #subToggleBtn,
+    #playerContainer:not(.idle-fs) .player-sub-overlay-btn,
+    #playerContainer:not(.idle-fs) .player-fs-overlay-btn,
+    #playerContainer:not(.idle-fs) #playerHome,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) #playerClose,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) #topbarWatchPartyBtn,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) #subToggleBtn,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) .player-sub-overlay-btn,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) .player-fs-overlay-btn,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) #playerHome {
@@ -7047,11 +7083,17 @@
       transform: translateY(0) !important;
     }
 
-    /* Automatically hide watchparty, x mark (close), fullscreen marks, and overlay when idle IN FULLSCREEN */
+    /* Automatically hide watchparty, x mark (close), fullscreen marks, and overlay when idle (on all devices & modes) */
+    #playerContainer.idle-fs:not(.sub-panel-open) #playerClose,
+    #playerContainer.idle-fs:not(.sub-panel-open) #topbarWatchPartyBtn,
+    #playerContainer.idle-fs:not(.sub-panel-open) #subToggleBtn,
+    #playerContainer.idle-fs:not(.sub-panel-open) #skipIntroBtn,
+    #playerContainer.idle-fs:not(.sub-panel-open) #skipInfoBadge,
+    #playerContainer.idle-fs:not(.sub-panel-open) .popup-home,
+    #playerContainer.idle-fs:not(.sub-panel-open) #playerHome,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs:not(.sub-panel-open) #playerClose,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs:not(.sub-panel-open) #topbarWatchPartyBtn,
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs:not(.sub-panel-open) .player-sub-overlay-btn,
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs:not(.sub-panel-open) .player-fs-overlay-btn,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs:not(.sub-panel-open) #subToggleBtn,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs:not(.sub-panel-open) #skipIntroBtn,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs:not(.sub-panel-open) #skipInfoBadge,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs:not(.sub-panel-open) .popup-home,
@@ -7061,12 +7103,17 @@
       transform: translateY(-12px) !important;
     }
 
+    #playerContainer.idle-fs:not(.sub-panel-open) .player-sub-overlay-btn,
+    #playerContainer.idle-fs:not(.sub-panel-open) .player-fs-overlay-btn,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs:not(.sub-panel-open) .player-sub-overlay-btn,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs:not(.sub-panel-open) .player-fs-overlay-btn {
+      opacity: 0 !important;
+      pointer-events: none !important;
       transform: translateY(12px) !important;
     }
 
-    /* Hide mouse cursor when idle in fullscreen */
+    /* Hide mouse cursor when idle on player container */
+    #playerContainer.idle-fs,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs {
       cursor: none !important;
     }
@@ -7594,6 +7641,19 @@
     .device-mobile #topbarWatchPartyBtn svg {
       width: 16px !important;
       height: 16px !important;
+    }
+    .device-mobile #subToggleBtn {
+      top: 8px !important;
+      right: 88px !important;
+      width: 34px !important;
+      height: 34px !important;
+      padding: 0 !important;
+      justify-content: center !important;
+      border-radius: 50% !important;
+      z-index: 99999 !important;
+    }
+    .device-mobile #subToggleBtn span:not(.sub-flag) {
+      display: none !important;
     }
     .device-mobile .player-sub-overlay-btn {
       bottom: max(6px, env(safe-area-inset-bottom, 6px)) !important;
@@ -8713,6 +8773,12 @@
 
       <!-- Subtitle File Loader (hidden input) -->
       <input type="file" id="subFileInput" accept=".srt,.vtt,.ass,.ssa" style="display:none">
+
+      <!-- Sinhala Subtitles Toggle Button (On/Off) -->
+      <button class="topbar-sub-btn" id="subToggleBtn" title="Sinhala Subtitles — Toggle On / Off">
+        <span class="sub-flag">🇱🇰</span>
+        <span>Sinhala Sub</span>
+      </button>
 
       <!-- Watch Party button (always top layer) -->
       <button class="topbar-wp-btn" id="topbarWatchPartyBtn" title="Watch Party — Watch together with friends">
@@ -11597,6 +11663,7 @@
       const lbl = (label || '').toLowerCase();
       if (lbl.includes('hackymax')) return ' hackymax-btn';
       if (lbl.includes('sonic') || lbl.includes('vidzee')) return ' sonic-btn vidzee-btn';
+      if (lbl.includes('bolt') || lbl.includes('vidbolt')) return ' bolt-btn';
       if (lbl.includes('vortex') || lbl.includes('videasy')) return ' vortex-btn';
       if (lbl.includes('infinity')) return ' infinity-btn';
       if (lbl.includes('spark') || lbl.includes('vidspark')) return ' spark-btn';
@@ -11614,6 +11681,9 @@
       const raw = String(label);
       if (raw.toLowerCase().includes('sonic')) {
         return `Sonic <i class="fa-sharp fa-solid fa-speakers" style="color:#ffffff;margin-left:4px;"></i>`;
+      }
+      if (raw.toLowerCase().includes('bolt')) {
+        return `Bolt <i class="fa-solid fa-bolt" style="color:#ffffff;margin-left:4px;"></i>`;
       }
       return _escHtml(raw);
     }
@@ -11651,7 +11721,8 @@
             `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=bre&sub=0&subtitles=false`,
             `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&sub.mode=manual`,
             `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true&sub=false`,
-            `https://player.vidzee.wtf/embed/tv/${id}/${s}/${e}`
+            `https://player.vidzee.wtf/embed/tv/${id}/${s}/${e}`,
+            `https://vidbolt.xyz/tv/${id}/${s}/${e}?theme=E8C97A&autoPlay=true`
           ];
         } else {
           urls = [
@@ -11662,10 +11733,11 @@
             `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=en&sub=1`,
             `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&sub.mode=auto&sub.lang=en`,
             `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true&sub=true`,
-            `https://player.vidzee.wtf/embed/tv/${id}/${s}/${e}`
+            `https://player.vidzee.wtf/embed/tv/${id}/${s}/${e}`,
+            `https://vidbolt.xyz/tv/${id}/${s}/${e}?theme=E8C97A&autoPlay=true`
           ];
         }
-        labels = ['HackyMax', 'Nebula', 'Stellar', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Sonic'];
+        labels = ['HackyMax', 'Nebula', 'Stellar', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Sonic', 'Bolt'];
       } else {
         if (hasSinhalaSub) {
           urls = [
@@ -11676,7 +11748,8 @@
             `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=bre&sub=0&subtitles=false`,
             `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&sub.mode=manual`,
             `https://cdn.vidspark.to/movie/${id}?autoplay=true&sub=false`,
-            `https://player.vidzee.wtf/embed/movie/${id}`
+            `https://player.vidzee.wtf/embed/movie/${id}`,
+            `https://vidbolt.xyz/movie/${id}?theme=E8C97A&autoPlay=true`
           ];
         } else {
           urls = [
@@ -11687,10 +11760,11 @@
             `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=en&sub=1`,
             `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&sub.mode=auto&sub.lang=en`,
             `https://cdn.vidspark.to/movie/${id}?autoplay=true&sub=true`,
-            `https://player.vidzee.wtf/embed/movie/${id}`
+            `https://player.vidzee.wtf/embed/movie/${id}`,
+            `https://vidbolt.xyz/movie/${id}?theme=E8C97A&autoPlay=true`
           ];
         }
-        labels = ['HackyMax', 'Nebula', 'Stellar', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Sonic'];
+        labels = ['HackyMax', 'Nebula', 'Stellar', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Sonic', 'Bolt'];
       }
       return { urls, labels };
     }
@@ -12589,6 +12663,16 @@
     }
     window._isVidZeeServer = _isVidZeeServer;
 
+    function _isVidBoltServer() {
+      const curServer = (window._currentActiveServer || '').toLowerCase();
+      const frame = document.getElementById('playerFrame');
+      const curSrc = (frame && frame.src) ? frame.src.toLowerCase() : '';
+      return curServer.includes('bolt') ||
+             curServer.includes('vidbolt') ||
+             curSrc.includes('vidbolt.xyz');
+    }
+    window._isVidBoltServer = _isVidBoltServer;
+
     function _extractTimeFromMessage(eventData, depth = 0) {
       if (eventData == null || depth > 4) return null;
 
@@ -12853,7 +12937,8 @@
       const now = Date.now();
       const isHackyMax = _isHackyMaxServer();
       const isVidZee = _isVidZeeServer();
-      const isContinuousStreamServer = isHackyMax || isVidZee;
+      const isVidBolt = typeof _isVidBoltServer === 'function' ? _isVidBoltServer() : false;
+      const isContinuousStreamServer = isHackyMax || isVidZee || isVidBolt;
 
       // Watchdog: For continuous telemetry players (HackyMax, VidZee), because they stream periodic timeupdates.
       // Other players (Nebula, Cinezo, Nova, Vortex, Infinity, Spark, Zenith) run via continuous wall-clock!
@@ -12960,7 +13045,8 @@
 
       const isHackyMax = _isHackyMaxServer();
       const isVidZee = _isVidZeeServer();
-      const isContinuousStreamServer = isHackyMax || isVidZee;
+      const isVidBolt = typeof _isVidBoltServer === 'function' ? _isVidBoltServer() : false;
+      const isContinuousStreamServer = isHackyMax || isVidZee || isVidBolt;
 
       // Extract time from message if present
       let extracted = _extractTimeFromMessage(d);
@@ -14669,6 +14755,18 @@
       return false;
     }
 
+    function _isOverlayControlsHovered() {
+      const elements = [
+        document.getElementById('playerClose'),
+        document.getElementById('topbarWatchPartyBtn'),
+        document.getElementById('subToggleBtn'),
+        document.getElementById('playerSubSettingsBtn'),
+        document.getElementById('playerFsOverlayBtn'),
+        document.getElementById('subCustomizePanel')
+      ];
+      return elements.some(el => el && el.matches && el.matches(':hover'));
+    }
+
     function _pokePlayerFsControls(forceHide) {
       const pCont = document.getElementById('playerContainer');
       if (!pCont) return;
@@ -14698,21 +14796,24 @@
         return;
       }
 
-      const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || pCont.classList.contains('is-fullscreen') || document.body.classList.contains('is-fullscreen'));
-      const isMobile = window.innerWidth <= 768 || document.body.classList.contains('device-mobile');
       const isPlayerOpen = !!(document.getElementById('playerOverlay')?.classList.contains('open'));
 
-      // If playing and in fullscreen or on mobile, auto-hide after 3.5 seconds of inactivity
-      if (isPlayerOpen && (isFs || isMobile)) {
+      // If playing, auto-hide after 6 seconds of inactivity on ALL devices (TV, PC, Mobile) and all modes
+      if (isPlayerOpen) {
         _fsBtnIdleTimer = setTimeout(() => {
           const sp = document.getElementById('subCustomizePanel');
           if (sp && sp.classList.contains('open')) return;
           // Never hide while video is paused!
           if (_isPlayerVideoPaused()) return;
+          // Never hide while cursor is hovering on controls
+          if (_isOverlayControlsHovered()) {
+            _pokePlayerFsControls();
+            return;
+          }
           pCont.classList.add('idle-fs');
           const c = document.getElementById('fsMouseCatcher');
           if (c) c.style.pointerEvents = 'auto';
-        }, 3500); // 3.5 seconds inactivity auto-hide
+        }, 6000); // 6 seconds inactivity auto-hide
       }
     }
 
@@ -14722,7 +14823,7 @@
         // Paused -> show controls and keep them visible!
         _pokePlayerFsControls();
       } else if (state === 'play' || state === 'playing') {
-        // Playing -> wake controls and start auto-hide timer (fades away after 3.5s)
+        // Playing -> wake controls and start auto-hide timer (fades away after 6s)
         _pokePlayerFsControls();
       }
     }
@@ -14731,8 +14832,8 @@
     // Movement handler: ONLY triggers when cursor actually moved coordinates (prevents synthetic enter/leave loops)
     function _handleFsPointerMove(e) {
       if (e && typeof e.clientX === 'number') {
-        if (Math.abs(e.clientX - _lastFsPointerX) < 3 && Math.abs(e.clientY - _lastFsPointerY) < 3) {
-          return; // Ignore stationary events
+        if (_lastFsPointerX !== -1 && Math.abs(e.clientX - _lastFsPointerX) < 1 && Math.abs(e.clientY - _lastFsPointerY) < 1) {
+          return; // Ignore completely stationary synthetic noise
         }
         _lastFsPointerX = e.clientX;
         _lastFsPointerY = e.clientY;
@@ -14749,6 +14850,20 @@
     ['mousedown', 'pointerdown', 'touchstart', 'touchmove', 'keydown'].forEach(evt => {
       document.addEventListener(evt, () => _pokePlayerFsControls(), { passive: true });
       window.addEventListener(evt, () => _pokePlayerFsControls(), { passive: true });
+    });
+
+    // Keep controls visible while user is actively hovering on buttons
+    ['playerClose', 'topbarWatchPartyBtn', 'subToggleBtn', 'playerSubSettingsBtn', 'playerFsOverlayBtn', 'subCustomizePanel'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('mouseenter', () => {
+        clearTimeout(_fsBtnIdleTimer);
+        const pCont = document.getElementById('playerContainer');
+        if (pCont) pCont.classList.remove('idle-fs');
+      });
+      el.addEventListener('mouseleave', () => {
+        _pokePlayerFsControls();
+      });
     });
 
     const _fsCatcherEl = document.getElementById('fsMouseCatcher');
@@ -15385,9 +15500,10 @@
         : String(activeId);
 
       const frameEl = document.getElementById('playerFrame');
+      const curFrameSrc = (frameEl && frameEl.src) ? frameEl.src.toLowerCase() : '';
       const activeBtn = document.querySelector('.player-server-btn.active');
       const curServerLabel = activeBtn ? activeBtn.textContent.toLowerCase() : '';
-      const isAutoplayPlayer = curFrameSrc.includes('vidzee') || curServerLabel.includes('vidzee') || curFrameSrc.includes('spark') || curFrameSrc.includes('vidspark') || curFrameSrc.includes('nova') || curFrameSrc.includes('vidy') || curFrameSrc.includes('hackymax') || curFrameSrc.includes('vidstuck') || curFrameSrc.includes('nebula') || curFrameSrc.includes('videasy') || curFrameSrc.includes('vortex') || curFrameSrc.includes('cinezo') || curFrameSrc.includes('stellar') || curServerLabel.includes('spark') || curServerLabel.includes('nova') || curServerLabel.includes('vidy') || curServerLabel.includes('hackymax') || curServerLabel.includes('vidstuck') || curServerLabel.includes('nebula') || curServerLabel.includes('videasy') || curServerLabel.includes('vortex') || curServerLabel.includes('cinezo') || curServerLabel.includes('stellar');
+      const isAutoplayPlayer = curFrameSrc.includes('vidzee') || curServerLabel.includes('vidzee') || curFrameSrc.includes('bolt') || curServerLabel.includes('bolt') || curFrameSrc.includes('vidbolt') || curFrameSrc.includes('spark') || curFrameSrc.includes('vidspark') || curFrameSrc.includes('nova') || curFrameSrc.includes('vidy') || curFrameSrc.includes('hackymax') || curFrameSrc.includes('vidstuck') || curFrameSrc.includes('nebula') || curFrameSrc.includes('videasy') || curFrameSrc.includes('vortex') || curFrameSrc.includes('cinezo') || curFrameSrc.includes('stellar') || curServerLabel.includes('spark') || curServerLabel.includes('nova') || curServerLabel.includes('vidy') || curServerLabel.includes('hackymax') || curServerLabel.includes('vidstuck') || curServerLabel.includes('nebula') || curServerLabel.includes('videasy') || curServerLabel.includes('vortex') || curServerLabel.includes('cinezo') || curServerLabel.includes('stellar');
 
       // If cues are already loaded for THIS video/episode, IMMEDIATELY resume the loop and re-render
       if (_subCues && _subCues.length > 0 && window._currentLoadedSubKey === subKey) {
@@ -15576,8 +15692,8 @@
       if (!isGuestLockedInPlay) {
         window._externalCurrentTime = 0;
         window._lastExternalMsgTime = null;
-        const isAutoplayUrl = (url && (url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || url.includes('vidstuck') || url.includes('nebula') || url.includes('videasy') || url.includes('vortex') || url.includes('cinezo') || url.includes('stellar'))) ||
-          (labels && labels[_activeServerIndex] && (labels[_activeServerIndex].toLowerCase().includes('spark') || labels[_activeServerIndex].toLowerCase().includes('nova') || labels[_activeServerIndex].toLowerCase().includes('vidy') || labels[_activeServerIndex].toLowerCase().includes('vidstuck') || labels[_activeServerIndex].toLowerCase().includes('nebula') || labels[_activeServerIndex].toLowerCase().includes('videasy') || labels[_activeServerIndex].toLowerCase().includes('vortex') || labels[_activeServerIndex].toLowerCase().includes('cinezo') || labels[_activeServerIndex].toLowerCase().includes('stellar')));
+        const isAutoplayUrl = (url && (url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || url.includes('vidstuck') || url.includes('nebula') || url.includes('videasy') || url.includes('vortex') || url.includes('cinezo') || url.includes('stellar') || url.includes('bolt') || url.includes('vidbolt'))) ||
+          (labels && labels[_activeServerIndex] && (labels[_activeServerIndex].toLowerCase().includes('spark') || labels[_activeServerIndex].toLowerCase().includes('nova') || labels[_activeServerIndex].toLowerCase().includes('vidy') || labels[_activeServerIndex].toLowerCase().includes('vidstuck') || labels[_activeServerIndex].toLowerCase().includes('nebula') || labels[_activeServerIndex].toLowerCase().includes('videasy') || labels[_activeServerIndex].toLowerCase().includes('vortex') || labels[_activeServerIndex].toLowerCase().includes('cinezo') || labels[_activeServerIndex].toLowerCase().includes('stellar') || labels[_activeServerIndex].toLowerCase().includes('bolt') || labels[_activeServerIndex].toLowerCase().includes('vidbolt')));
         window._externalIsPaused = !isAutoplayUrl;
         window._isStreamBuffering = false;
         window._bufferFreezeElapsed = null;
@@ -15654,7 +15770,7 @@
       const curLabel = labels && labels[_activeServerIndex] ? labels[_activeServerIndex] : 'Server';
       window._currentActiveServer = curLabel;
       window._currentActiveServerUrl = url;
-      const isInitAutoLive = curLabel.toLowerCase().includes('sonic') || curLabel.toLowerCase().includes('vidzee') || curLabel.toLowerCase().includes('hackymax') || curLabel.toLowerCase().includes('infinity') || curLabel.toLowerCase().includes('spark') || curLabel.toLowerCase().includes('nebula') || curLabel.toLowerCase().includes('vortex') || curLabel.toLowerCase().includes('cinezo') || curLabel.toLowerCase().includes('stellar');
+      const isInitAutoLive = curLabel.toLowerCase().includes('sonic') || curLabel.toLowerCase().includes('vidzee') || curLabel.toLowerCase().includes('bolt') || curLabel.toLowerCase().includes('vidbolt') || curLabel.toLowerCase().includes('hackymax') || curLabel.toLowerCase().includes('infinity') || curLabel.toLowerCase().includes('spark') || curLabel.toLowerCase().includes('nebula') || curLabel.toLowerCase().includes('vortex') || curLabel.toLowerCase().includes('cinezo') || curLabel.toLowerCase().includes('stellar');
       _markSubSyncAutoLive(isInitAutoLive);
 
       // ── Auto-load & auto-start Sinhala subtitle for iframe (VidLink, etc.) ────────
@@ -15781,7 +15897,7 @@
           episode: window._currentPlayingEpisode || (typeof _selectedEpisode !== 'undefined' && _selectedEpisode) || 1
         });
       }
-      const isAutoplayServer = url.includes('vidzee') || sName.toLowerCase().includes('sonic') || sName.toLowerCase().includes('vidzee') || url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || url.includes('vidstuck') || url.includes('nebula') || url.includes('videasy') || url.includes('vortex') || url.includes('cinezo') || url.includes('stellar') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('videasy') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('cinezo') || sName.toLowerCase().includes('stellar');
+      const isAutoplayServer = url.includes('vidzee') || sName.toLowerCase().includes('sonic') || sName.toLowerCase().includes('vidzee') || url.includes('bolt') || sName.toLowerCase().includes('bolt') || url.includes('vidbolt') || url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || url.includes('vidstuck') || url.includes('nebula') || url.includes('videasy') || url.includes('vortex') || url.includes('cinezo') || url.includes('stellar') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('videasy') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('cinezo') || sName.toLowerCase().includes('stellar');
       window._externalCurrentTime = 0;
       window._lastExternalMsgTime = null;
       window._externalIsPaused = !isAutoplayServer;
@@ -15792,7 +15908,7 @@
       _subStartTime = Date.now();
       _lastIframeSubCueText = null;
 
-      const isAutoLive = sName.toLowerCase().includes('sonic') || sName.toLowerCase().includes('vidzee') || url.includes('vidzee') || sName.toLowerCase().includes('hackymax') || sName.toLowerCase().includes('infinity') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck') || sName.toLowerCase().includes('cinezo') || sName.toLowerCase().includes('stellar');
+      const isAutoLive = sName.toLowerCase().includes('sonic') || sName.toLowerCase().includes('vidzee') || url.includes('vidzee') || sName.toLowerCase().includes('bolt') || sName.toLowerCase().includes('vidbolt') || url.includes('vidbolt') || sName.toLowerCase().includes('hackymax') || sName.toLowerCase().includes('infinity') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck') || sName.toLowerCase().includes('cinezo') || sName.toLowerCase().includes('stellar');
       _markSubSyncAutoLive(isAutoLive);
 
       const rawSubId = _currentModalId || window._currentPlayingId || (window._currentModalItem && window._currentModalItem.id) || new URLSearchParams(window.location.search).get('m') || new URLSearchParams(window.location.search).get('s');
@@ -15843,6 +15959,11 @@
         } else if (document.webkitFullscreenElement) {
           document.webkitExitFullscreen();
         }
+        clearTimeout(_fsBtnIdleTimer);
+        const pCont = document.getElementById('playerContainer');
+        if (pCont) pCont.classList.remove('idle-fs');
+        const catcher = document.getElementById('fsMouseCatcher');
+        if (catcher) catcher.style.pointerEvents = 'none';
         // Restore modal & category view overlays display
         const modalEl = document.getElementById('modal');
         if (modalEl && modalEl.classList.contains('open')) {

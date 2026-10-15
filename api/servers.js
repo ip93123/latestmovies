@@ -21,7 +21,7 @@ export default async function handler(req, res) {
   const hasSinhalaSub = hasSub === '1' || SINHALA_SUB_KEYS.has(String(id)) || SINHALA_SUB_KEYS.has(subKey);
 
   let urls = [];
-  const labels = ['HackyMax', 'Nebula', 'Stellar', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Sonic'];
+  const labels = ['HackyMax', 'Nebula', 'Stellar', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Sonic', 'Bolt'];
 
   if (type === 'tv') {
     if (hasSinhalaSub) {
@@ -33,7 +33,8 @@ export default async function handler(req, res) {
         `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=bre&sub=0&subtitles=false`,
         `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&sub.mode=manual`,
         `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true&sub=false`,
-        `https://player.vidzee.wtf/embed/tv/${id}/${s}/${e}`
+        `https://player.vidzee.wtf/embed/tv/${id}/${s}/${e}`,
+        `https://vidbolt.xyz/tv/${id}/${s}/${e}?theme=E8C97A&autoPlay=true`
       ];
     } else {
       urls = [
@@ -44,7 +45,8 @@ export default async function handler(req, res) {
         `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=en&sub=1`,
         `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&sub.mode=auto&sub.lang=en`,
         `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true&sub=true`,
-        `https://player.vidzee.wtf/embed/tv/${id}/${s}/${e}`
+        `https://player.vidzee.wtf/embed/tv/${id}/${s}/${e}`,
+        `https://vidbolt.xyz/tv/${id}/${s}/${e}?theme=E8C97A&autoPlay=true`
       ];
     }
   } else {
@@ -58,7 +60,8 @@ export default async function handler(req, res) {
         `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=bre&sub=0&subtitles=false`,
         `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&sub.mode=manual`,
         `https://cdn.vidspark.to/movie/${id}?autoplay=true&sub=false`,
-        `https://player.vidzee.wtf/embed/movie/${id}`
+        `https://player.vidzee.wtf/embed/movie/${id}`,
+        `https://vidbolt.xyz/movie/${id}?theme=E8C97A&autoPlay=true`
       ];
     } else {
       urls = [
@@ -69,7 +72,8 @@ export default async function handler(req, res) {
         `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=en&sub=1`,
         `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&sub.mode=auto&sub.lang=en`,
         `https://cdn.vidspark.to/movie/${id}?autoplay=true&sub=true`,
-        `https://player.vidzee.wtf/embed/movie/${id}`
+        `https://player.vidzee.wtf/embed/movie/${id}`,
+        `https://vidbolt.xyz/movie/${id}?theme=E8C97A&autoPlay=true`
       ];
     }
   }
