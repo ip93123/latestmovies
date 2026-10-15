@@ -1421,6 +1421,64 @@
       letter-spacing: .8px;
     }
 
+    /* ── SINHALA SUBTITLE CORNER BADGE (TOP-RIGHT) ── */
+    .card-sinsub-badge {
+      position: absolute;
+      top: 9px;
+      right: 9px;
+      z-index: 5;
+      pointer-events: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.85));
+      transition: transform 0.25s cubic-bezier(0.2, 0, 0.2, 1);
+    }
+
+    .card-sinsub-badge img {
+      height: 22px;
+      width: auto;
+      max-width: 78px;
+      display: block;
+      object-fit: contain;
+    }
+
+    .movie-card:hover .card-sinsub-badge,
+    .trending-card:hover .card-sinsub-badge {
+      transform: scale(1.06);
+    }
+
+    @media (max-width: 768px) {
+      .card-sinsub-badge {
+        top: 7px;
+        right: 7px;
+      }
+      .card-sinsub-badge img {
+        height: 18px;
+        max-width: 64px;
+      }
+    }
+
+    .device-mobile .card-sinsub-badge {
+      top: 7px;
+      right: 7px;
+    }
+    .device-mobile .card-sinsub-badge img {
+      height: 18px;
+      max-width: 64px;
+    }
+
+    .device-tv .card-sinsub-badge,
+    .tv-mode .card-sinsub-badge {
+      top: 12px;
+      right: 12px;
+    }
+    .device-tv .card-sinsub-badge img,
+    .tv-mode .card-sinsub-badge img {
+      height: 28px;
+      max-width: 96px;
+    }
+
     /* STREAMING LOGOS ON CARD */
     .card-stream-logos {
       position: absolute;
@@ -9620,8 +9678,11 @@
       ${rank ? `<div class="card-rank">${String(rank).padStart(2, '0')}</div>` : ''}
       <div class="card-badges-row" style="position:absolute;top:10px;left:10px;display:flex;gap:5px;align-items:center;z-index:4;">
         ${!rank && !hasNewEp ? `<div class="type-badge ${typeClass}" style="position:static;">${typeLabel}</div>` : ''}
-        ${hasSinhalaSubtitle(item.id) ? `<div class="card-sub-tag" style="position:static;background:rgba(7,9,15,0.85);border:1px solid rgba(46,204,113,0.5);color:#2ECC71;font-size:0.65rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:4px;letter-spacing:0.5px;backdrop-filter:blur(8px);pointer-events:none;display:inline-flex;align-items:center;gap:3px;">🇱🇰 LK SUB</div>` : ''}
       </div>
+      ${hasSinhalaSubtitle(item.id) ? `
+        <div class="card-sinsub-badge" title="Sinhala Subtitle Available">
+          <img src="/sinhala-sub.png" alt="Sinhala Subtitle">
+        </div>` : ''}
       ${newEpBadgeHtml}
       ${buildRatingRing(vote, `${item.id}-card`, true)}
       <div class="card-stream-logos">${streamLogos}</div>
@@ -9656,6 +9717,10 @@
       return `<div class="trending-card" tabindex="0" role="button" aria-label="${title}" data-id="${item.id}" data-type="${type}">
       <div class="trending-poster" style="position:relative">
         ${poster ? `<img src="${poster}" alt="${title}" loading="lazy" decoding="async">` : ''}
+        ${hasSub ? `
+          <div class="card-sinsub-badge" title="Sinhala Subtitle Available" style="top:6px;right:6px;">
+            <img src="/sinhala-sub.png" alt="Sinhala Subtitle" style="height:17px;width:auto;">
+          </div>` : ''}
       </div>
       <div class="trending-info">
         ${metaParts ? `<div class="trending-meta">${metaParts}</div>` : ''}
@@ -9663,7 +9728,6 @@
         <div class="trending-genres">
           ${genres.map(g => `<span class="trending-genre-tag">${g}</span>`).join('')}
           <span class="trending-type-tag ${typeCls}">${typeLabel}</span>
-          ${hasSub ? `<span class="trending-sub-tag">🇱🇰 LK SUB</span>` : ''}
         </div>
       </div>
       ${buildRatingRing(vote || '0', `${item.id}-tr`, false)}
@@ -10179,17 +10243,19 @@
               }
             });
 
-            // Auto-apply LK SUB badge to any rendered cards
+            // Auto-apply Sinhala Subtitle badge to any rendered cards
             document.querySelectorAll('.movie-card[data-id], .trending-card[data-id]').forEach(card => {
               const cid = card.getAttribute('data-id');
               if (hasSinhalaSubtitle(cid)) {
-                const badgeRow = card.querySelector('.card-badges-row');
-                if (badgeRow && !badgeRow.querySelector('.card-sub-tag')) {
-                  const tag = document.createElement('div');
-                  tag.className = 'card-sub-tag';
-                  tag.style.cssText = 'position:static;background:rgba(7,9,15,0.85);border:1px solid rgba(46,204,113,0.5);color:#2ECC71;font-size:0.65rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:4px;letter-spacing:0.5px;backdrop-filter:blur(8px);pointer-events:none;display:inline-flex;align-items:center;gap:3px;';
-                  tag.textContent = '🇱🇰 LK SUB';
-                  badgeRow.appendChild(tag);
+                const poster = card.querySelector('.card-poster, .trending-poster');
+                if (poster && !poster.querySelector('.card-sinsub-badge')) {
+                  const badge = document.createElement('div');
+                  badge.className = 'card-sinsub-badge';
+                  badge.title = 'Sinhala Subtitle Available';
+                  const isTrending = card.classList.contains('trending-card');
+                  if (isTrending) badge.style.cssText = 'top:6px;right:6px;';
+                  badge.innerHTML = `<img src="/sinhala-sub.png" alt="Sinhala Subtitle" style="${isTrending ? 'height:17px;width:auto;' : ''}">`;
+                  poster.appendChild(badge);
                 }
               }
             });
