@@ -798,6 +798,163 @@
       opacity: 1;
     }
 
+    .status-badge-active {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #2ECC71;
+      background: rgba(46, 204, 113, 0.12);
+      border: 1px solid rgba(46, 204, 113, 0.35);
+      letter-spacing: 0.4px;
+    }
+
+    /* Leaderboard Card & Grid */
+    #leaderboardCard {
+      position: relative;
+      z-index: 20;
+      margin-bottom: 2rem;
+    }
+
+    .leaderboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 1.1rem;
+      margin-top: 1.2rem;
+    }
+
+    .leaderboard-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      border-radius: var(--radius-md);
+      background: rgba(14, 20, 34, 0.65);
+      border: 1px solid var(--border);
+      transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .leaderboard-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      border-color: rgba(232, 201, 122, 0.45);
+    }
+
+    .leaderboard-card.rank-1 {
+      background: linear-gradient(135deg, rgba(232, 201, 122, 0.16), rgba(14, 20, 34, 0.85));
+      border: 1.5px solid rgba(232, 201, 122, 0.55);
+      box-shadow: 0 4px 20px rgba(232, 201, 122, 0.15);
+    }
+
+    .leaderboard-card.rank-2 {
+      background: linear-gradient(135deg, rgba(192, 204, 222, 0.14), rgba(14, 20, 34, 0.85));
+      border: 1.5px solid rgba(192, 204, 222, 0.45);
+    }
+
+    .leaderboard-card.rank-3 {
+      background: linear-gradient(135deg, rgba(205, 127, 50, 0.14), rgba(14, 20, 34, 0.85));
+      border: 1.5px solid rgba(205, 127, 50, 0.45);
+    }
+
+    .rank-number-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .rank-1 .rank-number-badge {
+      background: linear-gradient(135deg, #E8C97A, #C9A227);
+      color: #07090F;
+      box-shadow: 0 0 16px rgba(232, 201, 122, 0.65);
+      border: none;
+    }
+
+    .rank-2 .rank-number-badge {
+      background: linear-gradient(135deg, #E2E8F0, #94A3B8);
+      color: #0F172A;
+      box-shadow: 0 0 14px rgba(226, 232, 240, 0.5);
+      border: none;
+    }
+
+    .rank-3 .rank-number-badge {
+      background: linear-gradient(135deg, #FDBA74, #C2410C);
+      color: #fff;
+      box-shadow: 0 0 14px rgba(249, 115, 22, 0.45);
+      border: none;
+    }
+
+    .uploader-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(232, 201, 122, 0.12);
+      border: 1.5px solid rgba(232, 201, 122, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold);
+      font-weight: 800;
+      font-size: 1.05rem;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .uploader-meta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .uploader-name {
+      font-weight: 700;
+      font-size: 0.98rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .uploader-role {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .sub-count-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(232, 201, 122, 0.1);
+      border: 1px solid rgba(232, 201, 122, 0.3);
+      color: var(--gold);
+      font-size: 0.8rem;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .sub-count-pill b {
+      font-size: 0.98rem;
+      color: #fff;
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
@@ -808,6 +965,10 @@
       .studio-card { padding: 1.2rem; }
       .selected-card { flex-direction: column; }
       .selected-poster { width: 80px; height: 120px; }
+      .leaderboard-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+      .leaderboard-card { padding: 12px 14px; gap: 10px; }
+      .rank-number-badge { width: 34px; height: 34px; font-size: 0.9rem; }
+      .uploader-avatar { width: 36px; height: 36px; font-size: 0.95rem; }
     }
   </style>
 </head>
@@ -974,6 +1135,20 @@
           <button type="button" id="startUploadBtn" class="btn-gold" style="display:none;" onclick="startUpload()">
             <span>🚀 Upload &amp; Link Subtitle</span>
           </button>
+        </div>
+      </div>
+
+      <!-- Top Contributors Leaderboard -->
+      <div class="studio-card" id="leaderboardCard">
+        <div class="studio-card-title" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 1.35rem;">🏆</span>
+            <span>Top Subtitle Contributors Leaderboard</span>
+          </div>
+          <span id="totalContributorsCount" style="font-size: 0.8rem; color: var(--gold); background: rgba(232, 201, 122, 0.1); border: 1px solid rgba(232, 201, 122, 0.28); padding: 4px 12px; border-radius: 999px; font-weight: 700;">Loading contributors…</span>
+        </div>
+        <div id="leaderboardGrid" class="leaderboard-grid">
+          <div style="color:var(--text-muted); padding:1rem; grid-column: 1/-1;">Loading contributor rankings…</div>
         </div>
       </div>
 
@@ -1515,7 +1690,7 @@
               <td><span class="type-pill ${isTv ? 'tv' : 'movie'}">${isTv ? 'TV' : 'MOVIE'}</span></td>
               <td><span class="file-ext-badge">${(item.format || 'srt').toUpperCase()}</span></td>
               <td>${item.uploader || 'Admin'}</td>
-              <td><span style="color:var(--green); font-weight:700;">🟢 Active</span></td>
+              <td><span class="status-badge-active">Active</span></td>
               <td>
                 <a href="${isTv ? `/?s=${item.tmdbId || item.key}&season=${item.season || 1}&episode=${item.episode || 1}&play=1` : `/?m=${item.tmdbId || item.key}&play=1`}" target="_blank" class="btn-test-play" style="padding:4px 10px; font-size:0.75rem;">
                   <i class="fa-solid fa-play" style="margin-right:4px;"></i> Play
@@ -1524,7 +1699,72 @@
             </tr>
           `;
         }).join('');
+
+        // Also refresh Top Contributors Leaderboard
+        loadLeaderboard();
       } catch (_) {}
+    }
+
+    // ── Load Top Contributors Leaderboard ─────────────────────────────────────
+    async function loadLeaderboard() {
+      try {
+        const res = await fetch('/api/sub-catalog?all=1');
+        if (!res.ok) return;
+        const data = await res.json();
+        const grid = document.getElementById('leaderboardGrid');
+        const countBadge = document.getElementById('totalContributorsCount');
+        if (!grid || !data.catalog) return;
+
+        // Tally counts per uploader
+        const counts = {};
+        Object.values(data.catalog).forEach(item => {
+          let u = (item.uploader || 'Anonymous').trim();
+          counts[u] = (counts[u] || 0) + 1;
+        });
+
+        // Sort descending by count, then alphabetically
+        const sorted = Object.entries(counts).sort((a, b) => {
+          if (b[1] !== a[1]) return b[1] - a[1];
+          return a[0].localeCompare(b[0]);
+        });
+
+        if (countBadge) {
+          countBadge.textContent = `${sorted.length} Contributors Ranked`;
+        }
+
+        if (sorted.length === 0) {
+          grid.innerHTML = '<div style="color:var(--text-muted); padding:1rem; grid-column: 1/-1;">No contributor uploads yet.</div>';
+          return;
+        }
+
+        grid.innerHTML = sorted.map(([name, count], index) => {
+          const rank = index + 1;
+          const rankClass = rank === 1 ? 'rank-1' : (rank === 2 ? 'rank-2' : (rank === 3 ? 'rank-3' : ''));
+          const rankMedal = rank === 1 ? '🥇' : (rank === 2 ? '🥈' : (rank === 3 ? '🥉' : ''));
+          const initial = (name || 'U').charAt(0).toUpperCase();
+          const isSystem = name.toLowerCase() === 'system';
+          const roleText = rank === 1 ? '👑 Top Contributor' : (isSystem ? 'Official System' : `Rank #${rank} Contributor`);
+
+          return `
+            <div class="leaderboard-card ${rankClass}">
+              <div class="rank-number-badge">${rankMedal || rank}</div>
+              <div class="uploader-avatar">${initial}</div>
+              <div class="uploader-meta">
+                <div class="uploader-name" title="${name}">
+                  <span>${name}</span>
+                  ${rank === 1 ? '<i class="fa-solid fa-crown" style="color:var(--gold); font-size:0.8rem;"></i>' : ''}
+                </div>
+                <div class="uploader-role">${roleText}</div>
+              </div>
+              <div class="sub-count-pill">
+                <b>${count}</b> ${count === 1 ? 'Subtitle' : 'Subtitles'}
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error('[Leaderboard error]', err);
+      }
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
