@@ -180,6 +180,7 @@ export default {
     resHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate');
     resHeaders.set('Pragma', 'no-cache');
     resHeaders.set('Expires', '0');
+    resHeaders.set('Vary', 'Accept-Encoding, CF-Device-Type, User-Agent');
 
     return new Response(upstream.body, {
       status: upstream.status,
