@@ -1228,7 +1228,7 @@
   <header class="sub-header">
     <a href="/" class="brand-wrap" title="Return to HackyMax Home">
       <img src="logo.png?v=3" alt="HackyMax Logo">
-      <span class="brand-tag">🇱🇰 Subtitle Studio</span>
+      <span class="brand-tag" style="display:inline-flex;align-items:center;gap:6px;"><img src="/sinhala-sub.png" alt="Sinhala Subtitle" style="height:19px;width:auto;display:inline-block;vertical-align:middle;"> Studio</span>
     </a>
 
     <div class="user-actions" id="headerUserActions">
@@ -1652,7 +1652,7 @@
 
         if (data.exists && data.item) {
           banner.className = 'status-banner exists';
-          titleEl.innerHTML = '✅ Already Subtitled (Sinhala 🇱🇰)';
+          titleEl.innerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;"><span style="color:#2ECC71;">✅ Already Subtitled</span> <img src="/sinhala-sub.png" alt="Sinhala Subtitle" style="height:20px;width:auto;display:inline-block;vertical-align:middle;"></span>';
           const dateStr = data.item.uploadedAt ? new Date(data.item.uploadedAt).toLocaleDateString() : 'System';
           subEl.innerHTML = `Format: <strong>.${data.item.format || 'srt'}</strong> · Uploader: <strong>${data.item.uploader || 'Admin'}</strong> · Date: ${dateStr}`;
 

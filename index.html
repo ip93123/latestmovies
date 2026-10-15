@@ -323,6 +323,33 @@
       color: #111115 !important;
     }
 
+    .nav-sinsub-img {
+      height: 20px;
+      width: auto;
+      max-width: 66px;
+      display: inline-block;
+      vertical-align: middle;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+      transition: transform 0.22s cubic-bezier(0.2, 0, 0.2, 1);
+    }
+
+    .nav-tab:hover .nav-sinsub-img {
+      transform: scale(1.08);
+    }
+
+    .nav-tab.active .nav-sinsub-img {
+      transform: scale(1.04);
+      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.65));
+    }
+
+    @media (max-width: 768px) {
+      .nav-sinsub-img {
+        height: 16px;
+        max-width: 50px;
+      }
+    }
+
     .nav-divider {
       position: relative;
       z-index: 2;
@@ -8868,7 +8895,9 @@
         <button type="button" class="nav-tab active" data-tab="home" onclick="window.navGo('home')">Home</button>
         <button type="button" class="nav-tab" data-tab="movies" onclick="window.navGo('movies')">Movies</button>
         <button type="button" class="nav-tab" data-tab="tv" onclick="window.navGo('tv')">TV</button>
-        <button type="button" class="nav-tab" data-tab="sub" onclick="window.navGo('sub')">🇱🇰 Sub</button>
+        <button type="button" class="nav-tab" data-tab="sub" onclick="window.navGo('sub')" title="සිංහල උපසිරැසි (Sinhala Subtitles)">
+          <img src="/sinhala-sub.png" alt="සිංහල" class="nav-sinsub-img">
+        </button>
         <button type="button" class="nav-tab" data-tab="mylist" onclick="window.navGo('mylist')">My List</button>
       </div>
       <span class="nav-divider"></span>
@@ -8937,7 +8966,7 @@
       <ul class="mobile-nav-list">
         <li><a href="#trending" onclick="window.toggleMobileNav(false)"><span><i class="fa-solid fa-fire" style="color:#FF4500;"></i> Trending</span><span style="opacity:0.4;">›</span></a></li>
         <li><a href="#categories" onclick="window.toggleMobileNav(false)"><span><i class="fa-solid fa-tags" style="color:var(--gold);"></i> Categories</span><span style="opacity:0.4;">›</span></a></li>
-        <li><a href="javascript:void(0)" onclick="window.toggleMobileNav(false); openCategoryPage('language', 'si', '🇱🇰 Sinhala Subtitles', 'Movies &amp; TV Series with Sinhala Subtitles')" style="color:#2ECC71;"><span>🇱🇰 Subtitle (Sinhala)</span><span class="mobile-sub-tag">SUB</span></a></li>
+        <li><a href="javascript:void(0)" onclick="window.toggleMobileNav(false); openCategoryPage('language', 'si', '<span style=\'display:inline-flex;align-items:center;gap:8px;\'><img src=\'/sinhala-sub.png\' style=\'height:28px;vertical-align:middle;display:inline-block;\' alt=\'සිංහල Subtitle\'> සිංහල උපසිරැසි</span>', 'Movies &amp; TV Series with Sinhala Subtitles')" style="display:flex;align-items:center;justify-content:space-between;"><span style="display:inline-flex;align-items:center;gap:8px;"><img src="/sinhala-sub.png" alt="Sinhala Subtitle" style="height:19px;width:auto;display:inline-block;"><span style="color:#F1C40F;font-weight:600;">සිංහල උපසිරැසි</span></span><span style="opacity:0.4;">›</span></a></li>
         <li><a href="javascript:void(0)" onclick="window.toggleMobileNav(false); openCategoryPage('movies', 'all', '<i class=\'fa-solid fa-film\'></i> Movies', 'Explore latest &amp; popular movies')"><span><i class="fa-solid fa-film" style="color:#00D2FF;"></i> Movies</span><span style="opacity:0.4;">›</span></a></li>
         <li><a href="javascript:void(0)" onclick="window.toggleMobileNav(false); openCategoryPage('tvshows', 'all', '<i class=\'fa-solid fa-tv\'></i> TV Series', 'Explore top rated &amp; popular TV series')"><span><i class="fa-solid fa-tv" style="color:#A855F7;"></i> TV Series</span><span style="opacity:0.4;">›</span></a></li>
         <li><a href="javascript:void(0)" onclick="window.toggleMobileNav(false); openCategoryPage('toprated', 'all', '<i class=\'fa-solid fa-star\'></i> Top Rated All Time', 'Highest rated movies &amp; series of all time')"><span><i class="fa-solid fa-star" style="color:#F59E0B;"></i> Top Rated</span><span style="opacity:0.4;">›</span></a></li>
@@ -9124,7 +9153,7 @@
       <img src="logo.png?v=3" alt="Hacky Max" style="height:58px;width:auto;max-width:240px;object-fit:contain;filter:drop-shadow(0 2px 10px rgba(0,0,0,0.5));">
     </div>
     <p style="margin-top:.5rem">Powered by TMDB & OMDb · Streaming data by JustWatch via TMDB · Updates daily</p>
-    <p style="margin-top:.35rem;font-size:0.83rem;color:rgba(255,255,255,0.65);">🇱🇰 Sinhala Subtitles & Translations credited to <a href="https://www.baiscope.lk" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:none;font-weight:600;">Baiscope.lk</a> & <a href="https://zoom.lk" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:none;font-weight:600;">Zoom.lk</a> community translators</p>
+    <p style="margin-top:.35rem;font-size:0.83rem;color:rgba(255,255,255,0.7);display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;"><img src="/sinhala-sub.png" alt="Sinhala Subtitle" style="height:17px;width:auto;display:inline-block;vertical-align:middle;"><span>Sinhala Subtitles &amp; Translations credited to <a href="https://www.baiscope.lk" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:none;font-weight:600;">Baiscope.lk</a> &amp; <a href="https://zoom.lk" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:none;font-weight:600;">Zoom.lk</a> community translators</span></p>
     <div class="footer-links">
       <a href="legal/terms.html">Terms of Service</a>
       <a href="legal/dmca.html">DMCA/Copyright</a>
@@ -10290,9 +10319,10 @@
       languages: [
         {
           code: 'si',
-          title: '🇱🇰 Sinhala Subtitles',
-          sub: 'Sinhala Subtitle Movies',
-          badge: '🇱🇰 Sin Sub',
+          title: 'සිංහල උපසිරැසි',
+          sub: 'Sinhala Subtitles',
+          badge: 'සිංහල',
+          badgeImg: '/sinhala-sub.png',
           accent: '#059669',
           gradient: 'linear-gradient(135deg, rgba(5,150,105,0.88) 0%, rgba(6,78,59,0.95) 100%)',
           img: 'https://image.tmdb.org/t/p/w780/gDyLcjvmdAhmYqjCMwZ9PndnAVm.jpg'
@@ -10484,9 +10514,9 @@
               <div class="category-card-overlay"></div>
               <div class="category-card-tint"></div>
               <div class="category-card-content">
-                <div class="category-card-native">${l.title}</div>
+                <div class="category-card-native">${l.code === 'si' ? `<span style="display:inline-flex;align-items:center;gap:6px;"><img src="/sinhala-sub.png" alt="සිංහල" style="height:18px;width:auto;display:inline-block;"><span>${l.title}</span></span>` : l.title}</div>
                 <div class="category-card-sub">${l.sub}</div>
-                <div class="category-card-badge">${l.badge}</div>
+                <div class="category-card-badge">${l.badgeImg ? `<img src="${l.badgeImg}" alt="${l.sub}" style="height:14px;width:auto;display:inline-block;vertical-align:middle;">` : l.badge}</div>
               </div>
             </div>`;
         }).join('');
@@ -10520,7 +10550,7 @@
             item = CATEGORIES_DATA.genres.find(x => String(x.id) === String(catKey));
           }
           if (item) {
-            const displayTitle = catType === 'language' ? (catKey === 'si' ? '🇱🇰 Sinhala Subtitles' : `${item.title} · ${item.sub}`) : item.title;
+            const displayTitle = catType === 'language' ? (catKey === 'si' ? '<span style="display:inline-flex;align-items:center;gap:10px;"><img src="/sinhala-sub.png" style="height:32px;width:auto;vertical-align:middle;display:inline-block;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.8));" alt="Sinhala Subtitle"><span>සිංහල උපසිරැසි</span></span>' : `${item.title} · ${item.sub}`) : item.title;
             const displaySub = catType === 'language' ? (catKey === 'si' ? 'Movies & TV Series with Sinhala Subtitles' : `Top Rated & Popular ${item.sub} Movies and Series`) : item.sub;
             openCategoryPage(catType, catKey, displayTitle, displaySub, true);
           }
@@ -10557,7 +10587,7 @@
         _currentCatItemData = { title: title || '<i class="fa-solid fa-gem"></i> 4K Ultra HD Picks', sub: sub || 'Cinematic 4K Ultra HD resolution titles with immersive clarity' };
       } else if (catType === 'language') {
         if (catKey === 'si') {
-          _currentCatItemData = { title: '🇱🇰 Sinhala Subtitles', sub: 'Movies & TV Series with Sinhala Subtitles' };
+          _currentCatItemData = { title: '<span style="display:inline-flex;align-items:center;gap:10px;"><img src="/sinhala-sub.png" style="height:32px;width:auto;vertical-align:middle;display:inline-block;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.8));" alt="Sinhala Subtitle"><span>සිංහල උපසිරැසි</span></span>', sub: 'Movies & TV Series with Sinhala Subtitles' };
           if (typeof setNavActive === 'function') setNavActive('sub');
         } else {
           _currentCatItemData = CATEGORIES_DATA.languages.find(x => x.code === catKey) || { title, sub };
@@ -11808,7 +11838,7 @@
       ${details.number_of_seasons ? `<span>· ${details.number_of_seasons} Season${details.number_of_seasons > 1 ? 's' : ''}</span>` : ''}
       ${details.vote_average ? `<span>· ★ ${details.vote_average.toFixed(1)}</span>` : ''}
       ${(details.genres || []).slice(0, 2).map(g => `<span style="background:rgba(232,201,122,0.1);color:var(--gold);padding:.15rem .5rem;border-radius:4px;font-size:.72rem">${g.name}</span>`).join('')}
-      ${(typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(id)]) ? `<span class="modal-sub-badge" style="background:rgba(46,204,113,0.18);border:1px solid rgba(46,204,113,0.5);color:#2ECC71;padding:.15rem .5rem;border-radius:20px;font-size:.72rem;font-weight:700;display:inline-flex;align-items:center;gap:3px;letter-spacing:0.3px;">🇱🇰 සිංහල උපසිරැසි සහිතයි</span>` : ''}
+      ${(hasSinhalaSubtitle(id) || (typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(id)])) ? `<span class="modal-sub-badge" style="display:inline-flex;align-items:center;gap:6px;background:rgba(7,9,15,0.7);border:1px solid rgba(241,196,15,0.4);padding:2px 8px 2px 4px;border-radius:20px;backdrop-filter:blur(6px);"><img src="/sinhala-sub.png" alt="Sinhala Subtitle" style="height:18px;width:auto;display:inline-block;"><span style="color:#F1C40F;font-size:0.72rem;font-weight:700;">උපසිරැසි සහිතයි</span></span>` : ''}
     `;
 
         const shareBtn = document.getElementById('modalShare');
@@ -16734,7 +16764,7 @@
       } else if (target === 'tv') {
         openCategoryPage('tvshows', 'all', '<i class="fa-solid fa-tv"></i> TV Series', 'Explore top rated & popular TV series');
       } else if (target === 'sub') {
-        openCategoryPage('language', 'si', '🇱🇰 Sinhala Subtitles', 'Movies & TV Series with Sinhala Subtitles');
+        openCategoryPage('language', 'si', '<span style="display:inline-flex;align-items:center;gap:10px;"><img src="/sinhala-sub.png" style="height:32px;width:auto;vertical-align:middle;display:inline-block;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.8));" alt="Sinhala Subtitle"><span>සිංහල උපසිරැසි</span></span>', 'Movies & TV Series with Sinhala Subtitles');
       } else if (target === 'mylist') {
         openWishlist();
       }
@@ -16939,7 +16969,7 @@
             displaySub = 'Cinematic 4K Ultra HD resolution titles with immersive clarity';
           } else if (catParam === 'language') {
             if (catIdParam === 'si') {
-              displayTitle = '🇱🇰 Sinhala Subtitles';
+              displayTitle = '<span style="display:inline-flex;align-items:center;gap:10px;"><img src="/sinhala-sub.png" style="height:32px;width:auto;vertical-align:middle;display:inline-block;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.8));" alt="Sinhala Subtitle"><span>සිංහල උපසිරැසි</span></span>';
               displaySub = 'Movies & TV Series with Sinhala Subtitles';
             } else {
               const item = CATEGORIES_DATA.languages.find(x => x.code === catIdParam);
