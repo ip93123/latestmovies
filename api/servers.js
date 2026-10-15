@@ -21,7 +21,7 @@ export default async function handler(req, res) {
   const hasSinhalaSub = hasSub === '1' || SINHALA_SUB_KEYS.has(String(id)) || SINHALA_SUB_KEYS.has(subKey);
 
   let urls = [];
-  const labels = ['HackyMax', 'Nebula', 'Cinezo', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Zenith', 'Hyperion'];
+  const labels = ['HackyMax', 'Nebula', 'Stellar', 'Nova', 'Vortex', 'Infinity', 'Spark'/*, 'Zenith', 'Hyperion'*/];
 
   if (type === 'tv') {
     if (hasSinhalaSub) {
@@ -32,9 +32,9 @@ export default async function handler(req, res) {
         `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=true&showNextEpisode=1&sub=false&subtitles=false`,
         `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=bre&sub=0&subtitles=false`,
         `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&sub.mode=manual`,
-        `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true&sub=false`,
-        `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
-        `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
+        `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true&sub=false`//,
+        // `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
+        // `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
       ];
     } else {
       urls = [
@@ -44,9 +44,9 @@ export default async function handler(req, res) {
         `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=true&showNextEpisode=1&sub=true`,
         `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=en&sub=1`,
         `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&sub.mode=auto&sub.lang=en`,
-        `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true&sub=true`,
-        `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
-        `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
+        `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true&sub=true`//,
+        // `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
+        // `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
       ];
     }
   } else {
@@ -59,9 +59,9 @@ export default async function handler(req, res) {
         `https://vidlove.cc/embed/movie/${id}?autoplay=true&sub=false&subtitles=false`,
         `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=bre&sub=0&subtitles=false`,
         `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&sub.mode=manual`,
-        `https://cdn.vidspark.to/movie/${id}?autoplay=true&sub=false`,
-        `https://vidnest.fun/movie/${id}?autoplay=1`,
-        `https://vixsrc.to/movie/${id}?autoplay=1`
+        `https://cdn.vidspark.to/movie/${id}?autoplay=true&sub=false`//,
+        // `https://vidnest.fun/movie/${id}?autoplay=1`,
+        // `https://vixsrc.to/movie/${id}?autoplay=1`
       ];
     } else {
       urls = [
@@ -71,9 +71,9 @@ export default async function handler(req, res) {
         `https://vidlove.cc/embed/movie/${id}?autoplay=true&sub=true`,
         `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=en&sub=1`,
         `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&sub.mode=auto&sub.lang=en`,
-        `https://cdn.vidspark.to/movie/${id}?autoplay=true&sub=true`,
-        `https://vidnest.fun/movie/${id}?autoplay=1`,
-        `https://vixsrc.to/movie/${id}?autoplay=1`
+        `https://cdn.vidspark.to/movie/${id}?autoplay=true&sub=true`//,
+        // `https://vidnest.fun/movie/${id}?autoplay=1`,
+        // `https://vixsrc.to/movie/${id}?autoplay=1`
       ];
     }
   }

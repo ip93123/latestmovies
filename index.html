@@ -4260,10 +4260,48 @@
       outline-offset: 1px;
     }
 
-    /* ── Infinity Server button (Vibrant Blue theme) ───────────────── */
+    /* ── Infinity & Vortex Server buttons (Ash / Slate Gray theme for fallback servers) ─ */
     .player-server-btn.infinity-btn,
-    .modal-stream-pill.infinity-btn {
-      background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+    .modal-stream-pill.infinity-btn,
+    .player-server-btn.vortex-btn,
+    .modal-stream-pill.vortex-btn,
+    .player-server-btn.videasy-btn,
+    .modal-stream-pill.videasy-btn {
+      background: linear-gradient(135deg, #64748B 0%, #475569 100%) !important;
+      color: #F8FAFC !important;
+      font-weight: 600 !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      letter-spacing: normal;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+      box-shadow: none !important;
+    }
+    .player-server-btn.infinity-btn:hover,
+    .modal-stream-pill.infinity-btn:hover,
+    .player-server-btn.vortex-btn:hover,
+    .modal-stream-pill.vortex-btn:hover,
+    .player-server-btn.videasy-btn:hover,
+    .modal-stream-pill.videasy-btn:hover {
+      background: linear-gradient(135deg, #788A9F 0%, #576577 100%) !important;
+      box-shadow: none !important;
+      transform: translateY(-1px);
+      filter: brightness(1.1);
+    }
+    .player-server-btn.infinity-btn.active,
+    .player-server-btn.vortex-btn.active,
+    .player-server-btn.videasy-btn.active {
+      background: linear-gradient(135deg, #94A3B8 0%, #64748B 100%) !important;
+      box-shadow: none !important;
+      border-color: #E2E8F0 !important;
+      outline: 2px solid rgba(226, 232, 240, 0.5) !important;
+      outline-offset: 1px;
+    }
+
+    /* ── Stellar (Cinezo) Server button (Vibrant Emerald / Mint Green theme) ── */
+    .player-server-btn.stellar-btn,
+    .modal-stream-pill.stellar-btn,
+    .player-server-btn.cinezo-btn,
+    .modal-stream-pill.cinezo-btn {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
       color: #ffffff !important;
       font-weight: 700 !important;
       border: 1px solid rgba(255, 255, 255, 0.25) !important;
@@ -4271,16 +4309,19 @@
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
       box-shadow: none !important;
     }
-    .player-server-btn.infinity-btn:hover,
-    .modal-stream-pill.infinity-btn:hover {
+    .player-server-btn.stellar-btn:hover,
+    .modal-stream-pill.stellar-btn:hover,
+    .player-server-btn.cinezo-btn:hover,
+    .modal-stream-pill.cinezo-btn:hover {
       box-shadow: none !important;
       transform: translateY(-1px);
       filter: brightness(1.1);
     }
-    .player-server-btn.infinity-btn.active {
+    .player-server-btn.stellar-btn.active,
+    .player-server-btn.cinezo-btn.active {
       box-shadow: none !important;
-      border-color: #93C5FD !important;
-      outline: 2px solid rgba(147, 197, 253, 0.5) !important;
+      border-color: #6EE7B7 !important;
+      outline: 2px solid rgba(110, 231, 183, 0.5) !important;
       outline-offset: 1px;
     }
 
@@ -4334,35 +4375,6 @@
       box-shadow: none !important;
       border-color: #A5B4FC !important;
       outline: 2px solid rgba(165, 180, 252, 0.5) !important;
-      outline-offset: 1px;
-    }
-
-    /* ── Vortex Server button (Electric Cyan theme) ───────────────── */
-    .player-server-btn.vortex-btn,
-    .modal-stream-pill.vortex-btn,
-    .player-server-btn.videasy-btn,
-    .modal-stream-pill.videasy-btn {
-      background: linear-gradient(135deg, #06B6D4 0%, #0891B2 100%) !important;
-      color: #ffffff !important;
-      font-weight: 700 !important;
-      border: 1px solid rgba(255, 255, 255, 0.25) !important;
-      letter-spacing: normal;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
-      box-shadow: none !important;
-    }
-    .player-server-btn.vortex-btn:hover,
-    .modal-stream-pill.vortex-btn:hover,
-    .player-server-btn.videasy-btn:hover,
-    .modal-stream-pill.videasy-btn:hover {
-      box-shadow: none !important;
-      transform: translateY(-1px);
-      filter: brightness(1.1);
-    }
-    .player-server-btn.vortex-btn.active,
-    .player-server-btn.videasy-btn.active {
-      box-shadow: none !important;
-      border-color: #67E8F9 !important;
-      outline: 2px solid rgba(103, 232, 249, 0.5) !important;
       outline-offset: 1px;
     }
 
@@ -10696,6 +10708,7 @@
       if (lbl.includes('spark') || lbl.includes('vidspark')) return ' spark-btn';
       if (lbl.includes('nebula') || lbl.includes('vidstuck') || lbl.includes('stuck')) return ' nebula-btn vidstuck-btn';
       if (lbl.includes('nova') || lbl.includes('vidy')) return ' nova-btn';
+      if (lbl.includes('stellar') || lbl.includes('cinezo')) return ' stellar-btn cinezo-btn';
       if (lbl.includes('cosmos') || lbl.includes('smashy')) return ' cosmos-btn smashystream-btn';
       if (lbl.includes('autoembed')) return ' autoembed-btn';
       if (lbl.includes('titan') || lbl.includes('2embed')) return ' twoembed-btn';
@@ -10734,9 +10747,9 @@
             `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=true&showNextEpisode=1&sub=false&subtitles=false`,
             `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=bre&sub=0&subtitles=false`,
             `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&sub.mode=manual`,
-            `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true&sub=false`,
-            `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
-            `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
+            `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true&sub=false`//,
+            // `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
+            // `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
           ];
         } else {
           urls = [
@@ -10746,12 +10759,12 @@
             `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=true&showNextEpisode=1&sub=true`,
             `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=en&sub=1`,
             `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&sub.mode=auto&sub.lang=en`,
-            `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true&sub=true`,
-            `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
-            `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
+            `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true&sub=true`//,
+            // `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
+            // `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
           ];
         }
-        labels = ['HackyMax', 'Nebula', 'Cinezo', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Zenith', 'Hyperion'];
+        labels = ['HackyMax', 'Nebula', 'Stellar', 'Nova', 'Vortex', 'Infinity', 'Spark'/*, 'Zenith', 'Hyperion'*/];
       } else {
         if (hasSinhalaSub) {
           urls = [
@@ -10761,9 +10774,9 @@
             `https://vidlove.cc/embed/movie/${id}?autoplay=true&sub=false&subtitles=false`,
             `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=bre&sub=0&subtitles=false`,
             `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&sub.mode=manual`,
-            `https://cdn.vidspark.to/movie/${id}?autoplay=true&sub=false`,
-            `https://vidnest.fun/movie/${id}?autoplay=1`,
-            `https://vixsrc.to/movie/${id}?autoplay=1`
+            `https://cdn.vidspark.to/movie/${id}?autoplay=true&sub=false`//,
+            // `https://vidnest.fun/movie/${id}?autoplay=1`,
+            // `https://vixsrc.to/movie/${id}?autoplay=1`
           ];
         } else {
           urls = [
@@ -10773,12 +10786,12 @@
             `https://vidlove.cc/embed/movie/${id}?autoplay=true&sub=true`,
             `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=en&sub=1`,
             `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&sub.mode=auto&sub.lang=en`,
-            `https://cdn.vidspark.to/movie/${id}?autoplay=true&sub=true`,
-            `https://vidnest.fun/movie/${id}?autoplay=1`,
-            `https://vixsrc.to/movie/${id}?autoplay=1`
+            `https://cdn.vidspark.to/movie/${id}?autoplay=true&sub=true`//,
+            // `https://vidnest.fun/movie/${id}?autoplay=1`,
+            // `https://vixsrc.to/movie/${id}?autoplay=1`
           ];
         }
-        labels = ['HackyMax', 'Nebula', 'Cinezo', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Zenith', 'Hyperion'];
+        labels = ['HackyMax', 'Nebula', 'Stellar', 'Nova', 'Vortex', 'Infinity', 'Spark'/*, 'Zenith', 'Hyperion'*/];
       }
       return { urls, labels };
     }
@@ -14335,7 +14348,7 @@
       const activeBtn = document.querySelector('.player-server-btn.active');
       const curServerLabel = activeBtn ? activeBtn.textContent.toLowerCase() : '';
       const curFrameSrc = (frameEl && frameEl.src) ? frameEl.src.toLowerCase() : '';
-      const isAutoplayPlayer = curFrameSrc.includes('spark') || curFrameSrc.includes('vidspark') || curFrameSrc.includes('nova') || curFrameSrc.includes('vidy') || curFrameSrc.includes('hackymax') || curFrameSrc.includes('vidstuck') || curFrameSrc.includes('nebula') || curFrameSrc.includes('videasy') || curFrameSrc.includes('vortex') || curFrameSrc.includes('cinezo') || curServerLabel.includes('spark') || curServerLabel.includes('nova') || curServerLabel.includes('vidy') || curServerLabel.includes('hackymax') || curServerLabel.includes('vidstuck') || curServerLabel.includes('nebula') || curServerLabel.includes('videasy') || curServerLabel.includes('vortex') || curServerLabel.includes('cinezo');
+      const isAutoplayPlayer = curFrameSrc.includes('spark') || curFrameSrc.includes('vidspark') || curFrameSrc.includes('nova') || curFrameSrc.includes('vidy') || curFrameSrc.includes('hackymax') || curFrameSrc.includes('vidstuck') || curFrameSrc.includes('nebula') || curFrameSrc.includes('videasy') || curFrameSrc.includes('vortex') || curFrameSrc.includes('cinezo') || curFrameSrc.includes('stellar') || curServerLabel.includes('spark') || curServerLabel.includes('nova') || curServerLabel.includes('vidy') || curServerLabel.includes('hackymax') || curServerLabel.includes('vidstuck') || curServerLabel.includes('nebula') || curServerLabel.includes('videasy') || curServerLabel.includes('vortex') || curServerLabel.includes('cinezo') || curServerLabel.includes('stellar');
 
       // If cues are already loaded for THIS video/episode, IMMEDIATELY resume the loop and re-render
       if (_subCues && _subCues.length > 0 && window._currentLoadedSubKey === subKey) {
@@ -14515,8 +14528,8 @@
       if (!isGuestLockedInPlay) {
         window._externalCurrentTime = 0;
         window._lastExternalMsgTime = null;
-        const isAutoplayUrl = (url && (url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || url.includes('vidstuck') || url.includes('nebula') || url.includes('videasy') || url.includes('vortex') || url.includes('cinezo'))) ||
-          (labels && labels[_activeServerIndex] && (labels[_activeServerIndex].toLowerCase().includes('spark') || labels[_activeServerIndex].toLowerCase().includes('nova') || labels[_activeServerIndex].toLowerCase().includes('vidy') || labels[_activeServerIndex].toLowerCase().includes('vidstuck') || labels[_activeServerIndex].toLowerCase().includes('nebula') || labels[_activeServerIndex].toLowerCase().includes('videasy') || labels[_activeServerIndex].toLowerCase().includes('vortex') || labels[_activeServerIndex].toLowerCase().includes('cinezo')));
+        const isAutoplayUrl = (url && (url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || url.includes('vidstuck') || url.includes('nebula') || url.includes('videasy') || url.includes('vortex') || url.includes('cinezo') || url.includes('stellar'))) ||
+          (labels && labels[_activeServerIndex] && (labels[_activeServerIndex].toLowerCase().includes('spark') || labels[_activeServerIndex].toLowerCase().includes('nova') || labels[_activeServerIndex].toLowerCase().includes('vidy') || labels[_activeServerIndex].toLowerCase().includes('vidstuck') || labels[_activeServerIndex].toLowerCase().includes('nebula') || labels[_activeServerIndex].toLowerCase().includes('videasy') || labels[_activeServerIndex].toLowerCase().includes('vortex') || labels[_activeServerIndex].toLowerCase().includes('cinezo') || labels[_activeServerIndex].toLowerCase().includes('stellar')));
         window._externalIsPaused = !isAutoplayUrl;
         window._isStreamBuffering = false;
         window._bufferFreezeElapsed = null;
@@ -14592,7 +14605,7 @@
       const curLabel = labels && labels[_activeServerIndex] ? labels[_activeServerIndex] : 'Server';
       window._currentActiveServer = curLabel;
       window._currentActiveServerUrl = url;
-      const isInitAutoLive = curLabel.toLowerCase().includes('hackymax') || curLabel.toLowerCase().includes('infinity') || curLabel.toLowerCase().includes('spark') || curLabel.toLowerCase().includes('nebula') || curLabel.toLowerCase().includes('vortex') || curLabel.toLowerCase().includes('cinezo');
+      const isInitAutoLive = curLabel.toLowerCase().includes('hackymax') || curLabel.toLowerCase().includes('infinity') || curLabel.toLowerCase().includes('spark') || curLabel.toLowerCase().includes('nebula') || curLabel.toLowerCase().includes('vortex') || curLabel.toLowerCase().includes('cinezo') || curLabel.toLowerCase().includes('stellar');
       _markSubSyncAutoLive(isInitAutoLive);
 
       // ── Auto-load & auto-start Sinhala subtitle for iframe (VidLink, etc.) ────────
@@ -14719,7 +14732,7 @@
           episode: window._currentPlayingEpisode || (typeof _selectedEpisode !== 'undefined' && _selectedEpisode) || 1
         });
       }
-      const isAutoplayServer = url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || url.includes('vidstuck') || url.includes('nebula') || url.includes('videasy') || url.includes('vortex') || url.includes('cinezo') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('videasy') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('cinezo');
+      const isAutoplayServer = url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || url.includes('vidstuck') || url.includes('nebula') || url.includes('videasy') || url.includes('vortex') || url.includes('cinezo') || url.includes('stellar') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('videasy') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('cinezo') || sName.toLowerCase().includes('stellar');
       window._externalCurrentTime = 0;
       window._lastExternalMsgTime = null;
       window._externalIsPaused = !isAutoplayServer;
@@ -14730,7 +14743,7 @@
       _subStartTime = Date.now();
       _lastIframeSubCueText = null;
 
-      const isAutoLive = sName.toLowerCase().includes('hackymax') || sName.toLowerCase().includes('infinity') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck') || sName.toLowerCase().includes('cinezo');
+      const isAutoLive = sName.toLowerCase().includes('hackymax') || sName.toLowerCase().includes('infinity') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck') || sName.toLowerCase().includes('cinezo') || sName.toLowerCase().includes('stellar');
       _markSubSyncAutoLive(isAutoLive);
 
       const rawSubId = _currentModalId || window._currentPlayingId || (window._currentModalItem && window._currentModalItem.id) || new URLSearchParams(window.location.search).get('m') || new URLSearchParams(window.location.search).get('s');
