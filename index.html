@@ -176,13 +176,20 @@
       top: 16px;
       left: 0;
       right: 0;
-      z-index: 700;
+      z-index: 900;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 0 3.5vw;
       pointer-events: none;
       transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    body:has(#searchOverlay.open) .nav-right-actions,
+    body:has(#wishlistOverlay.open) .nav-right-actions {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      transition: opacity 0.2s ease;
     }
 
     .nav-brand {
@@ -5945,15 +5952,16 @@
       position: fixed;
       inset: 0;
       background: rgba(7, 9, 15, .97);
-      z-index: 2500;
+      z-index: 800;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding-top: 4rem;
+      padding-top: 112px;
       opacity: 0;
       pointer-events: none;
       transition: opacity .3s;
-      backdrop-filter: blur(20px)
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
     }
 
     #searchOverlay.open {
@@ -5968,7 +5976,8 @@
       border-bottom: 2px solid var(--gold);
       padding-bottom: 1rem;
       width: min(1000px, 90vw);
-      margin-bottom: 2rem;
+      margin-top: 12px;
+      margin-bottom: 2.2rem;
     }
 
     .search-input-wrap input {
@@ -5988,14 +5997,31 @@
 
     .search-close {
       position: fixed;
-      top: 1.5rem;
-      right: 2rem;
-      font-size: 2rem;
-      cursor: pointer;
-      background: none;
-      border: none;
+      top: 18px;
+      right: 3.5vw;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
       color: var(--text);
-      line-height: 1
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      line-height: 1;
+      z-index: 1000;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.2s ease;
+    }
+
+    .search-close:hover {
+      background: rgba(231, 76, 60, 0.25);
+      border-color: #E74C3C;
+      color: #ffffff;
+      transform: scale(1.08);
     }
 
     .search-results {
@@ -6312,7 +6338,14 @@
       }
 
       #searchOverlay {
-        padding-top: 4rem;
+        padding-top: 76px;
+      }
+      .search-close, .wishlist-close {
+        top: 14px !important;
+        right: 16px !important;
+        width: 38px !important;
+        height: 38px !important;
+        font-size: 1.1rem !important;
       }
 
       .player-server-bar {
@@ -6689,11 +6722,11 @@
       position: fixed;
       inset: 0;
       background: rgba(7, 9, 15, 0.98);
-      z-index: 2500;
+      z-index: 800;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding-top: 4rem;
+      padding-top: 105px;
       opacity: 0;
       pointer-events: none;
       transition: opacity .3s;
@@ -6704,6 +6737,35 @@
     #wishlistOverlay.open {
       opacity: 1;
       pointer-events: all;
+    }
+
+    .wishlist-close {
+      position: fixed;
+      top: 18px;
+      right: 3.5vw;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: var(--text);
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      line-height: 1;
+      z-index: 1000;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: all 0.2s ease;
+    }
+
+    .wishlist-close:hover {
+      background: rgba(231, 76, 60, 0.25);
+      border-color: #E74C3C;
+      color: #ffffff;
+      transform: scale(1.08);
     }
 
     .wishlist-header {
