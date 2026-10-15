@@ -1230,10 +1230,12 @@
           const dateStr = data.item.uploadedAt ? new Date(data.item.uploadedAt).toLocaleDateString() : 'System';
           subEl.innerHTML = `Format: <strong>.${data.item.format || 'srt'}</strong> · Uploader: <strong>${data.item.uploader || 'Admin'}</strong> · Date: ${dateStr}`;
 
-          const playUrl = isTv ? `/?cat=tvshows` : `/?id=${selectedTitle.id}`;
+          const playUrl = isTv
+            ? `/?s=${selectedTitle.id}&season=${season}&episode=${episode}&play=1`
+            : `/?m=${selectedTitle.id}&play=1`;
           actionWrap.innerHTML = `
             <a href="${playUrl}" target="_blank" class="btn-test-play">
-              <span>▶️ Test Playback</span>
+              <span><i class="fa-solid fa-play" style="margin-right:6px;"></i> Test Playback</span>
             </a>
           `;
         } else {
@@ -1514,8 +1516,8 @@
               <td>${item.uploader || 'Admin'}</td>
               <td><span style="color:var(--green); font-weight:700;">🟢 Active</span></td>
               <td>
-                <a href="${isTv ? '/?cat=tvshows' : `/?id=${item.tmdbId || item.key}`}" target="_blank" class="btn-test-play" style="padding:4px 10px; font-size:0.75rem;">
-                  Play
+                <a href="${isTv ? `/?s=${item.tmdbId || item.key}&season=${item.season || 1}&episode=${item.episode || 1}&play=1` : `/?m=${item.tmdbId || item.key}&play=1`}" target="_blank" class="btn-test-play" style="padding:4px 10px; font-size:0.75rem;">
+                  <i class="fa-solid fa-play" style="margin-right:4px;"></i> Play
                 </a>
               </td>
             </tr>

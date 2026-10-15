@@ -16436,15 +16436,44 @@
         console.warn('initCategories error:', catErr);
       }
 
-      // ── Handle Shareable Links ──
+      // ── Handle Shareable Links & Direct Playback ──
       const params = new URLSearchParams(window.location.search);
-      const mParam = params.get('m');
+      const mParam = params.get('m') || (!params.get('cat') ? params.get('id') : null);
       const tvParam = params.get('s');
       const partyParam = params.get('party');
+      const playParam = params.get('play');
       const paramVal = mParam || tvParam;
       if (paramVal && !partyParam) {
         const id = parseInt(paramVal, 10);
-        setTimeout(() => openModal(id, tvParam ? 'tv' : 'movie'), 600);
+        const mType = tvParam ? 'tv' : 'movie';
+        const season = parseInt(params.get('season') || '1', 10);
+        const episode = parseInt(params.get('episode') || '1', 10);
+
+        if (playParam === '1' || playParam === 'true') {
+          setTimeout(async () => {
+            _selectedSeason = season;
+            _selectedEpisode = episode;
+            _currentModalId = id;
+            _currentModalType = mType;
+            window._currentPlayingId = id;
+            window._currentPlayingType = mType;
+            if (typeof openModal === 'function') {
+              openModal(id, mType);
+            }
+            try {
+              const resData = await getModalServerUrls(id, mType, season, episode);
+              const curUrls = resData.urls || [];
+              const curLabels = resData.labels || [];
+              if (curUrls.length && curUrls[0]) {
+                playStream(curUrls[0], curUrls, curLabels);
+              }
+            } catch (err) {
+              console.warn('[AutoPlay] Could not launch stream directly:', err);
+            }
+          }, 350);
+        } else {
+          setTimeout(() => openModal(id, mType), 600);
+        }
       }
 
       // Handle category shareable link / direct navigation

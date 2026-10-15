@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { createPresignedPutUrl, getR2Config } from '../lib/r2-helper.js';
+import { createPresignedPutUrl, createPresignedGetUrl, getR2Config, putR2Object, getR2ObjectText } from '../lib/r2-helper.js';
 
 export const config = {
   api: {
@@ -158,9 +158,43 @@ const SEED_TITLES = {
 };
 
 let _catalogCache = null;
+let _catalogCacheTime = 0;
 
 export function getCatalogFilePath() {
   return path.join(process.cwd(), 'Subtitle', 'catalog.json');
+}
+
+export async function loadCatalogAsync() {
+  const now = Date.now();
+  if (_catalogCache && (now - _catalogCacheTime < 20000)) {
+    return _catalogCache;
+  }
+  const catalog = { ...SEED_TITLES };
+
+  try {
+    const p = getCatalogFilePath();
+    if (fs.existsSync(p)) {
+      const data = JSON.parse(fs.readFileSync(p, 'utf8'));
+      Object.assign(catalog, data);
+    }
+  } catch (_) {}
+
+  try {
+    const r2Config = getR2Config();
+    if (r2Config.isConfigured) {
+      const r2Json = await getR2ObjectText('subtitles/catalog.json');
+      if (r2Json) {
+        const r2Data = JSON.parse(r2Json);
+        Object.assign(catalog, r2Data);
+      }
+    }
+  } catch (err) {
+    console.warn('[sub-catalog] Failed to load catalog from R2:', err.message);
+  }
+
+  _catalogCache = catalog;
+  _catalogCacheTime = now;
+  return catalog;
 }
 
 export function loadCatalog() {
@@ -179,21 +213,37 @@ export function loadCatalog() {
   return catalog;
 }
 
-export function saveCatalog(catalog) {
+export async function saveCatalog(catalog) {
   _catalogCache = catalog;
+  _catalogCacheTime = Date.now();
+
   try {
     const p = getCatalogFilePath();
     const dir = path.dirname(p);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(p, JSON.stringify(catalog, null, 2), 'utf8');
   } catch (err) {
-    console.error('[sub-catalog] Error writing catalog.json:', err.message);
+    console.warn('[sub-catalog] Local write skipped (read-only filesystem on serverless)');
+  }
+
+  try {
+    const r2Config = getR2Config();
+    if (r2Config.isConfigured) {
+      await putR2Object({
+        key: 'subtitles/catalog.json',
+        body: JSON.stringify(catalog, null, 2),
+        contentType: 'application/json'
+      });
+      console.log('[sub-catalog] Successfully synced catalog to Cloudflare R2!');
+    }
+  } catch (r2Err) {
+    console.error('[sub-catalog] Error syncing catalog to R2:', r2Err.message);
   }
 }
 
 async function handleCatalog(req, res) {
   const { id, type = 'movie', season = 1, episode = 1, recent, all } = req.query;
-  const catalog = loadCatalog();
+  const catalog = await loadCatalogAsync();
 
   if (all === '1' || all === 'true') {
     return res.status(200).json({ total: Object.keys(catalog).length, catalog });
@@ -343,7 +393,7 @@ async function handleUpload(req, res) {
       fs.writeFileSync(filePath, fileBuffer);
     } catch (_) {}
 
-    const catalog = loadCatalog();
+    const catalog = await loadCatalogAsync();
     catalog[subKey] = {
       tmdbId,
       mediaType: type,
@@ -357,7 +407,7 @@ async function handleUpload(req, res) {
       uploadedAt: Date.now(),
       url: publicUrl
     };
-    saveCatalog(catalog);
+    await saveCatalog(catalog);
 
     return res.status(200).json({
       success: true,
@@ -375,7 +425,7 @@ async function handleUpload(req, res) {
     }
 
     const subKey = type === 'tv' ? `${tmdbId}_S${season}_E${episode}` : `${tmdbId}`;
-    const catalog = loadCatalog();
+    const catalog = await loadCatalogAsync();
 
     catalog[subKey] = {
       tmdbId,
@@ -390,7 +440,7 @@ async function handleUpload(req, res) {
       uploadedAt: Date.now(),
       url: publicUrl
     };
-    saveCatalog(catalog);
+    await saveCatalog(catalog);
 
     return res.status(200).json({
       success: true,

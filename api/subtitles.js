@@ -138,40 +138,54 @@ export default async function handler(req, res) {
   // Load dynamic catalog (R2 and contributor uploads)
   let catalogItem = null;
   try {
-    const { loadCatalog } = await import('./sub-api.js');
-    const catalog = loadCatalog();
+    const { loadCatalogAsync } = await import('./sub-api.js');
+    const catalog = await loadCatalogAsync();
     catalogItem = catalog[subKey] || catalog[id] || null;
   } catch (_) {}
 
   const sinhalaSubUrl = catalogItem?.url || localSinhalaSub;
+  const isServe = isVtt || req.query.serve === '1' || req.query.stream === '1';
 
-  // Mode 2: Serve subtitle directly as WebVTT for embed players (VidLink, etc.)
-  if (id && isVtt && sinhalaSubUrl) {
+  // Mode 2: Serve subtitle directly as text / WebVTT for embed players (VidLink, Max Player, etc.)
+  if (id && isServe && sinhalaSubUrl) {
     try {
+      let rawText = '';
       if (sinhalaSubUrl.startsWith('http://') || sinhalaSubUrl.startsWith('https://')) {
-        const fetchRes = await fetch(sinhalaSubUrl, { signal: AbortSignal.timeout(6000) });
-        if (fetchRes.ok) {
-          let text = await fetchRes.text();
-          res.setHeader('Content-Type', 'text/vtt; charset=utf-8');
-          res.setHeader('Cache-Control', 'public, max-age=86400');
-          return res.status(200).send(srtToVtt(text));
+        if (sinhalaSubUrl.includes('r2.cloudflarestorage.com')) {
+          try {
+            const { getR2ObjectText } = await import('../lib/r2-helper.js');
+            const cleanKey = sinhalaSubUrl.split('.com/')[1] || `subtitles/${subKey}.${catalogItem?.format || 'srt'}`;
+            rawText = await getR2ObjectText(cleanKey);
+          } catch (_) {}
+        }
+        if (!rawText) {
+          const fetchRes = await fetch(sinhalaSubUrl, { signal: AbortSignal.timeout(6000) });
+          if (fetchRes.ok) rawText = await fetchRes.text();
         }
       } else {
         const filePath = path.join(process.cwd(), sinhalaSubUrl);
         if (fs.existsSync(filePath)) {
           const buf = fs.readFileSync(filePath);
-          let srtContent = (buf[0] === 0xFF && buf[1] === 0xFE)
+          rawText = (buf[0] === 0xFF && buf[1] === 0xFE)
             ? buf.toString('utf16le')
             : buf.toString('utf8');
-          if (srtContent.charCodeAt(0) === 0xFEFF) srtContent = srtContent.slice(1);
-          srtContent = srtContent.replace(/\x00/g, '');
+        }
+      }
+
+      if (rawText) {
+        if (rawText.charCodeAt(0) === 0xFEFF) rawText = rawText.slice(1);
+        rawText = rawText.replace(/\x00/g, '');
+        res.setHeader('Cache-Control', 'public, max-age=86400');
+        if (isVtt) {
           res.setHeader('Content-Type', 'text/vtt; charset=utf-8');
-          res.setHeader('Cache-Control', 'public, max-age=86400');
-          return res.status(200).send(srtToVtt(srtContent));
+          return res.status(200).send(srtToVtt(rawText));
+        } else {
+          res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+          return res.status(200).send(rawText);
         }
       }
     } catch (err) {
-      console.error('[VTT serving error]', err);
+      console.error('[Subtitle serving error]', err);
     }
   }
 
@@ -184,11 +198,15 @@ export default async function handler(req, res) {
 
   // Priority 1: Sinhala Master/Contributor subtitle
   if (sinhalaSubUrl) {
+    const servedUrl = catalogItem
+      ? `/api/subtitles?id=${id}&type=${type}${season ? `&season=${season}` : ''}${episode ? `&episode=${episode}` : ''}&serve=1`
+      : sinhalaSubUrl;
+
     tracks.push({
       id: 'sinhala',
       lang: 'si',
       label: 'Sinhala 🇱🇰',
-      url: sinhalaSubUrl,
+      url: servedUrl,
       isDefault: true,
       source: catalogItem ? 'contributor' : 'master'
     });
