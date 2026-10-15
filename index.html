@@ -302,7 +302,7 @@
       border: none;
       background: transparent;
       color: rgba(255, 255, 255, 0.82);
-      font-family: 'Inter', -apple-system, sans-serif;
+      font-family: 'Noto Sans Sinhala', 'Inter', -apple-system, sans-serif;
       font-size: 13.5px;
       font-weight: 700;
       cursor: pointer;
@@ -8895,9 +8895,7 @@
         <button type="button" class="nav-tab active" data-tab="home" onclick="window.navGo('home')">Home</button>
         <button type="button" class="nav-tab" data-tab="movies" onclick="window.navGo('movies')">Movies</button>
         <button type="button" class="nav-tab" data-tab="tv" onclick="window.navGo('tv')">TV</button>
-        <button type="button" class="nav-tab" data-tab="sub" onclick="window.navGo('sub')" title="සිංහල උපසිරැසි (Sinhala Subtitles)">
-          <img src="/sinhala-sub.png" alt="සිංහල" class="nav-sinsub-img">
-        </button>
+        <button type="button" class="nav-tab" data-tab="sub" onclick="window.navGo('sub')">සිංහල</button>
         <button type="button" class="nav-tab" data-tab="mylist" onclick="window.navGo('mylist')">My List</button>
       </div>
       <span class="nav-divider"></span>
@@ -10321,8 +10319,7 @@
           code: 'si',
           title: 'සිංහල උපසිරැසි',
           sub: 'Sinhala Subtitles',
-          badge: 'සිංහල',
-          badgeImg: '/sinhala-sub.png',
+          badge: 'Sinhala Sub',
           accent: '#059669',
           gradient: 'linear-gradient(135deg, rgba(5,150,105,0.88) 0%, rgba(6,78,59,0.95) 100%)',
           img: 'https://image.tmdb.org/t/p/w780/gDyLcjvmdAhmYqjCMwZ9PndnAVm.jpg'
@@ -10516,7 +10513,7 @@
               <div class="category-card-content">
                 <div class="category-card-native">${l.code === 'si' ? `<span style="display:inline-flex;align-items:center;gap:6px;"><img src="/sinhala-sub.png" alt="සිංහල" style="height:18px;width:auto;display:inline-block;"><span>${l.title}</span></span>` : l.title}</div>
                 <div class="category-card-sub">${l.sub}</div>
-                <div class="category-card-badge">${l.badgeImg ? `<img src="${l.badgeImg}" alt="${l.sub}" style="height:14px;width:auto;display:inline-block;vertical-align:middle;">` : l.badge}</div>
+                <div class="category-card-badge">${l.badge}</div>
               </div>
             </div>`;
         }).join('');
