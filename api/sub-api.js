@@ -17,20 +17,22 @@ export const config = {
 
 const JWT_SECRET = process.env.SUB_AUTH_SECRET || process.env.API_SECRET || 'hackymax_sub_secret_key_2026';
 
+function safeCompare(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  const bufA = Buffer.from(a, 'utf8');
+  const bufB = Buffer.from(b, 'utf8');
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
 function getContributors() {
   const envContributors = process.env.SUB_CONTRIBUTORS;
-  const map = {
-    'admin': 'hackymax2026',
-    'kalan': 'kalan2026',
-    'friend1': 'friend123',
-    'friend2': 'friend456',
-    'friend3': 'friend789'
-  };
+  const map = {};
 
   if (envContributors) {
     try {
       if (envContributors.trim().startsWith('{')) {
-        return { ...map, ...JSON.parse(envContributors) };
+        return JSON.parse(envContributors);
       }
       envContributors.split(',').forEach(pair => {
         const [u, p] = pair.split(':');
@@ -104,10 +106,15 @@ async function handleAuth(req, res) {
     }
 
     const contributors = getContributors();
+    if (Object.keys(contributors).length === 0) {
+      return res.status(503).json({ error: 'Contributor accounts are not configured. Set SUB_CONTRIBUTORS in Vercel environment variables.' });
+    }
+
     const cleanUser = String(username).trim();
     const cleanPass = String(password).trim();
+    const expectedPass = contributors[cleanUser];
 
-    if (contributors[cleanUser] && contributors[cleanUser] === cleanPass) {
+    if (expectedPass && safeCompare(cleanPass, expectedPass)) {
       const role = cleanUser === 'admin' ? 'admin' : 'contributor';
       const sessionToken = signToken(cleanUser, role);
       return res.status(200).json({
