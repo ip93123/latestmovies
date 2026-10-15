@@ -213,12 +213,12 @@
     }
 
     .nav-brand img {
-      height: 42px;
+      height: 52px;
       width: auto;
-      max-width: 175px;
+      max-width: 220px;
       object-fit: contain;
       display: block;
-      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.55));
+      filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.65));
     }
 
     /* Centered Floating Nav Pill */
@@ -434,9 +434,9 @@
         transform: scale(1.03) !important;
       }
       .nav-brand img {
-        height: 32px;
+        height: 38px;
         width: auto;
-        max-width: 130px;
+        max-width: 155px;
         object-fit: contain;
       }
       .nav-right-actions {
@@ -2478,45 +2478,26 @@
       to { opacity: 1; transform: scale(1); }
     }
     .cat-page-header {
-      position: sticky;
-      top: 0;
-      z-index: 40;
-      display: flex;
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
       align-items: center;
-      justify-content: space-between;
       gap: 1.2rem;
-      padding: 0.85rem 3.5vw;
-      background: rgba(7, 9, 15, 0.84);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-    }
-    .cat-back-btn {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #fff;
-      padding: 0.55rem 1.15rem;
-      border-radius: 24px;
-      font-size: 0.88rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-family: inherit;
-    }
-    .cat-back-btn:hover {
-      background: rgba(232, 201, 122, 0.15);
-      border-color: var(--gold, #E8C97A);
-      color: var(--gold, #E8C97A);
-      transform: translateX(-2px);
+      padding: 0.6rem 3.5vw 1.2rem 3.5vw;
+      background: transparent !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      border: none !important;
+      box-shadow: none !important;
     }
     .cat-header-titles {
+      grid-column: 2;
       text-align: center;
-      flex: 1;
       min-width: 0;
+    }
+    .cat-toggle-wrap {
+      grid-column: 3;
+      justify-self: end;
     }
     .cat-page-title {
       font-size: 1.75rem;
@@ -2786,33 +2767,25 @@
     /* ── Mobile Screen Optimizations (Header, Cards, and Pagination) ── */
     @media (max-width: 640px) {
       .cat-page-header {
-        display: grid;
-        grid-template-columns: auto 1fr auto;
-        grid-template-areas:
-          "back . toggle"
-          "titles titles titles";
-        padding: 0.75rem 1rem 0.85rem 1rem;
-        gap: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 1rem 1rem 1rem;
+        background: transparent !important;
       }
-      .cat-back-btn {
-        grid-area: back;
-        padding: 0.45rem 0.95rem;
-        font-size: 0.82rem;
-        border-radius: 20px;
+      .cat-header-titles {
+        grid-column: auto;
+        text-align: center;
+        width: 100%;
       }
       .cat-toggle-wrap {
-        grid-area: toggle;
-        justify-self: end;
+        grid-column: auto;
+        justify-self: center;
       }
       .cat-toggle-btn {
         padding: 0.4rem 0.95rem;
         font-size: 0.78rem;
-      }
-      .cat-header-titles {
-        grid-area: titles;
-        text-align: center;
-        width: 100%;
-        margin-top: 0.15rem;
       }
       .cat-page-title {
         font-size: 1.35rem;
@@ -7276,7 +7249,7 @@
     /* ── 14. Cat page header — compact on mobile */
     .device-mobile .cat-page-header {
       padding: .8rem 1rem;
-      background: rgba(7,9,15,0.97) !important;
+      background: transparent !important;
     }
     .device-mobile .cat-page-title { font-size: 1.3rem; }
     .device-mobile .cat-page-content { padding: 1rem .75rem 4rem .75rem; }
@@ -8482,14 +8455,6 @@
   <!-- FULLSCREEN DEDICATED CATEGORY VIEW (SPA PAGE) -->
   <div id="categoryViewOverlay" class="category-view-overlay">
     <div class="cat-page-header">
-      <button class="cat-back-btn" id="catBackBtn" onclick="closeCategoryPage()" title="Back to Categories">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="19" y1="12" x2="5" y2="12"></line>
-          <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-        <span>Back</span>
-      </button>
-
       <div class="cat-header-titles">
         <h1 class="cat-page-title" id="catPageTitle">Category</h1>
         <div class="cat-page-sub" id="catPageSub">Explore top rated &amp; popular titles</div>
@@ -10237,6 +10202,7 @@
         try {
           const u = new URL(window.location.origin + window.location.pathname);
           u.searchParams.delete('cat');
+          u.searchParams.delete('category');
           u.searchParams.delete('id');
           history.pushState({ ui: 'home' }, '', u.toString());
         } catch (_) {}
@@ -16199,15 +16165,25 @@
       setNavActive(target);
 
       if (target === 'home') {
-        const catPage = document.getElementById('categoryViewOverlay');
-        if (catPage && catPage.classList.contains('open')) {
-          if (typeof closeCategoryPage === 'function') closeCategoryPage();
+        if (typeof closeCategoryPage === 'function') {
+          closeCategoryPage();
+        } else {
+          const catPage = document.getElementById('categoryViewOverlay');
+          if (catPage) catPage.classList.remove('open');
+          document.body.style.overflow = '';
         }
-        const wl = document.getElementById('wishlistModal');
-        if (wl && wl.classList.contains('open')) {
-          if (typeof closeWishlist === 'function') closeWishlist();
-        }
+        if (typeof closeSearch === 'function') closeSearch();
+        if (typeof closeWishlist === 'function') closeWishlist();
+        if (typeof closeModal === 'function') closeModal();
+        try {
+          const u = new URL(window.location.origin + window.location.pathname);
+          u.searchParams.delete('cat');
+          u.searchParams.delete('category');
+          u.searchParams.delete('id');
+          history.pushState({ ui: 'home' }, '', u.toString());
+        } catch (_) {}
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        setNavActive('home');
       } else if (target === 'movies') {
         openCategoryPage('movies', 'all', '🎬 Movies', 'Explore latest & popular movies');
       } else if (target === 'tv') {
