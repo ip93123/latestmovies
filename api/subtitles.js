@@ -132,13 +132,32 @@ export default async function handler(req, res) {
     }
   }
 
-  // Mode 2: Serve local subtitle directly as WebVTT for embed players (VidLink, etc.)
-  if (id && isVtt) {
-    const subKey = type === 'tv' ? `${id}_S${season}_E${episode}` : `${id}`;
-    const localSub = SUBTITLE_MAP[subKey] || SUBTITLE_MAP[id] || null;
-    if (localSub) {
-      try {
-        const filePath = path.join(process.cwd(), localSub);
+  const subKey = type === 'tv' ? `${id}_S${season}_E${episode}` : `${id}`;
+  const localSinhalaSub = SUBTITLE_MAP[subKey] || SUBTITLE_MAP[id] || null;
+
+  // Load dynamic catalog (R2 and contributor uploads)
+  let catalogItem = null;
+  try {
+    const { loadCatalog } = await import('./sub-catalog.js');
+    const catalog = loadCatalog();
+    catalogItem = catalog[subKey] || catalog[id] || null;
+  } catch (_) {}
+
+  const sinhalaSubUrl = catalogItem?.url || localSinhalaSub;
+
+  // Mode 2: Serve subtitle directly as WebVTT for embed players (VidLink, etc.)
+  if (id && isVtt && sinhalaSubUrl) {
+    try {
+      if (sinhalaSubUrl.startsWith('http://') || sinhalaSubUrl.startsWith('https://')) {
+        const fetchRes = await fetch(sinhalaSubUrl, { signal: AbortSignal.timeout(6000) });
+        if (fetchRes.ok) {
+          let text = await fetchRes.text();
+          res.setHeader('Content-Type', 'text/vtt; charset=utf-8');
+          res.setHeader('Cache-Control', 'public, max-age=86400');
+          return res.status(200).send(srtToVtt(text));
+        }
+      } else {
+        const filePath = path.join(process.cwd(), sinhalaSubUrl);
         if (fs.existsSync(filePath)) {
           const buf = fs.readFileSync(filePath);
           let srtContent = (buf[0] === 0xFF && buf[1] === 0xFE)
@@ -150,9 +169,9 @@ export default async function handler(req, res) {
           res.setHeader('Cache-Control', 'public, max-age=86400');
           return res.status(200).send(srtToVtt(srtContent));
         }
-      } catch (err) {
-        console.error('[VTT serving error]', err);
       }
+    } catch (err) {
+      console.error('[VTT serving error]', err);
     }
   }
 
@@ -161,20 +180,17 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing id, imdb, or url parameter' });
   }
 
-  const subKey = type === 'tv' ? `${id}_S${season}_E${episode}` : `${id}`;
-  const localSinhalaSub = SUBTITLE_MAP[subKey] || SUBTITLE_MAP[id] || null;
-
   const tracks = [];
 
-  // Priority 1: Sinhala Master subtitle (if available locally)
-  if (localSinhalaSub) {
+  // Priority 1: Sinhala Master/Contributor subtitle
+  if (sinhalaSubUrl) {
     tracks.push({
       id: 'sinhala',
       lang: 'si',
       label: 'Sinhala 🇱🇰',
-      url: localSinhalaSub,
+      url: sinhalaSubUrl,
       isDefault: true,
-      source: 'master'
+      source: catalogItem ? 'contributor' : 'master'
     });
   }
 

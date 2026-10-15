@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subtitle Studio · HackyMax Contributor Portal</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07090F;
+      --bg-card: rgba(18, 24, 38, 0.75);
+      --bg-glass: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.1);
+      --border-focus: rgba(232, 201, 122, 0.5);
+      --gold: #E8C97A;
+      --gold-dark: #C9A44E;
+      --gold-glow: rgba(232, 201, 122, 0.25);
+      --text: #F3F5FA;
+      --text-muted: #8F9BB3;
+      --green: #2ECC71;
+      --green-glow: rgba(46, 204, 113, 0.25);
+      --red: #E74C3C;
+      --blue: #3498DB;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: radial-gradient(ellipse at top, #141A29 0%, #07090F 75%);
+      color: var(--text);
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navigation Bar */
+    header.sub-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 4vw;
+      background: rgba(7, 9, 15, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      text-decoration: none;
+    }
+
+    .brand-wrap img {
+      height: 44px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+    }
+
+    .brand-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(232, 201, 122, 0.12);
+      border: 1px solid rgba(232, 201, 122, 0.3);
+      color: var(--gold);
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .user-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .user-pill .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 10px var(--green);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(231, 76, 60, 0.15);
+      border-color: rgba(231, 76, 60, 0.4);
+      color: #FF7675;
+    }
+
+    /* Main Container */
+    main.sub-main {
+      flex: 1;
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem 1.5rem;
+    }
+
+    /* Auth Card View */
+    .auth-container {
+      max-width: 440px;
+      margin: 4rem auto 0 auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2.4rem;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+      text-align: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .auth-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.4rem;
+    }
+
+    .auth-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 1.8rem;
+      line-height: 1.5;
+    }
+
+    .form-group {
+      text-align: left;
+      margin-bottom: 1.2rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-field {
+      width: 100%;
+      background: rgba(10, 14, 24, 0.85);
+      border: 1.5px solid var(--border);
+      color: #fff;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .input-field:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 16px var(--gold-glow);
+    }
+
+    .btn-gold {
+      width: 100%;
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+      color: #0B0E17;
+      border: none;
+      padding: 13px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 0.98rem;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      transition: all 0.22s ease;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-gold:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(232, 201, 122, 0.4);
+    }
+
+    .btn-gold:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .auth-notice {
+      margin-top: 1.4rem;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Dashboard Grid */
+    .dashboard-view {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      animation: fadeIn 0.35s ease;
+    }
+
+    .dash-hero {
+      background: linear-gradient(135deg, rgba(232, 201, 122, 0.08) 0%, rgba(20, 26, 41, 0.5) 100%);
+      border: 1px solid rgba(232, 201, 122, 0.2);
+      border-radius: var(--radius-lg);
+      padding: 1.8rem 2.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .dash-hero-text h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dash-hero-text p {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      margin-top: 4px;
+    }
+
+    /* Studio Card */
+    .studio-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .studio-card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .step-badge {
+      background: var(--gold);
+      color: #0B0E17;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    /* TMDB Search Bar */
+    .search-box-wrap {
+      position: relative;
+    }
+
+    .search-input-group {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-input-group svg {
+      position: absolute;
+      left: 16px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      background: rgba(10, 14, 24, 0.9);
+      border: 1.5px solid var(--border);
+      color: #fff;
+      padding: 15px 16px 15px 48px;
+      border-radius: var(--radius-md);
+      font-size: 1.05rem;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 20px var(--gold-glow);
+    }
+
+    /* Search Results Dropdown */
+    .search-results-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      background: rgba(14, 18, 30, 0.98);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      max-height: 420px;
+      overflow-y: auto;
+      z-index: 50;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      display: none;
+    }
+
+    .search-results-dropdown.active {
+      display: block;
+    }
+
+    .search-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .search-item:hover {
+      background: rgba(232, 201, 122, 0.1);
+    }
+
+    .search-item:last-child {
+      border-bottom: none;
+    }
+
+    .search-poster {
+      width: 44px;
+      height: 64px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #1c2436;
+      flex-shrink: 0;
+    }
+
+    .search-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .search-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .search-meta {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .type-pill {
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .type-pill.movie {
+      background: rgba(52, 152, 219, 0.2);
+      color: #5DADE2;
+    }
+
+    .type-pill.tv {
+      background: rgba(155, 89, 182, 0.2);
+      color: #BB8FCE;
+    }
+
+    /* Selected Title Preview Card */
+    .selected-card {
+      display: flex;
+      gap: 1.5rem;
+      background: rgba(10, 14, 24, 0.6);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.4rem;
+      margin-top: 1.4rem;
+      align-items: flex-start;
+      position: relative;
+    }
+
+    .selected-poster {
+      width: 100px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: var(--radius-sm);
+      flex-shrink: 0;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .selected-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .selected-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .selected-meta {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .tv-selectors {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .selector-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .num-input {
+      width: 70px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-weight: 700;
+      outline: none;
+    }
+
+    .num-input:focus {
+      border-color: var(--gold);
+    }
+
+    /* Subtitle Status Banner */
+    .status-banner {
+      margin-top: 1.2rem;
+      padding: 14px 18px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.92rem;
+    }
+
+    .status-banner.exists {
+      background: rgba(46, 204, 113, 0.12);
+      border: 1px solid rgba(46, 204, 113, 0.35);
+      color: #2ECC71;
+    }
+
+    .status-banner.not-exists {
+      background: rgba(232, 201, 122, 0.1);
+      border: 1px solid rgba(232, 201, 122, 0.3);
+      color: var(--gold);
+    }
+
+    .status-text {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+    }
+
+    .status-sub {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+      font-weight: 400;
+    }
+
+    .btn-test-play {
+      background: rgba(46, 204, 113, 0.2);
+      border: 1px solid rgba(46, 204, 113, 0.4);
+      color: #2ECC71;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-test-play:hover {
+      background: rgba(46, 204, 113, 0.3);
+      transform: translateY(-1px);
+    }
+
+    /* Drag & Drop Upload Zone */
+    .upload-zone {
+      margin-top: 1.5rem;
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-md);
+      padding: 2.8rem 2rem;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.02);
+      cursor: pointer;
+      transition: all 0.22s ease;
+      position: relative;
+    }
+
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: var(--gold);
+      background: rgba(232, 201, 122, 0.05);
+      box-shadow: inset 0 0 24px rgba(232, 201, 122, 0.05);
+    }
+
+    .upload-icon {
+      width: 52px;
+      height: 52px;
+      color: var(--gold);
+      margin-bottom: 0.8rem;
+    }
+
+    .upload-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .upload-sub {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .file-input-hidden {
+      display: none;
+    }
+
+    /* File Preview Box */
+    .file-preview {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(10, 14, 24, 0.9);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      margin-top: 1.2rem;
+    }
+
+    .file-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .file-ext-badge {
+      background: var(--gold);
+      color: #0B0E17;
+      font-weight: 800;
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .file-name {
+      font-weight: 600;
+      font-size: 0.92rem;
+      color: #fff;
+    }
+
+    .file-size {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Progress Bar */
+    .progress-section {
+      margin-top: 1.5rem;
+      display: none;
+    }
+
+    .progress-section.active {
+      display: block;
+    }
+
+    .progress-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #E8C97A 0%, #2ECC71 100%);
+      border-radius: 999px;
+      transition: width 0.15s ease-out;
+      box-shadow: 0 0 14px rgba(46, 204, 113, 0.4);
+    }
+
+    .progress-status {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Recent Table */
+    .recent-table-wrap {
+      overflow-x: auto;
+      margin-top: 1rem;
+    }
+
+    table.sub-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    table.sub-table th {
+      padding: 10px 14px;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    table.sub-table td {
+      padding: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #fff;
+    }
+
+    table.sub-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .toast-msg {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(14, 18, 30, 0.95);
+      border: 1px solid var(--gold);
+      color: #fff;
+      padding: 14px 22px;
+      border-radius: var(--radius-md);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .toast-msg.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 640px) {
+      .dash-hero { padding: 1.2rem; }
+      .studio-card { padding: 1.2rem; }
+      .selected-card { flex-direction: column; }
+      .selected-poster { width: 80px; height: 120px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="sub-header">
+    <a href="/" class="brand-wrap" title="Return to HackyMax Home">
+      <img src="logo.png" alt="HackyMax Logo">
+      <span class="brand-tag">🇱🇰 Subtitle Studio</span>
+    </a>
+
+    <div class="user-actions" id="headerUserActions">
+      <!-- Populated via JavaScript -->
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="sub-main">
+
+    <!-- Auth View (Shown when not logged in) -->
+    <div id="authView" class="auth-container" style="display:none;">
+      <h2 class="auth-title">Contributor Login</h2>
+      <p class="auth-desc">Enter your username and password provided by the HackyMax administrator to start uploading subtitles.</p>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" id="loginUsername" class="input-field" placeholder="e.g. admin" required autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="loginPassword" class="input-field" placeholder="••••••••••••" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" id="loginSubmitBtn" class="btn-gold" style="margin-top:0.8rem;">
+          <span>Sign In to Studio</span>
+        </button>
+      </form>
+
+      <div class="auth-notice">
+        🔒 <strong>Authorized Contributors Only</strong><br>
+        All subtitle uploads are digitally signed, validated, and directly synced with Cloudflare R2 &amp; the HackyMax player.
+      </div>
+    </div>
+
+    <!-- Dashboard View (Shown when logged in) -->
+    <div id="dashboardView" class="dashboard-view" style="display:none;">
+
+      <!-- Hero Banner -->
+      <div class="dash-hero">
+        <div class="dash-hero-text">
+          <h1><span>🎬</span> Sinhala Subtitle Studio</h1>
+          <p>Search any movie or TV series, check if it's already subtitled, and upload subtitle files up to 20MB.</p>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <a href="/" class="btn-secondary" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+            <span>🌐 View Site</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Step 1 & 2: Search & Select Movie -->
+      <div class="studio-card">
+        <div class="studio-card-title">
+          <span class="step-badge">1</span>
+          <span>Search &amp; Select Title</span>
+        </div>
+
+        <div class="search-box-wrap">
+          <div class="search-input-group">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="tmdbSearchInput" class="search-input" placeholder="Type movie or TV series title (e.g. Banshee, Jana Nayagan, Dune, Inception)..." autocomplete="off" oninput="handleSearchInput(event)">
+          </div>
+
+          <div id="searchResultsDropdown" class="search-results-dropdown"></div>
+        </div>
+
+        <!-- Selected Title Card -->
+        <div id="selectedTitleCard" class="selected-card" style="display:none;">
+          <img id="selPoster" class="selected-poster" src="" alt="Poster">
+          <div class="selected-details">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <h2 id="selTitle" class="selected-title">Title</h2>
+              <span id="selTypeBadge" class="type-pill movie">MOVIE</span>
+            </div>
+            <div id="selMeta" class="selected-meta"></div>
+
+            <!-- TV Season / Episode selectors -->
+            <div id="tvSelectorWrap" class="tv-selectors" style="display:none;">
+              <div class="selector-box">
+                <span>Season:</span>
+                <input type="number" id="tvSeasonInput" class="num-input" value="1" min="1" max="99" onchange="checkSubtitleStatus()">
+              </div>
+              <div class="selector-box">
+                <span>Episode:</span>
+                <input type="number" id="tvEpisodeInput" class="num-input" value="1" min="1" max="999" onchange="checkSubtitleStatus()">
+              </div>
+            </div>
+
+            <!-- Dynamic Subtitle Status Banner -->
+            <div id="statusBanner" class="status-banner not-exists">
+              <div>
+                <div id="statusTitle" class="status-text">Checking subtitle status…</div>
+                <div id="statusSub" class="status-sub">Querying HackyMax subtitle catalog</div>
+              </div>
+              <div id="statusActionWrap"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Subtitle Upload Component -->
+      <div class="studio-card" id="uploadStepCard" style="display:none;">
+        <div class="studio-card-title">
+          <span class="step-badge">2</span>
+          <span>Upload Subtitle File (.srt, .vtt, .sub, .idx — Max 20MB)</span>
+        </div>
+
+        <div id="uploadDropZone" class="upload-zone" onclick="document.getElementById('subFileInput').click()">
+          <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <div class="upload-title">Choose subtitle file or drag &amp; drop here</div>
+          <div class="upload-sub">Supports .srt, .vtt, .sub, and .idx files up to 20MB</div>
+          <input type="file" id="subFileInput" class="file-input-hidden" accept=".srt,.vtt,.sub,.idx" onchange="handleFileSelected(event)">
+        </div>
+
+        <!-- Selected File Preview -->
+        <div id="filePreviewBox" class="file-preview" style="display:none;">
+          <div class="file-meta">
+            <span id="fileBadge" class="file-ext-badge">SRT</span>
+            <div>
+              <div id="fileName" class="file-name">filename.srt</div>
+              <div id="fileSize" class="file-size">0 KB</div>
+            </div>
+          </div>
+          <button type="button" class="btn-secondary" onclick="clearSelectedFile()">Change File</button>
+        </div>
+
+        <!-- Real-Time Progress Bar -->
+        <div id="progressSection" class="progress-section">
+          <div class="progress-header">
+            <span id="progressStepText">Uploading subtitle...</span>
+            <span id="progressPercentText" style="color:var(--gold);">0%</span>
+          </div>
+          <div class="progress-track">
+            <div id="progressBarFill" class="progress-bar-fill"></div>
+          </div>
+          <div id="progressStatusText" class="progress-status">Initiating direct Cloudflare R2 transfer...</div>
+        </div>
+
+        <!-- Upload Action Button -->
+        <div style="margin-top:1.5rem;">
+          <button type="button" id="startUploadBtn" class="btn-gold" style="display:none;" onclick="startUpload()">
+            <span>🚀 Upload &amp; Link Subtitle</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Recent Uploads Feed -->
+      <div class="studio-card">
+        <div class="studio-card-title">
+          <span>📜</span>
+          <span>Recent Subtitle Catalog Uploads</span>
+        </div>
+        <div class="recent-table-wrap">
+          <table class="sub-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Format</th>
+                <th>Uploader</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="recentTableBody">
+              <tr>
+                <td colspan="6" style="text-align:center; color:var(--text-muted); padding:2rem;">Loading recent subtitles…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <div id="toast" class="toast-msg"></div>
+
+  <script>
+    // ── Global State ──────────────────────────────────────────────────────────
+    let currentUser = null;
+    let selectedTitle = null;
+    let selectedFile = null;
+    let searchDebounceTimer = null;
+
+    const TOKEN_KEY = 'hackymax_sub_token';
+    const USER_KEY = 'hackymax_sub_user';
+
+    // ── Initialization ────────────────────────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', async () => {
+      setupDragDrop();
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (token) {
+        try {
+          const res = await fetch(`/api/sub-auth?token=${encodeURIComponent(token)}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.authenticated) {
+              setLoggedIn(data.user, token);
+              loadRecentUploads();
+              return;
+            }
+          }
+        } catch (_) {}
+      }
+      setLoggedOut();
+    });
+
+    // ── Auth Handling ─────────────────────────────────────────────────────────
+    function setLoggedIn(user, token) {
+      currentUser = user;
+      localStorage.setItem(TOKEN_KEY, token);
+      localStorage.setItem(USER_KEY, user);
+
+      document.getElementById('authView').style.display = 'none';
+      document.getElementById('dashboardView').style.display = 'flex';
+
+      document.getElementById('headerUserActions').innerHTML = `
+        <div class="user-pill">
+          <span class="dot"></span>
+          <span>👤 ${user}</span>
+        </div>
+        <button class="btn-secondary" onclick="handleLogout()">Sign Out</button>
+      `;
+
+      loadRecentUploads();
+    }
+
+    function setLoggedOut() {
+      currentUser = null;
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
+
+      document.getElementById('authView').style.display = 'block';
+      document.getElementById('dashboardView').style.display = 'none';
+
+      document.getElementById('headerUserActions').innerHTML = `
+        <span style="font-size:0.85rem; color:var(--text-muted);">Guest Mode</span>
+      `;
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById('loginUsername').value.trim();
+      const p = document.getElementById('loginPassword').value.trim();
+      const btn = document.getElementById('loginSubmitBtn');
+
+      if (!u || !p) return;
+      btn.disabled = true;
+      btn.innerHTML = '<span>Verifying credentials…</span>';
+
+      try {
+        const res = await fetch('/api/sub-auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'login', username: u, password: p })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          showToast(`Welcome back, ${data.user}!`);
+          setLoggedIn(data.user, data.token);
+        } else {
+          showToast(data.error || 'Invalid credentials. Please try again.');
+        }
+      } catch (err) {
+        showToast('Login failed: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Sign In to Studio</span>';
+      }
+    }
+
+    function handleLogout() {
+      setLoggedOut();
+      showToast('You have signed out.');
+    }
+
+    // ── TMDB Search Logic ─────────────────────────────────────────────────────
+    function handleSearchInput(e) {
+      clearTimeout(searchDebounceTimer);
+      const q = e.target.value.trim();
+      const dropdown = document.getElementById('searchResultsDropdown');
+
+      if (q.length < 2) {
+        dropdown.classList.remove('active');
+        dropdown.innerHTML = '';
+        return;
+      }
+
+      searchDebounceTimer = setTimeout(async () => {
+        try {
+          const res = await fetch(`/api/tmdb?target=/search/multi?query=${encodeURIComponent(q)}`);
+          if (!res.ok) return;
+          const data = await res.json();
+          renderSearchResults(data.results || []);
+        } catch (_) {}
+      }, 250);
+    }
+
+    function renderSearchResults(results) {
+      const dropdown = document.getElementById('searchResultsDropdown');
+      const valid = results.filter(r => r.media_type === 'movie' || r.media_type === 'tv').slice(0, 8);
+
+      if (valid.length === 0) {
+        dropdown.innerHTML = '<div style="padding:16px; text-align:center; color:var(--text-muted);">No movies or series found</div>';
+        dropdown.classList.add('active');
+        return;
+      }
+
+      dropdown.innerHTML = valid.map(item => {
+        const title = item.title || item.name || 'Untitled';
+        const year = (item.release_date || item.first_air_date || '').slice(0, 4) || 'N/A';
+        const poster = item.poster_path ? `https://image.tmdb.org/t/p/w92${item.poster_path}` : 'logo.png';
+        const isTv = item.media_type === 'tv';
+
+        return `
+          <div class="search-item" onclick='selectTitle(${JSON.stringify(item).replace(/'/g, "&#39;")})'>
+            <img class="search-poster" src="${poster}" alt="${title}">
+            <div class="search-info">
+              <div class="search-title">${title}</div>
+              <div class="search-meta">
+                <span class="type-pill ${isTv ? 'tv' : 'movie'}">${isTv ? 'TV SERIES' : 'MOVIE'}</span>
+                <span>📅 ${year}</span>
+                <span>⭐ ${item.vote_average ? item.vote_average.toFixed(1) : 'NR'}</span>
+                <span style="font-family:'JetBrains Mono',monospace; opacity:0.6;">#${item.id}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      dropdown.classList.add('active');
+    }
+
+    function selectTitle(item) {
+      selectedTitle = item;
+      document.getElementById('searchResultsDropdown').classList.remove('active');
+      document.getElementById('tmdbSearchInput').value = item.title || item.name;
+
+      const isTv = item.media_type === 'tv';
+      const poster = item.poster_path ? `https://image.tmdb.org/t/p/w185${item.poster_path}` : 'logo.png';
+      const year = (item.release_date || item.first_air_date || '').slice(0, 4);
+
+      document.getElementById('selPoster').src = poster;
+      document.getElementById('selTitle').textContent = item.title || item.name;
+      document.getElementById('selTypeBadge').textContent = isTv ? 'TV SERIES' : 'MOVIE';
+      document.getElementById('selTypeBadge').className = `type-pill ${isTv ? 'tv' : 'movie'}`;
+      document.getElementById('selMeta').innerHTML = `
+        <span>📅 ${year || 'N/A'}</span>
+        <span>⭐ ${item.vote_average ? item.vote_average.toFixed(1) : 'NR'}</span>
+        <span style="font-family:'JetBrains Mono',monospace;">TMDB ID: ${item.id}</span>
+      `;
+
+      document.getElementById('tvSelectorWrap').style.display = isTv ? 'flex' : 'none';
+      document.getElementById('selectedTitleCard').style.display = 'flex';
+      document.getElementById('uploadStepCard').style.display = 'block';
+
+      checkSubtitleStatus();
+    }
+
+    // ── Check "Already Subtitled" Status ──────────────────────────────────────
+    async function checkSubtitleStatus() {
+      if (!selectedTitle) return;
+      const isTv = selectedTitle.media_type === 'tv';
+      const season = isTv ? document.getElementById('tvSeasonInput').value : 1;
+      const episode = isTv ? document.getElementById('tvEpisodeInput').value : 1;
+
+      const banner = document.getElementById('statusBanner');
+      const titleEl = document.getElementById('statusTitle');
+      const subEl = document.getElementById('statusSub');
+      const actionWrap = document.getElementById('statusActionWrap');
+
+      titleEl.textContent = 'Checking subtitle catalog…';
+      subEl.textContent = 'Querying live HackyMax subtitle index';
+      actionWrap.innerHTML = '';
+
+      try {
+        const query = isTv
+          ? `id=${selectedTitle.id}&type=tv&season=${season}&episode=${episode}`
+          : `id=${selectedTitle.id}&type=movie`;
+        const res = await fetch(`/api/sub-catalog?${query}`);
+        const data = await res.json();
+
+        if (data.exists && data.item) {
+          banner.className = 'status-banner exists';
+          titleEl.innerHTML = '✅ Already Subtitled (Sinhala 🇱🇰)';
+          const dateStr = data.item.uploadedAt ? new Date(data.item.uploadedAt).toLocaleDateString() : 'System';
+          subEl.innerHTML = `Format: <strong>.${data.item.format || 'srt'}</strong> · Uploader: <strong>${data.item.uploader || 'Admin'}</strong> · Date: ${dateStr}`;
+
+          const playUrl = isTv ? `/?cat=tvshows` : `/?id=${selectedTitle.id}`;
+          actionWrap.innerHTML = `
+            <a href="${playUrl}" target="_blank" class="btn-test-play">
+              <span>▶️ Test Playback</span>
+            </a>
+          `;
+        } else {
+          banner.className = 'status-banner not-exists';
+          titleEl.innerHTML = '⚠️ No Sinhala Subtitle Yet';
+          subEl.textContent = 'Be the first to upload a Sinhala subtitle for this title!';
+          actionWrap.innerHTML = '';
+        }
+      } catch (err) {
+        titleEl.textContent = 'Status check failed';
+        subEl.textContent = err.message;
+      }
+    }
+
+    // ── Drag & Drop File Upload Setup ─────────────────────────────────────────
+    function setupDragDrop() {
+      const zone = document.getElementById('uploadDropZone');
+      ['dragenter', 'dragover'].forEach(eName => {
+        zone.addEventListener(eName, e => {
+          e.preventDefault();
+          zone.classList.add('dragover');
+        });
+      });
+      ['dragleave', 'drop'].forEach(eName => {
+        zone.addEventListener(eName, e => {
+          e.preventDefault();
+          zone.classList.remove('dragover');
+        });
+      });
+      zone.addEventListener('drop', e => {
+        const files = e.dataTransfer.files;
+        if (files && files.length > 0) processFile(files[0]);
+      });
+    }
+
+    function handleFileSelected(e) {
+      if (e.target.files && e.target.files.length > 0) {
+        processFile(e.target.files[0]);
+      }
+    }
+
+    function processFile(file) {
+      const MAX_SIZE = 20 * 1024 * 1024; // 20MB
+      if (file.size > MAX_SIZE) {
+        showToast('❌ File too large! Maximum allowed size is 20MB.');
+        return;
+      }
+
+      const ext = file.name.split('.').pop().toLowerCase();
+      const allowed = ['srt', 'vtt', 'sub', 'idx'];
+      if (!allowed.includes(ext)) {
+        showToast(`❌ Unsupported format .${ext}! Allowed: .srt, .vtt, .sub, .idx`);
+        return;
+      }
+
+      selectedFile = file;
+      document.getElementById('uploadDropZone').style.display = 'none';
+      document.getElementById('filePreviewBox').style.display = 'flex';
+      document.getElementById('fileBadge').textContent = ext.toUpperCase();
+      document.getElementById('fileName').textContent = file.name;
+      document.getElementById('fileSize').textContent = formatBytes(file.size);
+      document.getElementById('startUploadBtn').style.display = 'inline-flex';
+    }
+
+    function clearSelectedFile() {
+      selectedFile = null;
+      document.getElementById('subFileInput').value = '';
+      document.getElementById('uploadDropZone').style.display = 'block';
+      document.getElementById('filePreviewBox').style.display = 'none';
+      document.getElementById('startUploadBtn').style.display = 'none';
+    }
+
+    // ── Direct R2 Presigned / Streaming Upload with Real Progress ────────────
+    async function startUpload() {
+      if (!selectedTitle || !selectedFile) {
+        showToast('Please select a title and subtitle file first');
+        return;
+      }
+
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (!token) {
+        showToast('Please sign in to upload subtitles');
+        setLoggedOut();
+        return;
+      }
+
+      const isTv = selectedTitle.media_type === 'tv';
+      const season = isTv ? Number(document.getElementById('tvSeasonInput').value) : 1;
+      const episode = isTv ? Number(document.getElementById('tvEpisodeInput').value) : 1;
+
+      const progressSec = document.getElementById('progressSection');
+      const stepText = document.getElementById('progressStepText');
+      const percentText = document.getElementById('progressPercentText');
+      const barFill = document.getElementById('progressBarFill');
+      const statusText = document.getElementById('progressStatusText');
+      const uploadBtn = document.getElementById('startUploadBtn');
+
+      progressSec.classList.add('active');
+      uploadBtn.disabled = true;
+
+      function updateProgress(percent, status) {
+        barFill.style.width = `${percent}%`;
+        percentText.textContent = `${Math.round(percent)}%`;
+        if (status) statusText.textContent = status;
+      }
+
+      try {
+        stepText.textContent = '1/3 Requesting secure upload session…';
+        updateProgress(5, 'Authenticating with Cloudflare R2 API...');
+
+        // 1. Request presigned upload URL
+        const presignRes = await fetch('/api/sub-upload', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            action: 'presigned',
+            tmdbId: String(selectedTitle.id),
+            type: selectedTitle.media_type,
+            season,
+            episode,
+            fileName: selectedFile.name,
+            fileSize: selectedFile.size
+          })
+        });
+
+        const presignData = await presignRes.json();
+        if (!presignRes.ok || (!presignData.uploadUrl)) {
+          throw new Error(presignData.error || 'Failed to acquire upload authorization');
+        }
+
+        stepText.textContent = '2/3 Uploading subtitle (Real-time Transfer)…';
+        updateProgress(15, 'Streaming file directly to Cloudflare R2 bucket...');
+
+        // 2. Perform direct upload with XHR for real-time progress
+        if (presignData.mode === 'r2_presigned') {
+          await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('PUT', presignData.uploadUrl, true);
+            const ext = selectedFile.name.split('.').pop().toLowerCase();
+            xhr.setRequestHeader('Content-Type', ext === 'vtt' ? 'text/vtt' : 'text/plain; charset=utf-8');
+
+            xhr.upload.onprogress = (e) => {
+              if (e.lengthComputable) {
+                const p = 15 + (e.loaded / e.total) * 75; // 15% to 90%
+                updateProgress(p, `Uploaded ${formatBytes(e.loaded)} of ${formatBytes(e.total)}`);
+              }
+            };
+
+            xhr.onload = () => {
+              if (xhr.status >= 200 && xhr.status < 300) resolve();
+              else reject(new Error(`R2 upload rejected with status ${xhr.status}`));
+            };
+            xhr.onerror = () => reject(new Error('Network error during R2 transfer'));
+            xhr.send(selectedFile);
+          });
+        } else {
+          // Direct fallback mode
+          const base64Content = await fileToBase64(selectedFile);
+          await fetch('/api/sub-upload', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              action: 'direct',
+              tmdbId: String(selectedTitle.id),
+              type: selectedTitle.media_type,
+              season,
+              episode,
+              title: selectedTitle.title || selectedTitle.name,
+              year: (selectedTitle.release_date || selectedTitle.first_air_date || '').slice(0, 4),
+              fileName: selectedFile.name,
+              fileBase64: base64Content
+            })
+          });
+        }
+
+        stepText.textContent = '3/3 Finalizing & Linking to HackyMax Player…';
+        updateProgress(95, 'Writing subtitle metadata to catalog...');
+
+        // 3. Confirm catalog entry
+        const ext = selectedFile.name.split('.').pop().toLowerCase();
+        await fetch('/api/sub-upload', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            action: 'confirm',
+            tmdbId: String(selectedTitle.id),
+            type: selectedTitle.media_type,
+            season,
+            episode,
+            title: selectedTitle.title || selectedTitle.name,
+            year: (selectedTitle.release_date || selectedTitle.first_air_date || '').slice(0, 4),
+            format: ext,
+            fileSize: selectedFile.size,
+            publicUrl: presignData.publicUrl
+          })
+        });
+
+        updateProgress(100, '✅ Subtitle successfully uploaded and linked!');
+        stepText.textContent = '🎉 Upload Complete!';
+        showToast('🎉 Subtitle uploaded! Now automatically available on HackyMax player.');
+
+        checkSubtitleStatus();
+        loadRecentUploads();
+
+        setTimeout(() => {
+          clearSelectedFile();
+          progressSec.classList.remove('active');
+          uploadBtn.disabled = false;
+        }, 3000);
+
+      } catch (err) {
+        showToast('❌ Upload failed: ' + err.message);
+        statusText.textContent = 'Error: ' + err.message;
+        uploadBtn.disabled = false;
+      }
+    }
+
+    // ── Load Recent Uploads Table ─────────────────────────────────────────────
+    async function loadRecentUploads() {
+      try {
+        const res = await fetch('/api/sub-catalog?recent=1');
+        if (!res.ok) return;
+        const data = await res.json();
+        const tbody = document.getElementById('recentTableBody');
+
+        if (!data.recent || data.recent.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:2rem;">No recent uploads found.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = data.recent.map(item => {
+          const isTv = item.mediaType === 'tv';
+          const se = isTv && item.season ? ` S${item.season} E${item.episode}` : '';
+          const date = item.uploadedAt ? new Date(item.uploadedAt).toLocaleDateString() : 'System';
+
+          return `
+            <tr>
+              <td>
+                <strong>${item.title || item.key}</strong>
+                ${se ? `<span style="color:var(--gold); font-size:0.8rem; margin-left:4px;">${se}</span>` : ''}
+                <div style="font-size:0.75rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">ID: ${item.tmdbId || item.key}</div>
+              </td>
+              <td><span class="type-pill ${isTv ? 'tv' : 'movie'}">${isTv ? 'TV' : 'MOVIE'}</span></td>
+              <td><span class="file-ext-badge">${(item.format || 'srt').toUpperCase()}</span></td>
+              <td>${item.uploader || 'Admin'}</td>
+              <td><span style="color:var(--green); font-weight:700;">🟢 Active</span></td>
+              <td>
+                <a href="${isTv ? '/?cat=tvshows' : `/?id=${item.tmdbId || item.key}`}" target="_blank" class="btn-test-play" style="padding:4px 10px; font-size:0.75rem;">
+                  Play
+                </a>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } catch (_) {}
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function formatBytes(bytes) {
+      if (!bytes || bytes === 0) return '0 B';
+      const k = 1024;
+      const dm = 1;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = error => reject(error);
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3500);
+    }
+  </script>
+</body>
+</html>

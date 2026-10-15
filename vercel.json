@@ -1,5 +1,8 @@
 {
   "cleanUrls": true,
+  "rewrites": [
+    { "source": "/sub", "destination": "/sub.html" }
+  ],
   "headers": [
     {
       "source": "/(.*).html",
