@@ -3237,122 +3237,134 @@
       border-color: transparent;
     }
 
-    .player-close {
-      position: absolute;
-      top: 1.5rem;
-      right: 1.8rem;
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      background: rgba(15, 20, 32, 0.95);
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      font-size: 1.1rem;
-      cursor: pointer;
-      color: var(--text);
-      line-height: 1;
+    /* ── Top-Center Floating Glass Capsule Bar ──────────────────────── */
+    .player-floating-bar {
+      position: absolute !important;
+      top: 14px !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
       z-index: 99999 !important;
-      transition: all 0.2s;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      padding: 4px 6px !important;
+      background: rgba(10, 14, 24, 0.78) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.14) !important;
+      border-radius: 50px !important;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+      pointer-events: auto !important;
+      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 
-    .player-close:hover {
-      background: rgba(239, 68, 68, 0.85);
-      border-color: #EF4444;
-      color: #ffffff;
-      transform: scale(1.08);
+    .player-floating-bar .floating-btn {
+      position: static !important;
+      top: auto !important;
+      bottom: auto !important;
+      left: auto !important;
+      right: auto !important;
+      transform: none !important;
+      width: 34px !important;
+      height: 34px !important;
+      min-width: 34px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border-radius: 50% !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      cursor: pointer !important;
+      font-size: 1rem !important;
+      line-height: 1 !important;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+      color: var(--text) !important;
+      flex-shrink: 0 !important;
     }
 
-    .topbar-wp-btn {
-      position: absolute;
-      top: 1.5rem;
-      right: 4.8rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-      padding: 0 0.85rem;
-      height: 36px;
-      border-radius: 50px;
-      background: rgba(36, 16, 68, 0.95);
-      border: 1px solid rgba(168, 85, 247, 0.6);
-      color: #E9D5FF;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.3px;
-      cursor: pointer;
-      z-index: 99999 !important;
-      transition: all 0.2s;
+    .player-floating-bar .floating-divider {
+      width: 1px !important;
+      height: 18px !important;
+      background: rgba(255, 255, 255, 0.15) !important;
+      margin: 0 2px !important;
+      flex-shrink: 0 !important;
+      display: block !important;
     }
 
-    .topbar-wp-btn:hover {
-      background: linear-gradient(135deg, rgba(168, 85, 247, 0.35), rgba(124, 58, 237, 0.45));
-      border-color: rgba(168, 85, 247, 0.85);
-      color: #ffffff;
-      transform: translateY(-1px) scale(1.03);
-      box-shadow: 0 0 22px rgba(168, 85, 247, 0.5);
+    /* Home button inside floating bar */
+    .player-floating-bar #playerHome {
+      background: rgba(255, 255, 255, 0.08) !important;
+      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      color: #E2E8F0 !important;
+    }
+    .player-floating-bar #playerHome:hover {
+      background: rgba(232, 201, 122, 0.22) !important;
+      border-color: var(--gold) !important;
+      color: var(--gold) !important;
+      transform: scale(1.08) !important;
+      box-shadow: 0 0 16px rgba(232, 201, 122, 0.4) !important;
     }
 
-    .topbar-wp-btn.active {
-      background: linear-gradient(135deg, #A855F7, #7C3AED);
-      border-color: #C084FC;
-      color: #ffffff;
-      box-shadow: 0 0 20px rgba(168, 85, 247, 0.65);
+    /* Close (X) button inside floating bar */
+    .player-floating-bar .player-close {
+      background: rgba(255, 255, 255, 0.08) !important;
+      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      color: #E2E8F0 !important;
+    }
+    .player-floating-bar .player-close:hover {
+      background: rgba(239, 68, 68, 0.85) !important;
+      border-color: #EF4444 !important;
+      color: #ffffff !important;
+      transform: scale(1.08) !important;
+      box-shadow: 0 0 16px rgba(239, 68, 68, 0.5) !important;
     }
 
-    .topbar-wp-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #22c55e;
-      box-shadow: 0 0 8px #22c55e;
-      display: none;
+    /* Watch Party button: Round icon only */
+    .player-floating-bar .topbar-wp-btn {
+      position: relative !important;
+      width: 34px !important;
+      height: 34px !important;
+      min-width: 34px !important;
+      padding: 0 !important;
+      border-radius: 50% !important;
+      background: rgba(36, 16, 68, 0.95) !important;
+      border: 1px solid rgba(168, 85, 247, 0.6) !important;
+      color: #E9D5FF !important;
+    }
+    .player-floating-bar .topbar-wp-btn span:not(.topbar-wp-dot) {
+      display: none !important;
+    }
+    .player-floating-bar .topbar-wp-btn .topbar-wp-dot {
+      position: absolute !important;
+      top: 4px !important;
+      right: 4px !important;
+      width: 6px !important;
+      height: 6px !important;
+      border-radius: 50% !important;
+      background: #22c55e !important;
+      box-shadow: 0 0 8px #22c55e !important;
+      display: none !important;
+    }
+    .player-floating-bar .topbar-wp-btn.active .topbar-wp-dot {
+      display: inline-block !important;
+      animation: wpPulse 1.8s infinite !important;
+    }
+    .player-floating-bar .topbar-wp-btn:hover {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.45), rgba(124, 58, 237, 0.55)) !important;
+      border-color: rgba(168, 85, 247, 0.95) !important;
+      color: #ffffff !important;
+      transform: scale(1.08) !important;
+      box-shadow: 0 0 18px rgba(168, 85, 247, 0.6) !important;
+    }
+    .player-floating-bar .topbar-wp-btn.active {
+      background: linear-gradient(135deg, #A855F7, #7C3AED) !important;
+      border-color: #C084FC !important;
+      color: #ffffff !important;
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.75) !important;
     }
 
-    .topbar-wp-btn.active .topbar-wp-dot {
-      display: inline-block;
-      animation: wpPulse 1.8s infinite;
-    }
-
-    .topbar-sub-btn {
-      position: absolute;
-      top: 1.5rem;
-      right: 14.2rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-      padding: 0 0.85rem;
-      height: 36px;
-      border-radius: 50px;
-      background: rgba(232, 201, 122, 0.14);
-      border: 1px solid rgba(232, 201, 122, 0.45);
-      color: var(--gold);
-      font-family: 'Inter', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.3px;
-      cursor: pointer;
-      z-index: 99999 !important;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 0 16px rgba(232, 201, 122, 0.2);
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .topbar-sub-btn:hover {
-      background: rgba(232, 201, 122, 0.25);
-      border-color: var(--gold);
-      color: #ffffff;
-      transform: translateY(-1px) scale(1.03);
-      box-shadow: 0 0 22px rgba(232, 201, 122, 0.45);
-    }
-
-    .topbar-sub-btn.active {
-      background: linear-gradient(135deg, #E8C97A, #c9a227);
-      border-color: #E8C97A;
-      color: #07090F;
-      box-shadow: 0 0 20px rgba(232, 201, 122, 0.65);
-    }
 
     .player-newtab-btn {
       display: inline-flex;
@@ -3715,6 +3727,13 @@
       pointer-events: auto !important;
       transform: translateY(0) scale(1) !important;
     }
+    .sub-panel-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.15rem;
+      gap: 10px;
+    }
     .sub-panel-back-btn {
       display: inline-flex;
       align-items: center;
@@ -3727,12 +3746,55 @@
       font-weight: 500;
       padding: 5px 14px;
       cursor: pointer;
-      margin-bottom: 1.15rem;
+      margin-bottom: 0 !important;
       transition: background 0.15s, color 0.15s;
     }
     .sub-panel-back-btn:hover {
       background: rgba(255, 255, 255, 0.14);
       color: #ffffff;
+    }
+    .sub-panel-toggle-btn,
+    #subToggleBtn {
+      position: static !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      padding: 5px 12px !important;
+      height: 32px !important;
+      border-radius: 9999px !important;
+      font-size: 0.8rem !important;
+      font-weight: 700 !important;
+      cursor: pointer !important;
+      font-family: 'Inter', sans-serif !important;
+      background: rgba(232, 201, 122, 0.12) !important;
+      border: 1px solid rgba(232, 201, 122, 0.35) !important;
+      color: var(--gold) !important;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      box-shadow: none !important;
+      white-space: nowrap !important;
+    }
+    .sub-panel-toggle-btn:hover,
+    #subToggleBtn:hover {
+      background: rgba(232, 201, 122, 0.22) !important;
+      border-color: var(--gold) !important;
+      color: #ffffff !important;
+      transform: translateY(-1px) !important;
+      box-shadow: 0 0 14px rgba(232, 201, 122, 0.35) !important;
+    }
+    .sub-panel-toggle-btn.active,
+    #subToggleBtn.active {
+      background: linear-gradient(135deg, #E8C97A, #c9a227) !important;
+      border-color: #E8C97A !important;
+      color: #07090F !important;
+      box-shadow: 0 0 16px rgba(232, 201, 122, 0.5) !important;
+    }
+    .sub-panel-toggle-btn .sub-flag {
+      font-size: 1rem;
+      line-height: 1;
+    }
+    .sub-panel-toggle-btn .sub-toggle-text {
+      display: inline !important;
+      font-size: 0.78rem;
     }
     .sub-setting-group {
       margin-bottom: 1.15rem;
@@ -3919,7 +3981,7 @@
     /* ── Subtitle Toast Badge ────────────────────────────────────────── */
     .sub-toast-badge {
       position: absolute;
-      top: 22px;
+      top: 58px;
       left: 50%;
       transform: translateX(-50%) translateY(-20px);
       background: rgba(11, 14, 23, 0.94);
@@ -4522,19 +4584,7 @@
       #topbarWatchPartyBtn svg {
         width: 16px !important;
         height: 16px !important;
-      }
-      #subToggleBtn {
-        top: 8px !important;
-        right: 88px !important;
-        width: 34px !important;
-        height: 34px !important;
-        padding: 0 !important;
-        justify-content: center !important;
-        border-radius: 50% !important;
-      }
-      #subToggleBtn span:not(.sub-flag) {
-        display: none !important;
-      }
+
       #playerHome {
         top: 8px !important;
         left: 8px !important;
@@ -7019,19 +7069,14 @@
     }
 
     /* Fullscreen controls transitions */
+    .player-floating-bar,
     #playerClose,
     #topbarWatchPartyBtn,
-    #subToggleBtn,
     .player-fs-overlay-btn,
     .player-sub-overlay-btn,
     #skipIntroBtn,
     #skipInfoBadge {
       transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
-    }
-
-    /* In fullscreen, hide home icon */
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #playerHome {
-      display: none !important;
     }
 
     /* ── Fullscreen Invisible Mouse Catcher Overlay ──────────────────── */
@@ -7058,42 +7103,53 @@
       pointer-events: none !important;
     }
 
-    /* Keep close, watch party, and sinhala sub button elevated when active (not idle) */
+    /* Keep floating bar, close, and watch party button elevated when active (not idle) */
+    .player-floating-bar {
+      display: inline-flex !important;
+      z-index: 99999 !important;
+    }
     #playerClose,
-    #topbarWatchPartyBtn,
-    #subToggleBtn {
+    #topbarWatchPartyBtn {
       display: flex !important;
-      z-index: 45 !important;
+    }
+
+    #playerContainer:not(.idle-fs) .player-floating-bar,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) .player-floating-bar {
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      transform: translate(-50%, 0) !important;
     }
 
     #playerContainer:not(.idle-fs) #playerClose,
     #playerContainer:not(.idle-fs) #topbarWatchPartyBtn,
-    #playerContainer:not(.idle-fs) #subToggleBtn,
     #playerContainer:not(.idle-fs) .player-sub-overlay-btn,
     #playerContainer:not(.idle-fs) .player-fs-overlay-btn,
     #playerContainer:not(.idle-fs) #playerHome,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) #playerClose,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) #topbarWatchPartyBtn,
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) #subToggleBtn,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) .player-sub-overlay-btn,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) .player-fs-overlay-btn,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) #playerHome {
       opacity: 1 !important;
       pointer-events: auto !important;
-      transform: translateY(0) !important;
     }
 
-    /* Automatically hide watchparty, x mark (close), fullscreen marks, and overlay when idle (on all devices & modes) */
+    /* Automatically hide watchparty, x mark (close), floating bar, and overlay when idle (on all devices & modes) */
+    #playerContainer.idle-fs:not(.sub-panel-open) .player-floating-bar,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs:not(.sub-panel-open) .player-floating-bar {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      transform: translate(-50%, -10px) !important;
+    }
+
     #playerContainer.idle-fs:not(.sub-panel-open) #playerClose,
     #playerContainer.idle-fs:not(.sub-panel-open) #topbarWatchPartyBtn,
-    #playerContainer.idle-fs:not(.sub-panel-open) #subToggleBtn,
     #playerContainer.idle-fs:not(.sub-panel-open) #skipIntroBtn,
     #playerContainer.idle-fs:not(.sub-panel-open) #skipInfoBadge,
     #playerContainer.idle-fs:not(.sub-panel-open) .popup-home,
     #playerContainer.idle-fs:not(.sub-panel-open) #playerHome,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs:not(.sub-panel-open) #playerClose,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs:not(.sub-panel-open) #topbarWatchPartyBtn,
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs:not(.sub-panel-open) #subToggleBtn,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs:not(.sub-panel-open) #skipIntroBtn,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs:not(.sub-panel-open) #skipInfoBadge,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs:not(.sub-panel-open) .popup-home,
@@ -7641,20 +7697,7 @@
     .device-mobile #topbarWatchPartyBtn svg {
       width: 16px !important;
       height: 16px !important;
-    }
-    .device-mobile #subToggleBtn {
-      top: 8px !important;
-      right: 88px !important;
-      width: 34px !important;
-      height: 34px !important;
-      padding: 0 !important;
-      justify-content: center !important;
-      border-radius: 50% !important;
-      z-index: 99999 !important;
-    }
-    .device-mobile #subToggleBtn span:not(.sub-flag) {
-      display: none !important;
-    }
+
     .device-mobile .player-sub-overlay-btn {
       bottom: max(6px, env(safe-area-inset-bottom, 6px)) !important;
       right: calc(max(6px, env(safe-area-inset-right, 6px)) + 48px) !important;
@@ -8742,13 +8785,6 @@
       <button class="player-ep-btn" id="playerNextEp" title="Next Episode">Next Ep ⏭</button>
     </div>
     <div class="player-container" id="playerContainer">
-      <button class="popup-home" id="playerHome"
-        title="Go Home"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" />
-          <path d="M9 21V12h6v9" />
-        </svg></button>
-
       <iframe id="playerFrame" src="about:blank"
         allow="autoplay *; encrypted-media *; picture-in-picture *; web-share *"
         frameborder="0"></iframe>
@@ -8774,26 +8810,31 @@
       <!-- Subtitle File Loader (hidden input) -->
       <input type="file" id="subFileInput" accept=".srt,.vtt,.ass,.ssa" style="display:none">
 
-      <!-- Sinhala Subtitles Toggle Button (On/Off) -->
-      <button class="topbar-sub-btn" id="subToggleBtn" title="Sinhala Subtitles — Toggle On / Off">
-        <span class="sub-flag">🇱🇰</span>
-        <span>Sinhala Sub</span>
-      </button>
+      <!-- Modern Top-Center Floating Glass Capsule Bar -->
+      <div class="player-floating-bar" id="playerFloatingBar">
+        <button class="floating-btn" id="playerHome" title="Go Home">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" />
+            <path d="M9 21V12h6v9" />
+          </svg>
+        </button>
 
-      <!-- Watch Party button (always top layer) -->
-      <button class="topbar-wp-btn" id="topbarWatchPartyBtn" title="Watch Party — Watch together with friends">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
-          <circle cx="9" cy="7" r="4"/>
-          <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
-          <circle cx="19" cy="9" r="3"/>
-          <path d="M23 21v-2a3 3 0 0 0-3-3h-1"/>
-        </svg>
-        <span>Watch Party</span>
-        <span class="topbar-wp-dot" id="topbarWpActiveDot"></span>
-      </button>
+        <span class="floating-divider" id="floatingBarDivider"></span>
 
-      <!-- Player Close Button (always top layer) -->
-      <button class="player-close" id="playerClose">&#10005;</button>
+        <!-- Watch Party button (Round Icon Only) -->
+        <button class="floating-btn topbar-wp-btn" id="topbarWatchPartyBtn" title="Watch Party — Watch together with friends">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
+            <circle cx="19" cy="9" r="3"/>
+            <path d="M23 21v-2a3 3 0 0 0-3-3h-1"/>
+          </svg>
+          <span class="topbar-wp-dot" id="topbarWpActiveDot"></span>
+        </button>
+
+        <!-- Player Close Button (always top layer) -->
+        <button class="floating-btn player-close" id="playerClose" title="Close Player (Esc)">&#10005;</button>
+      </div>
 
       <!-- Dedicated High-Z-Index Subtitle CC Button (right next to Fullscreen) -->
       <button class="player-sub-overlay-btn" id="playerSubSettingsBtn" title="Subtitles & Closed Captions (CC)" aria-label="Subtitle CC Settings">
@@ -8808,10 +8849,17 @@
 
       <!-- Modern Dark Subtitle Customize Panel -->
       <div class="sub-customize-panel" id="subCustomizePanel" aria-hidden="true">
-        <button class="sub-panel-back-btn" id="subCustomizeBackBtn" type="button">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-          <span>Back to subtitles</span>
-        </button>
+        <div class="sub-panel-top-row">
+          <button class="sub-panel-back-btn" id="subCustomizeBackBtn" type="button">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            <span>Back to subtitles</span>
+          </button>
+          <!-- Sinhala Subtitles Toggle Button (On/Off) -->
+          <button class="sub-panel-toggle-btn" id="subToggleBtn" title="Sinhala Subtitles — Toggle On / Off">
+            <span class="sub-flag">🇱🇰</span>
+            <span class="sub-toggle-text">Sinhala Sub</span>
+          </button>
+        </div>
 
         <div class="sub-setting-group">
           <div class="sub-setting-header">
@@ -14757,9 +14805,11 @@
 
     function _isOverlayControlsHovered() {
       const elements = [
+        document.getElementById('playerFloatingBar'),
         document.getElementById('playerClose'),
         document.getElementById('topbarWatchPartyBtn'),
         document.getElementById('subToggleBtn'),
+        document.getElementById('playerHome'),
         document.getElementById('playerSubSettingsBtn'),
         document.getElementById('playerFsOverlayBtn'),
         document.getElementById('subCustomizePanel')
