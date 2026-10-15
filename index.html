@@ -963,7 +963,17 @@
     }
 
     section {
-      padding: 5rem 3rem
+      padding: 4.5rem clamp(2.5rem, 4vw, 5.5rem);
+    }
+
+    @media (min-width: 1800px) {
+      section {
+        padding-left: clamp(4rem, 6vw, 8rem);
+        padding-right: clamp(4rem, 6vw, 8rem);
+      }
+      .hero-content {
+        margin-left: clamp(4rem, 6vw, 8rem);
+      }
     }
 
     .section-header {
@@ -2376,7 +2386,7 @@
       display: flex;
       overflow-x: auto;
       gap: 1.15rem;
-      padding: 0.6rem 2rem 1.4rem 2rem;
+      padding: 0.6rem 0.2rem 1.4rem 0.2rem;
       scrollbar-width: none;
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
@@ -5506,14 +5516,13 @@
     /* ── TRAILER SECTION ─────────────────────────────────────────────── */
     #trailers {
       background: var(--dark);
-      padding: 3rem 0;
       overflow: hidden;
     }
 
     .trailer-filter-bar {
       display: flex;
       gap: .5rem;
-      padding: 0 3rem 1.5rem;
+      padding: 0 0 1.5rem 0;
       flex-wrap: wrap;
     }
 
@@ -5542,7 +5551,7 @@
       display: flex;
       gap: 1rem;
       overflow-x: auto;
-      padding: 0 3rem 1rem;
+      padding: 0 0 1rem 0;
       scrollbar-width: none;
     }
 
@@ -8662,7 +8671,7 @@
   </section>
 
   <!-- CATEGORIES SECTION (POPULAR LANGUAGES & POPULAR GENRES) -->
-  <section id="categories" style="background:var(--dark2);padding:2.5rem 0 3.2rem 0;border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06);">
+  <section id="categories" style="background:var(--dark2);border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06);">
     <!-- Popular Languages -->
     <div style="margin-bottom:2.5rem;">
       <div class="section-header">
@@ -14444,9 +14453,15 @@
         else if (u8.length >= 2 && u8[0] === 0xFE && u8[1] === 0xFF) dec = new TextDecoder('utf-16be');
         let text = dec.decode(buf);
         if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
-        return text.replace(/\x00/g, '');
+        text = text.replace(/\x00/g, '');
+        if (text.trim().startsWith('{') && text.includes('"tracks"')) return null;
+        return text;
       } catch (_) {
-        try { return await res.text(); } catch (_) { return null; }
+        try {
+          const t = await res.text();
+          if (t && t.trim().startsWith('{') && t.includes('"tracks"')) return null;
+          return t;
+        } catch (_) { return null; }
       }
     }
 
@@ -14715,6 +14730,14 @@
           url: localSub,
           source: 'master'
         });
+      } else if (window._dynamicSubCatalog && (window._dynamicSubCatalog[subKey] || window._dynamicSubCatalog[String(tmdbId)])) {
+        _mxsTracks.push({
+          id: 'sinhala',
+          lang: 'si',
+          label: 'Sinhala 🇱🇰',
+          url: `/api/subtitles?id=${tmdbId}&type=${type || 'movie'}${season ? `&season=${season}` : ''}${episode ? `&episode=${episode}` : ''}&serve=1`,
+          source: 'contributor'
+        });
       }
 
       try {
@@ -14854,7 +14877,16 @@
         srtText = await _fetchSubtitleTextSafe(localSub);
       }
 
-      // If not in local SUBTITLE_MAP, query /api/subtitles for Sinhala track
+      // Check dynamic catalog from contributor uploads
+      if (!srtText && window._dynamicSubCatalog) {
+        const dynItem = window._dynamicSubCatalog[subKey] || window._dynamicSubCatalog[String(activeId)];
+        if (dynItem) {
+          const directServeUrl = `/api/subtitles?id=${activeId}&type=${_currentModalType || 'movie'}${_selectedSeason ? `&season=${_selectedSeason}` : ''}${_selectedEpisode ? `&episode=${_selectedEpisode}` : ''}&serve=1`;
+          srtText = await _fetchSubtitleTextSafe(directServeUrl);
+        }
+      }
+
+      // If not in local SUBTITLE_MAP or dynamic catalog, query /api/subtitles for Sinhala track
       if (!srtText) {
         try {
           const p = new URLSearchParams({ id: activeId, type: _currentModalType || 'movie' });

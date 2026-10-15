@@ -15,7 +15,7 @@ export const config = {
 // 1. AUTHENTICATION MODULE (HMAC-SHA256)
 // ══════════════════════════════════════════════════════════════════════════
 
-const JWT_SECRET = process.env.SUB_AUTH_SECRET || process.env.API_SECRET || 'hackymax_sub_secret_key_2026';
+const JWT_SECRET = (process.env.SUB_AUTH_SECRET || process.env.API_SECRET || 'hackymax_sub_secret_key_2026').trim();
 
 function safeCompare(a, b) {
   if (typeof a !== 'string' || typeof b !== 'string') return false;
