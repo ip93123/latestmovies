@@ -322,7 +322,7 @@ async function handleUpload(req, res) {
 
       const publicUrl = r2Config.publicDomain
         ? `${r2Config.publicDomain.replace(/\/$/, '')}/${fileKey}`
-        : `https://${r2Config.bucket}.${r2Config.accountId}.r2.cloudflarestorage.com/${fileKey}`;
+        : `/api/subtitles?id=${tmdbId}&type=${type}${season ? `&season=${season}` : ''}${episode ? `&episode=${episode}` : ''}&serve=1`;
 
       return res.status(200).json({
         mode: 'r2_presigned',
@@ -362,24 +362,15 @@ async function handleUpload(req, res) {
     if (r2Config.isConfigured) {
       const fileKey = `subtitles/${targetFile}`;
       try {
-        const presignedPutUrl = createPresignedPutUrl({
+        const ok = await putR2Object({
           key: fileKey,
-          contentType: ext === 'vtt' ? 'text/vtt' : 'text/plain; charset=utf-8',
-          expiresIn: 300
+          body: fileBuffer,
+          contentType: ext === 'vtt' ? 'text/vtt' : 'text/plain; charset=utf-8'
         });
-
-        const r2UploadRes = await fetch(presignedPutUrl, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': ext === 'vtt' ? 'text/vtt' : 'text/plain; charset=utf-8'
-          },
-          body: fileBuffer
-        });
-
-        if (r2UploadRes.ok) {
+        if (ok) {
           publicUrl = r2Config.publicDomain
             ? `${r2Config.publicDomain.replace(/\/$/, '')}/${fileKey}`
-            : `https://${r2Config.bucket}.${r2Config.accountId}.r2.cloudflarestorage.com/${fileKey}`;
+            : `/api/subtitles?id=${tmdbId}&type=${type}${season ? `&season=${season}` : ''}${episode ? `&episode=${episode}` : ''}&serve=1`;
         }
       } catch (r2Err) {
         console.error('[sub-upload] Server failed to upload to R2 directly:', r2Err.message);
@@ -438,7 +429,9 @@ async function handleUpload(req, res) {
       fileSize: Number(fileSize),
       uploader: verified.u,
       uploadedAt: Date.now(),
-      url: publicUrl
+      url: (publicUrl && !publicUrl.includes('.r2.cloudflarestorage.com'))
+        ? publicUrl
+        : `/api/subtitles?id=${tmdbId}&type=${type}${season ? `&season=${season}` : ''}${episode ? `&episode=${episode}` : ''}&serve=1`
     };
     await saveCatalog(catalog);
 
