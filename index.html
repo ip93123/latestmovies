@@ -10,9 +10,9 @@
   <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
   <meta name="bingbot" content="noindex, nofollow">
   <title>Hacky Max</title>
-  <link rel="icon" type="image/png" sizes="192x192" href="logo.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="logo.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="logo.png?v=3">
+  <link rel="apple-touch-icon" sizes="180x180" href="logo.png?v=3">
+  <link rel="icon" type="image/png" sizes="32x32" href="logo.png?v=3">
   <link rel="preconnect" href="https://image.tmdb.org" crossorigin>
   <link rel="dns-prefetch" href="https://image.tmdb.org">
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
@@ -8493,7 +8493,7 @@
   <header id="mainNav" class="topbar">
     <!-- Brand Logo (Desktop left / Mobile top-left) -->
     <div class="nav-brand" onclick="window.navGo('home')" title="Hacky Max Home">
-      <img src="logo.png" alt="Hacky Max">
+      <img src="logo.png?v=3" alt="Hacky Max">
     </div>
 
     <!-- Centered Floating Pill Navigation (Floating Bottom on Mobile!) -->
@@ -8556,9 +8556,8 @@
     <div class="mobile-nav-backdrop" onclick="window.toggleMobileNav(false)"></div>
     <div class="mobile-nav-content">
       <div class="mobile-nav-header">
-        <div class="nav-logo" style="font-size:1.6rem;">
-          <img src="logo.png" alt="Logo" style="width:36px;height:30px;">
-          <span>Hacky Max</span>
+        <div class="nav-logo" onclick="window.navGo('home'); window.toggleMobileNav(false);" style="cursor:pointer;display:flex;align-items:center;">
+          <img src="logo.png?v=3" alt="Hacky Max" style="height:36px;width:auto;max-width:150px;object-fit:contain;">
         </div>
         <button class="mobile-nav-close" onclick="window.toggleMobileNav(false)" aria-label="Close menu">✕</button>
       </div>
@@ -8756,7 +8755,9 @@
   </section>
 
   <footer>
-    <strong>Hacky Max</strong>
+    <div style="display:flex;align-items:center;justify-content:center;margin-bottom:0.75rem;">
+      <img src="logo.png?v=3" alt="Hacky Max" style="height:44px;width:auto;max-width:190px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));">
+    </div>
     <p style="margin-top:.5rem">Powered by TMDB & OMDb · Streaming data by JustWatch via TMDB · Updates daily</p>
     <p style="margin-top:.35rem;font-size:0.83rem;color:rgba(255,255,255,0.65);">🇱🇰 Sinhala Subtitles & Translations credited to <a href="https://www.baiscope.lk" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:none;font-weight:600;">Baiscope.lk</a> & <a href="https://zoom.lk" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:none;font-weight:600;">Zoom.lk</a> community translators</p>
     <div class="footer-links">
