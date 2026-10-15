@@ -3154,16 +3154,16 @@
       display: inline-block !important;
     }
 
-    /* ── Dedicated Fullscreen Toggle Button in Bottom-Right Corner ── */
+    /* ── Dedicated Fullscreen Toggle Button in Bottom-Right Corner (solidly covers native player fullscreen) ── */
     .player-fs-overlay-btn {
       position: absolute;
-      bottom: 14px;
-      right: 14px;
-      width: 42px;
-      height: 42px;
+      bottom: 10px;
+      right: 12px;
+      width: 46px;
+      height: 46px;
       border-radius: 9px;
-      background: rgba(13, 17, 23, 0.92);
-      border: 1.5px solid rgba(232, 201, 122, 0.6);
+      background: rgba(9, 12, 20, 0.98);
+      border: 1.5px solid rgba(232, 201, 122, 0.65);
       color: var(--gold, #E8C97A);
       display: flex;
       align-items: center;
@@ -3171,7 +3171,7 @@
       cursor: pointer;
       pointer-events: auto !important;
       z-index: 99999 !important;
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.65), 0 0 10px rgba(232, 201, 122, 0.25);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8), 0 0 12px rgba(232, 201, 122, 0.3);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s, border-color 0.2s;
@@ -3179,11 +3179,11 @@
       opacity: 0.95;
     }
     .player-fs-overlay-btn:hover {
-      background: rgba(232, 201, 122, 0.25);
+      background: rgba(232, 201, 122, 0.28);
       border-color: #E8C97A;
       color: #fff;
-      transform: scale(1.1);
-      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.8), 0 0 16px rgba(232, 201, 122, 0.45);
+      transform: scale(1.08);
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.85), 0 0 18px rgba(232, 201, 122, 0.5);
     }
     .player-fs-overlay-btn:active {
       transform: scale(0.94);
@@ -3191,6 +3191,8 @@
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) .player-fs-overlay-btn {
       display: flex !important;
       z-index: 99999 !important;
+      bottom: 12px;
+      right: 14px;
     }
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs .player-fs-overlay-btn {
       opacity: 0 !important;
@@ -3661,14 +3663,15 @@
       .player-fs-overlay-btn {
         bottom: 8px !important;
         right: 8px !important;
-        width: 34px !important;
-        height: 34px !important;
+        width: 40px !important;
+        height: 40px !important;
         border-radius: 8px !important;
+        background: rgba(9, 12, 20, 0.98) !important;
         z-index: 99999 !important;
       }
       .player-fs-overlay-btn svg {
-        width: 16px !important;
-        height: 16px !important;
+        width: 18px !important;
+        height: 18px !important;
       }
       #skipIntroBtn {
         bottom: 46px !important;
@@ -6502,9 +6505,10 @@
     .device-mobile .player-fs-overlay-btn {
       bottom: 8px !important;
       right: 8px !important;
-      width: 34px !important;
-      height: 34px !important;
+      width: 40px !important;
+      height: 40px !important;
       border-radius: 8px !important;
+      background: rgba(9, 12, 20, 0.98) !important;
       z-index: 99999 !important;
     }
     .device-mobile .player-server-bar {
@@ -12590,7 +12594,7 @@
         if (_maxMode && _maxVideo && !_maxVideo.paused && !_isScrubbing && !(panel && panel.classList.contains('open'))) {
           _maxWrap.classList.add('idle-hide');
         }
-      }, 2800);
+      }, 6000);
     }
 
     function _initMaxCustomControls() {
@@ -12963,7 +12967,7 @@
       if (isFs || isMobile) {
         _fsBtnIdleTimer = setTimeout(() => {
           pCont.classList.add('idle-fs');
-        }, isMobile ? 3200 : 2000);
+        }, 6000); // 6 seconds on all devices
       }
     }
 
