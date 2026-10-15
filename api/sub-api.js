@@ -304,16 +304,46 @@ async function handleUpload(req, res) {
     const ext = extMatch ? extMatch[1].toLowerCase() : 'srt';
     const subKey = type === 'tv' ? `${tmdbId}_S${season}_E${episode}` : `${tmdbId}`;
     const targetFile = `${subKey}.${ext}`;
-
-    const uploadsDir = path.join(process.cwd(), 'Subtitle', 'uploads');
-    if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-
-    const filePath = path.join(uploadsDir, targetFile);
     const fileBuffer = Buffer.from(fileBase64, 'base64');
-    fs.writeFileSync(filePath, fileBuffer);
+
+    let publicUrl = `/Subtitle/uploads/${targetFile}`;
+    const r2Config = getR2Config();
+
+    if (r2Config.isConfigured) {
+      const fileKey = `subtitles/${targetFile}`;
+      try {
+        const presignedPutUrl = createPresignedPutUrl({
+          key: fileKey,
+          contentType: ext === 'vtt' ? 'text/vtt' : 'text/plain; charset=utf-8',
+          expiresIn: 300
+        });
+
+        const r2UploadRes = await fetch(presignedPutUrl, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': ext === 'vtt' ? 'text/vtt' : 'text/plain; charset=utf-8'
+          },
+          body: fileBuffer
+        });
+
+        if (r2UploadRes.ok) {
+          publicUrl = r2Config.publicDomain
+            ? `${r2Config.publicDomain.replace(/\/$/, '')}/${fileKey}`
+            : `https://${r2Config.bucket}.${r2Config.accountId}.r2.cloudflarestorage.com/${fileKey}`;
+        }
+      } catch (r2Err) {
+        console.error('[sub-upload] Server failed to upload to R2 directly:', r2Err.message);
+      }
+    }
+
+    try {
+      const uploadsDir = path.join(process.cwd(), 'Subtitle', 'uploads');
+      if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+      const filePath = path.join(uploadsDir, targetFile);
+      fs.writeFileSync(filePath, fileBuffer);
+    } catch (_) {}
 
     const catalog = loadCatalog();
-    const publicUrl = `/Subtitle/uploads/${targetFile}`;
     catalog[subKey] = {
       tmdbId,
       mediaType: type,
@@ -385,9 +415,12 @@ export default async function handler(req, res) {
     return res.status(204).end();
   }
 
+  req.query = req.query || {};
+  req.body = req.body || {};
+
   const url = req.url || '';
-  const qAction = (req.query && req.query.action) || '';
-  const bAction = (req.body && req.body.action) || '';
+  const qAction = req.query.action || '';
+  const bAction = req.body.action || '';
 
   // Auth routing
   if (url.includes('sub-auth') || qAction === 'auth' || bAction === 'login' || bAction === 'verify') {

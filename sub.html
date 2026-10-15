@@ -1370,32 +1370,46 @@
         stepText.textContent = '2/3 Uploading subtitle (Real-time Transfer)…';
         updateProgress(15, 'Streaming file directly to Cloudflare R2 bucket...');
 
-        // 2. Perform direct upload with XHR for real-time progress
+        // 2. Perform upload (Direct R2 transfer with automatic server fallback)
+        let directServerFallbackNeeded = false;
+        let finalPublicUrl = presignData.publicUrl;
+
         if (presignData.mode === 'r2_presigned') {
-          await new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open('PUT', presignData.uploadUrl, true);
-            const ext = selectedFile.name.split('.').pop().toLowerCase();
-            xhr.setRequestHeader('Content-Type', ext === 'vtt' ? 'text/vtt' : 'text/plain; charset=utf-8');
+          try {
+            await new Promise((resolve, reject) => {
+              const xhr = new XMLHttpRequest();
+              xhr.open('PUT', presignData.uploadUrl, true);
+              const ext = selectedFile.name.split('.').pop().toLowerCase();
+              xhr.setRequestHeader('Content-Type', ext === 'vtt' ? 'text/vtt' : 'text/plain; charset=utf-8');
 
-            xhr.upload.onprogress = (e) => {
-              if (e.lengthComputable) {
-                const p = 15 + (e.loaded / e.total) * 75; // 15% to 90%
-                updateProgress(p, `Uploaded ${formatBytes(e.loaded)} of ${formatBytes(e.total)}`);
-              }
-            };
+              xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                  const p = 15 + (e.loaded / e.total) * 75; // 15% to 90%
+                  updateProgress(p, `Uploaded ${formatBytes(e.loaded)} of ${formatBytes(e.total)}`);
+                }
+              };
 
-            xhr.onload = () => {
-              if (xhr.status >= 200 && xhr.status < 300) resolve();
-              else reject(new Error(`R2 upload rejected with status ${xhr.status}`));
-            };
-            xhr.onerror = () => reject(new Error('Network error during R2 transfer'));
-            xhr.send(selectedFile);
-          });
+              xhr.onload = () => {
+                if (xhr.status >= 200 && xhr.status < 300) resolve();
+                else reject(new Error(`R2 upload rejected with status ${xhr.status}`));
+              };
+              xhr.onerror = () => reject(new Error('R2 direct transfer blocked (CORS / network)'));
+              xhr.send(selectedFile);
+            });
+          } catch (r2Err) {
+            console.warn('[Subtitle Studio] Direct R2 transfer blocked (likely R2 bucket CORS missing). Switching to secure server fallback stream:', r2Err);
+            updateProgress(30, 'R2 CORS restricted. Seamlessly streaming file via secure server...');
+            directServerFallbackNeeded = true;
+          }
         } else {
-          // Direct fallback mode
+          directServerFallbackNeeded = true;
+        }
+
+        if (directServerFallbackNeeded) {
+          stepText.textContent = '2/3 Uploading subtitle (Server Direct Stream)…';
+          updateProgress(50, 'Streaming file directly through server...');
           const base64Content = await fileToBase64(selectedFile);
-          await fetch('/api/sub-upload', {
+          const fallbackRes = await fetch('/api/sub-upload', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -1413,32 +1427,42 @@
               fileBase64: base64Content
             })
           });
+
+          const fallbackData = await fallbackRes.json();
+          if (!fallbackRes.ok || !fallbackData.success) {
+            throw new Error(fallbackData.error || 'Server upload failed');
+          }
+          finalPublicUrl = fallbackData.publicUrl || finalPublicUrl;
+        } else {
+          stepText.textContent = '3/3 Finalizing & Linking to HackyMax Player…';
+          updateProgress(95, 'Writing subtitle metadata to catalog...');
+
+          // 3. Confirm catalog entry for direct R2 upload
+          const ext = selectedFile.name.split('.').pop().toLowerCase();
+          const confirmRes = await fetch('/api/sub-upload', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              action: 'confirm',
+              tmdbId: String(selectedTitle.id),
+              type: selectedTitle.media_type,
+              season,
+              episode,
+              title: selectedTitle.title || selectedTitle.name,
+              year: (selectedTitle.release_date || selectedTitle.first_air_date || '').slice(0, 4),
+              format: ext,
+              fileSize: selectedFile.size,
+              publicUrl: finalPublicUrl
+            })
+          });
+          const confirmData = await confirmRes.json();
+          if (!confirmRes.ok || !confirmData.success) {
+            throw new Error(confirmData.error || 'Failed to register subtitle in catalog');
+          }
         }
-
-        stepText.textContent = '3/3 Finalizing & Linking to HackyMax Player…';
-        updateProgress(95, 'Writing subtitle metadata to catalog...');
-
-        // 3. Confirm catalog entry
-        const ext = selectedFile.name.split('.').pop().toLowerCase();
-        await fetch('/api/sub-upload', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            action: 'confirm',
-            tmdbId: String(selectedTitle.id),
-            type: selectedTitle.media_type,
-            season,
-            episode,
-            title: selectedTitle.title || selectedTitle.name,
-            year: (selectedTitle.release_date || selectedTitle.first_air_date || '').slice(0, 4),
-            format: ext,
-            fileSize: selectedFile.size,
-            publicUrl: presignData.publicUrl
-          })
-        });
 
         updateProgress(100, '✅ Subtitle successfully uploaded and linked!');
         stepText.textContent = '🎉 Upload Complete!';

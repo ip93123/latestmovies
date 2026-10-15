@@ -138,7 +138,7 @@ export default async function handler(req, res) {
   // Load dynamic catalog (R2 and contributor uploads)
   let catalogItem = null;
   try {
-    const { loadCatalog } = await import('./sub-catalog.js');
+    const { loadCatalog } = await import('./sub-api.js');
     const catalog = loadCatalog();
     catalogItem = catalog[subKey] || catalog[id] || null;
   } catch (_) {}
