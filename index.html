@@ -3157,10 +3157,10 @@
     /* ── Dedicated Fullscreen Toggle Button in Bottom-Right Corner (solidly covers native player fullscreen) ── */
     .player-fs-overlay-btn {
       position: absolute;
-      bottom: 10px;
-      right: 12px;
-      width: 46px;
-      height: 46px;
+      bottom: 8px;
+      right: 8px;
+      width: 56px;
+      height: 54px;
       border-radius: 9px;
       background: rgba(9, 12, 20, 0.98);
       border: 1.5px solid rgba(232, 201, 122, 0.65);
@@ -3182,17 +3182,19 @@
       background: rgba(232, 201, 122, 0.28);
       border-color: #E8C97A;
       color: #fff;
-      transform: scale(1.08);
+      transform: scale(1.05);
       box-shadow: 0 6px 24px rgba(0, 0, 0, 0.85), 0 0 18px rgba(232, 201, 122, 0.5);
     }
     .player-fs-overlay-btn:active {
-      transform: scale(0.94);
+      transform: scale(0.95);
     }
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) .player-fs-overlay-btn {
       display: flex !important;
       z-index: 99999 !important;
-      bottom: 12px;
-      right: 14px;
+      bottom: 10px;
+      right: 12px;
+      width: 56px;
+      height: 54px;
     }
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs .player-fs-overlay-btn {
       opacity: 0 !important;
@@ -3661,10 +3663,10 @@
         z-index: 99999 !important;
       }
       .player-fs-overlay-btn {
-        bottom: 8px !important;
-        right: 8px !important;
-        width: 40px !important;
-        height: 40px !important;
+        bottom: 6px !important;
+        right: 6px !important;
+        width: 48px !important;
+        height: 46px !important;
         border-radius: 8px !important;
         background: rgba(9, 12, 20, 0.98) !important;
         z-index: 99999 !important;
@@ -6503,10 +6505,10 @@
       height: 16px !important;
     }
     .device-mobile .player-fs-overlay-btn {
-      bottom: 8px !important;
-      right: 8px !important;
-      width: 40px !important;
-      height: 40px !important;
+      bottom: 6px !important;
+      right: 6px !important;
+      width: 48px !important;
+      height: 46px !important;
       border-radius: 8px !important;
       background: rgba(9, 12, 20, 0.98) !important;
       z-index: 99999 !important;
