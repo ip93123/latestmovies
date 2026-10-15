@@ -1,0 +1,15 @@
+/*
+  Access-Control-Allow-Origin: *
+
+/*.html
+  Cache-Control: public, max-age=0, s-maxage=3600, stale-while-revalidate=86400
+
+/
+  Cache-Control: public, max-age=0, s-maxage=3600, stale-while-revalidate=86400
+
+/logo.png
+  Cache-Control: public, max-age=31536000, immutable
+
+/Subtitle/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+  Access-Control-Allow-Origin: *

@@ -4,9 +4,6 @@
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Block all search engines from indexing this page -->
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
@@ -16,7 +13,9 @@
   <link rel="icon" type="image/png" sizes="192x192" href="logo.png">
   <link rel="apple-touch-icon" sizes="180x180" href="logo.png">
   <link rel="icon" type="image/png" sizes="32x32" href="logo.png">
+  <link rel="preconnect" href="https://image.tmdb.org" crossorigin>
   <link rel="dns-prefetch" href="https://image.tmdb.org">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -8357,7 +8356,7 @@
   <!-- MODAL -->
   <div id="modal">
     <div class="modal-box" id="modalBox">
-      <div class="modal-poster"><img id="modalPoster" src="" alt=""></div>
+      <div class="modal-poster"><img id="modalPoster" src="" alt="" loading="eager" decoding="async"></div>
       <div class="modal-body">
         <div class="modal-top-actions">
           <button class="popup-home" id="modalWishlistBtn" title="Add to WishList">🔖</button>
@@ -8755,7 +8754,7 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js" defer></script>
   <script>
     gsap.registerPlugin(ScrollTrigger);
 
@@ -9128,12 +9127,33 @@
       10766: 'Soap', 10767: 'Talk', 10768: 'War & Politics'
     };
 
+    const _tmdbMemCache = new Map();
     async function tmdb(path) {
+      if (_tmdbMemCache.has(path)) return _tmdbMemCache.get(path);
+      const sessionKey = 'tmdb_' + path;
       try {
-        const r = await fetch(`/api/tmdb?target=${encodeURIComponent(path)}`);
-        if (!r.ok) return null;  // Return null (not {}) so filter(Boolean) correctly excludes 404s
+        const cached = sessionStorage.getItem(sessionKey);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          _tmdbMemCache.set(path, parsed);
+          return parsed;
+        }
+      } catch (_) {}
+
+      try {
+        let r = await fetch(`/api/tmdb?target=${encodeURIComponent(path)}`);
+        if (!r.ok && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+          const sep = path.includes('?') ? '&' : '?';
+          r = await fetch(`https://api.themoviedb.org/3${path}${sep}api_key=8265bd1679663a7ea12ac168da84d2e8`);
+        }
+        if (!r.ok) return null;
         const text = await r.text();
-        return text ? JSON.parse(text) : null;
+        const data = text ? JSON.parse(text) : null;
+        if (data) {
+          _tmdbMemCache.set(path, data);
+          try { sessionStorage.setItem(sessionKey, JSON.stringify(data)); } catch (_) {}
+        }
+        return data;
       } catch (e) {
         return null;
       }
@@ -9307,7 +9327,7 @@
 
       return `<div class="trending-card" tabindex="0" role="button" aria-label="${title}" data-id="${item.id}" data-type="${type}">
       <div class="trending-poster" style="position:relative">
-        ${poster ? `<img src="${poster}" alt="${title}" loading="lazy">` : ''}
+        ${poster ? `<img src="${poster}" alt="${title}" loading="lazy" decoding="async">` : ''}
       </div>
       <div class="trending-info">
         ${metaParts ? `<div class="trending-meta">${metaParts}</div>` : ''}
@@ -9706,7 +9726,25 @@
       const isTV = window.DEVICE && window.DEVICE.isTV;
       const cardLimit = isTV ? 10 : 20;  // fewer cards = less DOM + fewer API calls on TV
       const row = document.getElementById('trendingRow');
-      row.innerHTML = Array.from({ length: isTV ? 8 : 15 }, () => `<div class="trending-card" style="flex:0 0 160px"><div style="aspect-ratio:2/3;background:var(--dark3)" class="sk"></div><div style="padding:.75rem"><div style="height:12px;margin-bottom:6px" class="sk"></div></div></div>`).join('');
+
+      // 0ms Instant Cache Hydration: Render cached trending immediately if present
+      let hasCached = false;
+      try {
+        const cachedRaw = localStorage.getItem('hm_trending_cache');
+        if (cachedRaw) {
+          const cachedAll = JSON.parse(cachedRaw);
+          if (Array.isArray(cachedAll) && cachedAll.length) {
+            row.innerHTML = cachedAll.slice(0, cardLimit).map((item, i) => buildTrendingCard(item, i + 1, item._type || (item.title ? 'movie' : 'tv'), null)).join('');
+            addCardListeners(row, '.trending-card');
+            hasCached = true;
+          }
+        }
+      } catch (_) {}
+
+      if (!hasCached) {
+        row.innerHTML = Array.from({ length: isTV ? 8 : 15 }, () => `<div class="trending-card" style="flex:0 0 160px"><div style="aspect-ratio:2/3;background:var(--dark3)" class="sk"></div><div style="padding:.75rem"><div style="height:12px;margin-bottom:6px" class="sk"></div></div></div>`).join('');
+      }
+
       const [md, tvd] = await Promise.all([tmdb('/trending/movie/week?language=en-US'), tmdb('/trending/tv/week?language=en-US')]);
       const allRaw = [...(md?.results || []).slice(0, cardLimit / 2).map(x => ({ ...x, _type: 'movie' })), ...(tvd?.results || []).slice(0, cardLimit / 2).map(x => ({ ...x, _type: 'tv' }))].slice(0, cardLimit);
 
@@ -9730,9 +9768,11 @@
 
       const watchDatas = await Promise.all(all.map(item => getWatch(item.id, item._type)));
       row.innerHTML = all.map((item, i) => buildTrendingCard(item, i + 1, item._type, watchDatas[i])).join('');
+      try { localStorage.setItem('hm_trending_cache', JSON.stringify(all)); } catch (_) {}
+
       if (isTV) {
         gsap.set(row.children, { opacity: 1 });
-      } else {
+      } else if (!hasCached) {
         gsap.fromTo(row.children,
           { opacity: 0, x: 50, rotationY: -15, scale: .9, transformPerspective: 1000 },
           { opacity: 1, x: 0, rotationY: 0, scale: 1, duration: .6, stagger: .07, ease: 'back.out(1.2)', scrollTrigger: { trigger: row, start: 'top 85%' } }
@@ -16316,10 +16356,21 @@
         }, 500);
       }
 
+      // 0ms Instant First Paint: Hydrate Hero immediately from cache
+      try {
+        const cachedHero = JSON.parse(localStorage.getItem('hm_hero_cache') || '[]');
+        if (Array.isArray(cachedHero) && cachedHero.length) {
+          loadHero(cachedHero);
+        }
+      } catch (_) {}
+
       const [nowPlaying] = await Promise.all([tmdb('/movie/now_playing?language=en-US&page=1')]);
 
       const heroPool = (nowPlaying?.results || []).filter(m => m.backdrop_path).slice(0, 6);
-      await loadHero(heroPool);
+      if (heroPool && heroPool.length) {
+        try { localStorage.setItem('hm_hero_cache', JSON.stringify(heroPool)); } catch (_) {}
+        await loadHero(heroPool);
+      }
       await loadRecentWatch();
 
       // Lazy load sections as they scroll into view
@@ -16519,7 +16570,7 @@
       // Build cards using existing buildCard (fetches watchData too)
       grid.innerHTML = wl.map(item => {
         const poster = item.poster_path
-          ? `<img src="https://image.tmdb.org/t/p/w342${item.poster_path}" alt="${item.title || item.name || ''}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block">`
+          ? `<img src="https://image.tmdb.org/t/p/w342${item.poster_path}" alt="${item.title || item.name || ''}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;display:block">`
           : `<div style="width:100%;height:100%;background:var(--dark3);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.75rem">No Poster</div>`;
         const year = (item.release_date || '').slice(0, 4);
         return `
