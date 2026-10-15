@@ -144,49 +144,68 @@ export default async function handler(req, res) {
   } catch (_) {}
 
   const sinhalaSubUrl = catalogItem?.url || localSinhalaSub;
-  const isServe = isVtt || req.query.serve === '1' || req.query.stream === '1';
+  const isServe = isVtt || String(req.query.serve) === '1' || String(req.query.stream) === '1' || (req.url && (req.url.includes('serve=1') || req.url.includes('stream=1')));
 
   // Mode 2: Serve subtitle directly as text / WebVTT for embed players (VidLink, Max Player, etc.)
-  if (id && isServe && sinhalaSubUrl) {
+  if (id && isServe) {
+    let rawText = '';
+
+    // 1. Try Cloudflare R2 first
     try {
-      let rawText = '';
-      if (sinhalaSubUrl.startsWith('http://') || sinhalaSubUrl.startsWith('https://')) {
-        if (sinhalaSubUrl.includes('r2.cloudflarestorage.com')) {
-          try {
-            const { getR2ObjectText } = await import('../lib/r2-helper.js');
-            const cleanKey = sinhalaSubUrl.split('.com/')[1] || `subtitles/${subKey}.${catalogItem?.format || 'srt'}`;
-            rawText = await getR2ObjectText(cleanKey);
-          } catch (_) {}
-        }
-        if (!rawText) {
-          const fetchRes = await fetch(sinhalaSubUrl, { signal: AbortSignal.timeout(6000) });
-          if (fetchRes.ok) rawText = await fetchRes.text();
-        }
-      } else {
-        const filePath = path.join(process.cwd(), sinhalaSubUrl);
+      const { getR2ObjectText } = await import('../lib/r2-helper.js');
+      const possibleKeys = [
+        `subtitles/${subKey}.${catalogItem?.format || 'srt'}`,
+        `subtitles/${id}.${catalogItem?.format || 'srt'}`,
+        `subtitles/${subKey}.srt`,
+        `subtitles/${id}.srt`
+      ];
+      if (sinhalaSubUrl && sinhalaSubUrl.includes('.com/')) {
+        possibleKeys.unshift(sinhalaSubUrl.split('.com/')[1]);
+      }
+      for (const k of possibleKeys) {
+        if (!k) continue;
+        rawText = await getR2ObjectText(k);
+        if (rawText && rawText.trim().length > 10) break;
+      }
+    } catch (_) {}
+
+    // 2. Try remote URL fetch if http(s)
+    if (!rawText && (sinhalaSubUrl?.startsWith('http://') || sinhalaSubUrl?.startsWith('https://'))) {
+      try {
+        const fetchRes = await fetch(sinhalaSubUrl, { signal: AbortSignal.timeout(6000) });
+        if (fetchRes.ok) rawText = await fetchRes.text();
+      } catch (_) {}
+    }
+
+    // 3. Try local disk
+    if (!rawText && sinhalaSubUrl) {
+      try {
+        const cleanPath = sinhalaSubUrl.startsWith('/') ? sinhalaSubUrl.slice(1) : sinhalaSubUrl;
+        const filePath = path.join(process.cwd(), cleanPath);
         if (fs.existsSync(filePath)) {
           const buf = fs.readFileSync(filePath);
           rawText = (buf[0] === 0xFF && buf[1] === 0xFE)
             ? buf.toString('utf16le')
             : buf.toString('utf8');
         }
-      }
-
-      if (rawText) {
-        if (rawText.charCodeAt(0) === 0xFEFF) rawText = rawText.slice(1);
-        rawText = rawText.replace(/\x00/g, '');
-        res.setHeader('Cache-Control', 'public, max-age=86400');
-        if (isVtt) {
-          res.setHeader('Content-Type', 'text/vtt; charset=utf-8');
-          return res.status(200).send(srtToVtt(rawText));
-        } else {
-          res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-          return res.status(200).send(rawText);
-        }
-      }
-    } catch (err) {
-      console.error('[Subtitle serving error]', err);
+      } catch (_) {}
     }
+
+    if (rawText && rawText.trim().length > 0) {
+      if (rawText.charCodeAt(0) === 0xFEFF) rawText = rawText.slice(1);
+      rawText = rawText.replace(/\x00/g, '');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      if (isVtt) {
+        res.setHeader('Content-Type', 'text/vtt; charset=utf-8');
+        return res.status(200).send(srtToVtt(rawText));
+      } else {
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        return res.status(200).send(rawText);
+      }
+    }
+
+    return res.status(404).send('Subtitle content not found');
   }
 
   // Mode 3: Get available subtitle tracks catalog for movie or episode
