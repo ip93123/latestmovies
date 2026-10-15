@@ -1,7 +1,12 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/sub", "destination": "/sub.html" }
+    { "source": "/sub", "destination": "/sub.html" },
+    { "source": "/api/sub-auth", "destination": "/api/sub-api?action=auth" },
+    { "source": "/api/sub-upload", "destination": "/api/sub-api?action=upload" },
+    { "source": "/api/sub-catalog", "destination": "/api/sub-api?action=catalog" },
+    { "source": "/api/sinmax", "destination": "/api/hackymax" },
+    { "source": "/api/zeemax", "destination": "/api/hackymax" }
   ],
   "headers": [
     {
