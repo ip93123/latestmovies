@@ -30,17 +30,18 @@
         var isTV = /TV|SmartTV|Tizen|Web0S|webOS|BRAVIA|Roku|FireTV|Silk|AppleTV|GoogleTV/i.test(ua);
         var isMobile = !isTV && (/Android|iPhone|iPad|iPod|Mobile|BlackBerry|IEMobile|Opera Mini/i.test(ua) || (window.innerWidth <= 768));
         var type = isTV ? 'tv' : (isMobile ? 'mobile' : 'pc');
-        document.documentElement.classList.add('device-' + type);
-        if (isTV) document.documentElement.classList.add('tv-mode');
-        if (document.body) {
+        var root = document.documentElement;
+        root.classList.remove('device-pc', 'device-mobile', 'device-tv', 'tv-mode');
+        root.classList.add('device-' + type);
+        if (isTV) root.classList.add('tv-mode');
+        function applyToBody() {
+          if (!document.body) return;
+          document.body.classList.remove('device-pc', 'device-mobile', 'device-tv', 'tv-mode');
           document.body.classList.add('device-' + type);
           if (isTV) document.body.classList.add('tv-mode');
-        } else {
-          document.addEventListener('DOMContentLoaded', function() {
-            document.body.classList.add('device-' + type);
-            if (isTV) document.body.classList.add('tv-mode');
-          });
         }
+        if (document.body) applyToBody();
+        else document.addEventListener('DOMContentLoaded', applyToBody);
       } catch(_) {}
     })();
   </script>
@@ -1279,25 +1280,22 @@
       position: relative;
       border-radius: 12px;
       overflow: hidden;
-      background: rgba(15, 21, 32, 0.55);
-      backdrop-filter: blur(14px) saturate(1.4);
-      -webkit-backdrop-filter: blur(14px) saturate(1.4);
+      background: rgba(15, 21, 32, 0.92);
       border: 1px solid rgba(255, 255, 255, 0.09);
       cursor: pointer;
-      transform-style: preserve-3d;
-      transition: border-color .35s, box-shadow .35s;
-      will-change: transform;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
       display: flex;
       flex-direction: column;
       height: 100%;
     }
 
-    .movie-card:hover {
-      border-color: rgba(232, 201, 122, 0.45);
-      box-shadow: 0 0 0 1px rgba(232, 201, 122, 0.25),
-        0 8px 40px rgba(0, 0, 0, 0.5),
-        0 0 var(--neon-spread) rgba(232, 201, 122, 0.2);
+    @media (hover: hover) and (pointer: fine) {
+      .movie-card:hover {
+        transform: translateY(-6px) scale(1.02);
+        border-color: rgba(232, 201, 122, 0.55);
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 0 25px rgba(232, 201, 122, 0.2);
+      }
     }
 
     .card-poster {
@@ -1451,59 +1449,99 @@
     /* ── SINHALA SUBTITLE CORNER BADGE (TOP-RIGHT) ── */
     .card-sinsub-badge {
       position: absolute;
-      top: 9px;
-      right: 9px;
+      top: 8px;
+      right: 8px;
       z-index: 5;
       pointer-events: none;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.85));
-      transition: transform 0.25s cubic-bezier(0.2, 0, 0.2, 1);
+      filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.85));
+      transition: transform 0.22s ease;
     }
 
     .card-sinsub-badge img {
-      height: 22px;
+      height: 20px;
       width: auto;
-      max-width: 78px;
+      max-width: 66px;
       display: block;
       object-fit: contain;
     }
 
     .movie-card:hover .card-sinsub-badge,
     .trending-card:hover .card-sinsub-badge {
-      transform: scale(1.06);
+      transform: scale(1.05);
+    }
+
+    .trending-poster .card-sinsub-badge {
+      top: 4px !important;
+      right: 4px !important;
+    }
+    .trending-poster .card-sinsub-badge img {
+      height: 13px !important;
+      max-width: 40px !important;
     }
 
     @media (max-width: 768px) {
       .card-sinsub-badge {
-        top: 7px;
-        right: 7px;
+        top: 5px !important;
+        right: 5px !important;
       }
       .card-sinsub-badge img {
-        height: 18px;
-        max-width: 64px;
+        height: 13px !important;
+        max-width: 44px !important;
+      }
+      .trending-poster .card-sinsub-badge {
+        top: 3px !important;
+        right: 3px !important;
+      }
+      .trending-poster .card-sinsub-badge img {
+        height: 10px !important;
+        max-width: 30px !important;
       }
     }
 
     .device-mobile .card-sinsub-badge {
-      top: 7px;
-      right: 7px;
+      top: 5px !important;
+      right: 5px !important;
     }
     .device-mobile .card-sinsub-badge img {
-      height: 18px;
-      max-width: 64px;
+      height: 13px !important;
+      max-width: 44px !important;
+    }
+    .device-mobile .trending-poster .card-sinsub-badge {
+      top: 3px !important;
+      right: 3px !important;
+    }
+    .device-mobile .trending-poster .card-sinsub-badge img {
+      height: 10px !important;
+      max-width: 30px !important;
     }
 
     .device-tv .card-sinsub-badge,
     .tv-mode .card-sinsub-badge {
-      top: 12px;
-      right: 12px;
+      top: 12px !important;
+      right: 12px !important;
     }
     .device-tv .card-sinsub-badge img,
     .tv-mode .card-sinsub-badge img {
-      height: 28px;
-      max-width: 96px;
+      height: 26px !important;
+      max-width: 86px !important;
+    }
+
+    .cat-header-sinsub-img {
+      height: clamp(18px, 4vw, 28px);
+      width: auto;
+      vertical-align: middle;
+      display: inline-block;
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.8));
+    }
+
+    .cat-card-sinsub-img {
+      height: clamp(13px, 3.2vw, 17px);
+      width: auto;
+      display: inline-block;
+      vertical-align: middle;
     }
 
     /* STREAMING LOGOS ON CARD */
@@ -4606,44 +4644,47 @@
         min-height: 32px !important;
         border-radius: 20px !important;
       }
-      .player-close {
-        top: 8px !important;
-        right: 8px !important;
-        width: 34px !important;
-        height: 34px !important;
-        font-size: 1rem !important;
-        border-radius: 50% !important;
-        background: rgba(12, 16, 26, 0.9) !important;
-        border: 1px solid rgba(255, 255, 255, 0.25) !important;
+      /* Clean, responsive top-center floating capsule bar on mobile */
+      .player-floating-bar {
+        top: max(8px, env(safe-area-inset-top, 8px)) !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        padding: 3px 5px !important;
+        gap: 5px !important;
+        border-radius: 9999px !important;
+        background: rgba(10, 14, 24, 0.94) !important;
+        border: 1px solid rgba(255, 255, 255, 0.18) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.75) !important;
         z-index: 99999 !important;
+        display: inline-flex !important;
+        align-items: center !important;
       }
-      #topbarWatchPartyBtn {
-        top: 8px !important;
-        right: 48px !important;
-        width: 34px !important;
-        height: 34px !important;
+      .player-floating-bar .floating-btn {
+        position: static !important;
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
         padding: 0 !important;
+        margin: 0 !important;
+        border-radius: 50% !important;
+        font-size: 0.9rem !important;
+        display: inline-flex !important;
+        align-items: center !important;
         justify-content: center !important;
-        border-radius: 50% !important;
-        z-index: 99999 !important;
       }
-      #topbarWatchPartyBtn span:not(.topbar-wp-dot) {
-        display: none !important;
-      }
-      #topbarWatchPartyBtn svg {
-        width: 16px !important;
+      .player-floating-bar .floating-divider {
+        width: 1px !important;
         height: 16px !important;
+        margin: 0 1px !important;
+        background: rgba(255, 255, 255, 0.18) !important;
       }
-
-      #playerHome {
-        top: 8px !important;
-        left: 8px !important;
-        width: 34px !important;
-        height: 34px !important;
-        border-radius: 50% !important;
-        background: rgba(12, 16, 26, 0.9) !important;
-        border: 1px solid rgba(255, 255, 255, 0.25) !important;
-        z-index: 99999 !important;
+      .player-floating-bar .topbar-wp-btn svg {
+        width: 15px !important;
+        height: 15px !important;
+      }
+      .player-floating-bar #playerHome svg {
+        width: 15px !important;
+        height: 15px !important;
       }
       .player-sub-overlay-btn {
         bottom: max(6px, env(safe-area-inset-bottom, 6px)) !important;
@@ -4687,20 +4728,11 @@
         border-radius: 8px !important;
         display: flex !important;
       }
-      :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #playerClose {
+      :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) .player-floating-bar {
         top: max(8px, env(safe-area-inset-top, 8px)) !important;
-        right: max(8px, env(safe-area-inset-right, 8px)) !important;
-        width: 36px !important;
-        height: 36px !important;
-        font-size: 1rem !important;
-        display: flex !important;
-      }
-      :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #topbarWatchPartyBtn {
-        top: max(8px, env(safe-area-inset-top, 8px)) !important;
-        right: calc(max(8px, env(safe-area-inset-right, 8px)) + 42px) !important;
-        width: 36px !important;
-        height: 36px !important;
-        display: flex !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        display: inline-flex !important;
       }
       :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) #subOverlay {
         padding-bottom: max(6%, calc(env(safe-area-inset-bottom, 0px) + 38px)) !important;
@@ -7845,35 +7877,46 @@
         aspect-ratio: auto !important;
       }
     }
-    .device-mobile .player-close,
-    .device-mobile #playerHome {
-      width: 34px !important;
-      height: 34px !important;
-      font-size: 1rem !important;
-      top: 8px !important;
-      border-radius: 50% !important;
-      background: rgba(12, 16, 26, 0.9) !important;
-      border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    .device-mobile .player-floating-bar {
+      top: max(8px, env(safe-area-inset-top, 8px)) !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      padding: 3px 5px !important;
+      gap: 5px !important;
+      border-radius: 9999px !important;
+      background: rgba(10, 14, 24, 0.94) !important;
+      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.75) !important;
       z-index: 99999 !important;
+      display: inline-flex !important;
+      align-items: center !important;
     }
-    .device-mobile .player-close { right: 8px !important; }
-    .device-mobile #playerHome { left: 8px !important; }
-    .device-mobile #topbarWatchPartyBtn {
-      top: 8px !important;
-      right: 48px !important;
-      width: 34px !important;
-      height: 34px !important;
+    .device-mobile .player-floating-bar .floating-btn {
+      position: static !important;
+      width: 32px !important;
+      height: 32px !important;
+      min-width: 32px !important;
       padding: 0 !important;
-      justify-content: center !important;
+      margin: 0 !important;
       border-radius: 50% !important;
-      z-index: 99999 !important;
+      font-size: 0.9rem !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
     }
-    .device-mobile #topbarWatchPartyBtn span:not(.topbar-wp-dot) {
-      display: none !important;
-    }
-    .device-mobile #topbarWatchPartyBtn svg {
-      width: 16px !important;
+    .device-mobile .player-floating-bar .floating-divider {
+      width: 1px !important;
       height: 16px !important;
+      margin: 0 1px !important;
+      background: rgba(255, 255, 255, 0.18) !important;
+    }
+    .device-mobile .player-floating-bar .topbar-wp-btn svg {
+      width: 15px !important;
+      height: 15px !important;
+    }
+    .device-mobile .player-floating-bar #playerHome svg {
+      width: 15px !important;
+      height: 15px !important;
     }
 
     .device-mobile .player-sub-overlay-btn {
@@ -8324,35 +8367,28 @@
       transform: none !important;
       transition: none !important;
     }
-    .device-tv .player-close,
-    .tv-mode .player-close {
+    .device-tv .player-floating-bar .player-close,
+    .tv-mode .player-floating-bar .player-close {
+      position: static !important;
       width: 48px !important;
       height: 48px !important;
-      font-size: 1.4rem !important;
-      top: 1.2rem !important;
-      right: 1.5rem !important;
-      background: #11141e !important;
-      border: 1px solid rgba(255, 255, 255, 0.3) !important;
-      box-shadow: none !important;
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
-      transform: none !important;
-      transition: none !important;
+      font-size: 1.5rem !important;
+      margin: 0 !important;
+      border-radius: 50% !important;
+      background: rgba(255, 255, 255, 0.1) !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.25) !important;
     }
-    .device-tv .topbar-wp-btn,
-    .tv-mode .topbar-wp-btn {
+    .device-tv .player-floating-bar .topbar-wp-btn,
+    .tv-mode .player-floating-bar .topbar-wp-btn {
+      position: static !important;
+      width: 48px !important;
       height: 48px !important;
-      padding: 0 1.2rem !important;
-      font-size: 1rem !important;
-      top: 1.2rem !important;
-      right: 5.2rem !important;
-      background: #11141e !important;
-      border: 1px solid rgba(168, 85, 247, 0.4) !important;
-      box-shadow: none !important;
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
-      transform: none !important;
-      transition: none !important;
+      min-width: 48px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border-radius: 50% !important;
+      background: rgba(36, 16, 68, 0.95) !important;
+      border: 1.5px solid rgba(168, 85, 247, 0.75) !important;
     }
     .device-tv .player-sub-overlay-btn,
     .tv-mode .player-sub-overlay-btn {
@@ -8415,16 +8451,76 @@
       transform: none !important;
       transition: none !important;
     }
-    .device-tv #playerHome,
-    .tv-mode #playerHome {
+    .device-tv .player-floating-bar,
+    .tv-mode .player-floating-bar {
+      top: 1.8rem !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      padding: 6px 12px !important;
+      gap: 12px !important;
+      border-radius: 9999px !important;
+      background: rgba(9, 12, 20, 0.98) !important;
+      border: 2px solid rgba(232, 201, 122, 0.55) !important;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9) !important;
+      z-index: 99999 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+    }
+    .device-tv .player-floating-bar .floating-btn,
+    .tv-mode .player-floating-bar .floating-btn,
+    .device-tv .player-floating-bar .topbar-wp-btn,
+    .tv-mode .player-floating-bar .topbar-wp-btn {
+      position: static !important;
       width: 48px !important;
       height: 48px !important;
-      top: 1.2rem !important;
-      left: 1.5rem !important;
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
-      transform: none !important;
-      transition: none !important;
+      min-width: 48px !important;
+      font-size: 1.3rem !important;
+      margin: 0 !important;
+      border-radius: 50% !important;
+      background: rgba(255, 255, 255, 0.1) !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.25) !important;
+      color: #ffffff !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease !important;
+    }
+    .device-tv .player-floating-bar .topbar-wp-btn,
+    .tv-mode .player-floating-bar .topbar-wp-btn {
+      background: rgba(36, 16, 68, 0.95) !important;
+      border: 1.5px solid rgba(168, 85, 247, 0.75) !important;
+    }
+    .device-tv .player-floating-bar .floating-btn:focus,
+    .tv-mode .player-floating-bar .floating-btn:focus,
+    .device-tv .player-floating-bar .topbar-wp-btn:focus,
+    .tv-mode .player-floating-bar .topbar-wp-btn:focus,
+    .player-floating-bar .floating-btn:focus-visible {
+      outline: 3px solid #E8C97A !important;
+      outline-offset: 3px !important;
+      transform: scale(1.15) !important;
+      box-shadow: 0 0 26px rgba(232, 201, 122, 0.95) !important;
+      background: rgba(232, 201, 122, 0.28) !important;
+      border-color: #E8C97A !important;
+      color: #E8C97A !important;
+    }
+    .device-tv .player-floating-bar .floating-btn svg,
+    .tv-mode .player-floating-bar .floating-btn svg,
+    .device-tv .player-floating-bar .topbar-wp-btn svg,
+    .tv-mode .player-floating-bar .topbar-wp-btn svg {
+      width: 24px !important;
+      height: 24px !important;
+      stroke-width: 2.2 !important;
+    }
+    .device-tv .player-floating-bar .player-close,
+    .tv-mode .player-floating-bar .player-close {
+      font-size: 1.5rem !important;
+    }
+    .device-tv .player-floating-bar .floating-divider,
+    .tv-mode .player-floating-bar .floating-divider {
+      width: 2px !important;
+      height: 28px !important;
+      margin: 0 4px !important;
+      background: rgba(255, 255, 255, 0.25) !important;
     }
     .device-tv .player-ep-btn,
     .tv-mode .player-ep-btn {
@@ -9644,11 +9740,9 @@
       }
     }
 
-    const TMDB_FALLBACK_IMG = 'https://image.tmdb.org/t/p/';
-    // Cloudflare Edge CDN Image Delivery: routes image requests through Cloudflare's Anycast edge PoPs for blazing fast loading
-    const IMG = (typeof window !== 'undefined' && window.location && window.location.protocol === 'file:')
-      ? TMDB_FALLBACK_IMG
-      : '/img/';
+    // Official TMDB Global Edge CDN (Anycast PoPs worldwide with native HTTP/2 & HTTP/3)
+    const TMDB_CDN_IMG = 'https://image.tmdb.org/t/p/';
+    const IMG = TMDB_CDN_IMG;
     const COUNTRY = 'US';
 
     function slugify(text) {
@@ -9935,30 +10029,20 @@
     function imgUrl(p, s = 'w500') {
       if (!p) return '';
       if (typeof p === 'string' && (p.startsWith('http://') || p.startsWith('https://'))) {
-        if (p.includes('image.tmdb.org/t/p/')) {
-          return p.replace('https://image.tmdb.org/t/p/', IMG);
-        }
         return p;
       }
       const cleanPath = String(p).startsWith('/') ? p : '/' + p;
       return `${IMG}${s}${cleanPath}`;
     }
 
-    // Automatic failover to direct TMDB origin if CDN has any localized network glitch
+    // Direct error handler if any image fails to load
     window.handleImgError = function(img) {
       if (!img || img._hasFailedOver) return;
       img._hasFailedOver = true;
       if (img.src && img.src.includes('/img/')) {
-        img.src = img.src.replace(/^.*\/img\//, TMDB_FALLBACK_IMG);
+        img.src = img.src.replace(/^.*\/img\//, TMDB_CDN_IMG);
       }
     };
-    document.addEventListener('error', (e) => {
-      const el = e.target;
-      if (el && el.tagName === 'IMG' && !el._hasFailedOver && el.src && el.src.includes('/img/')) {
-        el._hasFailedOver = true;
-        el.src = el.src.replace(/^.*\/img\//, TMDB_FALLBACK_IMG);
-      }
-    }, true);
 
     // SVG circular progress ring (r=16 → circumference ≈ 100.53)
     function buildRatingRing(vote, idSuffix, mini = false) {
@@ -10273,8 +10357,8 @@
         gsap.set(grid.children, { opacity: 1 });
       } else {
         gsap.fromTo(grid.children,
-          { opacity: 0, y: 40, rotationX: 20, scale: .9, transformPerspective: 1000, transformOrigin: 'top center' },
-          { opacity: 1, y: 0, rotationX: 0, scale: 1, duration: .6, stagger: .07, ease: 'back.out(1.2)', scrollTrigger: { trigger: grid, start: 'top 85%' } }
+          { opacity: 0, y: 25 },
+          { opacity: 1, y: 0, duration: .4, stagger: .04, ease: 'power2.out', clearProps: 'all', scrollTrigger: { trigger: grid, start: 'top 85%' } }
         );
       }
     }
@@ -12724,6 +12808,7 @@
     const _subStartBtn   = document.getElementById('subStartBtn');
     const _subResetBtn   = document.getElementById('subResetBtn');
     const _subText       = document.getElementById('subText');
+    const _subStatusLine = document.getElementById('subStatusLine');
 
     if (_subToggleBtn) {
       const _syncToggleSwitchUI = () => {
@@ -13593,31 +13678,40 @@
       }
     }
 
-    // ── LOAD SUB button → open file picker or toggle subtitle display ───────────
+    // ── LOAD SUB / TOGGLE button → toggle subtitle display or open file picker ───────────
     if (_subToggleBtn) {
-      _subToggleBtn.addEventListener('click', () => {
-        if (_subLoaded) {
-          if (window._externalIsPaused) {
-            window._externalIsPaused = false;
-            if (window._subPausedElapsed != null && window._subPausedElapsed > 0) {
-              _subStartTime = Date.now() - window._subPausedElapsed;
-              window._subPausedElapsed = null;
-            } else {
-              _subStartTime = Date.now() - ((window._externalCurrentTime || 0) * 1000);
-            }
-            _setSubSyncBarPaused(false);
-            _markBufferState(false);
-            _sendIframeCmd('play');
-            if (!_subRaf) _subRaf = requestAnimationFrame(_subLoop);
-            return;
-          }
-          // Toggle subtitle visibility directly without showing any sync panel
+      _subToggleBtn.addEventListener('click', (e) => {
+        if (e) e.stopPropagation();
+        if (_subLoaded && _subCues && _subCues.length) {
           const overlay = document.getElementById('subOverlay');
+          const willBeActive = !_subActive || (overlay && overlay.style.display === 'none') || !_subToggleBtn.classList.contains('active');
+          _subActive = willBeActive;
           if (overlay) {
-            const isHidden = overlay.style.display === 'none';
-            overlay.style.display = isHidden ? '' : 'none';
-            _subToggleBtn.classList.toggle('active', isHidden);
-            _subToggleBtn.title = isHidden ? 'Subtitles active (click to hide)' : 'Subtitles hidden (click to show)';
+            overlay.style.display = willBeActive ? '' : 'none';
+          }
+          _subToggleBtn.classList.toggle('active', willBeActive);
+          _subToggleBtn.title = willBeActive ? 'Sinhala Subtitles — ON (Click to turn OFF)' : 'Sinhala Subtitles — OFF (Click to turn ON)';
+          const stateEl = _subToggleBtn.querySelector('.sub-toggle-state');
+          if (stateEl) stateEl.textContent = willBeActive ? 'ON' : 'OFF';
+          _subToggleBtn.setAttribute('aria-checked', willBeActive ? 'true' : 'false');
+
+          if (willBeActive) {
+            if (!_subStartTime) {
+              const resumeSec = (typeof window._externalCurrentTime === 'number' && window._externalCurrentTime > 0)
+                ? window._externalCurrentTime
+                : 0;
+              _subStartTime = Date.now() - (resumeSec * 1000);
+            }
+            _lastIframeSubCueText = null;
+            if (!_subRaf) _subRaf = requestAnimationFrame(_subLoop);
+            _showSubToast('🇱🇰 <strong>Sinhala Subtitles: ON</strong>', 2200);
+          } else {
+            _stopSubLoop();
+            if (_subText) {
+              _subText.innerHTML = '';
+              _subText.classList.remove('active');
+            }
+            _showSubToast('Sinhala Subtitles: OFF', 2000);
           }
           return;
         }
@@ -15865,8 +15959,13 @@
               _subToggleBtn.style.opacity = '1';
               _subToggleBtn.style.cursor = 'pointer';
               _subToggleBtn.classList.add('active');
-              _subToggleBtn.title = `Sinhala subtitles active (${parsedCues.length} cues) — Click to sync`;
+              _subToggleBtn.setAttribute('aria-checked', 'true');
+              const stateEl = _subToggleBtn.querySelector('.sub-toggle-state');
+              if (stateEl) stateEl.textContent = 'ON';
+              _subToggleBtn.title = `Sinhala Subtitles — ON (${parsedCues.length} cues) — Click to turn OFF`;
             }
+            const overlayEl = document.getElementById('subOverlay');
+            if (overlayEl) overlayEl.style.display = '';
             if (_subSyncPanel) _subSyncPanel.classList.remove('visible');
             console.log(`[Iframe Subtitles] Auto-started ${parsedCues.length} Sinhala cues for ${subKey}`);
           }
@@ -16641,75 +16740,41 @@
 
 
     function animateGrid(grid) {
+      if (!grid || !grid.children || !grid.children.length) return;
       if (window.DEVICE && window.DEVICE.isTV) {
         // Instant appearance on TV — 3D stagger animation blocks compositing on low-RAM GPUs
         gsap.set(grid.children, { opacity: 1, clearProps: 'all' });
         return;
       }
+      // Ultra-efficient 2D entrance animation with clearProps to free compositor memory immediately
       gsap.fromTo(grid.children,
-        { opacity: 0, y: 50, rotationX: 25, scale: .9, transformPerspective: 1000, transformOrigin: 'top center' },
-        { opacity: 1, y: 0, rotationX: 0, scale: 1, duration: .65, stagger: .08, ease: 'back.out(1.2)', scrollTrigger: { trigger: grid, start: 'top 85%' } }
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: .45, stagger: .04, ease: 'power2.out', clearProps: 'all', scrollTrigger: { trigger: grid, start: 'top 88%' } }
       );
     }
 
     function addCardListeners(container, selector) {
+      if (!container) return;
       const isTV = (window.DEVICE && window.DEVICE.isTV) || _tvMode || document.body.classList.contains('tv-mode') || document.body.classList.contains('device-tv');
 
-      if (!isTV) {
-        // Read accent color once per batch — avoids getComputedStyle on every mousemove
-        let _cachedAccent1 = getComputedStyle(document.documentElement).getPropertyValue('--accent1').trim() || '232,201,122';
-        // Refresh cache when hero changes accent (fired from applyDynamicColors)
-        const _accentObserver = new MutationObserver(() => {
-          _cachedAccent1 = getComputedStyle(document.documentElement).getPropertyValue('--accent1').trim() || '232,201,122';
-        });
-        _accentObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
-
-        container.querySelectorAll(selector).forEach(card => {
-          // RAF throttle: at most one tilt update per animation frame per card
-          let _cardRaf = null;
-          card.addEventListener('mousemove', e => {
-            if (_cardRaf) return;
-            _cardRaf = requestAnimationFrame(() => {
-              _cardRaf = null;
-              const rect = card.getBoundingClientRect();
-              const x = (e.clientX - rect.left) / rect.width - .5;
-              const y = (e.clientY - rect.top) / rect.height - .5;
-              gsap.to(card, { rotationY: x * 14, rotationX: -y * 14, transformPerspective: 900, transformOrigin: 'center', duration: .3, ease: 'power2.out' });
-              gsap.to(card, { boxShadow: `${-x * 25}px ${-y * 25}px 50px rgba(${_cachedAccent1},0.12), 0 0 40px rgba(${_cachedAccent1},0.06)`, duration: .3 });
-            });
-          }, { passive: true });
-          card.addEventListener('mouseleave', () => {
-            if (_cardRaf) { cancelAnimationFrame(_cardRaf); _cardRaf = null; }
-            gsap.to(card, { rotationY: 0, rotationX: 0, boxShadow: '0 4px 24px rgba(0,0,0,0.35)', duration: .6, ease: 'elastic.out(1,.75)' });
-          });
-          card.addEventListener('click', () => {
-            gsap.to(card, { scale: .95, duration: .1, yoyo: true, repeat: 1 });
-            spawnParticles(card);
-            const id = card.dataset.id;
-            const type = card.dataset.type || 'movie';
-            if (id) { closeSearch(); openModal(id, type); }
-          });
-        });
-      } else {
-        // TV mode: no mousemove, no MutationObserver, no tilt, no particles
-        // Only wire up click (remote OK button) and keyboard Enter
-        container.querySelectorAll(selector).forEach(card => {
-          card.setAttribute('tabindex', '0');  // ensure focusable via remote
-          card.addEventListener('click', () => {
-            const id = card.dataset.id;
-            const type = card.dataset.type || 'movie';
-            if (id) { closeSearch(); openModal(id, type); }
-          });
-          // Also handle Enter key for TV remotes that trigger keydown instead of click
-          card.addEventListener('keydown', e => {
+      container.querySelectorAll(selector).forEach(card => {
+        card.setAttribute('tabindex', '0');
+        card.onclick = () => {
+          gsap.to(card, { scale: .96, duration: .08, yoyo: true, repeat: 1 });
+          const id = card.dataset.id;
+          const type = card.dataset.type || 'movie';
+          if (id) { closeSearch(); openModal(id, type); }
+        };
+        if (isTV) {
+          card.onkeydown = e => {
             if (e.key === 'Enter' || e.keyCode === 13) {
               const id = card.dataset.id;
               const type = card.dataset.type || 'movie';
               if (id) { closeSearch(); openModal(id, type); }
             }
-          });
-        });
-      }
+          };
+        }
+      });
     }
 
     function spawnParticles(el) {
