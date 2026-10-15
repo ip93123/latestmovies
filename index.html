@@ -3161,36 +3161,46 @@
       right: 14px;
       width: 42px;
       height: 42px;
-      border-radius: 8px;
-      background: rgba(13, 17, 23, 0.95);
-      border: 1px solid rgba(232, 201, 122, 0.55);
+      border-radius: 9px;
+      background: rgba(13, 17, 23, 0.92);
+      border: 1.5px solid rgba(232, 201, 122, 0.6);
       color: var(--gold, #E8C97A);
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      pointer-events: auto;
-      z-index: 40 !important;
-      transition: opacity 0.25s, transform 0.2s, background 0.2s, border-color 0.2s;
+      pointer-events: auto !important;
+      z-index: 99999 !important;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.65), 0 0 10px rgba(232, 201, 122, 0.25);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s, border-color 0.2s;
       user-select: none;
+      opacity: 0.95;
     }
     .player-fs-overlay-btn:hover {
-      background: rgba(232, 201, 122, 0.22);
+      background: rgba(232, 201, 122, 0.25);
       border-color: #E8C97A;
+      color: #fff;
       transform: scale(1.1);
+      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.8), 0 0 16px rgba(232, 201, 122, 0.45);
+    }
+    .player-fs-overlay-btn:active {
+      transform: scale(0.94);
     }
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) .player-fs-overlay-btn {
       display: flex !important;
-      z-index: 40 !important;
+      z-index: 99999 !important;
     }
-    .player-container.idle-fs .player-fs-overlay-btn {
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs .player-fs-overlay-btn {
       opacity: 0 !important;
       pointer-events: none !important;
+      transform: translateY(12px) !important;
     }
-    .player-container:not(.idle-fs):hover .player-fs-overlay-btn,
-    .player-container:not(.idle-fs):active .player-fs-overlay-btn {
-      opacity: 1 !important;
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) .player-fs-overlay-btn {
+      opacity: 0.95 !important;
       pointer-events: auto !important;
+      transform: translateY(0) !important;
     }
 
     /* ── Subtitle Toast Badge ────────────────────────────────────────── */
@@ -5963,29 +5973,29 @@
       opacity: 1;
     }
 
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, .player-container):not(.idle-fs) #playerClose,
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, .player-container):not(.idle-fs) #topbarWatchPartyBtn,
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, .player-container):not(.idle-fs) .player-fs-overlay-btn,
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, .player-container):not(.idle-fs) #playerHome {
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) #playerClose,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) #topbarWatchPartyBtn,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) .player-fs-overlay-btn,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen):not(.idle-fs) #playerHome {
       opacity: 1 !important;
       pointer-events: auto !important;
       transform: translateY(0) !important;
     }
 
-    /* Automatically hide watchparty, x mark (close), fullscreen marks, and overlay when idle */
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, .player-container).idle-fs #playerClose,
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, .player-container).idle-fs #topbarWatchPartyBtn,
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, .player-container).idle-fs .player-fs-overlay-btn,
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, .player-container).idle-fs #skipIntroBtn,
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, .player-container).idle-fs #skipInfoBadge,
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, .player-container).idle-fs .popup-home,
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, .player-container).idle-fs #playerHome {
+    /* Automatically hide watchparty, x mark (close), fullscreen marks, and overlay when idle IN FULLSCREEN */
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs #playerClose,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs #topbarWatchPartyBtn,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs .player-fs-overlay-btn,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs #skipIntroBtn,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs #skipInfoBadge,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs .popup-home,
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs #playerHome {
       opacity: 0 !important;
       pointer-events: none !important;
       transform: translateY(-12px) !important;
     }
 
-    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen, .player-container).idle-fs .player-fs-overlay-btn {
+    :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs .player-fs-overlay-btn {
       transform: translateY(12px) !important;
     }
 
@@ -7532,8 +7542,7 @@
         </svg></button>
 
       <iframe id="playerFrame" src="about:blank"
-        allow="autoplay *; encrypted-media *; fullscreen *; picture-in-picture *; web-share *"
-        allowfullscreen
+        allow="autoplay *; encrypted-media *; picture-in-picture *; web-share *"
         frameborder="0"></iframe>
 
       <!-- Subtitle Overlay (rendered on top of iframe, click-through) -->
@@ -13769,6 +13778,11 @@
         _lastIframeSubCueText = null;
       }
       frame.style.display = '';
+      frame.removeAttribute('allowfullscreen');
+      frame.removeAttribute('webkitallowfullscreen');
+      frame.removeAttribute('mozallowfullscreen');
+      frame.allow = "autoplay *; encrypted-media *; picture-in-picture *; web-share *";
+      _attachSubOverlayToActiveWrap();
       _setPlayerLoading(true);
       if (isTvDevice) {
         frame.style.opacity = '1';
