@@ -12859,6 +12859,7 @@
       if (isExplicitPause) {
         window._externalIsPaused = true;
         _markBufferState(false);
+        if (typeof _onPlayerPlaybackStateChange === 'function') _onPlayerPlaybackStateChange('pause');
         if (ct !== null) {
           window._subPausedElapsed = Math.round(ct * 1000);
           window._externalCurrentTime = ct;
@@ -12887,6 +12888,7 @@
         _markBufferState(false);
         window._externalIsPaused = false;
         window._lastExternalMsgTime = Date.now();
+        if (typeof _onPlayerPlaybackStateChange === 'function') _onPlayerPlaybackStateChange('play');
         if (ct !== null && ct > 0) {
           _subStartTime = Date.now() - (ct * 1000);
           window._externalCurrentTime = ct;
@@ -13974,10 +13976,12 @@
           if (_maxWrap) _maxWrap.classList.add('playing');
           _resetIdleTimer();
           _markBufferState(false);
+          if (typeof _onPlayerPlaybackStateChange === 'function') _onPlayerPlaybackStateChange('play');
         });
         _maxVideo.addEventListener('playing', () => {
           _markBufferState(false);
           _setPlayerLoading(false);
+          if (typeof _onPlayerPlaybackStateChange === 'function') _onPlayerPlaybackStateChange('play');
         });
         _maxVideo.addEventListener('waiting', () => {
           _markBufferState(true);
@@ -13994,11 +13998,13 @@
           if (_maxWrap) _maxWrap.classList.remove('playing');
           _resetIdleTimer();
           _markBufferState(false);
+          if (typeof _onPlayerPlaybackStateChange === 'function') _onPlayerPlaybackStateChange('pause');
         });
         _maxVideo.addEventListener('ended', () => {
           if (_maxWrap) _maxWrap.classList.remove('playing');
           _resetIdleTimer();
           _markBufferState(false);
+          if (typeof _onPlayerPlaybackStateChange === 'function') _onPlayerPlaybackStateChange('pause');
         });
         _maxVideo.addEventListener('timeupdate', () => {
           if (!_maxVideo) return;
@@ -14439,23 +14445,39 @@
       window._applySubCustomSettings = applySettings;
     })();
 
-    // Idle timer for fullscreen overlay button & controls (auto-hide on inactivity, auto-wake on cursor move)
+    // ── Player Controls Overlay Idle & Play/Pause Sync Controller ─────────────
     let _fsBtnIdleTimer = null;
-    function _pokePlayerFsControls() {
+    let _lastFsPointerX = -1;
+    let _lastFsPointerY = -1;
+
+    function _isPlayerVideoPaused() {
+      // 1. If Max native video player is active
+      if (typeof _maxMode !== 'undefined' && _maxMode && typeof _maxVideo !== 'undefined' && _maxVideo) {
+        return !!_maxVideo.paused;
+      }
+      // 2. If iframe streaming player is active
+      if (typeof window._externalIsPaused !== 'undefined') {
+        return !!window._externalIsPaused;
+      }
+      return false;
+    }
+
+    function _pokePlayerFsControls(forceHide) {
       const pCont = document.getElementById('playerContainer');
       if (!pCont) return;
 
-      const wasIdle = pCont.classList.contains('idle-fs');
-      if (wasIdle) {
-        pCont.classList.remove('idle-fs');
-      }
-
-      const catcher = document.getElementById('fsMouseCatcher');
-      if (catcher) {
-        catcher.style.pointerEvents = 'none';
-      }
-
       clearTimeout(_fsBtnIdleTimer);
+      const catcher = document.getElementById('fsMouseCatcher');
+
+      if (forceHide) {
+        pCont.classList.add('idle-fs');
+        if (catcher) catcher.style.pointerEvents = 'auto';
+        return;
+      }
+
+      // Always restore controls visibility when poked
+      pCont.classList.remove('idle-fs');
+      if (catcher) catcher.style.pointerEvents = 'none';
 
       // Keep controls visible while subtitle customize panel is open
       const subPanel = document.getElementById('subCustomizePanel');
@@ -14463,35 +14485,74 @@
         return;
       }
 
+      // If the video is PAUSED, keep controls visible!
+      // This synchronizes with the TV/native player overlay: when paused with play button, controls stay visible.
+      if (_isPlayerVideoPaused()) {
+        return;
+      }
+
       const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || pCont.classList.contains('is-fullscreen') || document.body.classList.contains('is-fullscreen'));
       const isMobile = window.innerWidth <= 768 || document.body.classList.contains('device-mobile');
       const isPlayerOpen = !!(document.getElementById('playerOverlay')?.classList.contains('open'));
 
+      // If playing and in fullscreen or on mobile, auto-hide after 3.5 seconds of inactivity
       if (isPlayerOpen && (isFs || isMobile)) {
         _fsBtnIdleTimer = setTimeout(() => {
           const sp = document.getElementById('subCustomizePanel');
           if (sp && sp.classList.contains('open')) return;
+          // Never hide while video is paused!
+          if (_isPlayerVideoPaused()) return;
           pCont.classList.add('idle-fs');
           const c = document.getElementById('fsMouseCatcher');
           if (c) c.style.pointerEvents = 'auto';
-        }, 4000); // 4 seconds of inactivity auto-hide
+        }, 3500); // 3.5 seconds inactivity auto-hide
       }
     }
 
-    // Attach listeners on document, window and fsMouseCatcher so mouse movements and touches are always caught
-    ['mousemove', 'pointermove', 'mousedown', 'pointerdown', 'touchstart', 'touchmove', 'keydown'].forEach(evt => {
-      document.addEventListener(evt, _pokePlayerFsControls, { passive: true });
-      window.addEventListener(evt, _pokePlayerFsControls, { passive: true });
+    // Called when video play/pause changes (from iframe postMessage or native video)
+    function _onPlayerPlaybackStateChange(state) {
+      if (state === 'pause' || state === 'ended') {
+        // Paused -> show controls and keep them visible!
+        _pokePlayerFsControls();
+      } else if (state === 'play' || state === 'playing') {
+        // Playing -> wake controls and start auto-hide timer (fades away after 3.5s)
+        _pokePlayerFsControls();
+      }
+    }
+    window._onPlayerPlaybackStateChange = _onPlayerPlaybackStateChange;
+
+    // Movement handler: ONLY triggers when cursor actually moved coordinates (prevents synthetic enter/leave loops)
+    function _handleFsPointerMove(e) {
+      if (e && typeof e.clientX === 'number') {
+        if (Math.abs(e.clientX - _lastFsPointerX) < 3 && Math.abs(e.clientY - _lastFsPointerY) < 3) {
+          return; // Ignore stationary events
+        }
+        _lastFsPointerX = e.clientX;
+        _lastFsPointerY = e.clientY;
+      }
+      _pokePlayerFsControls();
+    }
+
+    // Document and window listeners
+    ['mousemove', 'pointermove'].forEach(evt => {
+      document.addEventListener(evt, _handleFsPointerMove, { passive: true });
+      window.addEventListener(evt, _handleFsPointerMove, { passive: true });
+    });
+
+    ['mousedown', 'pointerdown', 'touchstart', 'touchmove', 'keydown'].forEach(evt => {
+      document.addEventListener(evt, () => _pokePlayerFsControls(), { passive: true });
+      window.addEventListener(evt, () => _pokePlayerFsControls(), { passive: true });
     });
 
     const _fsCatcherEl = document.getElementById('fsMouseCatcher');
     if (_fsCatcherEl) {
-      ['mousemove', 'pointermove', 'mouseenter', 'mouseover', 'mousedown', 'pointerdown', 'touchstart', 'touchmove'].forEach(evt => {
-        _fsCatcherEl.addEventListener(evt, () => {
-          _pokePlayerFsControls();
-        }, { passive: true });
+      // ONLY actual movement or clicks — NO mouseenter/mouseover which loops when pointer-events toggles!
+      _fsCatcherEl.addEventListener('mousemove', _handleFsPointerMove, { passive: true });
+      _fsCatcherEl.addEventListener('pointermove', _handleFsPointerMove, { passive: true });
+      _fsCatcherEl.addEventListener('touchstart', () => _pokePlayerFsControls(), { passive: true });
+      _fsCatcherEl.addEventListener('click', () => {
+        _pokePlayerFsControls();
       });
-
       _fsCatcherEl.addEventListener('dblclick', (e) => {
         e.preventDefault();
         _togglePlayerFullscreen();
