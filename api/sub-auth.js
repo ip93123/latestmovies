@@ -10,7 +10,10 @@ function getContributors() {
   const envContributors = process.env.SUB_CONTRIBUTORS;
   const map = {
     'admin': 'hackymax2026',
-    'contributor': 'subtitles123'
+    'kalan': 'kalan2026',
+    'friend1': 'friend123',
+    'friend2': 'friend456',
+    'friend3': 'friend789'
   };
 
   if (envContributors) {

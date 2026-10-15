@@ -8281,12 +8281,9 @@
       <!-- Player Close Button (always top layer) -->
       <button class="player-close" id="playerClose">&#10005;</button>
 
-      <!-- Dedicated High-Z-Index Subtitle Customize Button -->
-      <button class="player-sub-overlay-btn" id="playerSubSettingsBtn" title="Customize Subtitles (Size, Background, Color)" aria-label="Subtitle Settings">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="5" width="18" height="14" rx="3"/>
-          <path d="M7 15h4M15 15h2M7 11h2M13 11h4"/>
-        </svg>
+      <!-- Dedicated High-Z-Index Subtitle CC Button (right next to Fullscreen) -->
+      <button class="player-sub-overlay-btn" id="playerSubSettingsBtn" title="Subtitles & Closed Captions (CC)" aria-label="Subtitle CC Settings">
+        <span class="player-cc-badge" style="font-weight:900;font-size:0.88rem;letter-spacing:0.8px;font-family:'Outfit',sans-serif;border:1.8px solid currentColor;border-radius:5px;padding:2px 6px;line-height:1;display:inline-block;">CC</span>
       </button>
 
       <!-- Dedicated High-Z-Index Fullscreen Button (ensures Sinhala subtitles remain visible) -->
@@ -9295,7 +9292,7 @@
       ${rank ? `<div class="card-rank">${String(rank).padStart(2, '0')}</div>` : ''}
       <div class="card-badges-row" style="position:absolute;top:10px;left:10px;display:flex;gap:5px;align-items:center;z-index:4;">
         ${!rank && !hasNewEp ? `<div class="type-badge ${typeClass}" style="position:static;">${typeLabel}</div>` : ''}
-        ${(typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(item.id)]) ? `<div class="card-sub-tag" style="position:static;background:rgba(7,9,15,0.85);border:1px solid rgba(46,204,113,0.5);color:#2ECC71;font-size:0.65rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:4px;letter-spacing:0.5px;backdrop-filter:blur(8px);pointer-events:none;display:inline-flex;align-items:center;gap:3px;">🇱🇰 SUB</div>` : ''}
+        ${hasSinhalaSubtitle(item.id) ? `<div class="card-sub-tag" style="position:static;background:rgba(7,9,15,0.85);border:1px solid rgba(46,204,113,0.5);color:#2ECC71;font-size:0.65rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:4px;letter-spacing:0.5px;backdrop-filter:blur(8px);pointer-events:none;display:inline-flex;align-items:center;gap:3px;">🇱🇰 LK SUB</div>` : ''}
       </div>
       ${newEpBadgeHtml}
       ${buildRatingRing(vote, `${item.id}-card`, true)}
@@ -9318,7 +9315,7 @@
       const typeLabel = type === 'movie' ? 'Movie' : 'TV Show';
       const typeCls = type === 'movie' ? 'trending-type-movie' : 'trending-type-tv';
       const genres = (item.genre_ids || []).slice(0, 1).map(id => GENRE_MAP[id]).filter(Boolean);
-      const hasSub = (typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(item.id)]);
+      const hasSub = hasSinhalaSubtitle(item.id);
 
       let scoreCls = 'score-na';
       if (vote) {
@@ -9338,7 +9335,7 @@
         <div class="trending-genres">
           ${genres.map(g => `<span class="trending-genre-tag">${g}</span>`).join('')}
           <span class="trending-type-tag ${typeCls}">${typeLabel}</span>
-          ${hasSub ? `<span class="trending-sub-tag">🇱🇰 SUB</span>` : ''}
+          ${hasSub ? `<span class="trending-sub-tag">🇱🇰 LK SUB</span>` : ''}
         </div>
       </div>
       ${buildRatingRing(vote || '0', `${item.id}-tr`, false)}
@@ -9786,7 +9783,21 @@
     }
 
 
-    /* ── SIN SUB (Sinhala Subtitles) CATALOG ───────────────────────── */
+    /* ── SIN SUB (Sinhala Subtitles) CATALOG & DYNAMIC SYNC ────── */
+    window._dynamicSubCatalog = {};
+
+    function hasSinhalaSubtitle(id) {
+      if (!id) return false;
+      const sid = String(id);
+      if (window._dynamicSubCatalog) {
+        if (window._dynamicSubCatalog[sid]) return true;
+        for (const k in window._dynamicSubCatalog) {
+          if (k === sid || k.startsWith(sid + '_')) return true;
+        }
+      }
+      return !!(typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[sid]);
+    }
+
     const SINSUB_MOVIE_IDS = [
       '1235877', // Jana Nayagan (2026)
       '869227',  // Super Sharanya (2022)
@@ -9821,6 +9832,44 @@
     const SINSUB_TV_IDS = [
       '41727'    // Banshee (2013–2016)
     ];
+
+    async function initDynamicSubtitles() {
+      try {
+        const res = await fetch('/api/sub-catalog?all=1');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.catalog) {
+            window._dynamicSubCatalog = data.catalog;
+            // Sync with SINSUB_MOVIE_IDS and SINSUB_TV_IDS
+            Object.values(data.catalog).forEach(item => {
+              if (!item || !item.tmdbId) return;
+              const tid = String(item.tmdbId);
+              if (item.mediaType === 'tv') {
+                if (!SINSUB_TV_IDS.includes(tid)) SINSUB_TV_IDS.unshift(tid);
+              } else {
+                if (!SINSUB_MOVIE_IDS.includes(tid)) SINSUB_MOVIE_IDS.unshift(tid);
+              }
+            });
+
+            // Auto-apply LK SUB badge to any rendered cards
+            document.querySelectorAll('.movie-card[data-id], .trending-card[data-id]').forEach(card => {
+              const cid = card.getAttribute('data-id');
+              if (hasSinhalaSubtitle(cid)) {
+                const badgeRow = card.querySelector('.card-badges-row');
+                if (badgeRow && !badgeRow.querySelector('.card-sub-tag')) {
+                  const tag = document.createElement('div');
+                  tag.className = 'card-sub-tag';
+                  tag.style.cssText = 'position:static;background:rgba(7,9,15,0.85);border:1px solid rgba(46,204,113,0.5);color:#2ECC71;font-size:0.65rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:4px;letter-spacing:0.5px;backdrop-filter:blur(8px);pointer-events:none;display:inline-flex;align-items:center;gap:3px;';
+                  tag.textContent = '🇱🇰 LK SUB';
+                  badgeRow.appendChild(tag);
+                }
+              }
+            });
+          }
+        }
+      } catch (_) {}
+    }
+    initDynamicSubtitles();
 
     async function loadSinSubMovies() {
       const row = document.getElementById('sinsubRow');
@@ -10319,8 +10368,20 @@
           }
         } else if (_currentCatType === 'language') {
           if (_currentCatKey === 'si') {
-            // ONLY show the movies/shows we put subtitles for — DO NOT filter with TMDB original language
-            const idsList = (_currentCatMediaType === 'tv') ? (typeof SINSUB_TV_IDS !== 'undefined' ? SINSUB_TV_IDS : ['41727']) : SINSUB_MOVIE_IDS;
+            // ONLY show the movies/shows we put subtitles for — includes all dynamically uploaded titles
+            let idsList = (_currentCatMediaType === 'tv') ? (typeof SINSUB_TV_IDS !== 'undefined' ? [...SINSUB_TV_IDS] : ['41727']) : [...SINSUB_MOVIE_IDS];
+
+            if (window._dynamicSubCatalog) {
+              Object.values(window._dynamicSubCatalog).forEach(item => {
+                if (!item || !item.tmdbId) return;
+                const isTv = item.mediaType === 'tv';
+                if ((_currentCatMediaType === 'tv' && isTv) || (_currentCatMediaType === 'movie' && !isTv)) {
+                  const tid = String(item.tmdbId);
+                  if (!idsList.includes(tid)) idsList.unshift(tid);
+                }
+              });
+            }
+
             const fetchPromises = idsList.map(id =>
               tmdb(`/${_currentCatMediaType}/${id}?language=en-US`).catch(() => null)
             );
