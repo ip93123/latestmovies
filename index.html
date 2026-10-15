@@ -3294,7 +3294,10 @@
       bottom: 70px;
       right: 12px;
       width: 330px;
-      max-width: calc(100vw - 24px);
+      max-width: calc(100vw - 20px);
+      max-height: calc(100vh - 84px);
+      overflow-y: auto;
+      overflow-x: hidden;
       background: #0d1118;
       border: 1px solid rgba(255, 255, 255, 0.14);
       border-radius: 20px;
@@ -3309,6 +3312,16 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       user-select: none;
       box-sizing: border-box;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+      -webkit-overflow-scrolling: touch;
+    }
+    .sub-customize-panel::-webkit-scrollbar {
+      width: 4px;
+    }
+    .sub-customize-panel::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
     }
     .sub-customize-panel.open {
       opacity: 1 !important;
@@ -3395,20 +3408,41 @@
       gap: 10px;
       margin-top: 0.4rem;
     }
-    .sub-color-preview-btn {
-      width: 36px;
-      height: 36px;
+    .sub-color-preview-wrap {
+      position: relative;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      cursor: pointer;
       flex-shrink: 0;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-      background: #ffffff;
+      cursor: pointer;
+      display: inline-block;
+    }
+    .sub-color-preview-btn {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+      pointer-events: none;
       transition: transform 0.15s, border-color 0.15s;
     }
-    .sub-color-preview-btn:hover {
+    .sub-color-preview-wrap:hover .sub-color-preview-btn {
       transform: scale(1.08);
       border-color: #E8C97A;
+    }
+    .sub-native-color-input {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      border: none;
+      padding: 0;
+      margin: 0;
+      background: transparent;
+      z-index: 5;
     }
     .sub-rgb-boxes {
       display: flex;
@@ -3443,17 +3477,19 @@
     }
     .sub-color-presets {
       display: flex;
-      gap: 8px;
+      flex-wrap: wrap;
+      gap: 6px;
       margin-top: 0.65rem;
-      justify-content: space-between;
     }
     .sub-preset-chip {
-      flex: 1;
-      height: 22px;
+      flex: 1 1 calc(25% - 6px);
+      min-width: 32px;
+      height: 24px;
       border-radius: 6px;
-      border: 1.5px solid rgba(255, 255, 255, 0.15);
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
       cursor: pointer;
       transition: transform 0.12s, border-color 0.12s;
+      padding: 0;
     }
     .sub-preset-chip:hover {
       transform: scale(1.1);
@@ -3476,6 +3512,21 @@
       background: rgba(255, 255, 255, 0.1);
       border-color: rgba(255, 255, 255, 0.45);
       color: #ffffff;
+    }
+    @media (max-height: 520px) {
+      .sub-customize-panel {
+        bottom: 44px !important;
+        right: 6px !important;
+        max-height: calc(100vh - 52px) !important;
+        padding: 0.75rem 0.95rem !important;
+      }
+      .sub-setting-group {
+        margin-bottom: 0.65rem !important;
+      }
+      .sub-panel-back-btn {
+        margin-bottom: 0.65rem !important;
+        padding: 4px 10px !important;
+      }
     }
 
     /* ── Subtitle Toast Badge ────────────────────────────────────────── */
@@ -7976,8 +8027,10 @@
             <span class="sub-setting-title">COLOR</span>
           </div>
           <div class="sub-color-row">
-            <button class="sub-color-preview-btn" id="subColorPreviewBtn" title="Choose Custom Color" type="button" style="background:#ffffff;"></button>
-            <input type="color" id="subNativeColorPicker" style="display:none" value="#ffffff">
+            <div class="sub-color-preview-wrap" title="Choose Custom Color">
+              <div class="sub-color-preview-btn" id="subColorPreviewBtn" style="background:#ffffff;"></div>
+              <input type="color" id="subNativeColorPicker" class="sub-native-color-input" value="#ffffff" aria-label="Subtitle Color Picker">
+            </div>
             <div class="sub-rgb-boxes">
               <div class="sub-rgb-field">
                 <span class="sub-rgb-label">R</span>
@@ -7994,11 +8047,14 @@
             </div>
           </div>
           <div class="sub-color-presets">
-            <div class="sub-preset-chip" data-color="#ffffff" style="background:#ffffff;" title="White"></div>
-            <div class="sub-preset-chip" data-color="#ffe600" style="background:#ffe600;" title="Yellow"></div>
-            <div class="sub-preset-chip" data-color="#e8c97a" style="background:#e8c97a;" title="Gold"></div>
-            <div class="sub-preset-chip" data-color="#00e5ff" style="background:#00e5ff;" title="Cyan"></div>
-            <div class="sub-preset-chip" data-color="#00e676" style="background:#00e676;" title="Lime"></div>
+            <button type="button" class="sub-preset-chip" data-color="#ffffff" style="background:#ffffff;" title="White" aria-label="White"></button>
+            <button type="button" class="sub-preset-chip" data-color="#fff8e7" style="background:#fff8e7;" title="Warm White" aria-label="Warm White"></button>
+            <button type="button" class="sub-preset-chip" data-color="#ffe600" style="background:#ffe600;" title="Yellow" aria-label="Yellow"></button>
+            <button type="button" class="sub-preset-chip" data-color="#e8c97a" style="background:#e8c97a;" title="Gold" aria-label="Gold"></button>
+            <button type="button" class="sub-preset-chip" data-color="#00e5ff" style="background:#00e5ff;" title="Cyan" aria-label="Cyan"></button>
+            <button type="button" class="sub-preset-chip" data-color="#64b5f6" style="background:#64b5f6;" title="Sky Blue" aria-label="Sky Blue"></button>
+            <button type="button" class="sub-preset-chip" data-color="#00e676" style="background:#00e676;" title="Lime" aria-label="Lime"></button>
+            <button type="button" class="sub-preset-chip" data-color="#ff4081" style="background:#ff4081;" title="Pink" aria-label="Pink"></button>
           </div>
         </div>
 
@@ -13476,6 +13532,21 @@
         if (inpG) inpG.value = settings.g;
         if (inpB) inpB.value = settings.b;
 
+        if (presetChips && presetChips.length) {
+          presetChips.forEach(chip => {
+            const c = chip.dataset.color;
+            if (c && c.toLowerCase() === colorVal.toLowerCase()) {
+              chip.style.borderColor = '#ffffff';
+              chip.style.transform = 'scale(1.12)';
+              chip.style.boxShadow = '0 0 10px rgba(255, 255, 255, 0.6)';
+            } else {
+              chip.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+              chip.style.transform = 'none';
+              chip.style.boxShadow = 'none';
+            }
+          });
+        }
+
         // Persist
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
@@ -13547,15 +13618,8 @@
       }
 
       // Color events
-      if (previewBtn && nativePicker) {
-        previewBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          nativePicker.click();
-        });
-      }
-
       if (nativePicker) {
-        nativePicker.addEventListener('input', (e) => {
+        const onColorPick = (e) => {
           const hex = e.target.value;
           const rgb = hexToRgb(hex);
           settings.color = hex;
@@ -13563,7 +13627,9 @@
           settings.g = rgb.g;
           settings.b = rgb.b;
           applySettings();
-        });
+        };
+        nativePicker.addEventListener('input', onColorPick);
+        nativePicker.addEventListener('change', onColorPick);
       }
 
       function handleRgbChange() {
