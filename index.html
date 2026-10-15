@@ -350,6 +350,22 @@
         max-width: 50px;
       }
     }
+    .device-tv .nav-sinsub-img,
+    .tv-mode .nav-sinsub-img {
+      height: 28px;
+      max-width: 90px;
+    }
+
+    .footer-sinsub-img {
+      height: 17px;
+      width: auto;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .device-tv .footer-sinsub-img,
+    .tv-mode .footer-sinsub-img {
+      height: 26px;
+    }
 
     .nav-divider {
       position: relative;
@@ -1479,69 +1495,160 @@
     }
     .trending-poster .card-sinsub-badge img {
       height: 13px !important;
-      max-width: 40px !important;
+      max-width: 42px !important;
     }
 
     @media (max-width: 768px) {
       .card-sinsub-badge {
-        top: 5px !important;
-        right: 5px !important;
+        top: 6px !important;
+        right: 6px !important;
       }
       .card-sinsub-badge img {
-        height: 13px !important;
-        max-width: 44px !important;
+        height: 14px !important;
+        max-width: 48px !important;
       }
       .trending-poster .card-sinsub-badge {
         top: 3px !important;
         right: 3px !important;
       }
       .trending-poster .card-sinsub-badge img {
-        height: 10px !important;
-        max-width: 30px !important;
+        height: 11px !important;
+        max-width: 36px !important;
       }
     }
 
     .device-mobile .card-sinsub-badge {
-      top: 5px !important;
-      right: 5px !important;
+      top: 6px !important;
+      right: 6px !important;
     }
     .device-mobile .card-sinsub-badge img {
-      height: 13px !important;
-      max-width: 44px !important;
+      height: 14px !important;
+      max-width: 48px !important;
     }
     .device-mobile .trending-poster .card-sinsub-badge {
       top: 3px !important;
       right: 3px !important;
     }
     .device-mobile .trending-poster .card-sinsub-badge img {
-      height: 10px !important;
-      max-width: 30px !important;
+      height: 11px !important;
+      max-width: 36px !important;
     }
 
     .device-tv .card-sinsub-badge,
     .tv-mode .card-sinsub-badge {
-      top: 12px !important;
-      right: 12px !important;
+      top: 14px !important;
+      right: 14px !important;
     }
     .device-tv .card-sinsub-badge img,
     .tv-mode .card-sinsub-badge img {
-      height: 26px !important;
-      max-width: 86px !important;
+      height: 32px !important;
+      max-width: 105px !important;
+      filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.95)) !important;
     }
 
+    /* Category Page & Header Sinhala Subtitle Image */
+    .cat-header-sinsub-title {
+      display: inline-flex;
+      align-items: center;
+      gap: clamp(6px, 1.8vw, 12px);
+      flex-wrap: wrap;
+    }
     .cat-header-sinsub-img {
-      height: clamp(18px, 4vw, 28px);
+      height: clamp(20px, 4vw, 32px);
       width: auto;
       vertical-align: middle;
       display: inline-block;
       filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.8));
     }
+    @media (max-width: 768px) {
+      .cat-header-sinsub-img {
+        height: clamp(18px, 5vw, 24px) !important;
+      }
+    }
+    .device-mobile .cat-header-sinsub-img {
+      height: clamp(18px, 5vw, 24px) !important;
+    }
+    .device-tv .cat-header-sinsub-img,
+    .tv-mode .cat-header-sinsub-img {
+      height: 48px !important;
+      filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.95)) !important;
+    }
 
     .cat-card-sinsub-img {
-      height: clamp(13px, 3.2vw, 17px);
+      height: clamp(14px, 3.2vw, 18px);
       width: auto;
       display: inline-block;
       vertical-align: middle;
+    }
+    .device-mobile .cat-card-sinsub-img {
+      height: 14px !important;
+    }
+    .device-tv .cat-card-sinsub-img,
+    .tv-mode .cat-card-sinsub-img {
+      height: 28px !important;
+    }
+
+    /* Detail Modal Sinhala Subtitle Badge */
+    .modal-sub-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(7, 9, 15, 0.78);
+      border: 1px solid rgba(232, 201, 122, 0.5);
+      padding: 3px 10px 3px 6px;
+      border-radius: 20px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+    }
+    .modal-sinsub-img {
+      height: 18px;
+      width: auto;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .modal-sinsub-text {
+      color: #E8C97A;
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    @media (max-width: 768px) {
+      .modal-sub-badge {
+        padding: 2px 8px 2px 5px !important;
+        gap: 5px !important;
+      }
+      .modal-sinsub-img {
+        height: 15px !important;
+      }
+      .modal-sinsub-text {
+        font-size: 0.68rem !important;
+      }
+    }
+    .device-mobile .modal-sub-badge {
+      padding: 2px 8px 2px 5px !important;
+      gap: 5px !important;
+    }
+    .device-mobile .modal-sinsub-img {
+      height: 15px !important;
+    }
+    .device-mobile .modal-sinsub-text {
+      font-size: 0.68rem !important;
+    }
+    .device-tv .modal-sub-badge,
+    .tv-mode .modal-sub-badge {
+      padding: 6px 16px 6px 10px !important;
+      border-radius: 30px !important;
+      gap: 10px !important;
+      border-color: rgba(232, 201, 122, 0.7) !important;
+    }
+    .device-tv .modal-sinsub-img,
+    .tv-mode .modal-sinsub-img {
+      height: 28px !important;
+    }
+    .device-tv .modal-sinsub-text,
+    .tv-mode .modal-sinsub-text {
+      font-size: 1.05rem !important;
     }
 
     /* STREAMING LOGOS ON CARD */
@@ -4942,21 +5049,29 @@
       }
       .player-server-bar {
         position: absolute !important;
-        top: max(6px, env(safe-area-inset-top, 6px)) !important;
-        left: max(48px, calc(env(safe-area-inset-left, 0px) + 48px)) !important;
-        max-width: calc(100vw - 140px) !important;
+        top: auto !important;
+        bottom: max(6px, env(safe-area-inset-bottom, 6px)) !important;
+        left: max(8px, env(safe-area-inset-left, 8px)) !important;
+        max-width: calc(100vw - 110px) !important;
         z-index: 720 !important;
-        background: rgba(7, 9, 15, 0.85) !important;
+        background: rgba(7, 9, 15, 0.88) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
         border-radius: 20px !important;
-        padding: 2px 8px !important;
+        padding: 2px 6px !important;
+        gap: 4px !important;
+      }
+      .player-server-btn {
+        padding: 0.25rem 0.6rem !important;
+        font-size: 0.7rem !important;
+        min-height: 28px !important;
       }
       .player-ep-bar {
         position: absolute !important;
-        bottom: max(8px, env(safe-area-inset-bottom, 8px)) !important;
+        bottom: max(44px, calc(env(safe-area-inset-bottom, 8px) + 36px)) !important;
         left: 50% !important;
         transform: translateX(-50%) !important;
         z-index: 720 !important;
-        background: rgba(7, 9, 15, 0.85) !important;
+        background: rgba(7, 9, 15, 0.88) !important;
         border-radius: 20px !important;
         padding: 2px 8px !important;
       }
@@ -8367,6 +8482,16 @@
       transform: none !important;
       transition: none !important;
     }
+    .device-tv .player-server-btn:focus,
+    .tv-mode .player-server-btn:focus,
+    .player-server-btn:focus-visible {
+      outline: 3px solid #E8C97A !important;
+      outline-offset: 2px !important;
+      box-shadow: 0 0 22px rgba(232, 201, 122, 0.9) !important;
+      background: rgba(232, 201, 122, 0.25) !important;
+      color: #E8C97A !important;
+      transform: scale(1.08) !important;
+    }
     .device-tv .player-floating-bar .player-close,
     .tv-mode .player-floating-bar .player-close {
       position: static !important;
@@ -8526,8 +8651,19 @@
     .tv-mode .player-ep-btn {
       padding: 0.6rem 1.4rem !important;
       font-size: 1rem !important;
+      border-radius: 50px !important;
       transform: none !important;
       transition: none !important;
+    }
+    .device-tv .player-ep-btn:focus,
+    .tv-mode .player-ep-btn:focus,
+    .player-ep-btn:focus-visible {
+      outline: 3px solid #E8C97A !important;
+      outline-offset: 2px !important;
+      box-shadow: 0 0 22px rgba(232, 201, 122, 0.9) !important;
+      background: rgba(232, 201, 122, 0.25) !important;
+      color: #E8C97A !important;
+      transform: scale(1.08) !important;
     }
     .device-tv #wpModalBox {
       width: 580px !important;
@@ -8543,8 +8679,12 @@
       padding: 0.8rem 1.2rem !important;
       font-size: 1rem !important;
     }
-    .device-tv #subText {
-      font-size: clamp(1.3rem, 2.3vw, 1.9rem) !important;
+    .device-tv #subText,
+    .tv-mode #subText {
+      font-size: clamp(1.6rem, 2.8vw, 2.6rem) !important;
+      font-weight: 700 !important;
+      line-height: 1.35 !important;
+      text-shadow: 0 3px 12px rgba(0, 0, 0, 0.98), 0 0 6px rgba(0, 0, 0, 0.9) !important;
     }
 
     /* ─── TV MODAL ANTI-CRASH STYLES ─── */
@@ -9395,7 +9535,7 @@
       <ul class="mobile-nav-list">
         <li><a href="#trending" onclick="window.toggleMobileNav(false)"><span><i class="fa-solid fa-fire" style="color:#FF4500;"></i> Trending</span><span style="opacity:0.4;">›</span></a></li>
         <li><a href="#categories" onclick="window.toggleMobileNav(false)"><span><i class="fa-solid fa-tags" style="color:var(--gold);"></i> Categories</span><span style="opacity:0.4;">›</span></a></li>
-        <li><a href="javascript:void(0)" onclick="window.toggleMobileNav(false); openCategoryPage('language', 'si', '<span style=\'display:inline-flex;align-items:center;gap:8px;\'><img src=\'/sinhala-sub.png\' style=\'height:28px;vertical-align:middle;display:inline-block;\' alt=\'සිංහල Subtitle\'> සිංහල උපසිරැසි</span>', 'Movies &amp; TV Series with Sinhala Subtitles')" style="display:flex;align-items:center;justify-content:space-between;"><span style="display:inline-flex;align-items:center;gap:8px;"><img src="/sinhala-sub.png" alt="Sinhala Subtitle" style="height:19px;width:auto;display:inline-block;"><span style="color:#F1C40F;font-weight:600;">සිංහල උපසිරැසි</span></span><span style="opacity:0.4;">›</span></a></li>
+        <li><a href="javascript:void(0)" onclick="window.toggleMobileNav(false); openCategoryPage('language', 'si', '<span class=\'cat-header-sinsub-title\'><img src=\'/sinhala-sub.png\' class=\'cat-header-sinsub-img\' alt=\'සිංහල Subtitle\'> <span>සිංහල උපසිරැසි</span></span>', 'Movies &amp; TV Series with Sinhala Subtitles')" style="display:flex;align-items:center;justify-content:space-between;"><span style="display:inline-flex;align-items:center;gap:8px;"><img src="/sinhala-sub.png" alt="Sinhala Subtitle" class="cat-card-sinsub-img"><span style="color:#F1C40F;font-weight:600;">සිංහල උපසිරැසි</span></span><span style="opacity:0.4;">›</span></a></li>
         <li><a href="javascript:void(0)" onclick="window.toggleMobileNav(false); openCategoryPage('movies', 'all', '<i class=\'fa-solid fa-film\'></i> Movies', 'Explore latest &amp; popular movies')"><span><i class="fa-solid fa-film" style="color:#00D2FF;"></i> Movies</span><span style="opacity:0.4;">›</span></a></li>
         <li><a href="javascript:void(0)" onclick="window.toggleMobileNav(false); openCategoryPage('tvshows', 'all', '<i class=\'fa-solid fa-tv\'></i> TV Series', 'Explore top rated &amp; popular TV series')"><span><i class="fa-solid fa-tv" style="color:#A855F7;"></i> TV Series</span><span style="opacity:0.4;">›</span></a></li>
         <li><a href="javascript:void(0)" onclick="window.toggleMobileNav(false); openCategoryPage('toprated', 'all', '<i class=\'fa-solid fa-star\'></i> Top Rated All Time', 'Highest rated movies &amp; series of all time')"><span><i class="fa-solid fa-star" style="color:#F59E0B;"></i> Top Rated</span><span style="opacity:0.4;">›</span></a></li>
@@ -9582,7 +9722,7 @@
       <img src="logo.png?v=3" alt="Hacky Max" style="height:58px;width:auto;max-width:240px;object-fit:contain;filter:drop-shadow(0 2px 10px rgba(0,0,0,0.5));">
     </div>
     <p style="margin-top:.5rem">Powered by TMDB & OMDb · Streaming data by JustWatch via TMDB · Updates daily</p>
-    <p style="margin-top:.35rem;font-size:0.83rem;color:rgba(255,255,255,0.7);display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;"><img src="/sinhala-sub.png" alt="Sinhala Subtitle" style="height:17px;width:auto;display:inline-block;vertical-align:middle;"><span>Sinhala Subtitles &amp; Translations credited to <a href="https://www.baiscope.lk" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:none;font-weight:600;">Baiscope.lk</a> &amp; <a href="https://zoom.lk" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:none;font-weight:600;">Zoom.lk</a> community translators</span></p>
+    <p style="margin-top:.35rem;font-size:0.83rem;color:rgba(255,255,255,0.7);display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;"><img src="/sinhala-sub.png" alt="Sinhala Subtitle" class="footer-sinsub-img"><span>Sinhala Subtitles &amp; Translations credited to <a href="https://www.baiscope.lk" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:none;font-weight:600;">Baiscope.lk</a> &amp; <a href="https://zoom.lk" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:none;font-weight:600;">Zoom.lk</a> community translators</span></p>
     <div class="footer-links">
       <a href="legal/terms.html">Terms of Service</a>
       <a href="legal/dmca.html">DMCA/Copyright</a>
@@ -10194,8 +10334,8 @@
       <div class="trending-poster" style="position:relative">
         ${poster ? `<img src="${poster}" alt="${title}" loading="lazy" decoding="async">` : ''}
         ${hasSub ? `
-          <div class="card-sinsub-badge" title="Sinhala Subtitle Available" style="top:6px;right:6px;">
-            <img src="/sinhala-sub.png" alt="Sinhala Subtitle" style="height:17px;width:auto;">
+          <div class="card-sinsub-badge" title="Sinhala Subtitle Available">
+            <img src="/sinhala-sub.png" alt="Sinhala Subtitle">
           </div>` : ''}
       </div>
       <div class="trending-info">
@@ -10728,9 +10868,7 @@
                   const badge = document.createElement('div');
                   badge.className = 'card-sinsub-badge';
                   badge.title = 'Sinhala Subtitle Available';
-                  const isTrending = card.classList.contains('trending-card');
-                  if (isTrending) badge.style.cssText = 'top:6px;right:6px;';
-                  badge.innerHTML = `<img src="/sinhala-sub.png" alt="Sinhala Subtitle" style="${isTrending ? 'height:17px;width:auto;' : ''}">`;
+                  badge.innerHTML = `<img src="/sinhala-sub.png" alt="Sinhala Subtitle">`;
                   poster.appendChild(badge);
                 }
               }
@@ -10960,7 +11098,7 @@
               <div class="category-card-overlay"></div>
               <div class="category-card-tint"></div>
               <div class="category-card-content">
-                <div class="category-card-native">${l.code === 'si' ? `<span style="display:inline-flex;align-items:center;gap:6px;"><img src="/sinhala-sub.png" alt="සිංහල" style="height:18px;width:auto;display:inline-block;"><span>${l.title}</span></span>` : l.title}</div>
+                <div class="category-card-native">${l.code === 'si' ? `<span style="display:inline-flex;align-items:center;gap:6px;"><img src="/sinhala-sub.png" class="cat-card-sinsub-img" alt="සිංහල"><span>${l.title}</span></span>` : l.title}</div>
                 <div class="category-card-sub">${l.sub}</div>
                 <div class="category-card-badge">${l.badge}</div>
               </div>
@@ -10996,7 +11134,7 @@
             item = CATEGORIES_DATA.genres.find(x => String(x.id) === String(catKey));
           }
           if (item) {
-            const displayTitle = catType === 'language' ? (catKey === 'si' ? '<span style="display:inline-flex;align-items:center;gap:10px;"><img src="/sinhala-sub.png" style="height:32px;width:auto;vertical-align:middle;display:inline-block;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.8));" alt="Sinhala Subtitle"><span>සිංහල උපසිරැසි</span></span>' : `${item.title} · ${item.sub}`) : item.title;
+            const displayTitle = catType === 'language' ? (catKey === 'si' ? '<span class="cat-header-sinsub-title"><img src="/sinhala-sub.png" class="cat-header-sinsub-img" alt="Sinhala Subtitle"><span>සිංහල උපසිරැසි</span></span>' : `${item.title} · ${item.sub}`) : item.title;
             const displaySub = catType === 'language' ? (catKey === 'si' ? 'Movies & TV Series with Sinhala Subtitles' : `Top Rated & Popular ${item.sub} Movies and Series`) : item.sub;
             openCategoryPage(catType, catKey, displayTitle, displaySub, true);
           }
@@ -11033,7 +11171,7 @@
         _currentCatItemData = { title: title || '<i class="fa-solid fa-gem"></i> 4K Ultra HD Picks', sub: sub || 'Cinematic 4K Ultra HD resolution titles with immersive clarity' };
       } else if (catType === 'language') {
         if (catKey === 'si') {
-          _currentCatItemData = { title: '<span style="display:inline-flex;align-items:center;gap:10px;"><img src="/sinhala-sub.png" style="height:32px;width:auto;vertical-align:middle;display:inline-block;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.8));" alt="Sinhala Subtitle"><span>සිංහල උපසිරැසි</span></span>', sub: 'Movies & TV Series with Sinhala Subtitles' };
+          _currentCatItemData = { title: '<span class="cat-header-sinsub-title"><img src="/sinhala-sub.png" class="cat-header-sinsub-img" alt="Sinhala Subtitle"><span>සිංහල උපසිරැසි</span></span>', sub: 'Movies & TV Series with Sinhala Subtitles' };
           if (typeof setNavActive === 'function') setNavActive('sub');
         } else {
           _currentCatItemData = CATEGORIES_DATA.languages.find(x => x.code === catKey) || { title, sub };
@@ -12298,7 +12436,7 @@
       ${details.number_of_seasons ? `<span>· ${details.number_of_seasons} Season${details.number_of_seasons > 1 ? 's' : ''}</span>` : ''}
       ${details.vote_average ? `<span>· ★ ${details.vote_average.toFixed(1)}</span>` : ''}
       ${(details.genres || []).slice(0, 2).map(g => `<span style="background:rgba(232,201,122,0.1);color:var(--gold);padding:.15rem .5rem;border-radius:4px;font-size:.72rem">${g.name}</span>`).join('')}
-      ${(hasSinhalaSubtitle(id) || (typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(id)])) ? `<span class="modal-sub-badge" style="display:inline-flex;align-items:center;gap:6px;background:rgba(7,9,15,0.7);border:1px solid rgba(241,196,15,0.4);padding:2px 8px 2px 4px;border-radius:20px;backdrop-filter:blur(6px);"><img src="/sinhala-sub.png" alt="Sinhala Subtitle" style="height:18px;width:auto;display:inline-block;"><span style="color:#F1C40F;font-size:0.72rem;font-weight:700;">උපසිරැසි සහිතයි</span></span>` : ''}
+      ${(hasSinhalaSubtitle(id) || (typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[String(id)])) ? `<span class="modal-sub-badge"><img src="/sinhala-sub.png" class="modal-sinsub-img" alt="Sinhala Subtitle"><span class="modal-sinsub-text">උපසිරැසි සහිතයි</span></span>` : ''}
     `;
 
         const shareBtn = document.getElementById('modalShare');
@@ -17321,7 +17459,7 @@
       } else if (target === 'tv') {
         openCategoryPage('tvshows', 'all', '<i class="fa-solid fa-tv"></i> TV Series', 'Explore top rated & popular TV series');
       } else if (target === 'sub') {
-        openCategoryPage('language', 'si', '<span style="display:inline-flex;align-items:center;gap:10px;"><img src="/sinhala-sub.png" style="height:32px;width:auto;vertical-align:middle;display:inline-block;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.8));" alt="Sinhala Subtitle"><span>සිංහල උපසිරැසි</span></span>', 'Movies & TV Series with Sinhala Subtitles');
+        openCategoryPage('language', 'si', '<span class="cat-header-sinsub-title"><img src="/sinhala-sub.png" class="cat-header-sinsub-img" alt="Sinhala Subtitle"><span>සිංහල උපසිරැසි</span></span>', 'Movies & TV Series with Sinhala Subtitles');
       } else if (target === 'mylist') {
         openWishlist();
       }
@@ -17526,7 +17664,7 @@
             displaySub = 'Cinematic 4K Ultra HD resolution titles with immersive clarity';
           } else if (catParam === 'language') {
             if (catIdParam === 'si') {
-              displayTitle = '<span style="display:inline-flex;align-items:center;gap:10px;"><img src="/sinhala-sub.png" style="height:32px;width:auto;vertical-align:middle;display:inline-block;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.8));" alt="Sinhala Subtitle"><span>සිංහල උපසිරැසි</span></span>';
+              displayTitle = '<span class="cat-header-sinsub-title"><img src="/sinhala-sub.png" class="cat-header-sinsub-img" alt="Sinhala Subtitle"><span>සිංහල උපසිරැසි</span></span>';
               displaySub = 'Movies & TV Series with Sinhala Subtitles';
             } else {
               const item = CATEGORIES_DATA.languages.find(x => x.code === catIdParam);
