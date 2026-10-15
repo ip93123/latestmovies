@@ -1220,6 +1220,244 @@
         padding: 10px 16px;
       }
     }
+
+    /* Subtitle Removal & Admin Styles */
+    .btn-delete-sub {
+      background: rgba(231, 76, 60, 0.15);
+      border: 1px solid rgba(231, 76, 60, 0.4);
+      color: #FF7675;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn-delete-sub:hover {
+      background: rgba(231, 76, 60, 0.3);
+      border-color: #E74C3C;
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(231, 76, 60, 0.25);
+    }
+
+    .btn-delete-row {
+      background: rgba(231, 76, 60, 0.12);
+      border: 1px solid rgba(231, 76, 60, 0.3);
+      color: #FF7675;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn-delete-row:hover {
+      background: rgba(231, 76, 60, 0.28);
+      border-color: #E74C3C;
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    .table-filter-tabs {
+      display: inline-flex;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 3px;
+      gap: 4px;
+    }
+
+    .tab-filter-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .tab-filter-btn:hover {
+      color: #fff;
+    }
+
+    .tab-filter-btn.active {
+      background: var(--gold);
+      color: #07090F;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(232, 201, 122, 0.3);
+    }
+
+    .hacky-admin-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(232, 201, 122, 0.12);
+      border: 1px solid rgba(232, 201, 122, 0.35);
+      color: var(--gold);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .user-pill.admin-pill {
+      border-color: rgba(232, 201, 122, 0.4);
+      background: rgba(232, 201, 122, 0.08);
+      color: var(--gold);
+    }
+
+    .uploader-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--text);
+    }
+
+    .uploader-tag.is-self {
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    .uploader-tag.is-self::after {
+      content: "(You)";
+      font-size: 0.72rem;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: rgba(232, 201, 122, 0.18);
+      border: 1px solid rgba(232, 201, 122, 0.3);
+      color: var(--gold);
+    }
+
+    /* Modal Backdrop & Dialog */
+    .sub-modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(4, 6, 12, 0.8);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      animation: fadeInModal 0.2s ease-out;
+    }
+
+    .sub-modal-box {
+      background: #101524;
+      border: 1px solid rgba(231, 76, 60, 0.4);
+      border-radius: var(--radius-md);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 0 28px rgba(231, 76, 60, 0.15);
+      max-width: 440px;
+      width: 100%;
+      padding: 1.8rem;
+      text-align: center;
+      animation: popInModal 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes fadeInModal {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes popInModal {
+      from { transform: scale(0.94); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .sub-modal-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: rgba(231, 76, 60, 0.15);
+      border: 1px solid rgba(231, 76, 60, 0.3);
+      color: #E74C3C;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.2rem auto;
+    }
+
+    .sub-modal-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.6rem;
+    }
+
+    .sub-modal-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 1.6rem;
+    }
+
+    .sub-modal-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .btn-modal-cancel {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn-modal-cancel:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .btn-modal-danger {
+      background: #E74C3C;
+      border: 1px solid #E74C3C;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 16px rgba(231, 76, 60, 0.4);
+      font-family: inherit;
+    }
+
+    .btn-modal-danger:hover {
+      background: #c0392b;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(231, 76, 60, 0.5);
+    }
   </style>
 </head>
 <body>
@@ -1404,9 +1642,24 @@
 
       <!-- Recent Uploads Feed -->
       <div class="studio-card" id="recentUploadsCard">
-        <div class="studio-card-title">
-          <span>📜</span>
-          <span>Recent Subtitle Catalog Uploads</span>
+        <div class="studio-card-title" style="justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span>📜</span>
+            <span>Recent Subtitle Catalog Uploads</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <div class="table-filter-tabs">
+              <button type="button" class="tab-filter-btn active" id="tabFilterAll" onclick="setCatalogFilter('all')">
+                All Subtitles (<span id="allSubCount">0</span>)
+              </button>
+              <button type="button" class="tab-filter-btn" id="tabFilterMine" onclick="setCatalogFilter('mine')">
+                My Subtitles (<span id="mySubCount">0</span>)
+              </button>
+            </div>
+            <span id="hackyAdminBadge" class="hacky-admin-badge" style="display:none;">
+              👑 Master Delete Access
+            </span>
+          </div>
         </div>
         <div class="recent-table-wrap">
           <table class="sub-table">
@@ -1433,17 +1686,51 @@
 
   </main>
 
+  <!-- Delete Confirmation Modal -->
+  <div id="deleteConfirmModal" class="sub-modal-backdrop" style="display:none;" onclick="if(event.target===this)closeDeleteModal()">
+    <div class="sub-modal-box">
+      <div class="sub-modal-icon">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <div class="sub-modal-title">Remove Subtitle?</div>
+      <div class="sub-modal-desc" id="deleteModalDesc">
+        Are you sure you want to remove this Sinhala subtitle? This will immediately unpublish it from the HackyMax player.
+      </div>
+      <div class="sub-modal-actions">
+        <button type="button" class="btn-modal-cancel" onclick="closeDeleteModal()">Cancel</button>
+        <button type="button" id="confirmDeleteBtn" class="btn-modal-danger" onclick="executeDeleteSubtitle()">
+          <i class="fa-solid fa-trash-can" style="margin-right:6px;"></i> Yes, Remove Subtitle
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="toast-msg"></div>
 
   <script>
     // ── Global State ──────────────────────────────────────────────────────────
     let currentUser = null;
+    let currentUserRole = 'contributor';
+    let allRecentUploads = [];
+    let currentCatalogFilter = 'all';
+    let pendingDeleteKey = null;
+    let pendingDeleteTitle = '';
     let selectedTitle = null;
     let selectedFile = null;
     let searchDebounceTimer = null;
 
     const TOKEN_KEY = 'hackymax_sub_token';
     const USER_KEY = 'hackymax_sub_user';
+
+    // ── Permission Check ──────────────────────────────────────────────────────
+    function canUserDelete(uploader) {
+      if (!currentUser) return false;
+      const u = currentUser.trim().toLowerCase();
+      // 'hacky' username or admin role can delete anyone's subtitle
+      if (u === 'hacky' || currentUserRole === 'admin') return true;
+      // Regular contributors can only remove subtitles that THEY uploaded
+      return (uploader || '').trim().toLowerCase() === u;
+    }
 
     // ── Initialization ────────────────────────────────────────────────────────
     window.addEventListener('DOMContentLoaded', async () => {
@@ -1455,8 +1742,7 @@
           if (res.ok) {
             const data = await res.json();
             if (data.authenticated) {
-              setLoggedIn(data.user, token);
-              loadRecentUploads();
+              setLoggedIn(data.user, token, data.role);
               return;
             }
           }
@@ -1466,29 +1752,42 @@
     });
 
     // ── Auth Handling ─────────────────────────────────────────────────────────
-    function setLoggedIn(user, token) {
+    function setLoggedIn(user, token, role = 'contributor') {
       currentUser = user;
+      currentUserRole = (user && user.toLowerCase() === 'hacky') ? 'admin' : (role || 'contributor');
       localStorage.setItem(TOKEN_KEY, token);
       localStorage.setItem(USER_KEY, user);
+      localStorage.setItem('hackymax_sub_role', currentUserRole);
 
       document.getElementById('authView').style.display = 'none';
       document.getElementById('dashboardView').style.display = 'flex';
 
+      const isHackyAdmin = currentUser.toLowerCase() === 'hacky' || currentUserRole === 'admin';
+      const adminBadge = document.getElementById('hackyAdminBadge');
+      if (adminBadge) {
+        adminBadge.style.display = isHackyAdmin ? 'inline-flex' : 'none';
+      }
+
       document.getElementById('headerUserActions').innerHTML = `
-        <div class="user-pill">
-          <span class="dot"></span>
-          <span>👤 ${user}</span>
+        <div class="user-pill ${isHackyAdmin ? 'admin-pill' : ''}">
+          <span class="dot" style="${isHackyAdmin ? 'background:var(--gold); box-shadow:0 0 10px var(--gold);' : ''}"></span>
+          <span>${isHackyAdmin ? '👑' : '👤'} ${user}${isHackyAdmin ? ' (Master Admin)' : ''}</span>
         </div>
         <button class="btn-secondary" onclick="handleLogout()">Sign Out</button>
       `;
 
       loadRecentUploads();
+      if (selectedTitle) {
+        checkSubtitleStatus();
+      }
     }
 
     function setLoggedOut() {
       currentUser = null;
+      currentUserRole = 'contributor';
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
+      localStorage.removeItem('hackymax_sub_role');
 
       document.getElementById('authView').style.display = 'block';
       document.getElementById('dashboardView').style.display = 'none';
@@ -1496,6 +1795,9 @@
       document.getElementById('headerUserActions').innerHTML = `
         <span style="font-size:0.85rem; color:var(--text-muted);">Guest Mode</span>
       `;
+
+      const adminBadge = document.getElementById('hackyAdminBadge');
+      if (adminBadge) adminBadge.style.display = 'none';
     }
 
     async function handleLogin(e) {
@@ -1518,7 +1820,7 @@
 
         if (res.ok && data.success) {
           showToast(`Welcome back, ${data.user}!`);
-          setLoggedIn(data.user, data.token);
+          setLoggedIn(data.user, data.token, data.role);
         } else {
           showToast(data.error || 'Invalid credentials. Please try again.');
         }
@@ -1570,7 +1872,7 @@
       dropdown.innerHTML = valid.map(item => {
         const title = item.title || item.name || 'Untitled';
         const year = (item.release_date || item.first_air_date || '').slice(0, 4) || 'N/A';
-        const poster = item.poster_path ? `https://image.tmdb.org/t/p/w92${item.poster_path}` : 'logo.png';
+        const poster = item.poster_path ? `/img/w92${item.poster_path}` : 'logo.png';
         const isTv = item.media_type === 'tv';
 
         return `
@@ -1607,7 +1909,7 @@
       document.getElementById('tmdbSearchInput').value = item.title || item.name;
 
       const isTv = item.media_type === 'tv';
-      const poster = item.poster_path ? `https://image.tmdb.org/t/p/w185${item.poster_path}` : 'logo.png';
+      const poster = item.poster_path ? `/img/w185${item.poster_path}` : 'logo.png';
       const year = (item.release_date || item.first_air_date || '').slice(0, 4);
 
       document.getElementById('selPoster').src = poster;
@@ -1659,10 +1961,19 @@
           const playUrl = isTv
             ? `/?s=${selectedTitle.id}&season=${season}&episode=${episode}&play=1`
             : `/?m=${selectedTitle.id}&play=1`;
+
+          const userCanRemove = canUserDelete(data.item.uploader);
+          const safeTitle = escapeJs(data.item.title || selectedTitle.title || selectedTitle.name || 'Subtitle');
+
           actionWrap.innerHTML = `
             <a href="${playUrl}" target="_blank" class="btn-test-play">
               <span><i class="fa-solid fa-play" style="margin-right:6px;"></i> Test Playback</span>
             </a>
+            ${userCanRemove ? `
+              <button type="button" class="btn-delete-sub" onclick="openDeleteModal('${data.key}', '${safeTitle}')" title="Remove this subtitle">
+                <i class="fa-solid fa-trash-can" style="margin-right:6px;"></i> Remove Subtitle
+              </button>
+            ` : ''}
           `;
         } else {
           banner.className = 'status-banner not-exists';
@@ -1912,110 +2223,251 @@
       }
     }
 
-    // ── Load Recent Uploads Table ─────────────────────────────────────────────
-    async function loadRecentUploads() {
-      try {
-        const res = await fetch('/api/sub-catalog?recent=1');
-        if (!res.ok) return;
-        const data = await res.json();
-        const tbody = document.getElementById('recentTableBody');
+    // ── Table Filtering & Subtitle Management ────────────────────────────────
+    function escapeJs(str) {
+      if (!str) return '';
+      return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
 
-        if (!data.recent || data.recent.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:2rem;">No recent uploads found.</td></tr>';
-          return;
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function setCatalogFilter(filter) {
+      currentCatalogFilter = filter;
+      const btnAll = document.getElementById('tabFilterAll');
+      const btnMine = document.getElementById('tabFilterMine');
+      if (btnAll && btnMine) {
+        if (filter === 'all') {
+          btnAll.classList.add('active');
+          btnMine.classList.remove('active');
+        } else {
+          btnMine.classList.add('active');
+          btnAll.classList.remove('active');
         }
+      }
+      renderRecentTable();
+    }
 
-        tbody.innerHTML = data.recent.map(item => {
-          const isTv = item.mediaType === 'tv';
-          const se = isTv && item.season ? ` S${item.season} E${item.episode}` : '';
-          const date = item.uploadedAt ? new Date(item.uploadedAt).toLocaleDateString() : 'System';
+    function renderRecentTable() {
+      const tbody = document.getElementById('recentTableBody');
+      if (!tbody) return;
 
-          return `
-            <tr>
-              <td>
-                <strong>${item.title || item.key}</strong>
-                ${se ? `<span style="color:var(--gold); font-size:0.8rem; margin-left:4px;">${se}</span>` : ''}
-                <div style="font-size:0.75rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">ID: ${item.tmdbId || item.key}</div>
-              </td>
-              <td><span class="type-pill ${isTv ? 'tv' : 'movie'}">${isTv ? 'TV' : 'MOVIE'}</span></td>
-              <td><span class="file-ext-badge">${(item.format || 'srt').toUpperCase()}</span></td>
-              <td>${item.uploader || 'Admin'}</td>
-              <td><span class="status-badge-active">Active</span></td>
-              <td>
+      let list = allRecentUploads;
+      if (currentCatalogFilter === 'mine') {
+        const u = (currentUser || '').trim().toLowerCase();
+        list = list.filter(item => (item.uploader || '').trim().toLowerCase() === u);
+      }
+
+      if (!list || list.length === 0) {
+        const emptyMsg = currentCatalogFilter === 'mine'
+          ? "You haven't uploaded any subtitles yet."
+          : 'No subtitles found in catalog.';
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:2rem;">${emptyMsg}</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(item => {
+        const isTv = item.mediaType === 'tv';
+        const se = isTv && item.season ? ` S${item.season} E${item.episode}` : '';
+        const isOwner = currentUser && (item.uploader || '').trim().toLowerCase() === currentUser.trim().toLowerCase();
+        const userCanRemove = canUserDelete(item.uploader);
+        const safeTitle = escapeJs(item.title || item.key);
+
+        return `
+          <tr>
+            <td>
+              <strong>${escapeHtml(item.title || item.key)}</strong>
+              ${se ? `<span style="color:var(--gold); font-size:0.8rem; margin-left:4px;">${se}</span>` : ''}
+              <div style="font-size:0.75rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace;">ID: ${item.tmdbId || item.key}</div>
+            </td>
+            <td><span class="type-pill ${isTv ? 'tv' : 'movie'}">${isTv ? 'TV' : 'MOVIE'}</span></td>
+            <td><span class="file-ext-badge">${(item.format || 'srt').toUpperCase()}</span></td>
+            <td>
+              <span class="uploader-tag ${isOwner ? 'is-self' : ''}">
+                ${escapeHtml(item.uploader || 'Admin')}
+              </span>
+            </td>
+            <td><span class="status-badge-active">Active</span></td>
+            <td>
+              <div style="display:flex; align-items:center; gap:8px;">
                 <a href="${isTv ? `/?s=${item.tmdbId || item.key}&season=${item.season || 1}&episode=${item.episode || 1}&play=1` : `/?m=${item.tmdbId || item.key}&play=1`}" target="_blank" class="btn-test-play" style="padding:4px 10px; font-size:0.75rem;">
                   <i class="fa-solid fa-play" style="margin-right:4px;"></i> Play
                 </a>
-              </td>
-            </tr>
-          `;
-        }).join('');
-
-        // Also refresh Top Contributors Leaderboard
-        loadLeaderboard();
-      } catch (_) {}
+                ${userCanRemove ? `
+                  <button type="button" class="btn-delete-row" title="Remove Subtitle" onclick="openDeleteModal('${item.key}', '${safeTitle}')">
+                    <i class="fa-solid fa-trash-can"></i> Remove
+                  </button>
+                ` : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
-    // ── Load Top Contributors Leaderboard ─────────────────────────────────────
-    async function loadLeaderboard() {
+    // ── Load Subtitle Catalog & Feed ──────────────────────────────────────────
+    async function loadRecentUploads() {
       try {
         const res = await fetch('/api/sub-catalog?all=1');
         if (!res.ok) return;
         const data = await res.json();
-        const grid = document.getElementById('leaderboardGrid');
-        const countBadge = document.getElementById('totalContributorsCount');
-        if (!grid || !data.catalog) return;
+        if (!data.catalog) return;
 
-        // Tally counts per uploader
-        const counts = {};
-        Object.values(data.catalog).forEach(item => {
-          let u = (item.uploader || 'Anonymous').trim();
-          counts[u] = (counts[u] || 0) + 1;
-        });
+        const list = Object.entries(data.catalog).map(([k, item]) => ({
+          key: k,
+          ...item
+        })).sort((a, b) => (b.uploadedAt || 0) - (a.uploadedAt || 0));
 
-        // Sort descending by count, then alphabetically
-        const sorted = Object.entries(counts).sort((a, b) => {
-          if (b[1] !== a[1]) return b[1] - a[1];
-          return a[0].localeCompare(b[0]);
-        });
+        allRecentUploads = list;
 
-        if (countBadge) {
-          countBadge.textContent = `${sorted.length} Contributors Ranked`;
+        const allCountEl = document.getElementById('allSubCount');
+        const myCountEl = document.getElementById('mySubCount');
+        if (allCountEl) allCountEl.textContent = list.length;
+        if (myCountEl) {
+          const u = (currentUser || '').trim().toLowerCase();
+          const myCount = list.filter(i => (i.uploader || '').trim().toLowerCase() === u).length;
+          myCountEl.textContent = myCount;
         }
 
-        if (sorted.length === 0) {
-          grid.innerHTML = '<div style="color:var(--text-muted); padding:1rem; grid-column: 1/-1;">No contributor uploads yet.</div>';
-          return;
-        }
-
-        grid.innerHTML = sorted.map(([name, count], index) => {
-          const rank = index + 1;
-          const rankClass = rank === 1 ? 'rank-1' : (rank === 2 ? 'rank-2' : (rank === 3 ? 'rank-3' : ''));
-          const rankMedal = rank === 1 ? '🥇' : (rank === 2 ? '🥈' : (rank === 3 ? '🥉' : ''));
-          const initial = (name || 'U').charAt(0).toUpperCase();
-          const isSystem = name.toLowerCase() === 'system';
-          const roleText = rank === 1 ? '👑 Top Contributor' : (isSystem ? 'Official System' : `Rank #${rank} Contributor`);
-
-          return `
-            <div class="leaderboard-card ${rankClass}">
-              <div class="rank-number-badge">${rankMedal || rank}</div>
-              <div class="uploader-avatar">${initial}</div>
-              <div class="uploader-meta">
-                <div class="uploader-name" title="${name}">
-                  <span>${name}</span>
-                  ${rank === 1 ? '<i class="fa-solid fa-crown" style="color:var(--gold); font-size:0.8rem;"></i>' : ''}
-                </div>
-                <div class="uploader-role">${roleText}</div>
-              </div>
-              <div class="sub-count-pill">
-                <b>${count}</b> ${count === 1 ? 'Subtitle' : 'Subtitles'}
-              </div>
-            </div>
-          `;
-        }).join('');
+        renderRecentTable();
+        renderLeaderboard(data.catalog);
       } catch (err) {
-        console.error('[Leaderboard error]', err);
+        console.error('[loadRecentUploads error]', err);
       }
     }
+
+    // ── Load Top Contributors Leaderboard ─────────────────────────────────────
+    function renderLeaderboard(catalog) {
+      const grid = document.getElementById('leaderboardGrid');
+      const countBadge = document.getElementById('totalContributorsCount');
+      if (!grid || !catalog) return;
+
+      const counts = {};
+      Object.values(catalog).forEach(item => {
+        let u = (item.uploader || 'Anonymous').trim();
+        counts[u] = (counts[u] || 0) + 1;
+      });
+
+      const sorted = Object.entries(counts).sort((a, b) => {
+        if (b[1] !== a[1]) return b[1] - a[1];
+        return a[0].localeCompare(b[0]);
+      });
+
+      if (countBadge) {
+        countBadge.textContent = `${sorted.length} Contributors Ranked`;
+      }
+
+      if (sorted.length === 0) {
+        grid.innerHTML = '<div style="color:var(--text-muted); padding:1rem; grid-column: 1/-1;">No contributor uploads yet.</div>';
+        return;
+      }
+
+      grid.innerHTML = sorted.map(([name, count], index) => {
+        const rank = index + 1;
+        const rankClass = rank === 1 ? 'rank-1' : (rank === 2 ? 'rank-2' : (rank === 3 ? 'rank-3' : ''));
+        const rankMedal = rank === 1 ? '🥇' : (rank === 2 ? '🥈' : (rank === 3 ? '🥉' : ''));
+        const initial = (name || 'U').charAt(0).toUpperCase();
+        const isHacky = name.toLowerCase() === 'hacky';
+        const isSystem = name.toLowerCase() === 'system';
+        const roleText = isHacky ? '👑 Master Admin' : (rank === 1 ? '👑 Top Contributor' : (isSystem ? 'Official System' : `Rank #${rank} Contributor`));
+
+        return `
+          <div class="leaderboard-card ${rankClass}">
+            <div class="rank-number-badge">${rankMedal || rank}</div>
+            <div class="uploader-avatar">${initial}</div>
+            <div class="uploader-meta">
+              <div class="uploader-name" title="${escapeHtml(name)}">
+                <span>${escapeHtml(name)}</span>
+                ${(rank === 1 || isHacky) ? '<i class="fa-solid fa-crown" style="color:var(--gold); font-size:0.8rem;"></i>' : ''}
+              </div>
+              <div class="uploader-role">${roleText}</div>
+            </div>
+            <div class="sub-count-pill">
+              <b>${count}</b> ${count === 1 ? 'Subtitle' : 'Subtitles'}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ── Delete Subtitle Dialog & Execution ────────────────────────────────────
+    function openDeleteModal(key, title) {
+      pendingDeleteKey = key;
+      pendingDeleteTitle = title || key;
+      const descEl = document.getElementById('deleteModalDesc');
+      if (descEl) {
+        descEl.innerHTML = `Are you sure you want to remove the Sinhala subtitle for <strong>${escapeHtml(pendingDeleteTitle)}</strong>?<br><span style="color:var(--text-muted);font-size:0.82rem;margin-top:6px;display:inline-block;">This will immediately remove it from HackyMax player for all viewers.</span>`;
+      }
+      const modal = document.getElementById('deleteConfirmModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeDeleteModal() {
+      pendingDeleteKey = null;
+      pendingDeleteTitle = '';
+      const modal = document.getElementById('deleteConfirmModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    async function executeDeleteSubtitle() {
+      if (!pendingDeleteKey) return;
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (!token) {
+        showToast('Please sign in to perform this action');
+        closeDeleteModal();
+        return;
+      }
+
+      const btn = document.getElementById('confirmDeleteBtn');
+      const origText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right:6px;"></i> Removing…';
+
+      try {
+        const res = await fetch('/api/sub-delete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ key: pendingDeleteKey })
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Failed to remove subtitle');
+        }
+
+        showToast(`🗑️ Subtitle removed successfully!`);
+        closeDeleteModal();
+
+        // Refresh search banner if title is selected
+        if (selectedTitle) {
+          checkSubtitleStatus();
+        }
+
+        // Refresh catalog table and leaderboard
+        await loadRecentUploads();
+
+      } catch (err) {
+        showToast(`❌ Error: ${err.message}`);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = origText;
+      }
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDeleteModal();
+    });
 
     // ── Helpers ───────────────────────────────────────────────────────────────
     function formatBytes(bytes) {

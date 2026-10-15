@@ -9309,7 +9309,11 @@
       }
     }
 
-    const IMG = 'https://image.tmdb.org/t/p/';
+    const TMDB_FALLBACK_IMG = 'https://image.tmdb.org/t/p/';
+    // Cloudflare Edge CDN Image Delivery: routes image requests through Cloudflare's Anycast edge PoPs for blazing fast loading
+    const IMG = (typeof window !== 'undefined' && window.location && window.location.protocol === 'file:')
+      ? TMDB_FALLBACK_IMG
+      : '/img/';
     const COUNTRY = 'US';
 
     function slugify(text) {
@@ -9593,7 +9597,33 @@
       try { const d = await tmdb(`/${type}/${id}/credits`); return d; } catch { return null }
     }
 
-    function imgUrl(p, s = 'w500') { return p ? `${IMG}${s}${p}` : '' }
+    function imgUrl(p, s = 'w500') {
+      if (!p) return '';
+      if (typeof p === 'string' && (p.startsWith('http://') || p.startsWith('https://'))) {
+        if (p.includes('image.tmdb.org/t/p/')) {
+          return p.replace('https://image.tmdb.org/t/p/', IMG);
+        }
+        return p;
+      }
+      const cleanPath = String(p).startsWith('/') ? p : '/' + p;
+      return `${IMG}${s}${cleanPath}`;
+    }
+
+    // Automatic failover to direct TMDB origin if CDN has any localized network glitch
+    window.handleImgError = function(img) {
+      if (!img || img._hasFailedOver) return;
+      img._hasFailedOver = true;
+      if (img.src && img.src.includes('/img/')) {
+        img.src = img.src.replace(/^.*\/img\//, TMDB_FALLBACK_IMG);
+      }
+    };
+    document.addEventListener('error', (e) => {
+      const el = e.target;
+      if (el && el.tagName === 'IMG' && !el._hasFailedOver && el.src && el.src.includes('/img/')) {
+        el._hasFailedOver = true;
+        el.src = el.src.replace(/^.*\/img\//, TMDB_FALLBACK_IMG);
+      }
+    }, true);
 
     // SVG circular progress ring (r=16 → circumference ≈ 100.53)
     function buildRatingRing(vote, idSuffix, mini = false) {
@@ -9698,7 +9728,7 @@
 
       return `<div class="movie-card" tabindex="0" role="button" aria-label="${title}" data-id="${item.id}" data-type="${type}" data-providers="${providerIds.join(',')}" style="opacity:1">
     <div class="card-poster">
-      ${poster ? `<img src="${poster}" alt="${title}" loading="lazy" decoding="async" onerror="this.src=''">` :
+      ${poster ? `<img src="${poster}" alt="${title}" loading="lazy" decoding="async" onerror="handleImgError(this)">` :
           `<div style="width:100%;height:100%;background:var(--dark3);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.75rem">No Poster</div>`}
       <div class="card-overlay"></div>
       <div class="card-play"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>
@@ -10507,7 +10537,7 @@
         langRow.innerHTML = CATEGORIES_DATA.languages.map(l => {
           return `
             <div class="category-card" tabindex="0" role="button" aria-label="${l.title} · ${l.sub}" data-cat-type="language" data-cat-key="${l.code}" style="--cat-accent:${l.accent}">
-              <img src="${l.img}" alt="${l.sub}" loading="lazy" onerror="this.style.display='none'">
+              <img src="${imgUrl(l.img)}" alt="${l.sub}" loading="lazy" decoding="async" onerror="handleImgError(this)">
               <div class="category-card-overlay"></div>
               <div class="category-card-tint"></div>
               <div class="category-card-content">
@@ -10523,7 +10553,7 @@
         genreRow.innerHTML = CATEGORIES_DATA.genres.map(g => {
           return `
             <div class="category-card" tabindex="0" role="button" aria-label="${g.title} · ${g.sub}" data-cat-type="genre" data-cat-key="${g.id}" style="--cat-accent:${g.accent}">
-              <img src="${g.img}" alt="${g.title}" loading="lazy" onerror="this.style.display='none'">
+              <img src="${imgUrl(g.img)}" alt="${g.title}" loading="lazy" decoding="async" onerror="handleImgError(this)">
               <div class="category-card-overlay"></div>
               <div class="category-card-tint"></div>
               <div class="category-card-content">
@@ -11184,8 +11214,8 @@
     function _buildTrailerCard(m, trailerKey) {
       const isTV = m._mediaType === 'tv';
       const thumb = m.backdrop_path
-        ? `https://image.tmdb.org/t/p/w780${m.backdrop_path}`
-        : (m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : '');
+        ? imgUrl(m.backdrop_path, 'w780')
+        : (m.poster_path ? imgUrl(m.poster_path, 'w500') : '');
       const year = (m.release_date || m.first_air_date || '').slice(0, 4);
       const rating = m.vote_average ? m.vote_average.toFixed(1) : null;
       const labelText = isTV ? 'NEW SERIES' : 'IN THEATRES';
@@ -11200,7 +11230,7 @@
       div.dataset.genreIds = (m.genre_ids || []).join(',');
       div.innerHTML = `
         <div class="trailer-thumb" id="tthumb-${cardKey}">
-          ${thumb ? `<img src="${thumb}" alt="${m.title || m.name || ''}" loading="lazy">` : `<div style="width:100%;height:100%;background:var(--dark3)"></div>`}
+          ${thumb ? `<img src="${thumb}" alt="${m.title || m.name || ''}" loading="lazy" decoding="async" onerror="handleImgError(this)">` : `<div style="width:100%;height:100%;background:var(--dark3)"></div>`}
           <div class="trailer-play-overlay">
             <div class="trailer-play-icon">
               <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
@@ -11940,11 +11970,11 @@
         const castEl = document.getElementById('modalCast');
         if (castList.length) {
           castEl.innerHTML = castList.map(c => {
-            const imgUrl = c.profile_path
-              ? `https://image.tmdb.org/t/p/w185${c.profile_path}`
+            const avatarUrl = c.profile_path
+              ? imgUrl(c.profile_path, 'w185')
               : null;
-            const avatarHtml = imgUrl
-              ? `<div class="cast-avatar"><img src="${imgUrl}" alt="${c.name}" loading="lazy" onerror="this.parentElement.innerHTML='\uD83D\uDC64'"></div>`
+            const avatarHtml = avatarUrl
+              ? `<div class="cast-avatar"><img src="${avatarUrl}" alt="${c.name}" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML='\\uD83D\\uDC64'"></div>`
               : `<div class="cast-avatar">👤</div>`;
             return `
               <div class="cast-card" title="${c.name}${c.character ? ' as ' + c.character : ''}">
@@ -17205,7 +17235,7 @@
       // Build cards using existing buildCard (fetches watchData too)
       grid.innerHTML = wl.map(item => {
         const poster = item.poster_path
-          ? `<img src="https://image.tmdb.org/t/p/w342${item.poster_path}" alt="${item.title || item.name || ''}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;display:block">`
+          ? `<img src="${imgUrl(item.poster_path, 'w342')}" alt="${item.title || item.name || ''}" loading="lazy" decoding="async" onerror="handleImgError(this)" style="width:100%;height:100%;object-fit:cover;display:block">`
           : `<div style="width:100%;height:100%;background:var(--dark3);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.75rem">No Poster</div>`;
         const year = (item.release_date || '').slice(0, 4);
         return `

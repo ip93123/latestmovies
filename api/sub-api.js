@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { createPresignedPutUrl, createPresignedGetUrl, getR2Config, putR2Object, getR2ObjectText } from '../lib/r2-helper.js';
+import { createPresignedPutUrl, createPresignedGetUrl, getR2Config, putR2Object, getR2ObjectText, deleteR2Object } from '../lib/r2-helper.js';
 
 export const config = {
   api: {
@@ -41,6 +41,14 @@ function getContributors() {
     } catch (e) {
       console.error('[sub-auth] Error parsing SUB_CONTRIBUTORS:', e);
     }
+  }
+
+  // Ensure default accounts exist if env is unconfigured
+  if (Object.keys(map).length === 0) {
+    map['hacky'] = 'hacky2026';
+    map['admin'] = 'hackymax2026';
+    map['kalan'] = 'kalan2026';
+    map['friend1'] = 'friend123';
   }
 
   return map;
@@ -115,7 +123,8 @@ async function handleAuth(req, res) {
     const expectedPass = contributors[cleanUser];
 
     if (expectedPass && safeCompare(cleanPass, expectedPass)) {
-      const role = cleanUser === 'admin' ? 'admin' : 'contributor';
+      const isSuper = cleanUser.toLowerCase() === 'admin' || cleanUser.toLowerCase() === 'hacky';
+      const role = isSuper ? 'admin' : 'contributor';
       const sessionToken = signToken(cleanUser, role);
       return res.status(200).json({
         success: true,
@@ -442,17 +451,96 @@ async function handleUpload(req, res) {
     });
   }
 
+  if (action === 'delete') {
+    return handleDelete(req, res);
+  }
+
   return res.status(400).json({ error: 'Unknown action' });
 }
 
 // ══════════════════════════════════════════════════════════════════════════
-// 4. UNIFIED ROUTER (Routes based on req.url / req.query / body)
+// 4. DELETE / REMOVE MODULE
+// ══════════════════════════════════════════════════════════════════════════
+
+async function handleDelete(req, res) {
+  if (req.method !== 'POST' && req.method !== 'DELETE') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '') || req.body?.token || req.query?.token;
+  const verified = verifyToken(token);
+
+  if (!verified) {
+    return res.status(401).json({ error: 'Unauthorized: Please log in with contributor credentials' });
+  }
+
+  const { key, tmdbId, type, season, episode } = req.body || req.query || {};
+  let targetKey = key;
+  if (!targetKey && tmdbId) {
+    targetKey = (type === 'tv' && season && episode) ? `${tmdbId}_S${season}_E${episode}` : `${tmdbId}`;
+  }
+
+  if (!targetKey) {
+    return res.status(400).json({ error: 'Missing subtitle key or tmdbId' });
+  }
+
+  const catalog = await loadCatalogAsync();
+  const item = catalog[targetKey];
+
+  if (!item) {
+    return res.status(404).json({ error: 'Subtitle not found in catalog' });
+  }
+
+  // Permission rules:
+  // 1. 'hacky' username or admin role can delete ANY subtitle in catalog
+  // 2. Normal contributors can ONLY delete subtitles that THEY uploaded
+  const isSuperAdmin = (verified.u && verified.u.toLowerCase() === 'hacky') || verified.r === 'admin';
+  const isOwner = (item.uploader || '').trim().toLowerCase() === (verified.u || '').trim().toLowerCase();
+
+  if (!isSuperAdmin && !isOwner) {
+    return res.status(403).json({
+      error: `Permission denied: Subtitle was uploaded by "${item.uploader || 'another user'}". You can only remove subtitles you uploaded.`
+    });
+  }
+
+  // 1. Attempt Cloudflare R2 file removal
+  try {
+    const ext = item.format || 'srt';
+    const r2Key = `subtitles/${targetKey}.${ext}`;
+    await deleteR2Object({ key: r2Key });
+  } catch (err) {
+    console.warn('[sub-delete] Failed to delete file from R2:', err.message);
+  }
+
+  // 2. Attempt local file removal (if exists)
+  try {
+    const ext = item.format || 'srt';
+    const localUploadPath = path.join(process.cwd(), 'Subtitle', 'uploads', `${targetKey}.${ext}`);
+    if (fs.existsSync(localUploadPath)) {
+      fs.unlinkSync(localUploadPath);
+    }
+  } catch (_) {}
+
+  // 3. Remove entry from catalog and persist
+  delete catalog[targetKey];
+  await saveCatalog(catalog);
+
+  return res.status(200).json({
+    success: true,
+    message: `Subtitle for "${item.title || targetKey}" successfully removed.`,
+    key: targetKey
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// 5. UNIFIED ROUTER (Routes based on req.url / req.query / body)
 // ══════════════════════════════════════════════════════════════════════════
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
 
   if (req.method === 'OPTIONS') {
     return res.status(204).end();
@@ -468,6 +556,11 @@ export default async function handler(req, res) {
   // Auth routing
   if (url.includes('sub-auth') || qAction === 'auth' || bAction === 'login' || bAction === 'verify') {
     return handleAuth(req, res);
+  }
+
+  // Delete routing
+  if (url.includes('sub-delete') || qAction === 'delete' || bAction === 'delete') {
+    return handleDelete(req, res);
   }
 
   // Catalog routing

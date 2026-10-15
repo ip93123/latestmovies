@@ -26,24 +26,78 @@ export default {
       return new Response('Method Not Allowed', { status: 405 });
     }
 
-    // ── 1b. Secret Token Auth ─────────────────────────────────────────────────
+    const reqUrl = new URL(request.url);
+
+    // ── 1c. Cloudflare Edge CDN Image Proxy & Cache ───────────────────────────
+    // Fast edge-cached delivery for TMDB movie card posters, backdrops, and logos
+    const isImgPath = reqUrl.pathname.startsWith('/img/');
+    const urlMatch = reqUrl.search.match(/[?&]url=([^]*)/);
+    let targetUrlStr = urlMatch && urlMatch[1] ? urlMatch[1] : '';
+    try { if (targetUrlStr) targetUrlStr = decodeURIComponent(targetUrlStr); } catch (_) {}
+
+    const isTmdbImage = isImgPath || (targetUrlStr && (targetUrlStr.includes('image.tmdb.org') || /\.(jpe?g|png|webp|avif)$/i.test(targetUrlStr)));
+
+    if (isTmdbImage) {
+      let imgTarget = targetUrlStr;
+      if (isImgPath) {
+        const cleanPath = reqUrl.pathname.replace(/^\/img\/?/, '');
+        imgTarget = `https://image.tmdb.org/t/p/${cleanPath}`;
+      }
+
+      if (imgTarget) {
+        const cache = caches.default;
+        const cacheKey = new Request(request.url, request);
+        let cachedRes = await cache.match(cacheKey);
+        if (cachedRes) {
+          return cachedRes;
+        }
+
+        try {
+          const upstreamImg = await fetch(imgTarget, {
+            cf: { cacheTtl: 31536000, cacheEverything: true },
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+              'Accept': 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8'
+            }
+          });
+
+          if (!upstreamImg.ok) {
+            return new Response('Image not found', { status: upstreamImg.status, headers: CORS });
+          }
+
+          const imgHeaders = new Headers(CORS);
+          imgHeaders.set('Content-Type', upstreamImg.headers.get('content-type') || 'image/jpeg');
+          imgHeaders.set('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, stale-while-revalidate=604800, immutable');
+          imgHeaders.set('CF-Cache-Status', 'HIT');
+
+          const response = new Response(upstreamImg.body, {
+            status: 200,
+            headers: imgHeaders,
+          });
+
+          ctx.waitUntil(cache.put(cacheKey, response.clone()));
+          return response;
+        } catch (err) {
+          return new Response(`Image fetch failed: ${err.message}`, { status: 502, headers: CORS });
+        }
+      }
+    }
+
+    // ── 1b. Secret Token Auth for Video Streams ──────────────────────────────
     // Set API_SECRET in Cloudflare Worker env vars.
     // Vercel API appends ?_t=TOKEN to every worker URL it builds server-side.
     // HLS.js player can't send custom headers, so we use a query param instead.
     // Bots calling the worker directly without ?_t get 401 — quota protected.
     const secret = env.API_SECRET;
     if (secret) {
-      const reqUrlForAuth = new URL(request.url);
-      const token = reqUrlForAuth.searchParams.get('_t') || '';
+      const token = reqUrl.searchParams.get('_t') || '';
       if (token !== secret) {
         return new Response('Unauthorized', { status: 401, headers: CORS });
       }
     }
 
     // ── 2. Robust URL Extraction (Preserves ALL query params like internal_token) ──
-    const reqUrl = new URL(request.url);
     const fullSearch = reqUrl.search;
-    const urlMatch = fullSearch.match(/[?&]url=([^]*)/);
 
     // ?direct=1 → segments served directly from CDN (no worker bandwidth used)
     // Only the manifest itself passes through the worker — saves ~99% bandwidth!
@@ -52,11 +106,6 @@ export default {
     if (!urlMatch || !urlMatch[1]) {
       return new Response('Missing ?url= parameter', { status: 400 });
     }
-
-    let targetUrlStr = urlMatch[1];
-    try {
-      targetUrlStr = decodeURIComponent(targetUrlStr);
-    } catch (_) {}
 
     let targetUrl;
     try {
