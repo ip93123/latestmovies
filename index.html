@@ -1294,10 +1294,10 @@
     }
 
     .movie-card:hover {
-      border-color: rgba(var(--accent1), 0.45);
-      box-shadow: 0 0 0 1px rgba(var(--accent1), 0.2),
+      border-color: rgba(232, 201, 122, 0.45);
+      box-shadow: 0 0 0 1px rgba(232, 201, 122, 0.25),
         0 8px 40px rgba(0, 0, 0, 0.5),
-        0 0 var(--neon-spread) rgba(var(--accent1), 0.12);
+        0 0 var(--neon-spread) rgba(232, 201, 122, 0.2);
     }
 
     .card-poster {
@@ -1338,13 +1338,13 @@
       transform: translate(-50%, -50%) scale(0);
       width: 56px;
       height: 56px;
-      background: rgba(var(--accent1), 0.92);
+      background: var(--gold, #E8C97A);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: transform .3s cubic-bezier(.34, 1.56, .64, 1), box-shadow .3s;
-      box-shadow: 0 0 30px rgba(var(--accent1), 0.6), 0 0 60px rgba(var(--accent1), 0.2);
+      box-shadow: 0 0 30px rgba(232, 201, 122, 0.65), 0 0 60px rgba(232, 201, 122, 0.25);
     }
 
     .movie-card:hover .card-play {
@@ -4584,6 +4584,7 @@
       #topbarWatchPartyBtn svg {
         width: 16px !important;
         height: 16px !important;
+      }
 
       #playerHome {
         top: 8px !important;
@@ -7094,7 +7095,7 @@
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs #fsMouseCatcher,
     #playerContainer.idle-fs #fsMouseCatcher {
       pointer-events: auto !important;
-      cursor: default !important;
+      cursor: none !important;
       display: block !important;
       z-index: 99990 !important;
     }
@@ -7168,8 +7169,27 @@
       transform: translateY(12px) !important;
     }
 
-    /* Hide mouse cursor when idle on player container */
+    /* Auto-hide player server bar and episode navigation when idle in windowed overlay */
+    #playerOverlay.idle-fs #playerServerBar,
+    #playerOverlay.idle-fs #playerEpBar {
+      opacity: 0 !important;
+      pointer-events: none !important;
+      transform: translateY(-10px) !important;
+    }
+    #playerOverlay:not(.idle-fs) #playerServerBar,
+    #playerOverlay:not(.idle-fs) #playerEpBar {
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      transform: translateY(0) !important;
+    }
+    #playerServerBar,
+    #playerEpBar {
+      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    /* Hide mouse cursor when idle on player container and overlay */
     #playerContainer.idle-fs,
+    #playerOverlay.idle-fs,
     :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen).idle-fs {
       cursor: none !important;
     }
@@ -14441,10 +14461,7 @@
         _attachSubOverlayToActiveWrap();
         _mxsApplySubStyle();
 
-        if (!isFs && container) {
-          container.classList.remove('idle-fs');
-          clearTimeout(_fsBtnIdleTimer);
-        } else if (isFs) {
+        if (container) {
           _pokePlayerFsControls();
         }
 
@@ -14812,13 +14829,16 @@
         document.getElementById('playerHome'),
         document.getElementById('playerSubSettingsBtn'),
         document.getElementById('playerFsOverlayBtn'),
-        document.getElementById('subCustomizePanel')
+        document.getElementById('subCustomizePanel'),
+        document.getElementById('playerServerBar'),
+        document.getElementById('playerEpBar')
       ];
       return elements.some(el => el && el.matches && el.matches(':hover'));
     }
 
     function _pokePlayerFsControls(forceHide) {
       const pCont = document.getElementById('playerContainer');
+      const pOverlay = document.getElementById('playerOverlay');
       if (!pCont) return;
 
       clearTimeout(_fsBtnIdleTimer);
@@ -14826,12 +14846,14 @@
 
       if (forceHide) {
         pCont.classList.add('idle-fs');
+        if (pOverlay) pOverlay.classList.add('idle-fs');
         if (catcher) catcher.style.pointerEvents = 'auto';
         return;
       }
 
       // Always restore controls visibility when poked
       pCont.classList.remove('idle-fs');
+      if (pOverlay) pOverlay.classList.remove('idle-fs');
       if (catcher) catcher.style.pointerEvents = 'none';
 
       // Keep controls visible while subtitle customize panel is open
@@ -14840,27 +14862,20 @@
         return;
       }
 
-      // If the video is PAUSED, keep controls visible!
-      // This synchronizes with the TV/native player overlay: when paused with play button, controls stay visible.
-      if (_isPlayerVideoPaused()) {
-        return;
-      }
+      const isPlayerOpen = !!(pOverlay && pOverlay.classList.contains('open'));
 
-      const isPlayerOpen = !!(document.getElementById('playerOverlay')?.classList.contains('open'));
-
-      // If playing, auto-hide after 6 seconds of inactivity on ALL devices (TV, PC, Mobile) and all modes
+      // Auto-hide after 6 seconds of inactivity on ALL devices (TV, PC, Mobile) and all modes
       if (isPlayerOpen) {
         _fsBtnIdleTimer = setTimeout(() => {
           const sp = document.getElementById('subCustomizePanel');
           if (sp && sp.classList.contains('open')) return;
-          // Never hide while video is paused!
-          if (_isPlayerVideoPaused()) return;
-          // Never hide while cursor is hovering on controls
+          // Never hide while cursor is actively hovering on controls
           if (_isOverlayControlsHovered()) {
             _pokePlayerFsControls();
             return;
           }
           pCont.classList.add('idle-fs');
+          if (pOverlay) pOverlay.classList.add('idle-fs');
           const c = document.getElementById('fsMouseCatcher');
           if (c) c.style.pointerEvents = 'auto';
         }, 6000); // 6 seconds inactivity auto-hide
@@ -14868,14 +14883,12 @@
     }
 
     // Called when video play/pause changes (from iframe postMessage or native video)
+    let _lastReportedPlaybackState = null;
     function _onPlayerPlaybackStateChange(state) {
-      if (state === 'pause' || state === 'ended') {
-        // Paused -> show controls and keep them visible!
-        _pokePlayerFsControls();
-      } else if (state === 'play' || state === 'playing') {
-        // Playing -> wake controls and start auto-hide timer (fades away after 6s)
-        _pokePlayerFsControls();
-      }
+      const normState = (state === 'playing' || state === 'play') ? 'play' : (state === 'pause' || state === 'ended') ? 'pause' : state;
+      if (normState === _lastReportedPlaybackState) return; // Prevent continuous timeupdate loops!
+      _lastReportedPlaybackState = normState;
+      _pokePlayerFsControls();
     }
     window._onPlayerPlaybackStateChange = _onPlayerPlaybackStateChange;
 
@@ -14903,13 +14916,15 @@
     });
 
     // Keep controls visible while user is actively hovering on buttons
-    ['playerClose', 'topbarWatchPartyBtn', 'subToggleBtn', 'playerSubSettingsBtn', 'playerFsOverlayBtn', 'subCustomizePanel'].forEach(id => {
+    ['playerClose', 'topbarWatchPartyBtn', 'subToggleBtn', 'playerSubSettingsBtn', 'playerFsOverlayBtn', 'subCustomizePanel', 'playerServerBar', 'playerEpBar'].forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
       el.addEventListener('mouseenter', () => {
         clearTimeout(_fsBtnIdleTimer);
         const pCont = document.getElementById('playerContainer');
         if (pCont) pCont.classList.remove('idle-fs');
+        const pOverlay = document.getElementById('playerOverlay');
+        if (pOverlay) pOverlay.classList.remove('idle-fs');
       });
       el.addEventListener('mouseleave', () => {
         _pokePlayerFsControls();
@@ -15816,6 +15831,22 @@
       }
       const wasAlreadyOpen = overlay.classList.contains('open');
       overlay.classList.add('open');
+      overlay.classList.remove('idle-fs');
+
+      // Reset subtitle customize panel state on opening player
+      const subPanelEl = document.getElementById('subCustomizePanel');
+      if (subPanelEl) {
+        subPanelEl.classList.remove('open');
+        subPanelEl.setAttribute('aria-hidden', 'true');
+        const pContEl = document.getElementById('playerContainer');
+        if (pContEl) {
+          pContEl.classList.remove('sub-panel-open');
+          pContEl.classList.remove('idle-fs');
+        }
+      }
+
+      // Start 6s idle auto-hide timer immediately
+      _pokePlayerFsControls();
 
       const curLabel = labels && labels[_activeServerIndex] ? labels[_activeServerIndex] : 'Server';
       window._currentActiveServer = curLabel;
@@ -15973,6 +16004,7 @@
       }
 
       _autoLoadIframeSinhalaSub();
+      _pokePlayerFsControls();
     }
 
     document.getElementById('playerClose').addEventListener('click', () => {
@@ -15991,7 +16023,11 @@
       const isTvDevice = (window.DEVICE && window.DEVICE.isTV) || _tvMode || document.body.classList.contains('tv-mode') || document.body.classList.contains('device-tv');
       const onPlayerClosed = () => {
         _setPlayerLoading(false);
-        document.getElementById('playerOverlay').classList.remove('open');
+        const pOverlay = document.getElementById('playerOverlay');
+        if (pOverlay) {
+          pOverlay.classList.remove('open');
+          pOverlay.classList.remove('idle-fs');
+        }
         const frame = document.getElementById('playerFrame');
         frame.src = '';
         frame.style.display = ''; // restore visibility for next open
@@ -16011,7 +16047,15 @@
         }
         clearTimeout(_fsBtnIdleTimer);
         const pCont = document.getElementById('playerContainer');
-        if (pCont) pCont.classList.remove('idle-fs');
+        if (pCont) {
+          pCont.classList.remove('idle-fs');
+          pCont.classList.remove('sub-panel-open');
+        }
+        const sp = document.getElementById('subCustomizePanel');
+        if (sp) {
+          sp.classList.remove('open');
+          sp.setAttribute('aria-hidden', 'true');
+        }
         const catcher = document.getElementById('fsMouseCatcher');
         if (catcher) catcher.style.pointerEvents = 'none';
         // Restore modal & category view overlays display
@@ -16539,23 +16583,10 @@
     }
 
     async function applyDynamicColors(imgElOrSrc) {
-      // Canvas pixel readback (getImageData) blocks the main thread — skip on TV
-      if (window.DEVICE && window.DEVICE.isTV) return;
-      if (!imgElOrSrc) return;
-      try {
-        let img;
-        if (typeof imgElOrSrc === 'string') {
-          img = new Image();
-          img.src = imgElOrSrc;
-          await new Promise(r => { img.onload = r; img.onerror = r; });
-        } else {
-          img = imgElOrSrc;
-        }
-        const { c1, c2 } = await extractColors(img);
-        const root = document.documentElement.style;
-        root.setProperty('--accent1', `${c1[0]}, ${c1[1]}, ${c1[2]}`);
-        root.setProperty('--accent2', `${c2[0]}, ${c2[1]}, ${c2[2]}`);
-      } catch { /* CORS blocked — silently keep existing accent colors */ }
+      // Keep core brand theme color anchored to signature Gold Yellow (232, 201, 122)
+      // Do not allow arbitrary movie poster colors to turn the site, play buttons or hover shadows red
+      const root = document.documentElement.style;
+      root.setProperty('--accent1', '232, 201, 122');
     }
 
     // TABS
