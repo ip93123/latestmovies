@@ -21,7 +21,7 @@ export default async function handler(req, res) {
   const hasSinhalaSub = hasSub === '1' || SINHALA_SUB_KEYS.has(String(id)) || SINHALA_SUB_KEYS.has(subKey);
 
   let urls = [];
-  const labels = ['HackyMax', 'Nebula', 'Stellar', 'Nova', 'Vortex', 'Infinity', 'Spark', 'VidZee'];
+  const labels = ['HackyMax', 'Nebula', 'Stellar', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Sonic'];
 
   if (type === 'tv') {
     if (hasSinhalaSub) {

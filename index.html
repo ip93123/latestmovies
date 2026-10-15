@@ -5065,7 +5065,9 @@
       outline-offset: 1px;
     }
 
-    /* ── VidZee Server button (Electric Cyan / Ocean Teal theme) ────── */
+    /* ── Sonic (5.1 Surround Sound) Server button (Electric Cyan / Ocean Teal theme) ────── */
+    .player-server-btn.sonic-btn,
+    .modal-stream-pill.sonic-btn,
     .player-server-btn.vidzee-btn,
     .modal-stream-pill.vidzee-btn {
       background: linear-gradient(135deg, #06B6D4 0%, #0891B2 100%) !important;
@@ -5076,17 +5078,27 @@
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
       box-shadow: none !important;
     }
+    .player-server-btn.sonic-btn:hover,
+    .modal-stream-pill.sonic-btn:hover,
     .player-server-btn.vidzee-btn:hover,
     .modal-stream-pill.vidzee-btn:hover {
       box-shadow: none !important;
       transform: translateY(-1px);
       filter: brightness(1.1);
     }
+    .player-server-btn.sonic-btn.active,
     .player-server-btn.vidzee-btn.active {
       box-shadow: none !important;
       border-color: #67E8F9 !important;
       outline: 2px solid rgba(103, 232, 249, 0.5) !important;
       outline-offset: 1px;
+    }
+    .fa-speakers::before,
+    .fa-speaker::before {
+      content: "\f028" !important;
+      font-family: "Font Awesome 6 Free" !important;
+      font-weight: 900 !important;
+      color: #ffffff !important;
     }
 
     /* ── Silver Theme for Non-PostMessage Fallback Players ─────────── */
@@ -11584,7 +11596,7 @@
     function getServerBtnClass(label) {
       const lbl = (label || '').toLowerCase();
       if (lbl.includes('hackymax')) return ' hackymax-btn';
-      if (lbl.includes('vidzee')) return ' vidzee-btn';
+      if (lbl.includes('sonic') || lbl.includes('vidzee')) return ' sonic-btn vidzee-btn';
       if (lbl.includes('vortex') || lbl.includes('videasy')) return ' vortex-btn';
       if (lbl.includes('infinity')) return ' infinity-btn';
       if (lbl.includes('spark') || lbl.includes('vidspark')) return ' spark-btn';
@@ -11595,6 +11607,15 @@
       if (lbl.includes('autoembed')) return ' autoembed-btn';
       if (lbl.includes('titan') || lbl.includes('2embed')) return ' twoembed-btn';
       return ' silver-btn';
+    }
+
+    function formatServerLabel(label) {
+      if (!label) return '';
+      const raw = String(label);
+      if (raw.toLowerCase().includes('sonic')) {
+        return `Sonic <i class="fa-sharp fa-solid fa-speakers" style="color:#ffffff;margin-left:4px;"></i>`;
+      }
+      return _escHtml(raw);
     }
 
     async function getModalServerUrls(id, type, season, episode) {
@@ -11644,7 +11665,7 @@
             `https://player.vidzee.wtf/embed/tv/${id}/${s}/${e}`
           ];
         }
-        labels = ['HackyMax', 'Nebula', 'Stellar', 'Nova', 'Vortex', 'Infinity', 'Spark', 'VidZee'];
+        labels = ['HackyMax', 'Nebula', 'Stellar', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Sonic'];
       } else {
         if (hasSinhalaSub) {
           urls = [
@@ -11669,7 +11690,7 @@
             `https://player.vidzee.wtf/embed/movie/${id}`
           ];
         }
-        labels = ['HackyMax', 'Nebula', 'Stellar', 'Nova', 'Vortex', 'Infinity', 'Spark', 'VidZee'];
+        labels = ['HackyMax', 'Nebula', 'Stellar', 'Nova', 'Vortex', 'Infinity', 'Spark', 'Sonic'];
       }
       return { urls, labels };
     }
@@ -12050,8 +12071,9 @@
           playBtnsHtml += visibleUrls.map((u, i) => {
             const lbl = allLabels[i] || `Server ${i + 1}`;
             const cls = getServerBtnClass(lbl);
+            const displayLbl = formatServerLabel(lbl);
             const style = cls ? 'border:none;cursor:pointer' : `background:${colors[i % colors.length] || '#6B7280'};color:#fff;border:none;cursor:pointer`;
-            return `<button class="modal-stream-pill modal-play-btn${cls}" data-server="${i}" style="${style}" title="${lbl}"><span class="pill-label">${lbl}</span></button>`;
+            return `<button class="modal-stream-pill modal-play-btn${cls}" data-server="${i}" style="${style}" title="${lbl}"><span class="pill-label">${displayLbl}</span></button>`;
           }).join('');
 
           if (hiddenUrls.length > 0) {
@@ -12060,8 +12082,9 @@
               const idx = i + maxVisible;
               const lbl = allLabels[idx] || `Server ${idx + 1}`;
               const cls = getServerBtnClass(lbl);
+              const displayLbl = formatServerLabel(lbl);
               const style = cls ? 'border:none;cursor:pointer;display:none' : `background:${colors[idx % colors.length] || '#6B7280'};color:#fff;border:none;cursor:pointer;display:none`;
-              return `<button class="modal-stream-pill modal-play-btn extra-server-btn${cls}" data-server="${idx}" style="${style}" title="${lbl}"><span class="pill-label">${lbl}</span></button>`;
+              return `<button class="modal-stream-pill modal-play-btn extra-server-btn${cls}" data-server="${idx}" style="${style}" title="${lbl}"><span class="pill-label">${displayLbl}</span></button>`;
             }).join('');
           }
 
@@ -12560,7 +12583,8 @@
       const curServer = (window._currentActiveServer || '').toLowerCase();
       const frame = document.getElementById('playerFrame');
       const curSrc = (frame && frame.src) ? frame.src.toLowerCase() : '';
-      return curServer.includes('vidzee') ||
+      return curServer.includes('sonic') ||
+             curServer.includes('vidzee') ||
              curSrc.includes('vidzee.wtf');
     }
     window._isVidZeeServer = _isVidZeeServer;
@@ -15326,9 +15350,10 @@
           bar.innerHTML = allUrls.map((u, i) => {
             const lbl = labels[i] || `Server ${i + 1}`;
             const extraClass = getServerBtnClass(lbl);
+            const displayLbl = formatServerLabel(lbl);
             const activeClass = i === 0 ? ' active' : '';
             const fallbackStyle = extraClass ? '' : ` style="background:${colors[i % colors.length] || '#6B7280'};color:#fff;border-color:transparent"`;
-            return `<button class="player-server-btn${extraClass}${activeClass}"${fallbackStyle} data-server-index="${i}">${lbl}</button>`;
+            return `<button class="player-server-btn${extraClass}${activeClass}"${fallbackStyle} data-server-index="${i}">${displayLbl}</button>`;
           }).join('');
           bar.querySelectorAll('.player-server-btn').forEach((btn, i) => {
             btn.addEventListener('click', () => {
@@ -15609,9 +15634,10 @@
         bar.innerHTML = allUrls.map((u, i) => {
           const lbl = labels ? labels[i] : `Server ${i + 1}`;
           const extraClass = getServerBtnClass(lbl);
+          const displayLbl = formatServerLabel(lbl);
           const activeClass = i === _activeServerIndex ? ' active' : '';
           const fallbackStyle = extraClass ? '' : ` style="background:${colors[i % colors.length] || '#6B7280'};color:#fff;border-color:transparent"`;
-          return `<button class="player-server-btn${extraClass}${activeClass}"${fallbackStyle} data-server-index="${i}">${lbl}</button>`;
+          return `<button class="player-server-btn${extraClass}${activeClass}"${fallbackStyle} data-server-index="${i}">${displayLbl}</button>`;
         }).join('');
         bar.querySelectorAll('.player-server-btn').forEach((btn, i) => {
           btn.addEventListener('click', () => {
@@ -15628,7 +15654,7 @@
       const curLabel = labels && labels[_activeServerIndex] ? labels[_activeServerIndex] : 'Server';
       window._currentActiveServer = curLabel;
       window._currentActiveServerUrl = url;
-      const isInitAutoLive = curLabel.toLowerCase().includes('hackymax') || curLabel.toLowerCase().includes('infinity') || curLabel.toLowerCase().includes('spark') || curLabel.toLowerCase().includes('nebula') || curLabel.toLowerCase().includes('vortex') || curLabel.toLowerCase().includes('cinezo') || curLabel.toLowerCase().includes('stellar');
+      const isInitAutoLive = curLabel.toLowerCase().includes('sonic') || curLabel.toLowerCase().includes('vidzee') || curLabel.toLowerCase().includes('hackymax') || curLabel.toLowerCase().includes('infinity') || curLabel.toLowerCase().includes('spark') || curLabel.toLowerCase().includes('nebula') || curLabel.toLowerCase().includes('vortex') || curLabel.toLowerCase().includes('cinezo') || curLabel.toLowerCase().includes('stellar');
       _markSubSyncAutoLive(isInitAutoLive);
 
       // ── Auto-load & auto-start Sinhala subtitle for iframe (VidLink, etc.) ────────
@@ -15755,7 +15781,7 @@
           episode: window._currentPlayingEpisode || (typeof _selectedEpisode !== 'undefined' && _selectedEpisode) || 1
         });
       }
-      const isAutoplayServer = url.includes('vidzee') || sName.toLowerCase().includes('vidzee') || url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || url.includes('vidstuck') || url.includes('nebula') || url.includes('videasy') || url.includes('vortex') || url.includes('cinezo') || url.includes('stellar') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('videasy') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('cinezo') || sName.toLowerCase().includes('stellar');
+      const isAutoplayServer = url.includes('vidzee') || sName.toLowerCase().includes('sonic') || sName.toLowerCase().includes('vidzee') || url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || url.includes('vidstuck') || url.includes('nebula') || url.includes('videasy') || url.includes('vortex') || url.includes('cinezo') || url.includes('stellar') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('videasy') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('cinezo') || sName.toLowerCase().includes('stellar');
       window._externalCurrentTime = 0;
       window._lastExternalMsgTime = null;
       window._externalIsPaused = !isAutoplayServer;
@@ -15766,7 +15792,7 @@
       _subStartTime = Date.now();
       _lastIframeSubCueText = null;
 
-      const isAutoLive = sName.toLowerCase().includes('vidzee') || url.includes('vidzee') || sName.toLowerCase().includes('hackymax') || sName.toLowerCase().includes('infinity') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck') || sName.toLowerCase().includes('cinezo') || sName.toLowerCase().includes('stellar');
+      const isAutoLive = sName.toLowerCase().includes('sonic') || sName.toLowerCase().includes('vidzee') || url.includes('vidzee') || sName.toLowerCase().includes('hackymax') || sName.toLowerCase().includes('infinity') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck') || sName.toLowerCase().includes('cinezo') || sName.toLowerCase().includes('stellar');
       _markSubSyncAutoLive(isAutoLive);
 
       const rawSubId = _currentModalId || window._currentPlayingId || (window._currentModalItem && window._currentModalItem.id) || new URLSearchParams(window.location.search).get('m') || new URLSearchParams(window.location.search).get('s');
