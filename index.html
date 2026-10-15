@@ -3758,43 +3758,91 @@
       position: static !important;
       display: inline-flex !important;
       align-items: center !important;
-      gap: 6px !important;
-      padding: 5px 12px !important;
-      height: 32px !important;
+      justify-content: space-between !important;
+      gap: 8px !important;
+      padding: 3px 4px 3px 10px !important;
+      height: 30px !important;
       border-radius: 9999px !important;
-      font-size: 0.8rem !important;
-      font-weight: 700 !important;
       cursor: pointer !important;
-      font-family: 'Inter', sans-serif !important;
-      background: rgba(232, 201, 122, 0.12) !important;
-      border: 1px solid rgba(232, 201, 122, 0.35) !important;
-      color: var(--gold) !important;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+      background: rgba(255, 255, 255, 0.06) !important;
+      border: 1px solid rgba(255, 255, 255, 0.14) !important;
+      color: #e5e7eb !important;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
       box-shadow: none !important;
       white-space: nowrap !important;
+      user-select: none !important;
     }
     .sub-panel-toggle-btn:hover,
     #subToggleBtn:hover {
-      background: rgba(232, 201, 122, 0.22) !important;
-      border-color: var(--gold) !important;
-      color: #ffffff !important;
-      transform: translateY(-1px) !important;
-      box-shadow: 0 0 14px rgba(232, 201, 122, 0.35) !important;
+      background: rgba(255, 255, 255, 0.1) !important;
+      border-color: rgba(232, 201, 122, 0.3) !important;
     }
     .sub-panel-toggle-btn.active,
     #subToggleBtn.active {
+      background: rgba(232, 201, 122, 0.1) !important;
+      border-color: rgba(232, 201, 122, 0.45) !important;
+      color: #ffffff !important;
+      box-shadow: 0 0 12px rgba(232, 201, 122, 0.2) !important;
+    }
+    .sub-toggle-text {
+      font-size: 0.78rem !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.02em !important;
+      color: inherit !important;
+    }
+    .sub-toggle-switch {
+      display: inline-flex !important;
+      align-items: center !important;
+      position: relative !important;
+      width: 44px !important;
+      height: 22px !important;
+      border-radius: 9999px !important;
+      background: rgba(255, 255, 255, 0.14) !important;
+      padding: 2px !important;
+      box-sizing: border-box !important;
+      transition: background 0.25s ease, box-shadow 0.25s ease !important;
+    }
+    .sub-panel-toggle-btn.active .sub-toggle-switch,
+    #subToggleBtn.active .sub-toggle-switch {
       background: linear-gradient(135deg, #E8C97A, #c9a227) !important;
-      border-color: #E8C97A !important;
+      box-shadow: 0 0 10px rgba(232, 201, 122, 0.45) !important;
+    }
+    .sub-toggle-knob {
+      position: absolute !important;
+      top: 2px !important;
+      left: 2px !important;
+      width: 18px !important;
+      height: 18px !important;
+      border-radius: 50% !important;
+      background: #9ca3af !important;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6) !important;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background 0.25s ease !important;
+      z-index: 2 !important;
+    }
+    .sub-panel-toggle-btn.active .sub-toggle-knob,
+    #subToggleBtn.active .sub-toggle-knob {
+      transform: translateX(22px) !important;
+      background: #07090F !important;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.7) !important;
+    }
+    .sub-toggle-state {
+      position: absolute !important;
+      font-size: 0.62rem !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.05em !important;
+      transition: opacity 0.2s ease, transform 0.2s ease !important;
+      user-select: none !important;
+      line-height: 1 !important;
+      top: 5px !important;
+      right: 6px !important;
+      color: rgba(255, 255, 255, 0.5) !important;
+    }
+    .sub-panel-toggle-btn.active .sub-toggle-state,
+    #subToggleBtn.active .sub-toggle-state {
+      left: 6px !important;
+      right: auto !important;
       color: #07090F !important;
-      box-shadow: 0 0 16px rgba(232, 201, 122, 0.5) !important;
-    }
-    .sub-panel-toggle-btn .sub-flag {
-      font-size: 1rem;
-      line-height: 1;
-    }
-    .sub-panel-toggle-btn .sub-toggle-text {
-      display: inline !important;
-      font-size: 0.78rem;
     }
     .sub-setting-group {
       margin-bottom: 1.15rem;
@@ -3966,8 +4014,9 @@
       .sub-customize-panel {
         bottom: 44px !important;
         right: 6px !important;
+        width: min(265px, calc(100vw - 12px)) !important;
         max-height: calc(100vh - 52px) !important;
-        padding: 0.75rem 0.95rem !important;
+        padding: 0.65rem 0.75rem !important;
       }
       .sub-setting-group {
         margin-bottom: 0.65rem !important;
@@ -4663,18 +4712,124 @@
         max-width: 95% !important;
         line-height: 1.35 !important;
       }
+      #playerContainer.sub-panel-open {
+        overflow: visible !important;
+        z-index: 100000 !important;
+      }
       :is(#playerContainer:fullscreen, #playerContainer:-webkit-full-screen, #playerContainer.is-fullscreen) .sub-customize-panel {
-        bottom: max(54px, calc(env(safe-area-inset-bottom, 8px) + 48px)) !important;
-        right: max(8px, env(safe-area-inset-right, 8px)) !important;
-        width: min(320px, calc(100vw - 16px)) !important;
-        max-height: calc(100vh - 60px) !important;
+        bottom: max(46px, calc(env(safe-area-inset-bottom, 8px) + 40px)) !important;
+        right: max(6px, env(safe-area-inset-right, 6px)) !important;
+        width: min(265px, calc(100vw - 12px)) !important;
+        max-height: calc(100vh - 54px) !important;
       }
       .sub-customize-panel {
-        bottom: 58px !important;
-        right: 6px !important;
-        width: min(300px, calc(100vw - 12px)) !important;
-        padding: 0.95rem 1rem !important;
-        border-radius: 16px !important;
+        bottom: max(46px, calc(env(safe-area-inset-bottom, 6px) + 40px)) !important;
+        right: max(6px, env(safe-area-inset-right, 6px)) !important;
+        width: min(265px, calc(100vw - 12px)) !important;
+        max-height: min(380px, calc(100vh - 54px)) !important;
+        padding: 0.6rem 0.75rem !important;
+        border-radius: 14px !important;
+      }
+      .sub-panel-top-row {
+        margin-bottom: 0.5rem !important;
+        gap: 6px !important;
+      }
+      .sub-panel-back-btn {
+        padding: 3px 8px !important;
+        font-size: 0.72rem !important;
+        height: 26px !important;
+        border-radius: 9999px !important;
+      }
+      .sub-panel-back-btn svg {
+        width: 12px !important;
+        height: 12px !important;
+      }
+      .sub-panel-toggle-btn,
+      #subToggleBtn {
+        padding: 2px 4px 2px 8px !important;
+        height: 26px !important;
+        gap: 5px !important;
+      }
+      .sub-toggle-text {
+        font-size: 0.72rem !important;
+      }
+      .sub-toggle-switch {
+        width: 38px !important;
+        height: 20px !important;
+      }
+      .sub-toggle-knob {
+        width: 16px !important;
+        height: 16px !important;
+      }
+      .sub-panel-toggle-btn.active .sub-toggle-knob,
+      #subToggleBtn.active .sub-toggle-knob {
+        transform: translateX(18px) !important;
+      }
+      .sub-toggle-state {
+        font-size: 0.56rem !important;
+        top: 4px !important;
+      }
+      .sub-setting-group {
+        margin-bottom: 0.45rem !important;
+      }
+      .sub-setting-header {
+        margin-bottom: 0.2rem !important;
+      }
+      .sub-setting-title {
+        font-size: 0.65rem !important;
+      }
+      .sub-setting-val {
+        font-size: 0.8rem !important;
+      }
+      .sub-range-slider {
+        height: 4px !important;
+        margin: 3px 0 !important;
+      }
+      .sub-range-slider::-webkit-slider-thumb {
+        width: 16px !important;
+        height: 16px !important;
+      }
+      .sub-range-slider::-moz-range-thumb {
+        width: 16px !important;
+        height: 16px !important;
+      }
+      .sub-color-row {
+        margin-top: 0.25rem !important;
+        gap: 6px !important;
+      }
+      .sub-color-preview-wrap {
+        width: 26px !important;
+        height: 26px !important;
+      }
+      .sub-rgb-boxes {
+        gap: 4px !important;
+      }
+      .sub-rgb-field {
+        padding: 2px 4px !important;
+        border-radius: 6px !important;
+        gap: 2px !important;
+      }
+      .sub-rgb-label {
+        font-size: 0.62rem !important;
+      }
+      .sub-rgb-input {
+        font-size: 0.72rem !important;
+        padding: 0 !important;
+      }
+      .sub-color-presets {
+        margin-top: 0.35rem !important;
+        gap: 4px !important;
+      }
+      .sub-preset-chip {
+        height: 16px !important;
+        min-width: 22px !important;
+        border-radius: 4px !important;
+      }
+      .sub-reset-btn {
+        margin-top: 0.35rem !important;
+        padding: 5px !important;
+        font-size: 0.72rem !important;
+        border-radius: 8px !important;
       }
       #skipIntroBtn {
         bottom: 46px !important;
@@ -4801,9 +4956,11 @@
         line-height: 1.3 !important;
       }
       .sub-customize-panel {
-        bottom: max(46px, calc(env(safe-area-inset-bottom, 6px) + 40px)) !important;
+        bottom: max(42px, calc(env(safe-area-inset-bottom, 6px) + 36px)) !important;
         right: max(8px, env(safe-area-inset-right, 8px)) !important;
-        max-height: calc(100vh - 52px) !important;
+        width: min(260px, calc(100vw - 16px)) !important;
+        max-height: calc(100vh - 46px) !important;
+        padding: 0.5rem 0.65rem !important;
       }
     }
 
@@ -7717,6 +7874,7 @@
     .device-mobile #topbarWatchPartyBtn svg {
       width: 16px !important;
       height: 16px !important;
+    }
 
     .device-mobile .player-sub-overlay-btn {
       bottom: max(6px, env(safe-area-inset-bottom, 6px)) !important;
@@ -7736,13 +7894,17 @@
       background: rgba(9, 12, 20, 0.98) !important;
       z-index: 99999 !important;
     }
+    .device-mobile #playerContainer.sub-panel-open {
+      overflow: visible !important;
+      z-index: 100000 !important;
+    }
     .device-mobile .sub-customize-panel {
-      bottom: max(54px, calc(env(safe-area-inset-bottom, 6px) + 48px)) !important;
+      bottom: max(46px, calc(env(safe-area-inset-bottom, 6px) + 40px)) !important;
       right: max(6px, env(safe-area-inset-right, 6px)) !important;
-      width: min(320px, calc(100vw - 12px)) !important;
-      max-height: calc(100vh - 60px) !important;
-      padding: 0.95rem 1rem !important;
-      border-radius: 16px !important;
+      width: min(265px, calc(100vw - 12px)) !important;
+      max-height: min(380px, calc(100vh - 54px)) !important;
+      padding: 0.6rem 0.75rem !important;
+      border-radius: 14px !important;
     }
     .device-mobile .player-server-bar {
       display: flex !important;
@@ -8870,14 +9032,17 @@
       <!-- Modern Dark Subtitle Customize Panel -->
       <div class="sub-customize-panel" id="subCustomizePanel" aria-hidden="true">
         <div class="sub-panel-top-row">
-          <button class="sub-panel-back-btn" id="subCustomizeBackBtn" type="button">
+          <button class="sub-panel-back-btn" id="subCustomizeBackBtn" type="button" title="Back to Subtitle Settings">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-            <span>Back to subtitles</span>
+            <span class="sub-back-text">Back</span>
           </button>
-          <!-- Sinhala Subtitles Toggle Button (On/Off) -->
-          <button class="sub-panel-toggle-btn" id="subToggleBtn" title="Sinhala Subtitles — Toggle On / Off">
-            <span class="sub-flag">🇱🇰</span>
-            <span class="sub-toggle-text">Sinhala Sub</span>
+          <!-- Sinhala Subtitles Toggle Switch (On/Off) -->
+          <button class="sub-panel-toggle-btn active" id="subToggleBtn" type="button" role="switch" aria-checked="true" title="Sinhala Subtitles — ON (Click to turn OFF)">
+            <span class="sub-toggle-text">Sinhala</span>
+            <span class="sub-toggle-switch">
+              <span class="sub-toggle-knob"></span>
+              <span class="sub-toggle-state">ON</span>
+            </span>
           </button>
         </div>
 
@@ -12558,8 +12723,21 @@
     const _subSyncPanel  = document.getElementById('subSyncPanel');
     const _subStartBtn   = document.getElementById('subStartBtn');
     const _subResetBtn   = document.getElementById('subResetBtn');
-    const _subStatusLine = document.getElementById('subStatusLine');
     const _subText       = document.getElementById('subText');
+
+    if (_subToggleBtn) {
+      const _syncToggleSwitchUI = () => {
+        const isAct = _subToggleBtn.classList.contains('active');
+        const stateEl = _subToggleBtn.querySelector('.sub-toggle-state');
+        if (stateEl) stateEl.textContent = isAct ? 'ON' : 'OFF';
+        _subToggleBtn.setAttribute('aria-checked', isAct ? 'true' : 'false');
+      };
+      try {
+        const obs = new MutationObserver(_syncToggleSwitchUI);
+        obs.observe(_subToggleBtn, { attributes: true, attributeFilter: ['class'] });
+      } catch (_) {}
+      _syncToggleSwitchUI();
+    }
 
     // ── Time helpers ────────────────────────────────────────────────────────
     function vttTimeToMs(ts) {
