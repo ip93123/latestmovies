@@ -171,97 +171,365 @@
       border-radius: 2px
     }
 
-    nav {
+    /* ── 7Movies Floating Nav-Pill System ────────────────────────────────── */
+    .topbar {
       position: fixed;
-      top: 0;
+      top: 16px;
       left: 0;
       right: 0;
-      z-index: 200;
+      z-index: 500;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 1.2rem 3rem;
-      background: linear-gradient(180deg, rgba(7, 9, 15, 0.98) 0%, transparent 100%);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      transition: background .3s
+      justify-content: center;
+      padding: 0 3.5vw;
+      pointer-events: none;
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    .nav-logo {
+    .nav-brand {
+      position: absolute;
+      left: 3.5vw;
+      top: 50%;
+      transform: translateY(-50%);
       display: flex;
       align-items: center;
       gap: 0.6rem;
       font-family: 'Bebas Neue', sans-serif;
-      font-size: 2.2rem;
-      letter-spacing: 4px;
+      font-size: 2.1rem;
+      letter-spacing: 3px;
+      cursor: pointer;
+      pointer-events: auto;
+      user-select: none;
+      text-decoration: none;
+      z-index: 10;
     }
 
-    .nav-logo span {
-      background: linear-gradient(135deg, var(--gold), #fff);
+    .nav-brand span {
+      background: linear-gradient(135deg, var(--gold), #ffffff);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
       line-height: 1;
-      padding-top: 4px;
-      /* Syncs optical baseline with logo */
+      padding-top: 3px;
     }
 
-    .nav-logo img {
-      width: 50px;
-      height: 40px;
+    .nav-brand img {
+      width: 44px;
+      height: 36px;
       object-fit: contain;
-      filter: drop-shadow(0 0 8px rgba(232, 201, 122, 0.4));
+      filter: drop-shadow(0 0 10px rgba(232, 201, 122, 0.45));
     }
 
-    .nav-links {
-      display: flex;
-      gap: 2rem;
-      list-style: none
+    /* Centered Floating Nav Pill */
+    .nav-pill {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      height: 48px;
+      padding: 4px 6px;
+      border-radius: 999px;
+      pointer-events: auto;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.035) 42%, rgba(8, 17, 24, 0.88));
+      background-clip: padding-box;
+      backdrop-filter: blur(16px) saturate(140%);
+      -webkit-backdrop-filter: blur(16px) saturate(140%);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      z-index: 10;
+      transition: all 0.3s ease;
     }
 
-    .nav-links a {
-      color: var(--muted);
-      text-decoration: none;
-      font-size: .85rem;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      font-weight: 500;
-      transition: color .3s
+    /* Sliding White Active Indicator */
+    .nav-indicator {
+      position: absolute;
+      top: 4px;
+      left: 0;
+      height: 40px;
+      width: 60px;
+      border-radius: 999px;
+      background: #ffffff;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), width 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform, width;
+      pointer-events: none;
+      z-index: 1;
     }
 
-    .nav-links a:hover {
-      color: var(--gold)
-    }
-
-    .nav-search {
+    .tab-links {
+      position: relative;
+      z-index: 2;
       display: flex;
       align-items: center;
-      gap: .6rem;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border);
-      border-radius: 50px;
-      padding: .45rem 1rem;
+      gap: 2px;
+    }
+
+    .nav-tab {
+      position: relative;
+      height: 40px;
+      padding: 0 16px;
+      border: none;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.82);
+      font-family: 'Inter', -apple-system, sans-serif;
+      font-size: 13.5px;
+      font-weight: 700;
       cursor: pointer;
-      transition: all .3s
+      border-radius: 999px;
+      transition: color 0.22s ease;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
     }
 
-    .nav-search:hover {
-      border-color: var(--gold)
+    .nav-tab:hover {
+      color: #ffffff;
     }
 
-    .nav-search input {
+    .nav-tab.active {
+      color: #111115 !important;
+    }
+
+    .nav-divider {
+      position: relative;
+      z-index: 2;
+      width: 1px;
+      height: 20px;
+      margin: 0 6px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .nav-actions {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav-action {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.82);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nav-action:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-1px);
+    }
+
+    /* Right Side Desktop Actions */
+    .nav-right-actions {
+      position: absolute;
+      right: 3.5vw;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      pointer-events: auto;
+      z-index: 10;
+    }
+
+    .nav-search-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 44px;
+      padding: 0 16px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02) 42%, rgba(8, 17, 24, 0.75));
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+      transition: all 0.25s ease;
+    }
+
+    .nav-search-bar:hover {
+      border-color: rgba(232, 201, 122, 0.6);
+      background: rgba(255, 255, 255, 0.14);
+      transform: translateY(-1px);
+    }
+
+    .nav-search-bar svg {
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    .nav-search-bar input {
       background: transparent;
       border: none;
       outline: none;
-      color: var(--text);
+      color: #ffffff;
       font-family: 'Inter', sans-serif;
-      font-size: .85rem;
-      width: 160px;
-      cursor: pointer
+      font-size: 13px;
+      width: 130px;
+      cursor: pointer;
     }
 
-    .nav-search input::placeholder {
-      color: var(--muted)
+    .nav-search-bar input::placeholder {
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    .nav-wp-pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 44px;
+      padding: 0 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(232, 201, 122, 0.45);
+      background: linear-gradient(135deg, rgba(232, 201, 122, 0.22), rgba(232, 201, 122, 0.08));
+      color: var(--gold, #E8C97A);
+      font-family: 'Inter', sans-serif;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+      transition: all 0.25s ease;
+    }
+
+    .nav-wp-pill-btn:hover {
+      background: linear-gradient(135deg, rgba(232, 201, 122, 0.38), rgba(232, 201, 122, 0.15));
+      border-color: var(--gold);
+      transform: translateY(-1px);
+      box-shadow: 0 12px 30px rgba(232, 201, 122, 0.25);
+    }
+
+    /* ── Mobile Layout (<= 800px) ────────────────────────────────────────── */
+    @media (max-width: 800px) {
+      .topbar {
+        position: fixed !important;
+        inset: 0 !important;
+        height: auto !important;
+        padding: 0 !important;
+        pointer-events: none !important;
+        transform: none !important;
+      }
+      .nav-brand {
+        position: fixed !important;
+        top: 14px !important;
+        left: 16px !important;
+        transform: none !important;
+        font-size: 1.7rem;
+        z-index: 501;
+        pointer-events: auto !important;
+      }
+      .nav-brand img {
+        width: 36px;
+        height: 30px;
+      }
+      .nav-right-actions {
+        position: fixed !important;
+        top: 14px !important;
+        right: 16px !important;
+        transform: none !important;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        z-index: 501;
+        pointer-events: auto !important;
+      }
+      .nav-search-bar {
+        display: none !important; /* Mobile has 🔍 inside the bottom floating nav-pill */
+      }
+      .nav-wp-pill-btn span {
+        display: none;
+      }
+      .nav-wp-pill-btn {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        justify-content: center;
+      }
+
+      /* Bottom Floating Pill on Mobile */
+      .nav-pill {
+        position: fixed !important;
+        top: auto !important;
+        bottom: max(14px, env(safe-area-inset-bottom)) !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: calc(100vw - 20px) !important;
+        max-width: 440px !important;
+        height: 52px !important;
+        padding: 4px 6px !important;
+        justify-content: space-between !important;
+        background: rgba(8, 17, 24, 0.95) !important;
+        border: 1px solid rgba(255, 255, 255, 0.22) !important;
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+        z-index: 2500 !important;
+        pointer-events: auto !important;
+        backdrop-filter: blur(20px) saturate(150%) !important;
+        -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
+      }
+
+      .nav-indicator {
+        height: 44px;
+        top: 4px;
+      }
+
+      .tab-links {
+        width: 100%;
+        justify-content: space-around;
+      }
+
+      .nav-tab {
+        flex: 1;
+        height: 44px;
+        padding: 0 4px;
+        font-size: 12px;
+      }
+
+      .nav-divider {
+        display: none;
+      }
+
+      .nav-actions {
+        margin-right: 2px;
+      }
+
+      .nav-action {
+        width: 36px;
+        height: 36px;
+      }
+      .nav-action.nav-wp-action {
+        display: none; /* Already on top-right of mobile header */
+      }
+    }
+
+    /* TV Mode adjustments */
+    .device-tv .topbar,
+    .tv-mode .topbar {
+      top: 24px;
+    }
+    .device-tv .nav-pill,
+    .tv-mode .nav-pill {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      background: #0B111E !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.25) !important;
+    }
+    .device-tv .nav-tab:focus,
+    .tv-mode .nav-tab:focus,
+    .device-tv .nav-action:focus,
+    .tv-mode .nav-action:focus {
+      outline: 2.5px solid #E8C97A !important;
+      outline-offset: 2px !important;
     }
 
     #hero {
@@ -3798,13 +4066,13 @@
       .nav-mobile-toggle {
         display: flex !important;
       }
-      nav {
+      header#mainNav {
         padding: 0.85rem 1.4rem !important;
       }
     }
 
     @media (max-width: 600px) {
-      nav {
+      header#mainNav {
         padding: 0.65rem 0.9rem !important;
       }
       .nav-logo {
@@ -8202,38 +8470,67 @@
     </div>
   </div>
 
-  <nav id="mainNav">
-    <div class="nav-logo">
+  <header id="mainNav" class="topbar">
+    <!-- Brand Logo (Desktop left / Mobile top-left) -->
+    <div class="nav-brand" onclick="window.navGo('home')" title="Hacky Max Home">
       <img src="logo.png" alt="Logo">
       <span>Hacky Max</span>
     </div>
-    <ul class="nav-links">
-      <li><a href="#trending">Trending</a></li>
-      <li><a href="#categories">Categories</a></li>
-      <li><a href="javascript:void(0)" onclick="openCategoryPage('movies', 'all', '🎬 Movies', 'Explore latest &amp; popular movies')">Movies</a></li>
-      <li><a href="javascript:void(0)" onclick="openCategoryPage('tvshows', 'all', '📺 TV Series', 'Explore top rated &amp; popular TV series')">TV Series</a></li>
-      <li><a href="javascript:void(0)" onclick="openCategoryPage('toprated', 'all', '⭐ Top Rated All Time', 'Highest rated movies & series of all time')">Top Rated</a></li>
-      <li><a href="javascript:void(0)" onclick="openCategoryPage('fourk', 'all', '💎 4K Ultra HD Picks', 'Cinematic 4K Ultra HD resolution titles with immersive clarity')">4K</a></li>
-      <li><a href="javascript:void(0)" onclick="openCategoryPage('language', 'si', '🇱🇰 Sinhala Subtitles', 'Movies &amp; TV Series with Sinhala Subtitles')" style="color:#2ECC71;font-weight:700;" title="Sinhala Subtitled Movies">🇱🇰 Subtitle</a></li>
-      <li><a href="javascript:void(0)" id="navWishlistLink" onclick="openWishlist()" title="WishList">WishList</a></li>
-    </ul>
-    <div style="display:flex;align-items:center;gap:10px;">
-      <div class="nav-search" id="navSearch">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-        stroke-linecap="round">
-        <circle cx="11" cy="11" r="8" />
-        <line x1="21" y1="21" x2="16.65" y2="16.65" />
-      </svg>
-      <input type="text" placeholder="Search..." id="navSearchInput" readonly>
+
+    <!-- Centered Floating Pill Navigation (Floating Bottom on Mobile!) -->
+    <nav class="nav-pill" id="navPill" aria-label="Primary navigation">
+      <span class="nav-indicator" id="navIndicator"></span>
+      <div class="tab-links" id="navTabLinks">
+        <button type="button" class="nav-tab active" data-tab="home" onclick="window.navGo('home')">Home</button>
+        <button type="button" class="nav-tab" data-tab="movies" onclick="window.navGo('movies')">Movies</button>
+        <button type="button" class="nav-tab" data-tab="tv" onclick="window.navGo('tv')">TV</button>
+        <button type="button" class="nav-tab" data-tab="sub" onclick="window.navGo('sub')">🇱🇰 Sub</button>
+        <button type="button" class="nav-tab" data-tab="mylist" onclick="window.navGo('mylist')">My List</button>
       </div>
-      <!-- Mobile Navigation Hamburger Button -->
+      <span class="nav-divider"></span>
+      <div class="nav-actions">
+        <button type="button" class="nav-action" id="navSearchPillBtn" aria-label="Search" onclick="openSearch()" title="Search">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </button>
+        <button type="button" class="nav-action nav-wp-action" id="navWpPillBtn" aria-label="Watch Party" onclick="window.openWatchPartyModal && window.openWatchPartyModal('join')" title="Watch Party">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a3 3 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Right Side Quick Actions (Desktop search bar & Watch Party pill) -->
+    <div class="nav-right-actions">
+      <div class="nav-search-bar" id="navSearch" onclick="openSearch()" title="Search Movies & TV">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input type="text" placeholder="Search..." id="navSearchInput" readonly>
+      </div>
+
+      <button class="nav-wp-pill-btn" onclick="window.openWatchPartyModal && window.openWatchPartyModal('join')" title="Watch Party with friends">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="19" cy="9" r="3"/><path d="M23 21v-2a3 3 0 0 0-3-3h-1"/>
+        </svg>
+        <span>Party</span>
+      </button>
+
+      <!-- Mobile Navigation Hamburger Button (for full category drawer) -->
       <button id="navMobileToggle" class="nav-mobile-toggle" aria-label="Toggle navigation menu" onclick="window.toggleMobileNav()">
         <span></span>
         <span></span>
         <span></span>
       </button>
     </div>
-  </nav>
+  </header>
 
   <!-- MOBILE NAVIGATION DRAWER -->
   <div id="mobileNavDrawer" class="mobile-nav-drawer">
@@ -9764,8 +10061,10 @@
       // Find metadata
       if (catType === 'movies' || catType === 'movie') {
         _currentCatItemData = { title: title || '🎬 Movies', sub: sub || 'Explore latest & popular movies' };
+        if (typeof setNavActive === 'function') setNavActive('movies');
       } else if (catType === 'tvshows' || catType === 'tv' || catType === 'series') {
         _currentCatItemData = { title: title || '📺 TV Series', sub: sub || 'Explore top rated & popular TV series' };
+        if (typeof setNavActive === 'function') setNavActive('tv');
       } else if (catType === 'toprated') {
         _currentCatItemData = { title: title || '⭐ Top Rated All Time', sub: sub || 'Highest rated movies & series of all time' };
       } else if (catType === 'fourk' || catType === '4k') {
@@ -9773,6 +10072,7 @@
       } else if (catType === 'language') {
         if (catKey === 'si') {
           _currentCatItemData = { title: '🇱🇰 Sinhala Subtitles', sub: 'Movies & TV Series with Sinhala Subtitles' };
+          if (typeof setNavActive === 'function') setNavActive('sub');
         } else {
           _currentCatItemData = CATEGORIES_DATA.languages.find(x => x.code === catKey) || { title, sub };
         }
@@ -9829,6 +10129,7 @@
       const overlay = document.getElementById('categoryViewOverlay');
       if (overlay) overlay.classList.remove('open');
       document.body.style.overflow = '';
+      if (typeof setNavActive === 'function') setNavActive('home');
 
       if (_tvMode) {
         setTimeout(() => {
@@ -15774,15 +16075,78 @@
       }
     });
 
-    // NAV SCROLL — RAF-throttled so it fires at most once per frame, not every pixel
+    // ── 7Movies Floating Nav-Pill Controller ─────────────────────────────
+    let _currentActiveNavTab = 'home';
+
+    function setNavActive(tabName) {
+      _currentActiveNavTab = tabName;
+      const pill = document.getElementById('navPill');
+      const indicator = document.getElementById('navIndicator');
+      if (!pill || !indicator) return;
+
+      const tabs = pill.querySelectorAll('.nav-tab');
+      const activeBtn = pill.querySelector(`.nav-tab[data-tab="${tabName}"]`);
+      if (!activeBtn) return;
+
+      tabs.forEach(t => t.classList.remove('active'));
+      activeBtn.classList.add('active');
+
+      const pillRect = pill.getBoundingClientRect();
+      const btnRect = activeBtn.getBoundingClientRect();
+      const left = btnRect.left - pillRect.left;
+
+      indicator.style.width = `${btnRect.width}px`;
+      indicator.style.transform = `translate3d(${left}px, 0, 0)`;
+    }
+    window.setNavActive = setNavActive;
+
+    window.navGo = function(target) {
+      setNavActive(target);
+
+      if (target === 'home') {
+        const catPage = document.getElementById('categoryViewOverlay');
+        if (catPage && catPage.classList.contains('open')) {
+          if (typeof closeCategoryPage === 'function') closeCategoryPage();
+        }
+        const wl = document.getElementById('wishlistModal');
+        if (wl && wl.classList.contains('open')) {
+          if (typeof closeWishlist === 'function') closeWishlist();
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (target === 'movies') {
+        openCategoryPage('movies', 'all', '🎬 Movies', 'Explore latest & popular movies');
+      } else if (target === 'tv') {
+        openCategoryPage('tvshows', 'all', '📺 TV Series', 'Explore top rated & popular TV series');
+      } else if (target === 'sub') {
+        openCategoryPage('language', 'si', '🇱🇰 Sinhala Subtitles', 'Movies & TV Series with Sinhala Subtitles');
+      } else if (target === 'mylist') {
+        openWishlist();
+      }
+    };
+
+    // Auto reposition indicator on resize and initial load
+    window.addEventListener('resize', () => {
+      if (_currentActiveNavTab) setNavActive(_currentActiveNavTab);
+    });
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => setNavActive('home'), 150);
+    });
+    setTimeout(() => setNavActive('home'), 350);
+
+    // NAV SCROLL
     let _scrollRaf = null;
     window.addEventListener('scroll', () => {
       if (_scrollRaf) return;
       _scrollRaf = requestAnimationFrame(() => {
         _scrollRaf = null;
         const nav = document.getElementById('mainNav');
-        nav.style.background = window.scrollY > 80 ? 'rgba(7,9,15,0.98)' : '';
-        nav.style.borderBottomColor = window.scrollY > 80 ? 'rgba(255,255,255,0.07)' : 'transparent';
+        if (nav && window.innerWidth > 800) {
+          if (window.scrollY > 40) {
+            nav.classList.add('scrolled');
+          } else {
+            nav.classList.remove('scrolled');
+          }
+        }
       });
     }, { passive: true });
 
@@ -16001,7 +16365,7 @@
         if (el) observer.observe(el);
       });
 
-      gsap.fromTo('#mainNav', { y: -60, opacity: 0 }, { y: 0, opacity: 1, duration: .7, delay: .2, ease: 'power3.out' });
+      gsap.fromTo('#mainNav', { y: -60, opacity: 0 }, { y: 0, opacity: 1, duration: .7, delay: .2, ease: 'power3.out', clearProps: 'transform' });
 
       // Hero parallax — skip on TV (scrub fires on every scroll pixel, very heavy on slow CPUs)
       if (!(window.DEVICE && window.DEVICE.isTV)) {
@@ -16113,6 +16477,7 @@
     function openWishlist() {
       const overlay = document.getElementById('wishlistOverlay');
       if (!overlay) return;
+      if (typeof setNavActive === 'function') setNavActive('mylist');
       overlay.classList.add('open');
       history.pushState({ ui: 'wishlist' }, '', location.href);
       renderWishlist();
@@ -16122,6 +16487,7 @@
     function closeWishlist() {
       const overlay = document.getElementById('wishlistOverlay');
       if (!overlay) return;
+      if (typeof setNavActive === 'function') setNavActive('home');
       gsap.to(overlay, {
         opacity: 0, duration: 0.25, ease: 'power2.in', onComplete: () => {
           overlay.classList.remove('open');
