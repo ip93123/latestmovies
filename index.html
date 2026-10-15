@@ -13925,6 +13925,10 @@
 
       _destroyMax();
       frame.style.display = '';
+      frame.removeAttribute('allowfullscreen');
+      frame.removeAttribute('webkitallowfullscreen');
+      frame.removeAttribute('mozallowfullscreen');
+      frame.allow = "autoplay *; encrypted-media *; picture-in-picture *; web-share *";
       _setPlayerLoading(true);
       if (isTvDevice) {
         frame.style.opacity = '1';
