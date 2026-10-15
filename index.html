@@ -5065,6 +5065,30 @@
       outline-offset: 1px;
     }
 
+    /* ── VidZee Server button (Electric Cyan / Ocean Teal theme) ────── */
+    .player-server-btn.vidzee-btn,
+    .modal-stream-pill.vidzee-btn {
+      background: linear-gradient(135deg, #06B6D4 0%, #0891B2 100%) !important;
+      color: #ffffff !important;
+      font-weight: 700 !important;
+      border: 1px solid rgba(255, 255, 255, 0.25) !important;
+      letter-spacing: normal;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+      box-shadow: none !important;
+    }
+    .player-server-btn.vidzee-btn:hover,
+    .modal-stream-pill.vidzee-btn:hover {
+      box-shadow: none !important;
+      transform: translateY(-1px);
+      filter: brightness(1.1);
+    }
+    .player-server-btn.vidzee-btn.active {
+      box-shadow: none !important;
+      border-color: #67E8F9 !important;
+      outline: 2px solid rgba(103, 232, 249, 0.5) !important;
+      outline-offset: 1px;
+    }
+
     /* ── Silver Theme for Non-PostMessage Fallback Players ─────────── */
     .player-server-btn.silver-btn,
     .modal-stream-pill.silver-btn {
@@ -11560,6 +11584,7 @@
     function getServerBtnClass(label) {
       const lbl = (label || '').toLowerCase();
       if (lbl.includes('hackymax')) return ' hackymax-btn';
+      if (lbl.includes('vidzee')) return ' vidzee-btn';
       if (lbl.includes('vortex') || lbl.includes('videasy')) return ' vortex-btn';
       if (lbl.includes('infinity')) return ' infinity-btn';
       if (lbl.includes('spark') || lbl.includes('vidspark')) return ' spark-btn';
@@ -11604,9 +11629,8 @@
             `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=true&showNextEpisode=1&sub=false&subtitles=false`,
             `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=bre&sub=0&subtitles=false`,
             `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&sub.mode=manual`,
-            `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true&sub=false`//,
-            // `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
-            // `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
+            `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true&sub=false`,
+            `https://player.vidzee.wtf/embed/tv/${id}/${s}/${e}`
           ];
         } else {
           urls = [
@@ -11616,12 +11640,11 @@
             `https://vidlove.cc/embed/tv/${id}/${s}/${e}?autoplay=true&showNextEpisode=1&sub=true`,
             `https://player.videasy.ws/embed/tv/${id}/${s}/${e}?autoplay=1&autonext=1&ds_lang=en&sub=1`,
             `https://vidlink.pro/tv/${id}/${s}/${e}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&nextEpisode=true&episodeSelector=true&sub.mode=auto&sub.lang=en`,
-            `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true&sub=true`//,
-            // `https://vidnest.fun/tv/${id}/${s}/${e}?autoplay=1`,
-            // `https://vixsrc.to/tv/${id}/${s}/${e}?autoplay=1`
+            `https://cdn.vidspark.to/tv/${id}/${s}/${e}?autoplay=true&sub=true`,
+            `https://player.vidzee.wtf/embed/tv/${id}/${s}/${e}`
           ];
         }
-        labels = ['HackyMax', 'Nebula', 'Stellar', 'Nova', 'Vortex', 'Infinity', 'Spark'/*, 'Zenith', 'Hyperion'*/];
+        labels = ['HackyMax', 'Nebula', 'Stellar', 'Nova', 'Vortex', 'Infinity', 'Spark', 'VidZee'];
       } else {
         if (hasSinhalaSub) {
           urls = [
@@ -11631,9 +11654,8 @@
             `https://vidlove.cc/embed/movie/${id}?autoplay=true&sub=false&subtitles=false`,
             `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=bre&sub=0&subtitles=false`,
             `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&sub.mode=manual`,
-            `https://cdn.vidspark.to/movie/${id}?autoplay=true&sub=false`//,
-            // `https://vidnest.fun/movie/${id}?autoplay=1`,
-            // `https://vixsrc.to/movie/${id}?autoplay=1`
+            `https://cdn.vidspark.to/movie/${id}?autoplay=true&sub=false`,
+            `https://player.vidzee.wtf/embed/movie/${id}`
           ];
         } else {
           urls = [
@@ -11643,12 +11665,11 @@
             `https://vidlove.cc/embed/movie/${id}?autoplay=true&sub=true`,
             `https://player.videasy.ws/embed/movie/${id}?autoplay=1&ds_lang=en&sub=1`,
             `https://vidlink.pro/movie/${id}?primaryColor=E8C97A&secondaryColor=07090F&iconColor=E8C97A&autoplay=true&sub.mode=auto&sub.lang=en`,
-            `https://cdn.vidspark.to/movie/${id}?autoplay=true&sub=true`//,
-            // `https://vidnest.fun/movie/${id}?autoplay=1`,
-            // `https://vixsrc.to/movie/${id}?autoplay=1`
+            `https://cdn.vidspark.to/movie/${id}?autoplay=true&sub=true`,
+            `https://player.vidzee.wtf/embed/movie/${id}`
           ];
         }
-        labels = ['HackyMax', 'Nebula', 'Stellar', 'Nova', 'Vortex', 'Infinity', 'Spark'/*, 'Zenith', 'Hyperion'*/];
+        labels = ['HackyMax', 'Nebula', 'Stellar', 'Nova', 'Vortex', 'Infinity', 'Spark', 'VidZee'];
       }
       return { urls, labels };
     }
@@ -12535,6 +12556,15 @@
     }
     window._isHackyMaxServer = _isHackyMaxServer;
 
+    function _isVidZeeServer() {
+      const curServer = (window._currentActiveServer || '').toLowerCase();
+      const frame = document.getElementById('playerFrame');
+      const curSrc = (frame && frame.src) ? frame.src.toLowerCase() : '';
+      return curServer.includes('vidzee') ||
+             curSrc.includes('vidzee.wtf');
+    }
+    window._isVidZeeServer = _isVidZeeServer;
+
     function _extractTimeFromMessage(eventData, depth = 0) {
       if (eventData == null || depth > 4) return null;
 
@@ -12798,12 +12828,14 @@
 
       const now = Date.now();
       const isHackyMax = _isHackyMaxServer();
+      const isVidZee = _isVidZeeServer();
+      const isContinuousStreamServer = isHackyMax || isVidZee;
 
-      // Watchdog: ONLY for HackyMax, because HackyMax streams continuous timeupdates.
+      // Watchdog: For continuous telemetry players (HackyMax, VidZee), because they stream periodic timeupdates.
       // Other players (Nebula, Cinezo, Nova, Vortex, Infinity, Spark, Zenith) run via continuous wall-clock!
-      if (isHackyMax && !window._externalIsPaused && window._lastExternalMsgTime) {
+      if (isContinuousStreamServer && !window._externalIsPaused && window._lastExternalMsgTime) {
         const silence = now - window._lastExternalMsgTime;
-        if (silence > 4000) {
+        if (silence > 3500) {
           _markBufferState(true);
         }
         if (silence > 7000) {
@@ -12871,7 +12903,7 @@
           _subStatusLine.textContent = `⏸ Paused (${mm}:${ss})`;
           _subStatusLine.style.color = 'rgba(255,255,255,0.7)';
         } else {
-          _subStatusLine.textContent = isHackyMax ? `⚡ Live-Sync (${mm}:${ss})` : `⏱ Smooth Sync (${mm}:${ss})`;
+          _subStatusLine.textContent = isContinuousStreamServer ? `⚡ Live-Sync (${mm}:${ss})` : `⏱ Smooth Sync (${mm}:${ss})`;
           _subStatusLine.style.color = '';
         }
       }
@@ -12897,12 +12929,14 @@
         return;
       }
 
-      // Special handling for Vidy / Nova MEDIA_DATA (periodic local history sync)
+      // Special handling for Vidy / Nova / VidZee MEDIA_DATA (periodic local history sync)
       if (d.type === 'MEDIA_DATA') {
         return;
       }
 
       const isHackyMax = _isHackyMaxServer();
+      const isVidZee = _isVidZeeServer();
+      const isContinuousStreamServer = isHackyMax || isVidZee;
 
       // Extract time from message if present
       let extracted = _extractTimeFromMessage(d);
@@ -12932,7 +12966,7 @@
       }
 
       const pState = _checkPlayPause(d);
-      const isBufferingEvent = isHackyMax && ((pState === 'buffer') ||
+      const isBufferingEvent = isContinuousStreamServer && ((pState === 'buffer') ||
         /(?:buffer|waiting|stalled?|loading)/i.test(evName) ||
         (d.data && /(?:buffer|waiting|stalled?|loading)/i.test(String(d.data.event || d.data.player_status || ''))));
 
@@ -12948,6 +12982,8 @@
         (d.data && d.data.paused === false && evName !== 'pause' && evName !== 'paused') ||
         (pState === 'play')
       );
+
+      const isExplicitSeek = (evName === 'seeked' || evName === 'seek') && ct !== null;
 
       const isWpGuestLocked = typeof WP !== 'undefined' && WP && !WP.isHost && (
         WP.hostConn ||
@@ -12968,7 +13004,7 @@
         return;
       }
 
-      // ── BUFFERING EVENT (HackyMax only) ──────────────────────────────
+      // ── BUFFERING EVENT (Continuous stream servers: HackyMax, VidZee) ──────────────
       if (isBufferingEvent) {
         _markBufferState(true);
         if (ct !== null && ct > 0) {
@@ -12976,6 +13012,30 @@
           window._bufferFreezeElapsed = Math.round(ct * 1000);
         }
         return;
+      }
+
+      // ── EXPLICIT SEEK EVENT ──────────────────────────────────────────
+      if (isExplicitSeek) {
+        window._externalCurrentTime = ct;
+        _markBufferState(false);
+        if (window._externalIsPaused) {
+          window._subPausedElapsed = Math.round(ct * 1000);
+        } else {
+          _subStartTime = Date.now() - (ct * 1000);
+          window._subPausedElapsed = null;
+        }
+        if (typeof WP !== 'undefined' && WP && WP.isHost && WP.code && typeof _broadcast === 'function') {
+          _broadcast({
+            type: 'seek',
+            ct: ct,
+            ts: Date.now(),
+            mId: window._currentPlayingId || _currentModalId,
+            mType: window._currentPlayingType || _currentModalType,
+            season: window._currentPlayingSeason || (typeof _selectedSeason !== 'undefined' && _selectedSeason) || 1,
+            episode: window._currentPlayingEpisode || (typeof _selectedEpisode !== 'undefined' && _selectedEpisode) || 1,
+            serverIndex: typeof _activeServerIndex === 'number' ? _activeServerIndex : 0
+          });
+        }
       }
 
       // ── PAUSE EVENT ──────────────────────────────────────────────────
@@ -13069,8 +13129,8 @@
         const currentSubSec = _subStartTime ? Math.max(0, (Date.now() - _subStartTime) / 1000) : 0;
         const drift = Math.abs(ct - currentSubSec);
 
-        if (isHackyMax) {
-          // HackyMax sends granular updates (~250-1000ms).
+        if (isContinuousStreamServer) {
+          // HackyMax & VidZee send granular updates (~250-1000ms).
           // Only re-anchor if drift is notable (> 0.75s) to avoid micro-jitter blinking!
           if (!_subStartTime || drift > 0.75) {
             _subStartTime = Date.now() - (ct * 1000);
@@ -15302,8 +15362,7 @@
       const frameEl = document.getElementById('playerFrame');
       const activeBtn = document.querySelector('.player-server-btn.active');
       const curServerLabel = activeBtn ? activeBtn.textContent.toLowerCase() : '';
-      const curFrameSrc = (frameEl && frameEl.src) ? frameEl.src.toLowerCase() : '';
-      const isAutoplayPlayer = curFrameSrc.includes('spark') || curFrameSrc.includes('vidspark') || curFrameSrc.includes('nova') || curFrameSrc.includes('vidy') || curFrameSrc.includes('hackymax') || curFrameSrc.includes('vidstuck') || curFrameSrc.includes('nebula') || curFrameSrc.includes('videasy') || curFrameSrc.includes('vortex') || curFrameSrc.includes('cinezo') || curFrameSrc.includes('stellar') || curServerLabel.includes('spark') || curServerLabel.includes('nova') || curServerLabel.includes('vidy') || curServerLabel.includes('hackymax') || curServerLabel.includes('vidstuck') || curServerLabel.includes('nebula') || curServerLabel.includes('videasy') || curServerLabel.includes('vortex') || curServerLabel.includes('cinezo') || curServerLabel.includes('stellar');
+      const isAutoplayPlayer = curFrameSrc.includes('vidzee') || curServerLabel.includes('vidzee') || curFrameSrc.includes('spark') || curFrameSrc.includes('vidspark') || curFrameSrc.includes('nova') || curFrameSrc.includes('vidy') || curFrameSrc.includes('hackymax') || curFrameSrc.includes('vidstuck') || curFrameSrc.includes('nebula') || curFrameSrc.includes('videasy') || curFrameSrc.includes('vortex') || curFrameSrc.includes('cinezo') || curFrameSrc.includes('stellar') || curServerLabel.includes('spark') || curServerLabel.includes('nova') || curServerLabel.includes('vidy') || curServerLabel.includes('hackymax') || curServerLabel.includes('vidstuck') || curServerLabel.includes('nebula') || curServerLabel.includes('videasy') || curServerLabel.includes('vortex') || curServerLabel.includes('cinezo') || curServerLabel.includes('stellar');
 
       // If cues are already loaded for THIS video/episode, IMMEDIATELY resume the loop and re-render
       if (_subCues && _subCues.length > 0 && window._currentLoadedSubKey === subKey) {
@@ -15696,7 +15755,7 @@
           episode: window._currentPlayingEpisode || (typeof _selectedEpisode !== 'undefined' && _selectedEpisode) || 1
         });
       }
-      const isAutoplayServer = url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || url.includes('vidstuck') || url.includes('nebula') || url.includes('videasy') || url.includes('vortex') || url.includes('cinezo') || url.includes('stellar') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('videasy') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('cinezo') || sName.toLowerCase().includes('stellar');
+      const isAutoplayServer = url.includes('vidzee') || sName.toLowerCase().includes('vidzee') || url.includes('spark') || url.includes('vidspark') || url.includes('nova') || url.includes('vidy') || url.includes('vidstuck') || url.includes('nebula') || url.includes('videasy') || url.includes('vortex') || url.includes('cinezo') || url.includes('stellar') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('videasy') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('cinezo') || sName.toLowerCase().includes('stellar');
       window._externalCurrentTime = 0;
       window._lastExternalMsgTime = null;
       window._externalIsPaused = !isAutoplayServer;
@@ -15707,7 +15766,7 @@
       _subStartTime = Date.now();
       _lastIframeSubCueText = null;
 
-      const isAutoLive = sName.toLowerCase().includes('hackymax') || sName.toLowerCase().includes('infinity') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck') || sName.toLowerCase().includes('cinezo') || sName.toLowerCase().includes('stellar');
+      const isAutoLive = sName.toLowerCase().includes('vidzee') || url.includes('vidzee') || sName.toLowerCase().includes('hackymax') || sName.toLowerCase().includes('infinity') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck') || sName.toLowerCase().includes('cinezo') || sName.toLowerCase().includes('stellar');
       _markSubSyncAutoLive(isAutoLive);
 
       const rawSubId = _currentModalId || window._currentPlayingId || (window._currentModalItem && window._currentModalItem.id) || new URLSearchParams(window.location.search).get('m') || new URLSearchParams(window.location.search).get('s');
@@ -17492,6 +17551,8 @@
             { action: 'play' }, { type: 'play' }, { event: 'play' },
             { type: 'PLAY' }, { action: 'PLAY' },
             { type: 'VIDEO_PLAY' }, { action: 'VIDEO_PLAY' },
+            { type: 'PLAYER_EVENT', data: { event: 'play' } },
+            { type: 'PLAYER_COMMAND', action: 'play' },
             { type: 'media:play' }, { api: 'play' },
             { method: 'play' }, { command: 'play' },
             { player: true, action: 'play' }
@@ -17501,6 +17562,8 @@
             { action: 'pause' }, { type: 'pause' }, { event: 'pause' },
             { type: 'PAUSE' }, { action: 'PAUSE' },
             { type: 'VIDEO_PAUSE' }, { action: 'VIDEO_PAUSE' },
+            { type: 'PLAYER_EVENT', data: { event: 'pause' } },
+            { type: 'PLAYER_COMMAND', action: 'pause' },
             { type: 'media:pause' }, { api: 'pause' },
             { method: 'pause' }, { command: 'pause' },
             { player: true, action: 'pause' }
@@ -17513,6 +17576,8 @@
             { event: 'seek', time: sec, currentTime: sec },
             { type: 'VIDEO_SEEK', time: sec, value: sec },
             { action: 'VIDEO_SEEK', time: sec, value: sec },
+            { type: 'PLAYER_EVENT', data: { event: 'seeked', currentTime: sec } },
+            { type: 'PLAYER_COMMAND', action: 'seek', time: sec },
             { type: 'media:seek', data: { time: sec } },
             { api: 'seek', value: sec },
             { method: 'setCurrentTime', value: sec },
