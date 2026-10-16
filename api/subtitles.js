@@ -90,10 +90,31 @@ const LANG_MAP = {
   si: { label: 'Sinhala', flag: '🇱🇰' },
 };
 
+function sanitizeSrtText(raw) {
+  if (!raw) return '';
+  raw = String(raw).replace(/\uFEFF/g, '').replace(/\x00/g, '');
+
+  // If file contains ZIP signature (e.g. uploaded as raw ZIP or Stored archive)
+  if (raw.slice(0, 2) === 'PK' || raw.includes('PK\x03\x04') || raw.includes('PK\x01\x02')) {
+    const cueMatch = raw.match(/(?:^|[\r\n])(\d+[\r\n]+\d{2}:\d{2}:\d{2}[,\.]\d{3}\s*-->\s*\d{2}:\d{2}:\d{2})/);
+    if (cueMatch && cueMatch.index !== undefined) {
+      const startIndex = cueMatch.index + (cueMatch[0].startsWith('\n') || cueMatch[0].startsWith('\r') ? 1 : 0);
+      let srtBody = raw.slice(startIndex);
+      const pkEnd = srtBody.search(/PK[\x01\x05][\x02\x06]/);
+      if (pkEnd !== -1) {
+        srtBody = srtBody.slice(0, pkEnd);
+      }
+      raw = srtBody.trim();
+    }
+  }
+
+  raw = raw.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  return raw;
+}
+
 function srtToVtt(srt) {
   let vtt = 'WEBVTT\n\n';
-  srt = srt.replace(/^\uFEFF/, '');
-  srt = srt.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  srt = sanitizeSrtText(srt);
   vtt += srt.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, '$1.$2');
   return vtt;
 }
@@ -119,6 +140,7 @@ export default async function handler(req, res) {
       }
 
       let text = await fetchRes.text();
+      text = sanitizeSrtText(text);
       if (isVtt && !text.startsWith('WEBVTT')) {
         text = srtToVtt(text);
         res.setHeader('Content-Type', 'text/vtt; charset=utf-8');
@@ -192,8 +214,7 @@ export default async function handler(req, res) {
     }
 
     if (rawText && rawText.trim().length > 0) {
-      if (rawText.charCodeAt(0) === 0xFEFF) rawText = rawText.slice(1);
-      rawText = rawText.replace(/\x00/g, '');
+      rawText = sanitizeSrtText(rawText);
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.setHeader('Cache-Control', 'public, max-age=86400');
       if (isVtt) {

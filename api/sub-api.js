@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { createPresignedPutUrl, createPresignedGetUrl, getR2Config, putR2Object, getR2ObjectText, deleteR2Object } from '../lib/r2-helper.js';
+import { extractZipEntries, autoSelectBestSrt } from '../lib/sub-extractor.js';
 
 export const config = {
   api: {
@@ -360,10 +361,25 @@ async function handleUpload(req, res) {
     }
 
     const extMatch = (fileName || '').match(/\.([a-z0-9]+)$/i);
-    const ext = extMatch ? extMatch[1].toLowerCase() : 'srt';
+    let ext = extMatch ? extMatch[1].toLowerCase() : 'srt';
+    let fileBuffer = Buffer.from(fileBase64, 'base64');
+
+    // Auto-extract ZIP archive if uploaded
+    if ((fileBuffer.length >= 4 && fileBuffer[0] === 0x50 && fileBuffer[1] === 0x4B) || ext === 'zip') {
+      try {
+        const extracted = extractZipEntries(fileBuffer);
+        const best = autoSelectBestSrt(extracted);
+        if (best && best.content) {
+          fileBuffer = Buffer.from(best.content, 'utf8');
+          ext = 'srt';
+        }
+      } catch (zipErr) {
+        console.warn('[sub-upload] Auto-extract zip warning:', zipErr.message);
+      }
+    }
+
     const subKey = type === 'tv' ? `${tmdbId}_S${season}_E${episode}` : `${tmdbId}`;
     const targetFile = `${subKey}.${ext}`;
-    const fileBuffer = Buffer.from(fileBase64, 'base64');
 
     let publicUrl = `/Subtitle/uploads/${targetFile}`;
     const r2Config = getR2Config();

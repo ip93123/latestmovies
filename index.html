@@ -15594,13 +15594,39 @@
         else if (u8.length >= 2 && u8[0] === 0xFE && u8[1] === 0xFF) dec = new TextDecoder('utf-16be');
         let text = dec.decode(buf);
         if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
-        text = text.replace(/\x00/g, '');
+        text = text.replace(/\uFEFF/g, '').replace(/\x00/g, '');
+
+        // If file contains ZIP signature (e.g. uploaded as raw ZIP or Stored archive)
+        if (text.slice(0, 2) === 'PK' || text.includes('PK\x03\x04') || text.includes('PK\x01\x02')) {
+          const cueMatch = text.match(/(?:^|[\r\n])(\d+[\r\n]+\d{2}:\d{2}:\d{2}[,\.]\d{3}\s*-->\s*\d{2}:\d{2}:\d{2})/);
+          if (cueMatch && cueMatch.index !== undefined) {
+            const startIndex = cueMatch.index + (cueMatch[0].startsWith('\n') || cueMatch[0].startsWith('\r') ? 1 : 0);
+            let srtBody = text.slice(startIndex);
+            const pkEnd = srtBody.search(/PK[\x01\x05][\x02\x06]/);
+            if (pkEnd !== -1) srtBody = srtBody.slice(0, pkEnd);
+            text = srtBody.trim();
+          }
+        }
+
         if (text.trim().startsWith('{') && text.includes('"tracks"')) return null;
         return text;
       } catch (_) {
         try {
-          const t = await res.text();
+          let t = await res.text();
           if (t && t.trim().startsWith('{') && t.includes('"tracks"')) return null;
+          if (t) {
+            t = t.replace(/\uFEFF/g, '').replace(/\x00/g, '');
+            if (t.slice(0, 2) === 'PK' || t.includes('PK\x03\x04')) {
+              const cueMatch = t.match(/(?:^|[\r\n])(\d+[\r\n]+\d{2}:\d{2}:\d{2}[,\.]\d{3}\s*-->\s*\d{2}:\d{2}:\d{2})/);
+              if (cueMatch && cueMatch.index !== undefined) {
+                const startIndex = cueMatch.index + (cueMatch[0].startsWith('\n') || cueMatch[0].startsWith('\r') ? 1 : 0);
+                let srtBody = t.slice(startIndex);
+                const pkEnd = srtBody.search(/PK[\x01\x05][\x02\x06]/);
+                if (pkEnd !== -1) srtBody = srtBody.slice(0, pkEnd);
+                t = srtBody.trim();
+              }
+            }
+          }
           return t;
         } catch (_) { return null; }
       }
@@ -15618,8 +15644,9 @@
         if (!text) return false;
 
         // ── Strict Arabic / Persian / Urdu script elimination ──
-        // Only Sinhala and English are allowed. Reject any subtitle containing Arabic characters.
-        if (/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(text)) {
+        // Only Sinhala and English are allowed. Reject any subtitle containing Arabic characters (exempt Sinhala).
+        const hasSinhala = /[\u0D80-\u0DFF]/.test(text);
+        if (!hasSinhala && /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFC]/.test(text)) {
           console.warn('[Max Subtitles] Blocked unwanted Arabic subtitle:', subUrl);
           return false;
         }
@@ -16053,14 +16080,33 @@
       }
 
       if (srtText) {
-        // Strict Arabic elimination
-        if (!/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(srtText)) {
-          let parsedCues = [];
-          if (srtText.includes('WEBVTT')) parsedCues = parseVtt(srtText);
-          else parsedCues = parseSrt(srtText);
-          if (!parsedCues.length) parsedCues = parseVtt(srtText);
+        if (srtText.charCodeAt(0) === 0xFEFF) srtText = srtText.slice(1);
+        srtText = srtText.replace(/\uFEFF/g, '').replace(/\x00/g, '');
 
-          if (parsedCues.length) {
+        if (srtText.slice(0, 2) === 'PK' || srtText.includes('PK\x03\x04') || srtText.includes('PK\x01\x02')) {
+          const cueMatch = srtText.match(/(?:^|[\r\n])(\d+[\r\n]+\d{2}:\d{2}:\d{2}[,\.]\d{3}\s*-->\s*\d{2}:\d{2}:\d{2})/);
+          if (cueMatch && cueMatch.index !== undefined) {
+            const startIndex = cueMatch.index + (cueMatch[0].startsWith('\n') || cueMatch[0].startsWith('\r') ? 1 : 0);
+            let srtBody = srtText.slice(startIndex);
+            const pkEnd = srtBody.search(/PK[\x01\x05][\x02\x06]/);
+            if (pkEnd !== -1) srtBody = srtBody.slice(0, pkEnd);
+            srtText = srtBody.trim();
+          }
+        }
+
+        // Strict Arabic elimination (exempt Sinhala)
+        const hasSinhala = /[\u0D80-\u0DFF]/.test(srtText);
+        if (!hasSinhala && /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFC]/.test(srtText)) {
+          console.warn('[Max Subtitles] Blocked unwanted Arabic subtitle');
+          return;
+        }
+
+        let parsedCues = [];
+        if (srtText.includes('WEBVTT')) parsedCues = parseVtt(srtText);
+        else parsedCues = parseSrt(srtText);
+        if (!parsedCues.length) parsedCues = parseVtt(srtText);
+
+        if (parsedCues.length) {
             _loadSubCues(parsedCues, subLabel);
             window._currentLoadedSubKey = subKey;
             _subActive = true;
