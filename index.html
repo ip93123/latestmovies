@@ -844,63 +844,234 @@
       color: #F5C518
     }
 
+    /* ══════════════════════════════════════════════════════════
+       ROTTEN TOMATOES (RT) SCORES — Responsive & Optimized CSS
+       Mobile, Desktop & Smart TV (10-Foot UI)
+    ═══════════════════════════════════════════════════════════ */
     .rt-badge {
       background: rgba(250, 50, 10, 0.15);
-      border: 1px solid rgba(250, 50, 10, 0.3);
-      color: var(--tomato);
+      border: 1px solid rgba(250, 50, 10, 0.35);
+      color: #FA320A;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .rating-badge.rt-badge.rt-fresh {
+      background: rgba(250, 50, 10, 0.16);
+      border-color: rgba(250, 50, 10, 0.45);
+      color: #FA320A;
+      box-shadow: 0 0 10px rgba(250, 50, 10, 0.15);
     }
 
     .rating-badge.rt-badge.rt-rotten {
-      background: rgba(10, 200, 85, 0.15);
-      border-color: rgba(10, 200, 85, 0.35);
+      background: rgba(10, 200, 85, 0.16);
+      border-color: rgba(10, 200, 85, 0.45);
       color: #0AC855;
+      box-shadow: 0 0 10px rgba(10, 200, 85, 0.15);
     }
 
-    /* Card Rotten Tomatoes Score Badge (Home Page & Trending) */
+    .rt-label-short {
+      display: none;
+    }
+
+    /* Card Rotten Tomatoes Score Badge (Home, Trending, Top 10, Categories, Trailers) */
     .card-rt-badge {
       display: inline-flex;
       align-items: center;
-      gap: 3px;
+      gap: 3.5px;
       font-size: 0.68rem;
       font-weight: 700;
       color: #FA320A;
-      background: rgba(250, 50, 10, 0.12);
-      border: 1px solid rgba(250, 50, 10, 0.3);
-      padding: 1px 6px;
+      background: rgba(250, 50, 10, 0.14);
+      border: 1px solid rgba(250, 50, 10, 0.35);
+      padding: 1.5px 6.5px;
       border-radius: 999px;
       vertical-align: middle;
       margin-left: 6px;
       line-height: 1.2;
-      transition: opacity 0.25s ease;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      user-select: none;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
     }
 
     .card-rt-badge.rt-fresh {
       color: #FA320A;
-      background: rgba(250, 50, 10, 0.14);
-      border-color: rgba(250, 50, 10, 0.35);
+      background: rgba(250, 50, 10, 0.15);
+      border-color: rgba(250, 50, 10, 0.4);
+      box-shadow: 0 0 8px rgba(250, 50, 10, 0.12);
+    }
+    .card-rt-badge.rt-fresh:hover {
+      background: rgba(250, 50, 10, 0.24);
+      border-color: rgba(250, 50, 10, 0.65);
+      box-shadow: 0 0 12px rgba(250, 50, 10, 0.3);
+      transform: scale(1.05);
     }
 
     .card-rt-badge.rt-rotten {
       color: #0AC855;
-      background: rgba(10, 200, 85, 0.14);
-      border-color: rgba(10, 200, 85, 0.35);
+      background: rgba(10, 200, 85, 0.15);
+      border-color: rgba(10, 200, 85, 0.4);
+      box-shadow: 0 0 8px rgba(10, 200, 85, 0.12);
+    }
+    .card-rt-badge.rt-rotten:hover {
+      background: rgba(10, 200, 85, 0.24);
+      border-color: rgba(10, 200, 85, 0.65);
+      box-shadow: 0 0 12px rgba(10, 200, 85, 0.3);
+      transform: scale(1.05);
     }
 
-    .trailer-meta .card-rt-badge {
+    .trailer-meta .card-rt-badge,
+    .top10-meta-row .card-rt-badge {
       margin-left: 0;
     }
 
     .card-rt-badge .rt-icon {
-      font-size: 0.72rem;
-      line-height: 1;
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .card-rt-badge .rt-icon-svg {
+      width: 11px;
+      height: 11px;
+      display: block;
+      flex-shrink: 0;
     }
 
     .card-rt-badge .rt-val {
       font-size: 0.68rem;
+      font-weight: 700;
       letter-spacing: 0.2px;
+      line-height: 1;
+    }
+
+    /* ── Mobile Optimization (<= 768px & <= 480px) ── */
+    @media (max-width: 768px) {
+      .card-rt-badge {
+        font-size: 0.63rem;
+        padding: 1px 5px;
+        gap: 2.5px;
+        margin-left: 4px;
+        line-height: 1.15;
+      }
+      .card-rt-badge .rt-val {
+        font-size: 0.63rem;
+      }
+      .card-rt-badge .rt-icon-svg {
+        width: 10px;
+        height: 10px;
+      }
+      .rating-badge.rt-badge {
+        font-size: 0.76rem;
+        padding: 0.24rem 0.65rem;
+        gap: 0.3rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .card-rt-badge {
+        font-size: 0.58rem;
+        padding: 1px 4px;
+        gap: 2px;
+        margin-left: 3px;
+      }
+      .card-rt-badge .rt-val {
+        font-size: 0.58rem;
+      }
+      .card-rt-badge .rt-icon-svg {
+        width: 9.5px;
+        height: 9.5px;
+      }
+      .rating-badge.rt-badge {
+        font-size: 0.72rem;
+        padding: 0.22rem 0.55rem;
+        gap: 0.25rem;
+      }
+      .rt-label-full {
+        display: none;
+      }
+      .rt-label-short {
+        display: inline;
+      }
+    }
+
+    /* ── TV Mode & Smart TV 10-Foot UI RT Optimization ── */
+    body.tv-mode .card-rt-badge,
+    body.device-tv .card-rt-badge,
+    .tv-mode .card-rt-badge,
+    .device-tv .card-rt-badge {
+      font-size: 0.88rem !important;
+      font-weight: 800 !important;
+      padding: 3px 9px !important;
+      gap: 5px !important;
+      border-width: 1.5px !important;
+      margin-left: 8px !important;
+      backdrop-filter: blur(10px) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
+    }
+    body.tv-mode .card-rt-badge .rt-val,
+    body.device-tv .card-rt-badge .rt-val,
+    .tv-mode .card-rt-badge .rt-val,
+    .device-tv .card-rt-badge .rt-val {
+      font-size: 0.88rem !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.3px !important;
+    }
+    body.tv-mode .card-rt-badge .rt-icon-svg,
+    body.device-tv .card-rt-badge .rt-icon-svg,
+    .tv-mode .card-rt-badge .rt-icon-svg,
+    .device-tv .card-rt-badge .rt-icon-svg {
+      width: 14px !important;
+      height: 14px !important;
+    }
+    body.tv-mode .card-rt-badge.rt-fresh,
+    body.device-tv .card-rt-badge.rt-fresh,
+    .tv-mode .card-rt-badge.rt-fresh,
+    .device-tv .card-rt-badge.rt-fresh {
+      background: rgba(250, 50, 10, 0.28) !important;
+      border-color: rgba(250, 50, 10, 0.75) !important;
+      color: #FF5A36 !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.65), 0 0 14px rgba(250, 50, 10, 0.4) !important;
+    }
+    body.tv-mode .card-rt-badge.rt-rotten,
+    body.device-tv .card-rt-badge.rt-rotten,
+    .tv-mode .card-rt-badge.rt-rotten,
+    .device-tv .card-rt-badge.rt-rotten {
+      background: rgba(10, 200, 85, 0.28) !important;
+      border-color: rgba(10, 200, 85, 0.75) !important;
+      color: #2CE071 !important;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.65), 0 0 14px rgba(10, 200, 85, 0.4) !important;
+    }
+    body.tv-mode :focus .card-rt-badge,
+    body.device-tv :focus .card-rt-badge,
+    .tv-mode :focus .card-rt-badge,
+    .device-tv :focus .card-rt-badge {
+      transform: scale(1.1);
+      box-shadow: 0 0 18px rgba(232, 201, 122, 0.5) !important;
+    }
+    body.tv-mode .rating-badge.rt-badge,
+    body.device-tv .rating-badge.rt-badge,
+    .tv-mode .rating-badge.rt-badge,
+    .device-tv .rating-badge.rt-badge {
+      font-size: 1.05rem !important;
+      font-weight: 800 !important;
+      padding: 0.45rem 1.1rem !important;
+      border-width: 2px !important;
+    }
+    body.tv-mode .rating-badge.rt-badge .rt-icon-svg,
+    body.device-tv .rating-badge.rt-badge .rt-icon-svg,
+    .tv-mode .rating-badge.rt-badge .rt-icon-svg,
+    .device-tv .rating-badge.rt-badge .rt-icon-svg {
+      width: 18px !important;
+      height: 18px !important;
     }
 
     .hero-plot {
@@ -1917,9 +2088,16 @@
     }
 
     .card-sub {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
       font-size: .75rem;
       color: var(--muted);
-      margin-bottom: .5rem
+      margin-bottom: .5rem;
+    }
+    .card-sub > span:first-child {
+      flex-shrink: 0;
     }
 
     /* STREAMING PILLS ON CARD INFO */
@@ -2141,12 +2319,19 @@
     }
 
     .trending-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
       font-size: .68rem;
       color: var(--muted);
       margin-bottom: .22rem;
+    }
+    .trending-meta > span:first-child {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      min-width: 0;
     }
 
     .trending-title {
@@ -12275,6 +12460,9 @@
       } catch (_) {}
     }
 
+    // ── Optimized RT Fetcher with In-Flight Deduplication & Throttling ──
+    const _pendingRtFetches = new Map();
+
     async function fetchRtRating(item, type = 'movie') {
       if (!item || !item.id) return null;
       const id = String(item.id);
@@ -12283,25 +12471,35 @@
       if (existing && existing.score && (Date.now() - existing.ts < 7 * 86400 * 1000)) {
         return existing;
       }
+      if (_pendingRtFetches.has(id)) {
+        return _pendingRtFetches.get(id);
+      }
 
       const title = item.title || item.name || '';
       const year = (item.release_date || item.first_air_date || '').slice(0, 4);
       if (!title) return null;
 
-      try {
-        const res = await fetch(`/api/omdb?title=${encodeURIComponent(title)}&year=${encodeURIComponent(year)}&type=${encodeURIComponent(type)}`);
-        if (!res.ok) return null;
-        const json = await res.json();
-        if (json && (json.rottenTomatoes || json.rottenTomatoesScore)) {
-          const score = json.rottenTomatoes || `${json.rottenTomatoesScore}%`;
-          const scoreNum = parseInt(score, 10);
-          const sentiment = json.rottenTomatoesSentiment || (scoreNum >= 60 ? 'POSITIVE' : 'NEGATIVE');
-          const result = { score, sentiment, ts: Date.now() };
-          saveRtCache(id, result);
-          return result;
-        }
-      } catch (_) {}
-      return null;
+      const p = (async () => {
+        try {
+          const res = await fetch(`/api/omdb?title=${encodeURIComponent(title)}&year=${encodeURIComponent(year)}&type=${encodeURIComponent(type)}`);
+          if (!res.ok) return null;
+          const json = await res.json();
+          if (json && (json.rottenTomatoes || json.rottenTomatoesScore)) {
+            const score = json.rottenTomatoes || `${json.rottenTomatoesScore}%`;
+            const scoreNum = parseInt(score, 10);
+            const sentiment = json.rottenTomatoesSentiment || (scoreNum >= 60 ? 'POSITIVE' : 'NEGATIVE');
+            const result = { score, sentiment, ts: Date.now() };
+            saveRtCache(id, result);
+            return result;
+          }
+        } catch (_) {}
+        return null;
+      })().finally(() => {
+        _pendingRtFetches.delete(id);
+      });
+
+      _pendingRtFetches.set(id, p);
+      return p;
     }
 
     const RT_ROTTEN_SVG = '<svg class="rt-icon-svg" width="11" height="11" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;flex-shrink:0;"><g transform="translate(0, 1.23)"><path d="M71.4638596,70.225614 C56.3459649,71.0192982 53.2568421,53.7203509 47.325614,53.8435088 C44.7982456,53.8964912 42.8063158,56.5389474 43.6810526,59.6185965 C44.1621053,61.3115789 45.4964912,63.794386 46.337193,65.3350877 C49.302807,70.7719298 44.9185965,76.9245614 39.7880702,77.4449123 C31.2621053,78.3098246 27.705614,73.3638596 27.925614,68.3007018 C28.1729825,62.6168421 32.9922807,56.8091228 28.0494737,54.3378947 C22.8694737,51.7480702 18.6585965,61.8754386 13.7017544,64.1357895 C9.2154386,66.1817544 2.9877193,64.5954386 0.773684211,59.6136842 C-0.781403509,56.1129825 -0.498596491,49.3722807 6.42526316,46.8003509 C10.7501754,45.1940351 20.3880702,48.9010526 20.8824561,44.205614 C21.4522807,38.7929825 10.7575439,38.3364912 7.53754386,37.0385965 C1.84,34.7424561 -1.52280702,29.8291228 1.11192982,24.5582456 C3.08877193,20.6045614 8.90526316,18.9957895 13.3449123,20.7277193 C18.6635088,22.8024561 19.517193,28.3189474 22.2421053,30.6129825 C24.5894737,32.5901754 27.8021053,32.8375439 29.9031579,31.4782456 C31.4526316,30.4754386 31.9684211,28.2729825 31.3838596,26.2610526 C30.6084211,23.5901754 28.5505263,21.9235088 26.542807,20.2905263 C22.9698246,17.3859649 17.925614,14.8884211 20.9768421,6.96035088 C23.4778947,0.463157895 30.8133333,0.229122807 30.8133333,0.229122807 C33.7277193,-0.0985964912 36.3375439,0.781403509 38.4642105,2.68140351 C41.3073684,5.22140351 41.8610526,8.61649123 41.3852632,12.2385965 C40.9505263,15.5449123 39.7803509,18.4407018 39.1701754,21.7164912 C38.4621053,25.5196491 40.4947368,29.3519298 44.3603509,29.5010526 C49.4449123,29.6975439 50.9694737,25.7894737 51.5915789,23.3122807 C52.5024561,19.6877193 53.6978947,16.322807 57.0617544,14.2035088 C61.8894737,11.1617544 68.5954386,11.8284211 71.7066667,17.674386 C74.1677193,22.3 73.3775439,28.6677193 69.6024561,32.1449123 C67.9087719,33.7045614 65.8722807,34.254386 63.6694737,34.2698246 C60.5105263,34.2922807 57.3529825,34.2147368 54.4207018,35.6929825 C52.4245614,36.6989474 51.5547368,38.3382456 51.5550877,40.5354386 C51.5550877,42.6768421 52.6698246,44.0754386 54.4761404,44.985614 C57.8782456,46.7003509 61.6336842,47.0508772 65.3087719,47.694386 C70.6382456,48.6277193 75.3242105,50.5049123 78.3326316,55.4505263 C78.3596491,55.4940351 78.3859649,55.5378947 78.4115789,55.5821053 C81.8666667,61.4375439 78.2533333,69.8687719 71.4638596,70.225614" fill="#0AC855"/></g></svg>';
@@ -12316,6 +12514,7 @@
       const isRotten = rtData.sentiment === 'NEGATIVE' || (scoreNum && scoreNum < 60);
       const icon = isRotten ? RT_ROTTEN_SVG : RT_FRESH_SVG;
       el.className = `card-rt-badge ${isRotten ? 'rt-rotten' : 'rt-fresh'}`;
+      el.setAttribute('title', `Rotten Tomatoes: ${rtData.score} (${isRotten ? 'Rotten' : 'Fresh'})`);
       el.innerHTML = `<span class="rt-icon">${icon}</span><span class="rt-val">${rtData.score}</span>`;
       el.style.display = 'inline-flex';
     }
@@ -12323,6 +12522,8 @@
     async function hydrateSectionRtRatings(items, type = 'movie') {
       if (!items || !items.length) return;
       const cache = getRtCache();
+      const uncached = [];
+
       for (const item of items) {
         if (!item || !item.id) continue;
         const id = item.id;
@@ -12332,16 +12533,27 @@
         const cached = cache[String(id)];
         if (cached && cached.score) {
           pills.forEach(p => applyRtBadgeToEl(p, cached));
-          continue;
+        } else {
+          uncached.push(item);
         }
+      }
 
-        const itemType = item._type || type;
-        fetchRtRating(item, itemType).then(data => {
-          if (data) {
-            const els = document.querySelectorAll(`[data-rt-id="${id}"]`);
-            els.forEach(el => applyRtBadgeToEl(el, data));
-          }
-        });
+      if (!uncached.length) return;
+
+      const isTV = (window.DEVICE && window.DEVICE.isTV) || _tvMode || document.body.classList.contains('tv-mode') || document.body.classList.contains('device-tv');
+      // Throttled concurrency: 4 concurrent on TV, 8 concurrent on PC/Mobile to optimize network/CPU
+      const batchSize = isTV ? 4 : 8;
+      for (let i = 0; i < uncached.length; i += batchSize) {
+        const batch = uncached.slice(i, i + batchSize);
+        await Promise.all(batch.map(item => {
+          const itemType = item._type || type;
+          return fetchRtRating(item, itemType).then(data => {
+            if (data) {
+              const els = document.querySelectorAll(`[data-rt-id="${item.id}"]`);
+              els.forEach(el => applyRtBadgeToEl(el, data));
+            }
+          });
+        }));
       }
     }
 
@@ -12651,6 +12863,7 @@
         
         row.innerHTML = validMovies.map((item, i) => buildTrendingCard(item, i + 1, 'movie', watchDatas[i])).join('');
         addCardListeners(row, '.trending-card');
+        hydrateSectionRtRatings(validMovies, 'movie');
       } catch (e) {
         console.warn('loadSinSubMovies failed:', e);
       }
@@ -13233,6 +13446,7 @@
           const cardsHtml = pageItems.map(m => buildCard(m, null, _currentCatMediaType, null)).join('');
           grid.innerHTML = cardsHtml || `<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--muted)">No titles found in this category.</div>`;
           addCardListeners(grid, '.movie-card');
+          hydrateSectionRtRatings(pageItems.slice(0, 30), _currentCatMediaType);
         }
 
         renderCategoryPagination(page, totalViewPages);
@@ -13426,6 +13640,7 @@
       grid.innerHTML = movies.map((m, i) => buildCard(m, null, 'movie', watchDatas[i])).join('');
       animateGrid(grid);
       addCardListeners(grid, '.movie-card');
+      hydrateSectionRtRatings(movies.slice(0, 30), 'movie');
     }
 
     async function loadDiscoverTV() {
@@ -13455,6 +13670,7 @@
       grid.innerHTML = shows.map((s, i) => buildCard(s, null, 'tv', watchDatas[i])).join('');
       animateGrid(grid);
       addCardListeners(grid, '.movie-card');
+      hydrateSectionRtRatings(shows.slice(0, 30), 'tv');
     }
 
     // Keep old names as aliases for genre-only calls
@@ -14374,7 +14590,7 @@
 
         document.getElementById('modalRatings').innerHTML = `
       <div class="rating-badge imdb-badge" id="modal-imdb"><i class="fa-solid fa-star" style="color:#F5C518;margin-right:4px;"></i> ${details.vote_average ? details.vote_average.toFixed(1) : '—'} TMDB</div>
-      <div class="rating-badge rt-badge" id="modal-rt" style="display:none;"><span class="rt-icon" style="margin-right:5px;display:inline-flex;align-items:center;"></span> <span id="modalRtScore"></span> Rotten Tomatoes</div>
+      <div class="rating-badge rt-badge" id="modal-rt" style="display:none;"><span class="rt-icon" style="margin-right:5px;display:inline-flex;align-items:center;"></span> <span id="modalRtScore"></span> <span class="rt-label-full">Rotten Tomatoes</span><span class="rt-label-short">RT</span></div>
       ${trailerBtn}
     `;
         updateModalRtBadge(details, type);
@@ -19665,6 +19881,7 @@
           _searchResults.innerHTML = results.map((r, i) => buildCard(r, null, r.media_type, watchDatas[i])).join('');
           gsap.fromTo('#searchResults .movie-card', { opacity: 0, y: 20 }, { opacity: 1, y: 0, stagger: .05, duration: .3, ease: 'power3.out' });
           addCardListeners(_searchResults, '.movie-card');
+          hydrateSectionRtRatings(results.slice(0, 20));
         } catch (err) {
           console.error('Search error:', err);
         }
