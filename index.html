@@ -12662,13 +12662,10 @@
         <div class="top10-rank">${rank}</div>
         <div class="top10-card">
           <div class="top10-today-tag"><i class="fa-solid fa-chart-line"></i> #${rank} TODAY</div>
-          <div class="top10-badges-top">
-            ${vote ? buildRatingRing(vote, `${item.id}-top10`, true) : ''}
-            ${hasSub ? `
-              <div class="card-sinsub-badge" title="Sinhala Subtitle Available" style="margin:0;position:static;">
-                <img src="/sinhala-sub.png" alt="Sinhala Subtitle">
-              </div>` : ''}
-          </div>
+          ${hasSub ? `
+            <div class="card-sinsub-badge" title="Sinhala Subtitle Available" style="position:absolute;top:8px;right:8px;margin:0;z-index:4;">
+              <img src="/sinhala-sub.png" alt="Sinhala Subtitle">
+            </div>` : ''}
           <div class="top10-poster-wrap">
             ${poster ? `<img src="${poster}" alt="${title}" loading="lazy" decoding="async" onerror="handleImgError(this)">` :
               `<div style="width:100%;height:100%;background:var(--dark3);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.75rem">No Poster</div>`}
