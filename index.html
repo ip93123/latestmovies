@@ -10794,16 +10794,22 @@
     /* ── SIN SUB (Sinhala Subtitles) CATALOG & DYNAMIC SYNC ────── */
     window._dynamicSubCatalog = {};
 
-    function hasSinhalaSubtitle(id) {
+    function hasSinhalaSubtitle(id, subKey) {
       if (!id) return false;
       const sid = String(id);
+      const sk = subKey || sid;
       if (window._dynamicSubCatalog) {
-        if (window._dynamicSubCatalog[sid]) return true;
+        if (Array.isArray(window._dynamicSubCatalog._deletedKeys)) {
+          if (window._dynamicSubCatalog._deletedKeys.includes(sk) || window._dynamicSubCatalog._deletedKeys.includes(sid)) {
+            return false;
+          }
+        }
+        if (window._dynamicSubCatalog[sk] || window._dynamicSubCatalog[sid]) return true;
         for (const k in window._dynamicSubCatalog) {
           if (k === sid || k.startsWith(sid + '_')) return true;
         }
       }
-      return !!(typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP[sid]);
+      return !!(typeof SUBTITLE_MAP !== 'undefined' && (SUBTITLE_MAP[sk] || SUBTITLE_MAP[sid]));
     }
 
     const SINSUB_MOVIE_IDS = [
@@ -10843,15 +10849,25 @@
 
     async function initDynamicSubtitles() {
       try {
-        const res = await fetch('/api/sub-catalog?all=1');
+        const res = await fetch(`/api/sub-catalog?all=1&_t=${Date.now()}`);
         if (res.ok) {
           const data = await res.json();
           if (data && data.catalog) {
             window._dynamicSubCatalog = data.catalog;
+            const deleted = Array.isArray(data.deletedKeys) ? data.deletedKeys : (Array.isArray(data.catalog._deletedKeys) ? data.catalog._deletedKeys : []);
+            window._dynamicSubCatalog._deletedKeys = deleted;
+            // Remove deleted IDs from hardcoded lists
+            for (const d of deleted) {
+              const idxM = SINSUB_MOVIE_IDS.indexOf(String(d));
+              if (idxM !== -1) SINSUB_MOVIE_IDS.splice(idxM, 1);
+              const idxT = SINSUB_TV_IDS.indexOf(String(d));
+              if (idxT !== -1) SINSUB_TV_IDS.splice(idxT, 1);
+            }
             // Sync with SINSUB_MOVIE_IDS and SINSUB_TV_IDS
             Object.values(data.catalog).forEach(item => {
               if (!item || !item.tmdbId) return;
               const tid = String(item.tmdbId);
+              if (deleted.includes(tid)) return;
               if (item.mediaType === 'tv') {
                 if (!SINSUB_TV_IDS.includes(tid)) SINSUB_TV_IDS.unshift(tid);
               } else {
@@ -12147,7 +12163,7 @@
       const s = season || 1;
       const e = episode || 1;
       const subKey = (type === 'tv') ? `${id}_S${s}_E${e}` : String(id);
-      const hasSinhalaSub = !!(typeof SUBTITLE_MAP !== 'undefined' && (SUBTITLE_MAP[subKey] || SUBTITLE_MAP[String(id)]));
+      const hasSinhalaSub = hasSinhalaSubtitle(id, subKey);
 
       // Try the backend API first (hides URLs from source code when deployed)
       try {
@@ -15895,7 +15911,9 @@
     async function _loadMaxSubtitleTracks(tmdbId, imdbId, type, season, episode, activeSubUrl) {
       _mxsTracks = [];
       const subKey = (type === 'tv') ? `${tmdbId}_S${season || 1}_E${episode || 1}` : String(tmdbId);
-      const localSub = typeof SUBTITLE_MAP !== 'undefined' ? (SUBTITLE_MAP[subKey] || SUBTITLE_MAP[String(tmdbId)]) : null;
+      const isDeleted = window._dynamicSubCatalog && Array.isArray(window._dynamicSubCatalog._deletedKeys) &&
+        (window._dynamicSubCatalog._deletedKeys.includes(subKey) || window._dynamicSubCatalog._deletedKeys.includes(String(tmdbId)));
+      const localSub = (!isDeleted && typeof SUBTITLE_MAP !== 'undefined') ? (SUBTITLE_MAP[subKey] || SUBTITLE_MAP[String(tmdbId)]) : null;
       if (localSub) {
         _mxsTracks.push({
           id: 'sinhala',
@@ -15904,7 +15922,7 @@
           url: localSub,
           source: 'master'
         });
-      } else if (window._dynamicSubCatalog && (window._dynamicSubCatalog[subKey] || window._dynamicSubCatalog[String(tmdbId)])) {
+      } else if (!isDeleted && window._dynamicSubCatalog && (window._dynamicSubCatalog[subKey] || window._dynamicSubCatalog[String(tmdbId)])) {
         _mxsTracks.push({
           id: 'sinhala',
           lang: 'si',
@@ -16044,7 +16062,9 @@
       _lastIframeSubCueText = null;
       window._subPausedElapsed = null;
 
-      const localSub = typeof SUBTITLE_MAP !== 'undefined' ? (SUBTITLE_MAP[subKey] || SUBTITLE_MAP[String(activeId)]) : null;
+      const isDeleted = window._dynamicSubCatalog && Array.isArray(window._dynamicSubCatalog._deletedKeys) &&
+        (window._dynamicSubCatalog._deletedKeys.includes(subKey) || window._dynamicSubCatalog._deletedKeys.includes(String(activeId)));
+      const localSub = (!isDeleted && typeof SUBTITLE_MAP !== 'undefined') ? (SUBTITLE_MAP[subKey] || SUBTITLE_MAP[String(activeId)]) : null;
       let srtText = null;
       let subLabel = 'Sinhala 🇱🇰';
 
@@ -16053,7 +16073,7 @@
       }
 
       // Check dynamic catalog from contributor uploads
-      if (!srtText && window._dynamicSubCatalog) {
+      if (!isDeleted && !srtText && window._dynamicSubCatalog) {
         const dynItem = window._dynamicSubCatalog[subKey] || window._dynamicSubCatalog[String(activeId)];
         if (dynItem) {
           const directServeUrl = `/api/subtitles?id=${activeId}&type=${_currentModalType || 'movie'}${_selectedSeason ? `&season=${_selectedSeason}` : ''}${_selectedEpisode ? `&episode=${_selectedEpisode}` : ''}&serve=1`;
@@ -16061,8 +16081,8 @@
         }
       }
 
-      // If not in local SUBTITLE_MAP or dynamic catalog, query /api/subtitles for Sinhala track
-      if (!srtText) {
+      // If not in local SUBTITLE_MAP or dynamic catalog, and not deleted, query /api/subtitles for Sinhala track
+      if (!isDeleted && !srtText) {
         try {
           const p = new URLSearchParams({ id: activeId, type: _currentModalType || 'movie' });
           if (_selectedSeason) p.set('season', _selectedSeason);
@@ -16461,7 +16481,7 @@
       const rawSubId = _currentModalId || window._currentPlayingId || (window._currentModalItem && window._currentModalItem.id) || new URLSearchParams(window.location.search).get('m') || new URLSearchParams(window.location.search).get('s');
       const activeSubId = rawSubId ? (String(rawSubId).includes('-') ? (parseInt(rawSubId, 10) || rawSubId) : rawSubId) : null;
       const subKey = (_currentModalType === 'tv') ? `${activeSubId}_S${_selectedSeason || 1}_E${_selectedEpisode || 1}` : String(activeSubId);
-      const hasSinhalaSub = !!(activeSubId && typeof SUBTITLE_MAP !== 'undefined' && (SUBTITLE_MAP[subKey] || SUBTITLE_MAP[String(activeSubId)]));
+      const hasSinhalaSub = activeSubId ? hasSinhalaSubtitle(activeSubId, subKey) : false;
 
       if (hasSinhalaSub) {
         _showSubToast(`Switched to <strong>${_escHtml(sName)}</strong> • Sinhala Subtitles Active`, 3200);

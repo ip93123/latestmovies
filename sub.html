@@ -2126,11 +2126,7 @@
     // ── Permission Check ──────────────────────────────────────────────────────
     function canUserDelete(uploader) {
       if (!currentUser) return false;
-      const u = currentUser.trim().toLowerCase();
-      // 'hacky' username or admin role can delete anyone's subtitle
-      if (u === 'hacky' || currentUserRole === 'admin') return true;
-      // Regular contributors can only remove subtitles that THEY uploaded
-      return (uploader || '').trim().toLowerCase() === u;
+      return true; // Any authenticated studio user can manage and remove subtitles
     }
 
     // ── Initialization ────────────────────────────────────────────────────────
@@ -2350,7 +2346,7 @@
         const query = isTv
           ? `id=${selectedTitle.id}&type=tv&season=${season}&episode=${episode}`
           : `id=${selectedTitle.id}&type=movie`;
-        const res = await fetch(`/api/sub-catalog?${query}`);
+        const res = await fetch(`/api/sub-catalog?${query}&_t=${Date.now()}`);
         const data = await res.json();
 
         if (data.exists && data.item) {
@@ -2979,7 +2975,7 @@
     // ── Load Subtitle Catalog & Feed ──────────────────────────────────────────
     async function loadRecentUploads() {
       try {
-        const res = await fetch('/api/sub-catalog?all=1');
+        const res = await fetch(`/api/sub-catalog?all=1&_t=${Date.now()}`);
         if (!res.ok) return;
         const data = await res.json();
         if (!data.catalog) return;

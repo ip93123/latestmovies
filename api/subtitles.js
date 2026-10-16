@@ -147,7 +147,7 @@ export default async function handler(req, res) {
       } else {
         res.setHeader('Content-Type', 'text/plain; charset=utf-8');
       }
-      res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.setHeader('Cache-Control', 'public, max-age=30, s-maxage=60, stale-while-revalidate=120');
       return res.status(200).send(text);
     } catch (err) {
       return res.status(500).json({ error: 'Failed to proxy subtitle: ' + err.message });
@@ -155,21 +155,32 @@ export default async function handler(req, res) {
   }
 
   const subKey = type === 'tv' ? `${id}_S${season}_E${episode}` : `${id}`;
-  const localSinhalaSub = SUBTITLE_MAP[subKey] || SUBTITLE_MAP[id] || null;
+  let isDeleted = false;
+  let catalogItem = null;
 
   // Load dynamic catalog (R2 and contributor uploads)
-  let catalogItem = null;
   try {
     const { loadCatalogAsync } = await import('./sub-api.js');
     const catalog = await loadCatalogAsync();
-    catalogItem = catalog[subKey] || catalog[id] || null;
+    if (Array.isArray(catalog._deletedKeys) && (catalog._deletedKeys.includes(subKey) || catalog._deletedKeys.includes(String(id)))) {
+      isDeleted = true;
+    }
+    if (!isDeleted) {
+      catalogItem = catalog[subKey] || catalog[id] || null;
+    }
   } catch (_) {}
 
-  const sinhalaSubUrl = catalogItem?.url || localSinhalaSub;
+  const localSinhalaSub = isDeleted ? null : (SUBTITLE_MAP[subKey] || SUBTITLE_MAP[id] || null);
+  const sinhalaSubUrl = isDeleted ? null : (catalogItem?.url || localSinhalaSub);
   const isServe = isVtt || String(req.query.serve) === '1' || String(req.query.stream) === '1' || (req.url && (req.url.includes('serve=1') || req.url.includes('stream=1')));
 
   // Mode 2: Serve subtitle directly as text / WebVTT for embed players (VidLink, Max Player, etc.)
   if (id && isServe) {
+    if (isDeleted) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      return res.status(404).send('Subtitle content removed');
+    }
+
     let rawText = '';
 
     // 1. Try Cloudflare R2 first
@@ -216,7 +227,7 @@ export default async function handler(req, res) {
     if (rawText && rawText.trim().length > 0) {
       rawText = sanitizeSrtText(rawText);
       res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.setHeader('Cache-Control', 'public, max-age=30, s-maxage=60, stale-while-revalidate=120');
       if (isVtt) {
         res.setHeader('Content-Type', 'text/vtt; charset=utf-8');
         return res.status(200).send(srtToVtt(rawText));
@@ -226,6 +237,7 @@ export default async function handler(req, res) {
       }
     }
 
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     return res.status(404).send('Subtitle content not found');
   }
 
@@ -292,8 +304,8 @@ export default async function handler(req, res) {
 
         const isNotArabic = s => s.url && !s.url.includes('/ar/') && !s.url.includes('/ara/') && s.lang !== 'ar' && s.lang !== 'ara';
 
-        // Check for Sinhala from OpenSubtitles if no local Sinhala sub exists
-        if (!localSinhalaSub) {
+        // Check for Sinhala from OpenSubtitles if no local Sinhala sub exists and not explicitly deleted
+        if (!sinhalaSubUrl && !isDeleted) {
           const sinSubs = rawSubs.filter(s => (s.lang === 'sin' || s.lang === 'si') && isNotArabic(s));
           if (sinSubs.length > 0) {
             tracks.push({
@@ -310,7 +322,7 @@ export default async function handler(req, res) {
     } catch (_) {}
   }
 
-  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.setHeader('Cache-Control', 'public, max-age=10, s-maxage=30, stale-while-revalidate=60');
   return res.status(200).json({
     id,
     imdb: resolvedImdb,

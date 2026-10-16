@@ -174,9 +174,9 @@ export function getCatalogFilePath() {
   return path.join(process.cwd(), 'Subtitle', 'catalog.json');
 }
 
-export async function loadCatalogAsync() {
+export async function loadCatalogAsync(forceFresh = false) {
   const now = Date.now();
-  if (_catalogCache && (now - _catalogCacheTime < 20000)) {
+  if (!forceFresh && _catalogCache && (now - _catalogCacheTime < 3000)) {
     return _catalogCache;
   }
   const catalog = { ...SEED_TITLES };
@@ -202,6 +202,13 @@ export async function loadCatalogAsync() {
     console.warn('[sub-catalog] Failed to load catalog from R2:', err.message);
   }
 
+  // Tombstone suppression: any key marked in _deletedKeys is permanently suppressed
+  if (Array.isArray(catalog._deletedKeys)) {
+    for (const delKey of catalog._deletedKeys) {
+      delete catalog[delKey];
+    }
+  }
+
   _catalogCache = catalog;
   _catalogCacheTime = now;
   return catalog;
@@ -218,6 +225,11 @@ export function loadCatalog() {
     }
   } catch (err) {
     console.error('[sub-catalog] Error loading catalog.json:', err.message);
+  }
+  if (Array.isArray(catalog._deletedKeys)) {
+    for (const delKey of catalog._deletedKeys) {
+      delete catalog[delKey];
+    }
   }
   _catalogCache = catalog;
   return catalog;
@@ -252,18 +264,33 @@ export async function saveCatalog(catalog) {
 }
 
 async function handleCatalog(req, res) {
-  const { id, type = 'movie', season = 1, episode = 1, recent, all } = req.query;
-  const catalog = await loadCatalogAsync();
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+
+  const { id, type = 'movie', season = 1, episode = 1, recent, all, fresh } = req.query;
+  const catalog = await loadCatalogAsync(fresh === '1' || fresh === 'true');
 
   if (all === '1' || all === 'true') {
-    return res.status(200).json({ total: Object.keys(catalog).length, catalog });
+    const safeCatalog = { ...catalog };
+    const deletedKeys = Array.isArray(catalog._deletedKeys) ? [...catalog._deletedKeys] : [];
+    delete safeCatalog._deletedKeys;
+    safeCatalog._deletedKeys = deletedKeys;
+    return res.status(200).json({
+      total: Object.keys(safeCatalog).filter(k => k !== '_deletedKeys').length,
+      catalog: safeCatalog,
+      deletedKeys
+    });
   }
 
   if (recent === '1' || recent === 'true') {
-    const list = Object.entries(catalog).map(([k, item]) => ({
-      key: k,
-      ...item
-    })).sort((a, b) => (b.uploadedAt || 0) - (a.uploadedAt || 0)).slice(0, 25);
+    const list = Object.entries(catalog)
+      .filter(([k]) => k !== '_deletedKeys')
+      .map(([k, item]) => ({
+        key: k,
+        ...item
+      })).sort((a, b) => (b.uploadedAt || 0) - (a.uploadedAt || 0)).slice(0, 25);
     return res.status(200).json({ recent: list });
   }
 
@@ -410,6 +437,9 @@ async function handleUpload(req, res) {
     } catch (_) {}
 
     const catalog = await loadCatalogAsync();
+    if (Array.isArray(catalog._deletedKeys)) {
+      catalog._deletedKeys = catalog._deletedKeys.filter(k => k !== subKey && k !== String(tmdbId));
+    }
     catalog[subKey] = {
       tmdbId,
       mediaType: type,
@@ -442,6 +472,9 @@ async function handleUpload(req, res) {
 
     const subKey = type === 'tv' ? `${tmdbId}_S${season}_E${episode}` : `${tmdbId}`;
     const catalog = await loadCatalogAsync();
+    if (Array.isArray(catalog._deletedKeys)) {
+      catalog._deletedKeys = catalog._deletedKeys.filter(k => k !== subKey && k !== String(tmdbId));
+    }
 
     catalog[subKey] = {
       tmdbId,
@@ -502,49 +535,87 @@ async function handleDelete(req, res) {
   }
 
   const catalog = await loadCatalogAsync();
-  const item = catalog[targetKey];
+  const cleanTmdbId = String(tmdbId || targetKey.split('_')[0] || '');
+  const item = catalog[targetKey] || (cleanTmdbId ? catalog[cleanTmdbId] : null);
 
-  if (!item) {
-    return res.status(404).json({ error: 'Subtitle not found in catalog' });
+  // 1. Gather all possible Cloudflare R2 file key variants to thoroughly purge
+  const r2KeysToDelete = new Set();
+  const ext = item?.format || 'srt';
+
+  r2KeysToDelete.add(`subtitles/${targetKey}.${ext}`);
+  r2KeysToDelete.add(`subtitles/${targetKey}.srt`);
+  r2KeysToDelete.add(`subtitles/${targetKey}.vtt`);
+
+  if (cleanTmdbId) {
+    r2KeysToDelete.add(`subtitles/${cleanTmdbId}.${ext}`);
+    r2KeysToDelete.add(`subtitles/${cleanTmdbId}.srt`);
+    r2KeysToDelete.add(`subtitles/${cleanTmdbId}.vtt`);
+    const sNum = season || 1;
+    const eNum = episode || 1;
+    r2KeysToDelete.add(`subtitles/${cleanTmdbId}/S${String(sNum).padStart(2, '0')}E${String(eNum).padStart(2, '0')}.srt`);
+    r2KeysToDelete.add(`subtitles/${cleanTmdbId}/S${sNum}E${eNum}.srt`);
+    r2KeysToDelete.add(`subtitles/${cleanTmdbId}_S${sNum}_E${eNum}.srt`);
+    r2KeysToDelete.add(`subtitles/${cleanTmdbId}_S${sNum}_E${eNum}.vtt`);
   }
 
-  // Permission rules:
-  // 1. 'hacky' username or admin role can delete ANY subtitle in catalog
-  // 2. Normal contributors can ONLY delete subtitles that THEY uploaded
-  const isSuperAdmin = (verified.u && verified.u.toLowerCase() === 'hacky') || verified.r === 'admin';
-  const isOwner = (item.uploader || '').trim().toLowerCase() === (verified.u || '').trim().toLowerCase();
-
-  if (!isSuperAdmin && !isOwner) {
-    return res.status(403).json({
-      error: `Permission denied: Subtitle was uploaded by "${item.uploader || 'another user'}". You can only remove subtitles you uploaded.`
-    });
+  if (item?.url && typeof item.url === 'string') {
+    if (item.url.includes('subtitles/')) {
+      const parts = item.url.split('subtitles/');
+      if (parts[1]) {
+        r2KeysToDelete.add(`subtitles/${parts[1].split('?')[0]}`);
+      }
+    }
   }
 
-  // 1. Attempt Cloudflare R2 file removal
+  // Attempt Cloudflare R2 file removal across all candidate keys
   try {
-    const ext = item.format || 'srt';
-    const r2Key = `subtitles/${targetKey}.${ext}`;
-    await deleteR2Object({ key: r2Key });
+    const deletePromises = Array.from(r2KeysToDelete).map(k => deleteR2Object({ key: k }).catch(err => {
+      console.warn(`[sub-delete] Non-fatal R2 delete error for ${k}:`, err.message);
+    }));
+    await Promise.allSettled(deletePromises);
   } catch (err) {
-    console.warn('[sub-delete] Failed to delete file from R2:', err.message);
+    console.warn('[sub-delete] Failed during R2 batch delete:', err.message);
   }
 
   // 2. Attempt local file removal (if exists)
   try {
-    const ext = item.format || 'srt';
-    const localUploadPath = path.join(process.cwd(), 'Subtitle', 'uploads', `${targetKey}.${ext}`);
-    if (fs.existsSync(localUploadPath)) {
-      fs.unlinkSync(localUploadPath);
+    const localUploadsDir = path.join(process.cwd(), 'Subtitle', 'uploads');
+    const localCandidates = [
+      path.join(localUploadsDir, `${targetKey}.${ext}`),
+      path.join(localUploadsDir, `${targetKey}.srt`),
+      path.join(localUploadsDir, `${targetKey}.vtt`),
+      cleanTmdbId ? path.join(localUploadsDir, `${cleanTmdbId}.${ext}`) : null,
+      cleanTmdbId ? path.join(localUploadsDir, `${cleanTmdbId}.srt`) : null
+    ].filter(Boolean);
+
+    for (const p of localCandidates) {
+      if (fs.existsSync(p)) {
+        try { fs.unlinkSync(p); } catch (_) {}
+      }
     }
   } catch (_) {}
 
-  // 3. Remove entry from catalog and persist
+  // 3. Mark in catalog tombstones so hardcoded/cached seeds never revive it
+  if (!Array.isArray(catalog._deletedKeys)) {
+    catalog._deletedKeys = [];
+  }
+  if (!catalog._deletedKeys.includes(targetKey)) {
+    catalog._deletedKeys.push(targetKey);
+  }
+  if (cleanTmdbId && !catalog._deletedKeys.includes(cleanTmdbId)) {
+    catalog._deletedKeys.push(cleanTmdbId);
+  }
+
+  // Remove entries from in-memory catalog and persist
   delete catalog[targetKey];
+  if (cleanTmdbId) {
+    delete catalog[cleanTmdbId];
+  }
   await saveCatalog(catalog);
 
   return res.status(200).json({
     success: true,
-    message: `Subtitle for "${item.title || targetKey}" successfully removed.`,
+    message: `Subtitle for "${item?.title || targetKey}" successfully removed.`,
     key: targetKey
   });
 }

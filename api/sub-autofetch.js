@@ -146,6 +146,9 @@ export default async function handler(req, res) {
 
             // Update catalog
             const catalog = await loadCatalogAsync();
+            if (Array.isArray(catalog._deletedKeys)) {
+              catalog._deletedKeys = catalog._deletedKeys.filter(k => k !== catalogKey && k !== String(tmdbId));
+            }
             catalog[catalogKey] = {
               title: finalQuery,
               tmdbId: String(tmdbId),
