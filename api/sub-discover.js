@@ -142,8 +142,8 @@ export default async function handler(req, res) {
           vote_count: m.vote_count || 0,
           original_language: m.original_language || 'en',
           overview: m.overview || '',
-          poster_path: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : null,
-          backdrop_path: m.backdrop_path ? `https://image.tmdb.org/t/p/w1280${m.backdrop_path}` : null,
+          poster_path: m.poster_path ? `https://img.hackymax.fun/t/p/w500${m.poster_path}` : null,
+          backdrop_path: m.backdrop_path ? `https://img.hackymax.fun/t/p/w1280${m.backdrop_path}` : null,
           hasSubtitle,
           existingSub: existingSub ? {
             source: existingSub.source,
