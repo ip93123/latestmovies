@@ -1574,18 +1574,39 @@
       filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.95)) !important;
     }
 
+    .category-card .cat-card-sinsub-img,
+    .category-card-native .cat-card-sinsub-img,
     .cat-card-sinsub-img {
-      height: clamp(14px, 3.2vw, 18px);
-      width: auto;
-      display: inline-block;
-      vertical-align: middle;
+      position: static !important;
+      width: auto !important;
+      max-width: none !important;
+      height: 20px !important;
+      max-height: 22px !important;
+      object-fit: contain !important;
+      display: inline-block !important;
+      vertical-align: middle !important;
+      filter: none !important;
+      transform: none !important;
+      z-index: 5 !important;
+      margin-right: 6px !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      pointer-events: auto !important;
     }
+    .device-mobile .category-card .cat-card-sinsub-img,
+    .device-mobile .category-card-native .cat-card-sinsub-img,
     .device-mobile .cat-card-sinsub-img {
-      height: 14px !important;
+      height: 16px !important;
+      max-height: 18px !important;
+      margin-right: 4px !important;
     }
+    .device-tv .category-card .cat-card-sinsub-img,
+    .tv-mode .category-card .cat-card-sinsub-img,
     .device-tv .cat-card-sinsub-img,
     .tv-mode .cat-card-sinsub-img {
-      height: 28px !important;
+      height: 26px !important;
+      max-height: 28px !important;
+      margin-right: 8px !important;
     }
 
     /* Detail Modal Sinhala Subtitle Badge */
@@ -2674,7 +2695,8 @@
       box-shadow: 0 16px 36px rgba(0, 0, 0, 0.75), 0 0 25px var(--cat-accent, rgba(232, 201, 122, 0.4));
       border-color: rgba(255, 255, 255, 0.4);
     }
-    .category-card img {
+    .category-card > img,
+    .category-card img.category-card-bg {
       position: absolute;
       right: 0;
       top: 0;
@@ -2686,7 +2708,8 @@
       filter: brightness(1.05) contrast(1.05) saturate(1.08);
       z-index: 1;
     }
-    .category-card:hover img {
+    .category-card:hover > img,
+    .category-card:hover img.category-card-bg {
       transform: scale(1.08);
       filter: brightness(1.15) contrast(1.1) saturate(1.15);
     }
@@ -7898,7 +7921,8 @@
     .device-mobile .category-card:active {
       transform: none !important;
     }
-    .device-mobile .category-card img {
+    .device-mobile .category-card > img,
+    .device-mobile .category-card img.category-card-bg {
       transition: none !important;
       filter: none !important;
     }
@@ -8296,14 +8320,18 @@
       transform: none !important;
       box-shadow: 0 2px 8px rgba(0,0,0,0.5) !important;
     }
-    .device-tv .category-card img,
-    .tv-mode .category-card img {
+    .device-tv .category-card > img,
+    .tv-mode .category-card > img,
+    .device-tv .category-card img.category-card-bg,
+    .tv-mode .category-card img.category-card-bg {
       transition: none !important;
       transform: none !important;
       filter: none !important;
     }
-    .device-tv .category-card:hover img,
-    .tv-mode .category-card:hover img {
+    .device-tv .category-card:hover > img,
+    .tv-mode .category-card:hover > img,
+    .device-tv .category-card:hover img.category-card-bg,
+    .tv-mode .category-card:hover img.category-card-bg {
       transform: none !important;
       filter: none !important;
     }
@@ -11110,7 +11138,7 @@
         langRow.innerHTML = CATEGORIES_DATA.languages.map(l => {
           return `
             <div class="category-card" tabindex="0" role="button" aria-label="${l.title} · ${l.sub}" data-cat-type="language" data-cat-key="${l.code}" style="--cat-accent:${l.accent}">
-              <img src="${imgUrl(l.img)}" alt="${l.sub}" loading="lazy" decoding="async" onerror="handleImgError(this)">
+              <img class="category-card-bg" src="${imgUrl(l.img)}" alt="${l.sub}" loading="lazy" decoding="async" onerror="handleImgError(this)">
               <div class="category-card-overlay"></div>
               <div class="category-card-tint"></div>
               <div class="category-card-content">
@@ -11126,7 +11154,7 @@
         genreRow.innerHTML = CATEGORIES_DATA.genres.map(g => {
           return `
             <div class="category-card" tabindex="0" role="button" aria-label="${g.title} · ${g.sub}" data-cat-type="genre" data-cat-key="${g.id}" style="--cat-accent:${g.accent}">
-              <img src="${imgUrl(g.img)}" alt="${g.title}" loading="lazy" decoding="async" onerror="handleImgError(this)">
+              <img class="category-card-bg" src="${imgUrl(g.img)}" alt="${g.title}" loading="lazy" decoding="async" onerror="handleImgError(this)">
               <div class="category-card-overlay"></div>
               <div class="category-card-tint"></div>
               <div class="category-card-content">

@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
     :root {
       --bg: #07090F;
@@ -1658,6 +1659,214 @@
       color: #70A1FF;
     }
 
+    .no-subs-card {
+      background: linear-gradient(135deg, rgba(231, 76, 60, 0.08), rgba(18, 24, 38, 0.95));
+      border: 1.5px dashed rgba(231, 76, 60, 0.4);
+      border-radius: var(--radius-md);
+      padding: 1.4rem;
+      margin-bottom: 1.2rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .no-subs-content {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .no-subs-icon-wrap {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(231, 76, 60, 0.15);
+      border: 1px solid rgba(231, 76, 60, 0.4);
+      color: #E74C3C;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+
+    .no-subs-heading {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .no-subs-message {
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      margin-top: 5px;
+      line-height: 1.5;
+    }
+
+    .no-subs-tip {
+      font-size: 0.8rem;
+      color: var(--gold);
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Season Pack / Batch Upload Styles */
+    .season-pack-box {
+      background: linear-gradient(135deg, rgba(46, 204, 113, 0.08), rgba(18, 24, 38, 0.95));
+      border: 1.5px solid rgba(46, 204, 113, 0.4);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      margin-top: 1rem;
+      margin-bottom: 1.2rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .season-pack-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .season-pack-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(46, 204, 113, 0.18);
+      border: 1px solid rgba(46, 204, 113, 0.4);
+      color: #2ECC71;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .season-pack-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #fff;
+    }
+
+    .season-pack-sub {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .season-pack-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: var(--radius-sm);
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .season-num-input {
+      width: 60px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      color: #fff;
+      font-weight: 700;
+      padding: 4px 8px;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .season-pack-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 8px;
+      max-height: 280px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .season-pack-grid::-webkit-scrollbar {
+      width: 6px;
+    }
+    .season-pack-grid::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+
+    .season-ep-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 7px 10px;
+      font-size: 0.78rem;
+    }
+
+    .season-ep-item.uploaded {
+      border-color: rgba(46, 204, 113, 0.5);
+      background: rgba(46, 204, 113, 0.1);
+    }
+
+    .season-ep-badge {
+      background: rgba(232, 201, 122, 0.18);
+      color: var(--gold);
+      border: 1px solid rgba(232, 201, 122, 0.35);
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      white-space: nowrap;
+    }
+
+    .season-ep-name {
+      color: #e2e8f0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+
+    .btn-batch-upload {
+      width: 100%;
+      background: linear-gradient(135deg, #2ECC71 0%, #27AE60 100%);
+      color: #051A0E;
+      border: none;
+      padding: 13px 24px;
+      border-radius: var(--radius-sm);
+      font-weight: 800;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 18px rgba(46, 204, 113, 0.35);
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn-batch-upload:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(46, 204, 113, 0.5);
+    }
+
+    .btn-batch-upload:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
     .hacky-admin-badge {
       display: inline-flex;
       align-items: center;
@@ -1970,6 +2179,26 @@
           <div id="multiSourceList" class="multi-source-grid"></div>
         </div>
 
+        <!-- No Subtitle Found Notice Card -->
+        <div id="noSubsFoundBox" class="no-subs-card" style="display:none;">
+          <div class="no-subs-content">
+            <div class="no-subs-icon-wrap">
+              <i class="fa-solid fa-file-circle-xmark"></i>
+            </div>
+            <div>
+              <div class="no-subs-heading">
+                <span>No Sinhala Subtitle Found on Web</span>
+              </div>
+              <div class="no-subs-message" id="noSubsMessage">
+                Searched Baiscope.lk, Zoom.lk and Subz.lk, but no verified Sinhala subtitle was released yet for this title.
+              </div>
+              <div class="no-subs-tip">
+                <i class="fa-regular fa-lightbulb"></i> Have your own .srt file? Drag &amp; drop or upload it below to link it!
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div style="display:flex;align-items:center;margin:1rem 0;color:var(--text-muted);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;">
           <div style="flex:1;height:1px;background:var(--border);"></div>
           <span style="padding:0 12px;">OR MANUAL UPLOAD</span>
@@ -1982,12 +2211,12 @@
             <polyline points="17 8 12 3 7 8"></polyline>
             <line x1="12" y1="3" x2="12" y2="15"></line>
           </svg>
-          <div class="upload-title">Choose subtitle file or drag &amp; drop here</div>
-          <div class="upload-sub">Supports .srt, .vtt, .sub, and .idx files up to 20MB</div>
-          <input type="file" id="subFileInput" class="file-input-hidden" accept=".srt,.vtt,.sub,.idx" onchange="handleFileSelected(event)">
+          <div class="upload-title">Choose subtitle file, ZIP season pack, or drag &amp; drop here</div>
+          <div class="upload-sub">Supports single .srt, multi-episode selection, or full season .zip packs up to 25MB</div>
+          <input type="file" id="subFileInput" class="file-input-hidden" accept=".srt,.vtt,.sub,.idx,.zip" multiple onchange="handleFileSelected(event)">
         </div>
 
-        <!-- Selected File Preview -->
+        <!-- Selected File Preview (Single File) -->
         <div id="filePreviewBox" class="file-preview" style="display:none;">
           <div class="file-meta">
             <span id="fileBadge" class="file-ext-badge">SRT</span>
@@ -2004,6 +2233,40 @@
               <i class="fa-solid fa-download"></i> <span>Download .srt</span>
             </button>
             <button type="button" class="btn-secondary" onclick="clearSelectedFile()">Change File</button>
+          </div>
+        </div>
+
+        <!-- Season Pack / Batch Episodes Preview Box -->
+        <div id="seasonPackPreviewBox" class="season-pack-box" style="display:none;">
+          <div class="season-pack-header">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div class="season-pack-icon">
+                <i class="fa-solid fa-boxes-packing"></i>
+              </div>
+              <div>
+                <div class="season-pack-title" id="seasonPackTitle">Season Pack Detected</div>
+                <div class="season-pack-sub" id="seasonPackSub">Episodes ready to link</div>
+              </div>
+            </div>
+            <button type="button" class="btn-secondary" onclick="clearSelectedFile()">Clear Pack</button>
+          </div>
+
+          <!-- Season Selector Override for Pack -->
+          <div class="season-pack-controls" id="seasonPackControls">
+            <label style="font-size:0.8rem;color:var(--text-muted);font-weight:600;">Target Season:</label>
+            <input type="number" id="packSeasonOverride" min="1" max="99" value="1" class="season-num-input" oninput="handlePackSeasonChange(this.value)">
+            <span style="font-size:0.75rem;color:var(--gold);">Episodes will be linked to Season <strong id="packTargetSeasonNum">1</strong></span>
+          </div>
+
+          <!-- Episode Grid / List -->
+          <div class="season-pack-grid" id="seasonPackGrid"></div>
+
+          <!-- Batch Upload Action Button -->
+          <div style="margin-top:1.2rem;">
+            <button type="button" id="btnBatchUploadSeason" class="btn-batch-upload" onclick="startBatchSeasonUpload()">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <span id="btnBatchUploadText">🚀 Batch Upload All Episodes</span>
+            </button>
           </div>
         </div>
 
@@ -2328,11 +2591,20 @@
       document.getElementById('selectedTitleCard').style.display = 'flex';
       document.getElementById('uploadStepCard').style.display = 'block';
 
-      checkSubtitleStatus();
+      // Clear previous files / candidate states
+      clearSelectedFile();
+      autofetchedResults = [];
+      const multiBox = document.getElementById('multiSourceResults');
+      if (multiBox) multiBox.style.display = 'none';
+      const noSubsBox = document.getElementById('noSubsFoundBox');
+      if (noSubsBox) noSubsBox.style.display = 'none';
+
+      // Automatically check status and auto-fetch web subtitles
+      checkSubtitleStatus(true);
     }
 
     // ── Check "Already Subtitled" Status ──────────────────────────────────────
-    async function checkSubtitleStatus() {
+    async function checkSubtitleStatus(autoFetchWeb = false) {
       if (!selectedTitle) return;
       const isTv = selectedTitle.media_type === 'tv';
       const season = isTv ? document.getElementById('tvSeasonInput').value : 1;
@@ -2380,12 +2652,17 @@
         } else {
           banner.className = 'status-banner not-exists';
           titleEl.innerHTML = '⚠️ No Sinhala Subtitle Yet';
-          subEl.textContent = 'Auto-fetch from web or upload your own file!';
+          subEl.textContent = autoFetchWeb ? 'Auto-searching Baiscope.lk, Zoom.lk & Subz.lk...' : 'Auto-fetch from web or upload your own file!';
           actionWrap.innerHTML = `
             <button type="button" class="btn-autofetch-sm" onclick="triggerAutoFetchSub()">
               <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Fetch Sub
             </button>
           `;
+
+          // Auto-trigger web subtitle search immediately
+          if (autoFetchWeb) {
+            triggerAutoFetchSub();
+          }
         }
       } catch (err) {
         titleEl.textContent = 'Status check failed';
@@ -2410,13 +2687,349 @@
       });
       zone.addEventListener('drop', e => {
         const files = e.dataTransfer.files;
-        if (files && files.length > 0) processFile(files[0]);
+        if (files && files.length > 0) {
+          if (files.length > 1 || files[0].name.toLowerCase().endsWith('.zip')) {
+            processBatchOrZip(files);
+          } else {
+            processFile(files[0]);
+          }
+        }
       });
     }
 
     function handleFileSelected(e) {
-      if (e.target.files && e.target.files.length > 0) {
-        processFile(e.target.files[0]);
+      const files = e.target.files;
+      if (files && files.length > 0) {
+        if (files.length > 1 || files[0].name.toLowerCase().endsWith('.zip')) {
+          processBatchOrZip(files);
+        } else {
+          processFile(files[0]);
+        }
+      }
+    }
+
+    // ── Season Pack / Batch Episode Upload Handlers ─────────────────────────
+    let currentSeasonPackEpisodes = [];
+    let currentSeasonPackTargetSeason = 1;
+
+    function parseEpisodeAndSeason(filename, fallbackSeason = 1) {
+      const clean = filename.replace(/\.(srt|vtt|sub|idx)$/i, '');
+      let s = fallbackSeason;
+      let e = null;
+
+      // 1. Standard S04E02 or s4e2 pattern
+      const sMatch = clean.match(/s(\d+)[\s._-]*e(\d+)/i);
+      if (sMatch) {
+        s = parseInt(sMatch[1], 10);
+        e = parseInt(sMatch[2], 10);
+        return { season: s, episode: e };
+      }
+
+      // 2. 4x02 or 04x02 pattern
+      const xMatch = clean.match(/\b(\d{1,2})x(\d{1,3})\b/i);
+      if (xMatch) {
+        s = parseInt(xMatch[1], 10);
+        e = parseInt(xMatch[2], 10);
+        return { season: s, episode: e };
+      }
+
+      // 3. Season pattern in filename
+      const seasonOnlyMatch = clean.match(/(?:season|s)[\s._-]*(\d+)/i);
+      if (seasonOnlyMatch) {
+        s = parseInt(seasonOnlyMatch[1], 10);
+      }
+
+      // 4. Episode / Ep pattern: Ep01, Episode 5, E03
+      const epMatch = clean.match(/\b(?:episode|ep|e)[\s._-]*(\d+)\b/i);
+      if (epMatch) {
+        e = parseInt(epMatch[1], 10);
+        return { season: s, episode: e };
+      }
+
+      // 5. Trailing numbers or numbers in filename (e.g., "The Mentalist 04" or "MobLand - 01")
+      const numMatches = clean.match(/\b(\d{1,3})\b/g);
+      if (numMatches && numMatches.length > 0) {
+        e = parseInt(numMatches[numMatches.length - 1], 10);
+      }
+
+      return { season: s, episode: e || 1 };
+    }
+
+    async function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result;
+          const base64 = typeof result === 'string' && result.includes(',') ? result.split(',')[1] : result;
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function processBatchOrZip(fileList) {
+      showToast('📦 Processing season archive / multiple subtitle files...');
+      const episodesList = [];
+      let detectedSeason = 1;
+
+      // Check if first file is a ZIP archive
+      if (fileList.length === 1 && fileList[0].name.toLowerCase().endsWith('.zip')) {
+        const zipFile = fileList[0];
+        try {
+          if (typeof JSZip === 'undefined') {
+            throw new Error('JSZip library not loaded yet');
+          }
+          const zip = await JSZip.loadAsync(zipFile);
+          
+          // Detect season from zip filename if available
+          const zipSeasonMatch = zipFile.name.match(/(?:season|s)[\s._-]*(\d+)/i);
+          if (zipSeasonMatch) {
+            detectedSeason = parseInt(zipSeasonMatch[1], 10);
+          } else if (selectedTitle && selectedTitle.media_type === 'tv') {
+            const inputSeason = parseInt(document.getElementById('tvSeasonInput').value, 10);
+            if (inputSeason) detectedSeason = inputSeason;
+          }
+
+          const fileNames = Object.keys(zip.files).filter(name => {
+            const lower = name.toLowerCase();
+            return !zip.files[name].dir &&
+                   !name.includes('__MACOSX') &&
+                   !name.startsWith('.') &&
+                   (lower.endsWith('.srt') || lower.endsWith('.vtt'));
+          });
+
+          if (fileNames.length === 0) {
+            showToast('❌ No .srt or .vtt subtitle files found inside this ZIP archive!');
+            return;
+          }
+
+          for (const name of fileNames) {
+            const base64 = await zip.files[name].async('base64');
+            const cleanName = name.split('/').pop().split('\\').pop();
+            const parsed = parseEpisodeAndSeason(cleanName, detectedSeason);
+            if (parsed.season) detectedSeason = parsed.season;
+            episodesList.push({
+              season: parsed.season || detectedSeason,
+              episode: parsed.episode,
+              fileName: cleanName,
+              fileBase64: base64,
+              status: 'ready'
+            });
+          }
+        } catch (err) {
+          console.error('[season-pack] Zip extraction error:', err);
+          showToast(`❌ Failed to read ZIP archive: ${err.message}`);
+          return;
+        }
+      } else {
+        // Multi-file selection
+        if (selectedTitle && selectedTitle.media_type === 'tv') {
+          const inputSeason = parseInt(document.getElementById('tvSeasonInput').value, 10);
+          if (inputSeason) detectedSeason = inputSeason;
+        }
+
+        for (let i = 0; i < fileList.length; i++) {
+          const f = fileList[i];
+          const ext = f.name.split('.').pop().toLowerCase();
+          if (!['srt', 'vtt', 'sub', 'idx'].includes(ext)) continue;
+
+          try {
+            const base64 = await fileToBase64(f);
+            const parsed = parseEpisodeAndSeason(f.name, detectedSeason);
+            if (parsed.season) detectedSeason = parsed.season;
+            episodesList.push({
+              season: parsed.season || detectedSeason,
+              episode: parsed.episode,
+              fileName: f.name,
+              fileBase64: base64,
+              status: 'ready'
+            });
+          } catch (e) {
+            console.error('File read error:', e);
+          }
+        }
+      }
+
+      if (episodesList.length === 0) {
+        showToast('❌ No valid subtitle files were found to process.');
+        return;
+      }
+
+      // Sort episodes ascending by episode number
+      episodesList.sort((a, b) => a.episode - b.episode);
+
+      currentSeasonPackEpisodes = episodesList;
+      currentSeasonPackTargetSeason = detectedSeason || 1;
+
+      // Update TV season selector input if this is a TV show
+      const tvSeasonInput = document.getElementById('tvSeasonInput');
+      if (tvSeasonInput) tvSeasonInput.value = currentSeasonPackTargetSeason;
+
+      renderSeasonPackUI();
+      showToast(`🎉 Detected ${episodesList.length} episodes for Season ${currentSeasonPackTargetSeason}!`);
+    }
+
+    function renderSeasonPackUI() {
+      const dropZone = document.getElementById('uploadDropZone');
+      const singlePreview = document.getElementById('filePreviewBox');
+      const packBox = document.getElementById('seasonPackPreviewBox');
+      const grid = document.getElementById('seasonPackGrid');
+      const titleEl = document.getElementById('seasonPackTitle');
+      const subEl = document.getElementById('seasonPackSub');
+      const overrideInput = document.getElementById('packSeasonOverride');
+      const targetSeasonEl = document.getElementById('packTargetSeasonNum');
+
+      if (!packBox || !grid) return;
+
+      dropZone.style.display = 'none';
+      if (singlePreview) singlePreview.style.display = 'none';
+      packBox.style.display = 'block';
+
+      titleEl.innerHTML = `<i class="fa-solid fa-boxes-packing" style="color:var(--gold);margin-right:6px;"></i> Season ${currentSeasonPackTargetSeason} Pack (${currentSeasonPackEpisodes.length} Episodes)`;
+      subEl.textContent = `All episodes parsed & ready to be linked to Season ${currentSeasonPackTargetSeason}`;
+
+      if (overrideInput) overrideInput.value = currentSeasonPackTargetSeason;
+      if (targetSeasonEl) targetSeasonEl.textContent = currentSeasonPackTargetSeason;
+
+      grid.innerHTML = currentSeasonPackEpisodes.map((ep, idx) => `
+        <div class="season-ep-item ${ep.status === 'done' ? 'uploaded' : ''}" id="seasonEpItem_${idx}">
+          <span class="season-ep-badge">S${String(currentSeasonPackTargetSeason).padStart(2, '0')}E${String(ep.episode).padStart(2, '0')}</span>
+          <span class="season-ep-name" title="${escapeHtml(ep.fileName)}">${escapeHtml(ep.fileName)}</span>
+          <span id="seasonEpStatus_${idx}" style="font-size:0.75rem;font-weight:700;color:${ep.status === 'done' ? '#2ECC71' : 'var(--text-muted)'};">
+            ${ep.status === 'done' ? '<i class="fa-solid fa-check"></i> Linked' : 'Ready'}
+          </span>
+        </div>
+      `).join('');
+
+      const btn = document.getElementById('btnBatchUploadSeason');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> <span>🚀 Batch Upload All ${currentSeasonPackEpisodes.length} Episodes</span>`;
+      }
+    }
+
+    function handlePackSeasonChange(val) {
+      const s = parseInt(val, 10);
+      if (isNaN(s) || s < 1) return;
+      currentSeasonPackTargetSeason = s;
+      const targetSeasonEl = document.getElementById('packTargetSeasonNum');
+      if (targetSeasonEl) targetSeasonEl.textContent = s;
+
+      const tvSeasonInput = document.getElementById('tvSeasonInput');
+      if (tvSeasonInput) tvSeasonInput.value = s;
+
+      // Re-render items badge
+      currentSeasonPackEpisodes.forEach((ep, idx) => {
+        const item = document.getElementById(`seasonEpItem_${idx}`);
+        if (item) {
+          const badge = item.querySelector('.season-ep-badge');
+          if (badge) badge.textContent = `S${String(s).padStart(2, '0')}E${String(ep.episode).padStart(2, '0')}`;
+        }
+      });
+    }
+
+    async function startBatchSeasonUpload() {
+      if (!selectedTitle) {
+        showToast('Please search and select the TV series first.');
+        return;
+      }
+
+      if (currentSeasonPackEpisodes.length === 0) {
+        showToast('No episodes loaded to upload.');
+        return;
+      }
+
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (!token) {
+        showToast('Please sign in to upload subtitles');
+        setLoggedOut();
+        return;
+      }
+
+      const btn = document.getElementById('btnBatchUploadSeason');
+      if (btn) btn.disabled = true;
+
+      const progressSec = document.getElementById('progressSection');
+      const stepText = document.getElementById('progressStepText');
+      const percentText = document.getElementById('progressPercentText');
+      const barFill = document.getElementById('progressBarFill');
+      const statusText = document.getElementById('progressStatusText');
+
+      if (progressSec) progressSec.classList.add('active');
+      if (stepText) stepText.textContent = `Batch uploading Season ${currentSeasonPackTargetSeason} (${currentSeasonPackEpisodes.length} episodes)...`;
+      if (barFill) barFill.style.width = '20%';
+      if (percentText) percentText.textContent = '20%';
+      if (statusText) statusText.textContent = 'Preparing payload and encoding subtitles...';
+
+      try {
+        const payload = {
+          action: 'batch_direct',
+          tmdbId: String(selectedTitle.id),
+          type: 'tv',
+          season: currentSeasonPackTargetSeason,
+          title: selectedTitle.title || selectedTitle.name || '',
+          year: (selectedTitle.release_date || selectedTitle.first_air_date || '').slice(0, 4),
+          episodes: currentSeasonPackEpisodes.map(ep => ({
+            episode: ep.episode,
+            fileBase64: ep.fileBase64,
+            fileName: ep.fileName
+          }))
+        };
+
+        if (barFill) barFill.style.width = '50%';
+        if (percentText) percentText.textContent = '50%';
+        if (statusText) statusText.textContent = 'Uploading files to Cloudflare R2 and updating catalog...';
+
+        const res = await fetch('/api/sub-api', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Failed to upload season pack');
+        }
+
+        if (barFill) barFill.style.width = '100%';
+        if (percentText) percentText.textContent = '100%';
+        if (statusText) statusText.textContent = `All ${data.count} episodes uploaded successfully to R2!`;
+
+        // Mark all episodes as uploaded
+        currentSeasonPackEpisodes.forEach((ep, idx) => {
+          ep.status = 'done';
+          const item = document.getElementById(`seasonEpItem_${idx}`);
+          if (item) item.classList.add('uploaded');
+          const st = document.getElementById(`seasonEpStatus_${idx}`);
+          if (st) {
+            st.innerHTML = '<i class="fa-solid fa-check"></i> Linked';
+            st.style.color = '#2ECC71';
+          }
+        });
+
+        if (btn) {
+          btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>✓ All ${data.count} Episodes Linked to Season ${currentSeasonPackTargetSeason}!</span>`;
+        }
+
+        showToast(`🎉 Success! Linked ${data.count} episodes to Season ${currentSeasonPackTargetSeason}!`);
+
+        // Refresh status
+        setTimeout(() => {
+          checkSubtitleStatus();
+        }, 1200);
+
+      } catch (err) {
+        console.error('[season-pack] Batch upload error:', err);
+        showToast(`❌ Batch upload failed: ${err.message}`);
+        if (statusText) statusText.textContent = `Error: ${err.message}`;
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = `<i class="fa-solid fa-rotate-right"></i> <span>Retry Upload</span>`;
+        }
       }
     }
 
@@ -2436,6 +3049,8 @@
 
       selectedFile = file;
       document.getElementById('uploadDropZone').style.display = 'none';
+      const packBox = document.getElementById('seasonPackPreviewBox');
+      if (packBox) packBox.style.display = 'none';
       document.getElementById('filePreviewBox').style.display = 'flex';
       document.getElementById('fileBadge').textContent = ext.toUpperCase();
       document.getElementById('fileName').textContent = file.name;
@@ -2452,9 +3067,12 @@
     function clearSelectedFile() {
       selectedFile = null;
       lastExtractedSrt = null;
+      currentSeasonPackEpisodes = [];
       document.getElementById('subFileInput').value = '';
       document.getElementById('uploadDropZone').style.display = 'block';
       document.getElementById('filePreviewBox').style.display = 'none';
+      const packBox = document.getElementById('seasonPackPreviewBox');
+      if (packBox) packBox.style.display = 'none';
       const upBtn = document.getElementById('startUploadBtn');
       if (upBtn) {
         upBtn.style.display = 'none';
@@ -2524,13 +3142,24 @@
           ? data.results
           : (data.srt ? [data] : []);
 
+        const resultsBox = document.getElementById('multiSourceResults');
+        const noSubsBox = document.getElementById('noSubsFoundBox');
+
         if (results.length === 0) {
           showToast(`ℹ️ No subtitle found on Baiscope, Zoom or Subz for "${titleName}"${releaseYear ? ` (${releaseYear})` : ''}.`);
-          const resultsBox = document.getElementById('multiSourceResults');
           if (resultsBox) resultsBox.style.display = 'none';
+          if (noSubsBox) {
+            const noSubsMsg = document.getElementById('noSubsMessage');
+            if (noSubsMsg) {
+              noSubsMsg.innerHTML = `We searched <strong>Baiscope.lk</strong>, <strong>Zoom.lk</strong>, and <strong>Subz.lk</strong> for <strong>"${escapeJs(titleName)}"</strong>${releaseYear ? ` (${releaseYear})` : ''}, but no matching Sinhala subtitle was released yet.`;
+            }
+            noSubsBox.style.display = 'block';
+            noSubsBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
           return;
         }
 
+        if (noSubsBox) noSubsBox.style.display = 'none';
         autofetchedResults = results;
         renderMultiSourceResults(results);
 

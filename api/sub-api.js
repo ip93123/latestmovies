@@ -500,6 +500,81 @@ async function handleUpload(req, res) {
     });
   }
 
+  // Action D: Batch Upload for Full Season Packs
+  if (action === 'batch_direct') {
+    const { tmdbId, type = 'tv', season = 1, episodes = [], title, year } = req.body || {};
+    if (!tmdbId || !Array.isArray(episodes) || episodes.length === 0) {
+      return res.status(400).json({ error: 'Missing tmdbId or episodes array' });
+    }
+
+    const r2Config = getR2Config();
+    const catalog = await loadCatalogAsync();
+    const savedEpisodes = [];
+
+    for (const ep of episodes) {
+      const epNum = Number(ep.episode);
+      if (!epNum || !ep.fileBase64) continue;
+
+      const subKey = `${tmdbId}_S${season}_E${epNum}`;
+      const targetFile = `${subKey}.srt`;
+      const fileBuffer = Buffer.from(ep.fileBase64, 'base64');
+      const fileKey = `subtitles/${targetFile}`;
+
+      let publicUrl = `/Subtitle/uploads/${targetFile}`;
+      if (r2Config.isConfigured) {
+        try {
+          const ok = await putR2Object({
+            key: fileKey,
+            body: fileBuffer,
+            contentType: 'text/plain; charset=utf-8'
+          });
+          if (ok) {
+            publicUrl = r2Config.publicDomain
+              ? `${r2Config.publicDomain.replace(/\/$/, '')}/${fileKey}`
+              : `/api/subtitles?id=${tmdbId}&type=tv&season=${season}&episode=${epNum}&serve=1`;
+          }
+        } catch (r2Err) {
+          console.error(`[sub-batch] Error saving ${fileKey} to R2:`, r2Err.message);
+        }
+      }
+
+      try {
+        const uploadsDir = path.join(process.cwd(), 'Subtitle', 'uploads');
+        if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+        const filePath = path.join(uploadsDir, targetFile);
+        fs.writeFileSync(filePath, fileBuffer);
+      } catch (_) {}
+
+      if (Array.isArray(catalog._deletedKeys)) {
+        catalog._deletedKeys = catalog._deletedKeys.filter(k => k !== subKey && k !== String(tmdbId));
+      }
+
+      catalog[subKey] = {
+        tmdbId: String(tmdbId),
+        mediaType: 'tv',
+        season: Number(season),
+        episode: epNum,
+        title: title || `TV Series ${tmdbId}`,
+        year: year || '',
+        format: 'srt',
+        fileSize: fileBuffer.length,
+        uploader: verified.u,
+        uploadedAt: Date.now(),
+        url: publicUrl
+      };
+
+      savedEpisodes.push({ episode: epNum, key: subKey, publicUrl });
+    }
+
+    await saveCatalog(catalog);
+
+    return res.status(200).json({
+      success: true,
+      count: savedEpisodes.length,
+      savedEpisodes
+    });
+  }
+
   if (action === 'delete') {
     return handleDelete(req, res);
   }
