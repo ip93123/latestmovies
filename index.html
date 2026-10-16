@@ -2578,11 +2578,11 @@
       display: none;
     }
     .top10-item {
-      flex: 0 0 215px;
+      flex: 0 0 230px;
       position: relative;
       display: flex;
       align-items: flex-end;
-      height: 315px;
+      height: 325px;
       cursor: pointer;
       user-select: none;
       transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
@@ -2597,50 +2597,60 @@
       z-index: 10;
     }
 
-    /* ── Netflix Style Giant Rank Number (Navbar Glassmorphism) ── */
+    /* ── Netflix Style Giant Rank Number (Frosted Glassmorphism Theme) ── */
     .top10-rank {
       position: absolute;
-      left: 0;
+      left: -16px;
       bottom: -6px;
       font-family: 'Bebas Neue', 'Outfit', sans-serif;
-      font-size: 10.5rem;
+      font-size: 10.6rem;
       font-weight: 900;
       line-height: 0.72;
       letter-spacing: -3px;
       z-index: 1;
       pointer-events: none;
       user-select: none;
-      /* Frosted Glassmorphism Finish matching Navbar */
-      color: rgba(255, 255, 255, 0.04);
-      -webkit-text-stroke: 2.2px rgba(255, 255, 255, 0.38);
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.2) 36%, rgba(8, 17, 24, 0.82) 68%, rgba(255, 255, 255, 0.35) 100%);
+      /* Frosted Glassmorphism Finish matching Navbar & Obsidian Theme */
+      color: rgba(255, 255, 255, 0.05);
+      -webkit-text-stroke: 2.2px rgba(255, 255, 255, 0.45);
+      background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(232, 201, 122, 0.5) 25%,
+        rgba(255, 255, 255, 0.18) 50%,
+        rgba(8, 17, 24, 0.85) 75%,
+        rgba(232, 201, 122, 0.4) 100%
+      );
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 18px rgba(255, 255, 255, 0.1));
+      filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.9))
+              drop-shadow(0 0 16px rgba(232, 201, 122, 0.2))
+              drop-shadow(0 0 1.5px rgba(255, 255, 255, 0.55));
       transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .top10-item[data-rank="1"] .top10-rank {
-      left: 4px;
+      left: -8px;
     }
     .top10-item[data-rank="10"] .top10-rank {
-      left: -4px;
-      font-size: 8.6rem;
+      left: -26px;
+      font-size: 9rem;
       letter-spacing: -6px;
     }
     .top10-item:hover .top10-rank,
     .top10-item:focus-visible .top10-rank {
-      -webkit-text-stroke: 2.5px var(--gold, #E8C97A);
-      background: linear-gradient(135deg, #ffffff 0%, var(--gold, #E8C97A) 45%, rgba(8, 17, 24, 0.85) 85%, rgba(232, 201, 122, 0.6) 100%);
+      -webkit-text-stroke: 2.6px var(--gold, #E8C97A);
+      background: linear-gradient(135deg, #ffffff 0%, var(--gold, #E8C97A) 35%, rgba(255, 255, 255, 0.7) 60%, rgba(232, 201, 122, 0.9) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 28px rgba(232, 201, 122, 0.45));
-      transform: scale(1.03) translateX(-2px);
+      filter: drop-shadow(0 18px 36px rgba(0, 0, 0, 0.95))
+              drop-shadow(0 0 28px rgba(232, 201, 122, 0.65))
+              drop-shadow(0 0 4px rgba(255, 255, 255, 0.9));
+      transform: scale(1.04) translateX(-3px);
     }
 
-    /* ── Movie Poster Card (Starts ~1/3 Into Number Like Netflix) ── */
+    /* ── Movie Poster Card ── */
     .top10-card {
-      margin-left: 36px;
-      width: calc(100% - 36px);
+      margin-left: 60px;
+      width: calc(100% - 60px);
       height: 100%;
       border-radius: 14px;
       overflow: hidden;
@@ -2657,12 +2667,12 @@
       z-index: 2;
     }
     .top10-item[data-rank="1"] .top10-card {
-      margin-left: 24px;
-      width: calc(100% - 24px);
+      margin-left: 52px;
+      width: calc(100% - 52px);
     }
     .top10-item[data-rank="10"] .top10-card {
-      margin-left: 54px;
-      width: calc(100% - 54px);
+      margin-left: 78px;
+      width: calc(100% - 78px);
     }
     .top10-item:hover .top10-card {
       border-color: rgba(232, 201, 122, 0.55);
@@ -2728,28 +2738,70 @@
       font-weight: 700;
       letter-spacing: 0.3px;
     }
-    .top10-today-tag {
+
+    /* Top Badges (IMDb round score + Tomato score) */
+    .top10-top-badges {
       position: absolute;
       top: 8px;
       left: 8px;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: 6px;
-      font-size: 0.62rem;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      color: #fff;
-      padding: 2.5px 7px;
       z-index: 4;
       display: flex;
       align-items: center;
-      gap: 4px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+      gap: 5px;
     }
-    .top10-today-tag i {
-      color: #E50914;
+    .top10-imdb-circle {
+      display: inline-flex;
+      align-items: center;
+      gap: 3.5px;
+      background: rgba(10, 14, 22, 0.82);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(245, 197, 24, 0.4);
+      border-radius: 20px;
+      padding: 2.5px 7px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.55), 0 0 8px rgba(245, 197, 24, 0.15);
+      line-height: 1.2;
+      user-select: none;
+    }
+    .top10-imdb-circle i {
+      color: #F5C518;
+      font-size: 0.65rem;
+    }
+    .top10-top-badges .card-rt-badge {
+      margin-left: 0;
+      padding: 2px 6.5px;
+      font-size: 0.66rem;
+      border-radius: 20px;
+      line-height: 1.2;
+    }
+
+    /* Type Tag (Movie / TV) in Top 10 meta row */
+    .top10-type-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 3.5px;
+      font-size: 0.64rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #E0E6ED;
+      line-height: 1.2;
+    }
+    .top10-type-tag.top10-type-tv {
+      background: rgba(0, 210, 255, 0.12);
+      border-color: rgba(0, 210, 255, 0.4);
+      color: #00D2FF;
+    }
+    .top10-type-tag.top10-type-movie {
+      background: rgba(232, 201, 122, 0.12);
+      border-color: rgba(232, 201, 122, 0.35);
+      color: var(--gold, #E8C97A);
     }
     .top10-item:focus-visible .top10-card {
       border-color: var(--gold, #E8C97A) !important;
@@ -2767,10 +2819,6 @@
       }
       .top10-header-title {
         font-size: 1.55rem;
-      }
-      .top10-badge-ribbon {
-        font-size: 0.75rem;
-        padding: 3px 7px;
       }
       .top10-sub-badge {
         font-size: 0.68rem;
@@ -2791,37 +2839,37 @@
         scroll-snap-type: x proximity;
       }
       .top10-item {
-        flex: 0 0 168px;
-        height: 240px;
+        flex: 0 0 185px;
+        height: 260px;
         scroll-snap-align: start;
         touch-action: pan-x pan-y;
       }
       .top10-rank {
-        font-size: 7.8rem;
-        left: 0;
+        font-size: 8.2rem;
+        left: -12px;
         bottom: -4px;
-        -webkit-text-stroke: 1.8px rgba(255, 255, 255, 0.4);
+        -webkit-text-stroke: 1.8px rgba(255, 255, 255, 0.45);
       }
       .top10-card {
-        margin-left: 26px;
-        width: calc(100% - 26px);
+        margin-left: 48px;
+        width: calc(100% - 48px);
         border-radius: 12px;
       }
       .top10-item[data-rank="1"] .top10-rank {
-        left: 2px;
+        left: -6px;
       }
       .top10-item[data-rank="1"] .top10-card {
-        margin-left: 18px;
-        width: calc(100% - 18px);
+        margin-left: 42px;
+        width: calc(100% - 42px);
       }
       .top10-item[data-rank="10"] .top10-rank {
-        left: -3px;
-        font-size: 6.5rem;
+        left: -18px;
+        font-size: 6.8rem;
         letter-spacing: -4px;
       }
       .top10-item[data-rank="10"] .top10-card {
-        margin-left: 42px;
-        width: calc(100% - 42px);
+        margin-left: 64px;
+        width: calc(100% - 64px);
       }
       .top10-title {
         font-size: 0.82rem;
@@ -2833,27 +2881,31 @@
 
     @media (min-width: 1400px) {
       .top10-item {
-        flex: 0 0 235px;
-        height: 335px;
+        flex: 0 0 250px;
+        height: 350px;
       }
       .top10-card {
-        margin-left: 42px;
-        width: calc(100% - 42px);
+        margin-left: 68px;
+        width: calc(100% - 68px);
       }
       .top10-item[data-rank="1"] .top10-card {
-        margin-left: 28px;
-        width: calc(100% - 28px);
+        margin-left: 58px;
+        width: calc(100% - 58px);
       }
       .top10-item[data-rank="10"] .top10-card {
-        margin-left: 60px;
-        width: calc(100% - 60px);
+        margin-left: 88px;
+        width: calc(100% - 88px);
       }
       .top10-rank {
-        font-size: 11.5rem;
+        font-size: 11.6rem;
+        left: -18px;
+      }
+      .top10-item[data-rank="1"] .top10-rank {
+        left: -10px;
       }
       .top10-item[data-rank="10"] .top10-rank {
-        font-size: 9.6rem;
-        left: -6px;
+        font-size: 9.8rem;
+        left: -28px;
       }
     }
 
@@ -11426,8 +11478,7 @@
   <section id="top10MoviesSection" class="top10-section">
     <div class="top10-header-wrap">
       <div class="top10-header-left">
-        <div class="top10-badge-ribbon">TOP 10</div>
-        <h2 class="top10-header-title"><span>Top 10 Movies</span> Today</h2>
+        <h2 class="top10-header-title"><span>Top 10</span> Today</h2>
       </div>
       <div class="top10-header-right">
         <span class="top10-sub-badge"><i class="fa-solid fa-fire" style="color:#E50914;"></i> Global Chart</span>
@@ -12931,19 +12982,31 @@
       return all;
     }
 
-    // ── TOP 10 MOVIES TODAY (Netflix Style with Glass Numbers & RT Badges) ──
+    // ── TOP 10 TODAY (Netflix Style with Glass Numbers, IMDb Circle & RT Badges) ──
     function buildTop10MovieCard(item, rank) {
+      const isTv = item.media_type === 'tv' || (!item.title && !!item.name) || (!item.release_date && !!item.first_air_date);
+      const mediaType = isTv ? 'tv' : 'movie';
+      item._type = mediaType;
       const poster = imgUrl(item.poster_path, 'w342') || imgUrl(item.poster_path, 'w185');
       const title = item.title || item.name || 'Unknown';
       const year = (item.release_date || item.first_air_date || '').slice(0, 4);
       const vote = item.vote_average ? item.vote_average.toFixed(1) : null;
       const genres = (item.genre_ids || []).slice(0, 1).map(id => GENRE_MAP[id]).filter(Boolean);
       const hasSub = hasSinhalaSubtitle(item.id);
+      const typeTag = isTv
+        ? `<span class="top10-type-tag top10-type-tv" title="TV Series"><i class="fa-solid fa-tv"></i> TV</span>`
+        : `<span class="top10-type-tag top10-type-movie" title="Movie"><i class="fa-solid fa-film"></i> Movie</span>`;
 
-      return `<div class="top10-item" tabindex="0" role="button" aria-label="${title}" data-id="${item.id}" data-type="movie" data-rank="${rank}">
+      return `<div class="top10-item" tabindex="0" role="button" aria-label="${title}" data-id="${item.id}" data-type="${mediaType}" data-rank="${rank}">
         <div class="top10-rank">${rank}</div>
         <div class="top10-card">
-          <div class="top10-today-tag"><i class="fa-solid fa-chart-line"></i> #${rank} TODAY</div>
+          <div class="top10-top-badges">
+            <div class="top10-imdb-circle" title="IMDb: ${vote || '—'}">
+              <i class="fa-solid fa-star"></i>
+              <span>${vote || '—'}</span>
+            </div>
+            <span class="card-rt-badge top10-top-rt" data-rt-id="${item.id}" style="display:none;"></span>
+          </div>
           ${hasSub ? `
             <div class="card-sinsub-badge" title="Sinhala Subtitle Available" style="position:absolute;top:8px;right:8px;margin:0;z-index:4;">
               <img src="/sinhala-sub.png" alt="Sinhala Subtitle">
@@ -12957,7 +13020,7 @@
             <div class="top10-meta-row">
               ${year ? `<span>${year}</span>` : ''}
               ${genres[0] ? `<span class="top10-genre-tag">${genres[0]}</span>` : ''}
-              <span class="card-rt-badge" data-rt-id="${item.id}" style="display:none;"></span>
+              ${typeTag}
             </div>
             <div class="top10-title" title="${title}">${title}</div>
           </div>
@@ -12972,13 +13035,13 @@
       // 0ms Instant Cache Hydration: Render cached top 10 immediately if present
       let hasCached = false;
       try {
-        const cachedRaw = localStorage.getItem('hm_top10_movies_cache');
+        const cachedRaw = localStorage.getItem('hm_top10_today_cache') || localStorage.getItem('hm_top10_movies_cache');
         if (cachedRaw) {
           const cached = JSON.parse(cachedRaw);
           if (Array.isArray(cached) && cached.length) {
             row.innerHTML = cached.slice(0, 10).map((item, i) => buildTop10MovieCard(item, i + 1)).join('');
             addCardListeners(row, '.top10-item');
-            hydrateSectionRtRatings(cached.slice(0, 10), 'movie');
+            hydrateSectionRtRatings(cached.slice(0, 10));
             hasCached = true;
           }
         }
@@ -12995,13 +13058,16 @@
       }
 
       try {
-        const data = await tmdb('/trending/movie/day?language=en-US');
+        let data = await tmdb('/trending/all/day?language=en-US');
+        if (!data || !data.results || !data.results.length) {
+          data = await tmdb('/trending/movie/day?language=en-US');
+        }
         const items = (data?.results || []).slice(0, 10);
         if (items && items.length) {
           row.innerHTML = items.map((item, i) => buildTop10MovieCard(item, i + 1)).join('');
-          try { localStorage.setItem('hm_top10_movies_cache', JSON.stringify(items)); } catch (_) {}
+          try { localStorage.setItem('hm_top10_today_cache', JSON.stringify(items)); } catch (_) {}
           addCardListeners(row, '.top10-item');
-          hydrateSectionRtRatings(items, 'movie');
+          hydrateSectionRtRatings(items);
 
           if (window.DEVICE && window.DEVICE.isTV) {
             gsap.set(row.children, { opacity: 1 });
@@ -13014,7 +13080,7 @@
           return items;
         }
       } catch (err) {
-        console.error('Failed to load Top 10 Movies Today:', err);
+        console.error('Failed to load Top 10 Today:', err);
       }
     }
 
