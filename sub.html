@@ -2226,9 +2226,16 @@
               <div class="autofetch-sub">Searches Baiscope.lk, Zoom.lk, Subz.lk &amp; Cineru.lk concurrently, auto-extracts ZIP archives, and lets you choose your preferred release</div>
             </div>
           </div>
-          <button type="button" class="btn-autofetch" id="btnAutoFetchSub" onclick="triggerAutoFetchSub()">
-            <i class="fa-solid fa-cloud-arrow-down"></i> <span>Search All 4 Sources</span>
-          </button>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+            <button type="button" class="btn-autofetch" id="btnAutoFetchSub" onclick="triggerAutoFetchSub()">
+              <i class="fa-solid fa-cloud-arrow-down"></i> <span>Search All 4 Sources</span>
+            </button>
+            <div style="display:flex;align-items:center;gap:10px;font-size:0.75rem;color:var(--text-muted);flex-wrap:wrap;">
+              <span>Direct Browser Search:</span>
+              <a id="quickCineruLink" href="https://cineru.lk" target="_blank" rel="noopener" style="color:#E74C3C;text-decoration:none;font-weight:700;display:inline-flex;align-items:center;gap:4px;" title="Open on Cineru.lk (Bypasses Cloudflare)"><i class="fa-solid fa-arrow-up-right-from-square"></i> Cineru.lk</a>
+              <a id="quickBaiscopeLink" href="https://baiscopelk.com" target="_blank" rel="noopener" style="color:#2ECC71;text-decoration:none;font-weight:700;display:inline-flex;align-items:center;gap:4px;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Baiscope.lk</a>
+            </div>
+          </div>
         </div>
 
         <!-- Multi-Source Results List -->
@@ -2266,15 +2273,37 @@
             <div class="no-subs-icon-wrap">
               <i class="fa-solid fa-file-circle-xmark"></i>
             </div>
-            <div>
+            <div style="flex:1;">
               <div class="no-subs-heading">
-                <span>No Sinhala Subtitle Found on Web</span>
+                <span>No Sinhala Subtitle Found on Baiscope / Zoom / Subz</span>
               </div>
               <div class="no-subs-message" id="noSubsMessage">
-                Searched Baiscope.lk, Zoom.lk, Subz.lk and Cineru.lk, but no verified Sinhala subtitle was released yet for this title.
+                Searched Baiscope.lk, Zoom.lk, Subz.lk and Cineru.lk, but no matching Sinhala subtitle was returned by automated cloud search.
               </div>
-              <div class="no-subs-tip">
-                <i class="fa-regular fa-lightbulb"></i> Have your own .srt file? Drag &amp; drop or upload it below to link it!
+
+              <!-- Cineru Direct Browser Action Card (Cloudflare Bypass) -->
+              <div id="cineruDirectBox" style="margin-top:14px;padding:14px 18px;background:linear-gradient(135deg, rgba(231,76,60,0.14), rgba(18,24,38,0.95));border:1.5px solid rgba(231,76,60,0.45);border-radius:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-shadow:0 4px 16px rgba(0,0,0,0.3);">
+                <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:260px;">
+                  <div style="width:38px;height:38px;border-radius:50%;background:rgba(231,76,60,0.2);border:1px solid #E74C3C;display:flex;align-items:center;justify-content:center;color:#E74C3C;font-size:1.1rem;flex-shrink:0;">
+                    <i class="fa-solid fa-shield-halved"></i>
+                  </div>
+                  <div>
+                    <div style="font-weight:800;color:#fff;font-size:0.9rem;display:flex;align-items:center;gap:6px;">
+                      <span>Check Cineru.lk Directly in Browser</span>
+                      <span style="font-size:0.68rem;padding:2px 6px;border-radius:4px;background:#E74C3C;color:#fff;font-weight:700;">CF PROTECTED</span>
+                    </div>
+                    <div style="font-size:0.78rem;color:#cbd5e1;margin-top:3px;line-height:1.4;">
+                      Cineru.lk blocks automated cloud scrapers with Cloudflare Turnstile, but loads normally in your browser. Open the post, download the <strong>.zip</strong> or <strong>.srt</strong>, and drop it below!
+                    </div>
+                  </div>
+                </div>
+                <a id="btnOpenCineruDirect" href="https://cineru.lk" target="_blank" rel="noopener" class="btn-gold" style="padding:9px 18px;font-size:0.85rem;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#E74C3C,#C0392B);border-color:#E74C3C;color:#fff;box-shadow:0 0 15px rgba(231,76,60,0.35);">
+                  <i class="fa-solid fa-arrow-up-right-from-square"></i> <span id="btnOpenCineruText">Open on Cineru.lk</span>
+                </a>
+              </div>
+
+              <div class="no-subs-tip" style="margin-top:12px;">
+                <i class="fa-regular fa-lightbulb"></i> Have your own .srt or .zip file? Drag &amp; drop or upload it below to link it!
               </div>
             </div>
           </div>
@@ -2706,6 +2735,13 @@
       if (multiBox) multiBox.style.display = 'none';
       const noSubsBox = document.getElementById('noSubsFoundBox');
       if (noSubsBox) noSubsBox.style.display = 'none';
+
+      // Update direct search links for the selected title
+      const titleName = selectedTitle.title || selectedTitle.name || '';
+      const quickCineru = document.getElementById('quickCineruLink');
+      const quickBaiscope = document.getElementById('quickBaiscopeLink');
+      if (quickCineru && titleName) quickCineru.href = `https://cineru.lk/?s=${encodeURIComponent(titleName)}`;
+      if (quickBaiscope && titleName) quickBaiscope.href = `https://baiscopelk.com/?s=${encodeURIComponent(titleName)}`;
 
       // Automatically check status and auto-fetch web subtitles
       checkSubtitleStatus(true);
@@ -3345,12 +3381,20 @@
         const noSubsBox = document.getElementById('noSubsFoundBox');
 
         if (results.length === 0) {
-          showToast(`ℹ️ No subtitle found on Baiscope, Zoom, Subz or Cineru for "${titleName}"${releaseYear ? ` (${releaseYear})` : ''}.`);
+          showToast(`ℹ️ No subtitle returned by cloud search for "${titleName}"${releaseYear ? ` (${releaseYear})` : ''}.`);
           if (resultsBox) resultsBox.style.display = 'none';
           if (noSubsBox) {
             const noSubsMsg = document.getElementById('noSubsMessage');
             if (noSubsMsg) {
-              noSubsMsg.innerHTML = `We searched <strong>Baiscope.lk</strong>, <strong>Zoom.lk</strong>, <strong>Subz.lk</strong>, and <strong>Cineru.lk</strong> for <strong>"${escapeJs(titleName)}"</strong>${releaseYear ? ` (${releaseYear})` : ''}, but no matching Sinhala subtitle was released yet.`;
+              noSubsMsg.innerHTML = `Automated search completed for <strong>"${escapeJs(titleName)}"</strong>${releaseYear ? ` (${releaseYear})` : ''} across Baiscope, Zoom, Subz &amp; Cineru.`;
+            }
+            const cineruLink = document.getElementById('btnOpenCineruDirect');
+            const cineruText = document.getElementById('btnOpenCineruText');
+            if (cineruLink) {
+              cineruLink.href = `https://cineru.lk/?s=${encodeURIComponent(titleName)}`;
+            }
+            if (cineruText) {
+              cineruText.textContent = `Open "${titleName}" on Cineru.lk`;
             }
             noSubsBox.style.display = 'block';
             noSubsBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

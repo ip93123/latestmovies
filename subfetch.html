@@ -1717,10 +1717,15 @@
       if (!list) return;
 
       if (!results || results.length === 0) {
+        const movieObj = (loadedMovies || []).find(m => m.id === tmdbId) || {};
+        const queryTitle = movieObj.title || movieObj.name || '';
         list.innerHTML = `
-          <div style="font-size:0.75rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;">
-            <i class="fa-solid fa-ban" style="color:#E74C3C;"></i>
-            <span>No subtitle found on Baiscope, Zoom, Subz, or Cineru.</span>
+          <div style="font-size:0.75rem;color:var(--text-muted);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <i class="fa-solid fa-ban" style="color:#E74C3C;"></i>
+              <span>No sub on Baiscope, Zoom, Subz.</span>
+            </div>
+            ${queryTitle ? `<a href="https://cineru.lk/?s=${encodeURIComponent(queryTitle)}" target="_blank" rel="noopener" style="color:#E74C3C;font-size:0.72rem;font-weight:700;text-decoration:none;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Check Cineru</a>` : ''}
           </div>
         `;
         return;

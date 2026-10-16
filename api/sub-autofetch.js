@@ -28,33 +28,6 @@ export default async function handler(req, res) {
   }
 
   const queryParams = req.method === 'GET' ? req.query : (req.body || {});
-
-  if (queryParams.testCurl) {
-    try {
-      const https = await import('https');
-      const result = await new Promise((resolve) => {
-        const headers = {
-          'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
-          'Accept': '*/*'
-        };
-        https.get('https://cineru.lk/?s=Animals', { headers }, (res) => {
-          let text = '';
-          res.on('data', c => text += c);
-          res.on('end', () => {
-            resolve({
-              status: res.statusCode,
-              len: text.length,
-              hasPost: text.includes('animals-2026-sinhala-sub'),
-              title: (text.match(/<title>([\s\S]*?)<\/title>/i) || [])[1]
-            });
-          });
-        }).on('error', e => resolve({ error: e.message }));
-      });
-      return res.status(200).json({ testResult: result });
-    } catch (e) {
-      return res.status(200).json({ error: e.message });
-    }
-  }
   const {
     q,
     title,
