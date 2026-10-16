@@ -334,9 +334,9 @@ async function handleUpload(req, res) {
       return res.status(400).json({ error: 'Missing tmdbId or fileName' });
     }
 
-    const MAX_SIZE = 20 * 1024 * 1024;
+    const MAX_SIZE = 150 * 1024 * 1024;
     if (fileSize && fileSize > MAX_SIZE) {
-      return res.status(400).json({ error: 'File size exceeds 20MB limit' });
+      return res.status(400).json({ error: 'File size exceeds 150MB limit' });
     }
 
     const extMatch = fileName.match(/\.([a-z0-9]+)$/i);

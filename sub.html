@@ -2225,6 +2225,23 @@
             <div class="multi-source-sub">Compare releases found across Baiscope, Zoom &amp; Subz. Click "Select" to load into player or download the .srt directly:</div>
           </div>
           <div id="multiSourceList" class="multi-source-grid"></div>
+
+          <!-- Selected Subtitle Action Banner with Direct Upload Button -->
+          <div id="multiSourceUploadBar" class="multi-source-upload-bar" style="display:none;margin-top:1.2rem;padding:16px 20px;background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.3);border-radius:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:38px;height:38px;border-radius:50%;background:rgba(46,204,113,0.15);border:1px solid rgba(46,204,113,0.35);display:flex;align-items:center;justify-content:center;color:#2ECC71;font-size:1.15rem;flex-shrink:0;">
+                <i class="fa-solid fa-check"></i>
+              </div>
+              <div>
+                <div id="multiSourceSelectedName" style="font-weight:700;color:#fff;font-size:0.92rem;word-break:break-all;">Subtitle Selected &amp; Ready</div>
+                <div id="multiSourceSelectedMeta" style="font-size:0.8rem;color:var(--text-muted);margin-top:2px;">Click Upload to link this subtitle to the movie</div>
+              </div>
+            </div>
+            <button type="button" class="btn-gold btn-ready-highlight" onclick="startUpload()" style="padding:10px 24px;font-size:0.95rem;font-weight:700;display:inline-flex;align-items:center;gap:8px;">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <span>🚀 Upload &amp; Link Subtitle</span>
+            </button>
+          </div>
         </div>
 
         <!-- No Subtitle Found Notice Card -->
@@ -2728,11 +2745,7 @@
           banner.className = 'status-banner not-exists';
           titleEl.innerHTML = '⚠️ No Sinhala Subtitle Yet';
           subEl.textContent = autoFetchWeb ? 'Auto-searching Baiscope.lk, Zoom.lk & Subz.lk...' : 'Auto-fetch from web or upload your own file!';
-          actionWrap.innerHTML = `
-            <button type="button" class="btn-autofetch-sm" onclick="triggerAutoFetchSub()">
-              <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Fetch Sub
-            </button>
-          `;
+          actionWrap.innerHTML = '';
 
           // Auto-trigger web subtitle search immediately
           if (autoFetchWeb) {
@@ -3202,9 +3215,9 @@
     }
 
     function processFile(file) {
-      const MAX_SIZE = 20 * 1024 * 1024; // 20MB
+      const MAX_SIZE = 150 * 1024 * 1024; // 150MB
       if (file.size > MAX_SIZE) {
-        showToast('❌ File too large! Maximum allowed size is 20MB.');
+        showToast('❌ File too large! Maximum allowed size is 150MB.');
         return;
       }
 
@@ -3246,6 +3259,8 @@
         upBtn.style.display = 'none';
         upBtn.classList.remove('btn-ready-highlight');
       }
+      const uploadBar = document.getElementById('multiSourceUploadBar');
+      if (uploadBar) uploadBar.style.display = 'none';
       const badge = document.getElementById('fileSourceBadge');
       if (badge) badge.style.display = 'none';
       const dlBtn = document.getElementById('btnDownloadExtracted');
@@ -3411,10 +3426,21 @@
           </div>
 
           <div class="source-card-actions">
-            <button type="button" class="btn-select-sub" onclick="selectSubtitleSource(${idx}, true)">
-              <i class="fa-solid ${idx === selectedResultIndex ? 'fa-check-double' : 'fa-check'}"></i>
-              <span>${idx === selectedResultIndex ? 'Selected & Ready' : 'Select Subtitle'}</span>
-            </button>
+            ${idx === selectedResultIndex ? `
+              <button type="button" class="btn-select-sub" onclick="selectSubtitleSource(${idx}, true)" style="background:#2ECC71;color:#000;">
+                <i class="fa-solid fa-check-double"></i>
+                <span>Selected &amp; Ready</span>
+              </button>
+              <button type="button" class="btn-gold" style="padding:8px 16px;font-size:0.82rem;font-weight:700;display:inline-flex;align-items:center;gap:6px;" onclick="startUpload()" title="Upload and link this subtitle now">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span>🚀 Upload Subtitle</span>
+              </button>
+            ` : `
+              <button type="button" class="btn-select-sub" onclick="selectSubtitleSource(${idx}, true)">
+                <i class="fa-solid fa-check"></i>
+                <span>Select Subtitle</span>
+              </button>
+            `}
             <button type="button" class="btn-card-download" onclick="downloadSubtitleSource(${idx})" title="Direct download .srt">
               <i class="fa-solid fa-download"></i> .SRT
             </button>
@@ -3432,32 +3458,31 @@
       const item = autofetchedResults[index];
       selectedResultIndex = index;
 
-      // Update card selected classes
-      autofetchedResults.forEach((_, idx) => {
-        const c = document.getElementById(`sourceCard_${idx}`);
-        if (c) {
-          if (idx === index) {
-            c.classList.add('selected');
-            const selectBtn = c.querySelector('.btn-select-sub');
-            if (selectBtn) selectBtn.innerHTML = '<i class="fa-solid fa-check-double"></i> <span>Selected & Ready</span>';
-          } else {
-            c.classList.remove('selected');
-            const selectBtn = c.querySelector('.btn-select-sub');
-            if (selectBtn) selectBtn.innerHTML = '<i class="fa-solid fa-check"></i> <span>Select Subtitle</span>';
-          }
-        }
-      });
-
-      const rawFileName = (item.srt.filename || `${selectedTitle?.title || 'subtitle'}.srt`).split('/').pop().split('\\').pop();
-      const blob = new Blob([item.srt.content], { type: 'text/plain;charset=utf-8' });
+      const rawFileName = (item.srt?.filename || `${selectedTitle?.title || 'subtitle'}.srt`).split('/').pop().split('\\').pop();
+      const content = item.srt?.content || '';
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
       const virtualFile = new File([blob], rawFileName, { type: 'text/plain' });
 
+      selectedFile = virtualFile;
       lastExtractedSrt = {
         blob,
         filename: rawFileName,
         source: item.source,
-        lineCount: item.srt.lineCount
+        lineCount: item.srt?.lineCount || 0
       };
+
+      // Re-render cards so selected card displays green state and the 🚀 Upload Subtitle button
+      renderMultiSourceResults(autofetchedResults);
+
+      // Show the dedicated upload bar right below Available Subtitles
+      const uploadBar = document.getElementById('multiSourceUploadBar');
+      if (uploadBar) {
+        uploadBar.style.display = 'flex';
+        const nameEl = document.getElementById('multiSourceSelectedName');
+        const metaEl = document.getElementById('multiSourceSelectedMeta');
+        if (nameEl) nameEl.textContent = `Ready to Upload: ${rawFileName}`;
+        if (metaEl) metaEl.textContent = `Source: ${item.source} • ${item.srt?.lineCount || 0} cues • ${formatBytes(virtualFile.size)}`;
+      }
 
       // Process into preview box
       processFile(virtualFile);
@@ -3480,12 +3505,13 @@
 
       const upBtn = document.getElementById('startUploadBtn');
       if (upBtn) {
+        upBtn.style.display = 'inline-flex';
         upBtn.classList.add('btn-ready-highlight');
-        upBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        upBtn.innerHTML = '<span>🚀 Upload &amp; Link Subtitle</span>';
       }
 
       if (notify) {
-        showToast(`✓ Loaded subtitle from ${item.source} (${item.srt.lineCount} cues)`);
+        showToast(`✓ Selected subtitle from ${item.source} (${item.srt?.lineCount || 0} cues)`);
       }
     }
 
