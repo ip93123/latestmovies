@@ -697,6 +697,50 @@
       background: rgba(255, 255, 255, 0.18);
     }
 
+    .candidate-card.selected {
+      border-color: #2ECC71 !important;
+      background: rgba(46, 204, 113, 0.12) !important;
+      box-shadow: 0 0 16px rgba(46, 204, 113, 0.25);
+    }
+
+    .btn-select-sub {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 6px 11px;
+      border-radius: 6px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .btn-select-sub:hover {
+      background: rgba(46, 204, 113, 0.15);
+      border-color: #2ECC71;
+      color: #fff;
+    }
+
+    .btn-select-sub.is-selected {
+      background: rgba(46, 204, 113, 0.25);
+      border-color: #2ECC71;
+      color: #2ECC71;
+      box-shadow: 0 0 10px rgba(46, 204, 113, 0.35);
+    }
+
+    .btn-batch-autoadd.has-selection {
+      background: linear-gradient(135deg, #2ECC71, #27AE60) !important;
+      border-color: #2ECC71 !important;
+      color: #07090F !important;
+      font-weight: 800 !important;
+      box-shadow: 0 4px 18px rgba(46, 204, 113, 0.45) !important;
+    }
+
     /* Skeleton Loading */
     .skeleton-box {
       background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.04) 75%);
@@ -1002,7 +1046,7 @@
         <i class="fa-solid fa-magnifying-glass-arrow-right"></i> <span>Auto-Hunt All Visible</span>
       </button>
       <button type="button" class="btn-batch-autoadd" id="btnBatchAutoAdd" onclick="startBatchAutoAdd()">
-        <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Auto-Commit All Matches</span>
+        <i class="fa-solid fa-cloud-arrow-up"></i> <span>Upload Selected (0)</span>
       </button>
     </div>
   </section>
@@ -1053,6 +1097,52 @@
     let discoveredMovies = [];
     let movieHuntCache = {}; // { [tmdbId]: { loading: boolean, results: [...] } }
     let isBatchRunning = false;
+    let userSelectedSubtitles = {}; // { [tmdbId]: candIndex }
+
+    function toggleSelectCandidate(tmdbId, candIndex) {
+      if (userSelectedSubtitles[tmdbId] === candIndex) {
+        delete userSelectedSubtitles[tmdbId];
+      } else {
+        userSelectedSubtitles[tmdbId] = candIndex;
+      }
+      updateSelectedCandidateCards(tmdbId);
+      updateBatchCommitButton();
+    }
+
+    function updateSelectedCandidateCards(tmdbId) {
+      const results = movieHuntCache[tmdbId] || [];
+      results.forEach((_, idx) => {
+        const card = document.getElementById(`cand_${tmdbId}_${idx}`);
+        const btn = document.getElementById(`btnSelect_${tmdbId}_${idx}`);
+        const isSel = userSelectedSubtitles[tmdbId] === idx;
+        if (card) {
+          if (isSel) card.classList.add('selected');
+          else card.classList.remove('selected');
+        }
+        if (btn) {
+          if (isSel) {
+            btn.className = 'btn-select-sub is-selected';
+            btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Selected</span>';
+          } else {
+            btn.className = 'btn-select-sub';
+            btn.innerHTML = '<i class="fa-regular fa-circle"></i> <span>Select Sub</span>';
+          }
+        }
+      });
+    }
+
+    function updateBatchCommitButton() {
+      const count = Object.keys(userSelectedSubtitles).length;
+      const btn = document.getElementById('btnBatchAutoAdd');
+      if (!btn) return;
+      if (count > 0) {
+        btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> <span>Upload Selected (${count})</span>`;
+        btn.classList.add('has-selection');
+      } else {
+        btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> <span>Upload Selected (0)</span>`;
+        btn.classList.remove('has-selection');
+      }
+    }
 
     const TOKEN_KEY = 'hackymax_sub_token';
     const USER_KEY = 'hackymax_sub_user';
@@ -1211,6 +1301,8 @@
         }
 
         discoveredMovies = data.movies || [];
+        userSelectedSubtitles = {};
+        updateBatchCommitButton();
         updateStats();
         renderMoviesGrid();
 
@@ -1423,9 +1515,16 @@
         const sizeStr = formatBytes(item.srt?.sizeBytes || item.srt?.content?.length || 0);
         const fileName = (item.srt?.filename || 'subtitle.srt').split('/').pop().split('\\').pop();
 
+        const isSelected = userSelectedSubtitles[tmdbId] === idx;
         const cand = document.createElement('div');
-        cand.className = 'candidate-card';
+        cand.className = `candidate-card ${isSelected ? 'selected' : ''}`;
         cand.id = `cand_${tmdbId}_${idx}`;
+        cand.onclick = (e) => {
+          if (!e.target.closest('button')) {
+            toggleSelectCandidate(tmdbId, idx);
+          }
+        };
+
         cand.innerHTML = `
           <div class="candidate-header">
             <span class="source-badge ${badgeClass}"><i class="fa-solid fa-circle-check"></i> ${item.source}</span>
@@ -1440,8 +1539,11 @@
           <div class="candidate-title" title="${fileName}">${fileName}</div>
 
           <div class="candidate-actions">
+            <button type="button" class="btn-select-sub ${isSelected ? 'is-selected' : ''}" id="btnSelect_${tmdbId}_${idx}" onclick="toggleSelectCandidate(${tmdbId}, ${idx})">
+              <i class="fa-${isSelected ? 'solid fa-circle-check' : 'regular fa-circle'}"></i> <span>${isSelected ? 'Selected' : 'Select Sub'}</span>
+            </button>
             <button type="button" class="btn-add-r2" id="btnAddR2_${tmdbId}_${idx}" onclick="saveCandidateToR2(${tmdbId}, ${idx})">
-              <i class="fa-solid fa-cloud-arrow-up"></i> <span>Add to Stream</span>
+              <i class="fa-solid fa-cloud-arrow-up"></i> <span>1-Click Upload</span>
             </button>
             <button type="button" class="btn-cand-tool" onclick="previewCandidate(${tmdbId}, ${idx})" title="Preview Cues">
               <i class="fa-solid fa-eye"></i>
@@ -1463,9 +1565,11 @@
 
       const item = results[candIndex];
       const btn = document.getElementById(`btnAddR2_${tmdbId}_${candIndex}`);
-      const origText = btn.innerHTML;
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Saving…</span>';
+      const origText = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Saving…</span>';
+      }
 
       try {
         const token = getAuthToken();
@@ -1493,8 +1597,14 @@
         }
 
         // Success state
-        btn.classList.add('done');
-        btn.innerHTML = '<i class="fa-solid fa-check-double"></i> <span>Live on Stream</span>';
+        if (btn) {
+          btn.classList.add('done');
+          btn.innerHTML = '<i class="fa-solid fa-check-double"></i> <span>Live on Stream</span>';
+        }
+
+        delete userSelectedSubtitles[tmdbId];
+        updateSelectedCandidateCards(tmdbId);
+        updateBatchCommitButton();
 
         const card = document.getElementById(`movieCard_${tmdbId}`);
         if (card) card.classList.add('has-active-sub');
@@ -1514,8 +1624,10 @@
 
       } catch (err) {
         console.error('[subfetch] Save error:', err);
-        btn.disabled = false;
-        btn.innerHTML = origText;
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origText;
+        }
         showToast(`❌ Error: ${err.message}`);
       }
     }
@@ -1598,22 +1710,28 @@
       setTimeout(() => { progressBox.style.display = 'none'; }, 4000);
     }
 
-    // ── Batch Auto-Commit Top Matches ──
+    // ── Batch Upload User-Selected Subtitles ──
     async function startBatchAutoAdd() {
       if (isBatchRunning) return;
-      const candidatesToSave = [];
 
-      discoveredMovies.forEach(m => {
-        if (!m.hasSubtitle && movieHuntCache[m.id] && movieHuntCache[m.id].length > 0) {
-          // Pick best candidate with verified Sinhala
-          const best = movieHuntCache[m.id].find(c => c.srt?.sinhalaDetected) || movieHuntCache[m.id][0];
-          const bestIdx = movieHuntCache[m.id].indexOf(best);
-          candidatesToSave.push({ tmdbId: m.id, candIndex: bestIdx, title: m.title });
+      const selectedIds = Object.keys(userSelectedSubtitles);
+      if (selectedIds.length === 0) {
+        showToast('⚠️ No subtitles selected! Click "Select Sub" on the cards below to choose which subtitles to upload.');
+        return;
+      }
+
+      const candidatesToSave = [];
+      selectedIds.forEach(idStr => {
+        const tmdbId = Number(idStr);
+        const candIndex = userSelectedSubtitles[tmdbId];
+        const movie = discoveredMovies.find(m => m.id === tmdbId);
+        if (movie && movieHuntCache[tmdbId] && movieHuntCache[tmdbId][candIndex]) {
+          candidatesToSave.push({ tmdbId, candIndex, title: movie.title });
         }
       });
 
       if (candidatesToSave.length === 0) {
-        showToast('ℹ️ No subtitle matches ready to commit. Run "Auto-Hunt" first.');
+        showToast('⚠️ None of the selected subtitles are ready in cache. Please re-hunt.');
         return;
       }
 
@@ -1624,12 +1742,15 @@
       const pct = document.getElementById('progressPercent');
       progressBox.style.display = 'block';
 
-      showToast(`🚀 Auto-committing ${candidatesToSave.length} subtitles to R2 & Catalog...`);
+      showToast(`🚀 Uploading ${candidatesToSave.length} manually selected subtitles...`);
       let done = 0;
 
       for (const item of candidatesToSave) {
-        txt.textContent = `Saving: ${item.title}...`;
+        txt.textContent = `Uploading: ${item.title}...`;
         await saveCandidateToR2(item.tmdbId, item.candIndex);
+        delete userSelectedSubtitles[item.tmdbId];
+        updateSelectedCandidateCards(item.tmdbId);
+        updateBatchCommitButton();
         done++;
         const percent = Math.round((done / candidatesToSave.length) * 100);
         fill.style.width = `${percent}%`;
@@ -1637,9 +1758,9 @@
         await new Promise(r => setTimeout(r, 400));
       }
 
-      txt.textContent = `Successfully added ${candidatesToSave.length} subtitles!`;
+      txt.textContent = `Successfully uploaded ${candidatesToSave.length} selected subtitles!`;
       isBatchRunning = false;
-      showToast(`🎉 Batch commit finished! ${candidatesToSave.length} subtitles live.`);
+      showToast(`🎉 Finished uploading ${candidatesToSave.length} selected subtitles!`);
       setTimeout(() => { progressBox.style.display = 'none'; }, 4000);
     }
 
