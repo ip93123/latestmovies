@@ -1449,9 +1449,12 @@
 
       list.innerHTML = `<div class="skeleton-box"></div>`;
 
+      const movieYear = movie.year || (movie.release_date || '').slice(0, 4);
+
       try {
         const queryParams = new URLSearchParams({
           q: movie.title,
+          year: movieYear,
           tmdbId: movie.id,
           type: 'movie',
           source: 'all'
@@ -1473,7 +1476,7 @@
         if (results.length > 0) {
           showToast(`🎯 Found ${results.length} sub source${results.length > 1 ? 's' : ''} for "${movie.title}"`);
         } else {
-          showToast(`ℹ️ No sub found on Baiscope, Zoom or Subz for "${movie.title}"`);
+          showToast(`ℹ️ No sub found on Baiscope, Zoom or Subz for "${movie.title}"${movieYear ? ` (${movieYear})` : ''}`);
         }
 
       } catch (err) {
@@ -1515,6 +1518,10 @@
         const sizeStr = formatBytes(item.srt?.sizeBytes || item.srt?.content?.length || 0);
         const fileName = (item.srt?.filename || 'subtitle.srt').split('/').pop().split('\\').pop();
 
+        const yearTag = item.matchedYear
+          ? `<span style="font-size:0.68rem;padding:2px 6px;border-radius:4px;background:${item.yearMatch ? 'rgba(46,204,113,0.18)' : 'rgba(232,201,122,0.15)'};color:${item.yearMatch ? '#2ECC71' : 'var(--gold)'};border:1px solid ${item.yearMatch ? 'rgba(46,204,113,0.3)' : 'rgba(232,201,122,0.3)'};font-weight:700;"><i class="fa-regular fa-calendar-check"></i> ${item.matchedYear}</span>`
+          : '';
+
         const isSelected = userSelectedSubtitles[tmdbId] === idx;
         const cand = document.createElement('div');
         cand.className = `candidate-card ${isSelected ? 'selected' : ''}`;
@@ -1527,7 +1534,10 @@
 
         cand.innerHTML = `
           <div class="candidate-header">
-            <span class="source-badge ${badgeClass}"><i class="fa-solid fa-circle-check"></i> ${item.source}</span>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span class="source-badge ${badgeClass}"><i class="fa-solid fa-circle-check"></i> ${item.source}</span>
+              ${yearTag}
+            </div>
             <div class="candidate-meta">
               <span><i class="fa-solid fa-list-ol"></i> ${lineCount} cues</span>
               <span>•</span>

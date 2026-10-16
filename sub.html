@@ -2495,15 +2495,17 @@
       }
 
       const titleName = selectedTitle.title || selectedTitle.name || '';
+      const releaseYear = (selectedTitle.release_date || selectedTitle.first_air_date || '').slice(0, 4);
       const isTv = selectedTitle.media_type === 'tv';
       const season = isTv ? document.getElementById('tvSeasonInput').value : 1;
       const episode = isTv ? document.getElementById('tvEpisodeInput').value : 1;
 
-      showToast(`🔍 Searching Baiscope, Zoom & Subz for "${titleName}"...`);
+      showToast(`🔍 Searching Baiscope, Zoom & Subz for "${titleName}"${releaseYear ? ` (${releaseYear})` : ''}...`);
 
       try {
         const queryParams = new URLSearchParams({
           q: titleName,
+          year: releaseYear,
           tmdbId: selectedTitle.id,
           type: selectedTitle.media_type || 'movie',
           season,
@@ -2523,7 +2525,7 @@
           : (data.srt ? [data] : []);
 
         if (results.length === 0) {
-          showToast(`ℹ️ No subtitle found on Baiscope, Zoom or Subz for "${titleName}".`);
+          showToast(`ℹ️ No subtitle found on Baiscope, Zoom or Subz for "${titleName}"${releaseYear ? ` (${releaseYear})` : ''}.`);
           const resultsBox = document.getElementById('multiSourceResults');
           if (resultsBox) resultsBox.style.display = 'none';
           return;
@@ -2574,15 +2576,24 @@
         const sizeFormatted = formatBytes(item.srt?.sizeBytes || (item.srt?.content ? item.srt.content.length : 0));
         const rawFileName = (item.srt?.filename || 'subtitle.srt').split('/').pop().split('\\').pop();
 
+        const yearPill = item.matchedYear
+          ? `<span class="source-badge-pill" style="background:${item.yearMatch ? 'rgba(46,204,113,0.18)' : 'rgba(232,201,122,0.15)'};color:${item.yearMatch ? '#2ECC71' : 'var(--gold)'};border:1px solid ${item.yearMatch ? 'rgba(46,204,113,0.35)' : 'rgba(232,201,122,0.3)'};font-size:0.75rem;padding:3px 8px;">
+              <i class="fa-regular fa-calendar-check"></i> ${item.matchedYear} ${item.yearMatch ? '✓' : ''}
+            </span>`
+          : '';
+
         const card = document.createElement('div');
         card.className = `source-option-card ${idx === selectedResultIndex ? 'selected' : ''}`;
         card.id = `sourceCard_${idx}`;
         card.innerHTML = `
           <div>
-            <div class="source-card-top">
-              <span class="source-badge-pill ${badgeClass}">
-                <i class="fa-solid ${badgeIcon}"></i> ${item.source}
-              </span>
+            <div class="source-card-top" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span class="source-badge-pill ${badgeClass}">
+                  <i class="fa-solid ${badgeIcon}"></i> ${item.source}
+                </span>
+                ${yearPill}
+              </div>
               ${item.postUrl ? `<a href="${item.postUrl}" target="_blank" rel="noopener" style="font-size:0.75rem;color:var(--gold);text-decoration:none;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Visit Post</a>` : ''}
             </div>
             <div class="source-card-title" title="${item.postTitle || rawFileName}" style="margin-top:8px;">
@@ -2596,6 +2607,7 @@
           </div>
 
           <div class="source-card-meta">
+            ${item.matchedYear ? `<span class="source-meta-tag" style="${item.yearMatch ? 'color:#2ECC71;border-color:rgba(46,204,113,0.3);' : ''}"><i class="fa-regular fa-calendar"></i> ${item.matchedYear} ${item.yearMatch ? 'Exact Match' : ''}</span>` : ''}
             <span class="source-meta-tag"><i class="fa-solid fa-list-ol"></i> ${lineCount.toLocaleString()} cues</span>
             <span class="source-meta-tag"><i class="fa-solid fa-hard-drive"></i> ${sizeFormatted}</span>
             ${item.srt?.sinhalaDetected ? '<span class="source-meta-tag" style="color:#2ECC71;border-color:rgba(46,204,113,0.3);"><i class="fa-solid fa-check"></i> Sinhala Verified</span>' : ''}

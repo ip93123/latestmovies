@@ -30,6 +30,7 @@ export default async function handler(req, res) {
   const {
     q,
     title,
+    year,
     tmdbId,
     type = 'movie',
     season = 1,
@@ -40,6 +41,7 @@ export default async function handler(req, res) {
   } = queryParams;
 
   const searchQuery = String(q || title || '').trim();
+  let finalYear = String(year || '').trim();
 
   if (!searchQuery && !tmdbId) {
     return res.status(400).json({
@@ -50,8 +52,8 @@ export default async function handler(req, res) {
 
   let finalQuery = searchQuery;
 
-  // If query is missing but tmdbId is given, resolve title via TMDB API
-  if (!finalQuery && tmdbId) {
+  // If query is missing or year is missing, resolve via TMDB API if tmdbId is provided
+  if ((!finalQuery || !finalYear) && tmdbId) {
     try {
       const tmdbKey = process.env.TMDB_API_KEY || '4f298a53e5522830c82f789f0e00568e';
       const endpoint = type === 'tv'
@@ -60,7 +62,8 @@ export default async function handler(req, res) {
       const tmdbRes = await fetch(endpoint);
       if (tmdbRes.ok) {
         const data = await tmdbRes.json();
-        finalQuery = data.title || data.name || '';
+        if (!finalQuery) finalQuery = data.title || data.name || '';
+        if (!finalYear) finalYear = (data.release_date || data.first_air_date || '').slice(0, 4);
       }
     } catch (_) {}
   }
@@ -76,16 +79,16 @@ export default async function handler(req, res) {
     let rawResults = [];
 
     if (source === 'baiscope') {
-      const r = await searchAndExtractBaiscope(finalQuery, quality);
+      const r = await searchAndExtractBaiscope(finalQuery, quality, finalYear);
       if (r) rawResults.push(r);
     } else if (source === 'zoom') {
-      const r = await searchAndExtractZoom(finalQuery, quality);
+      const r = await searchAndExtractZoom(finalQuery, quality, finalYear);
       if (r) rawResults.push(r);
     } else if (source === 'subz') {
-      const r = await searchAndExtractSubz(finalQuery, quality);
+      const r = await searchAndExtractSubz(finalQuery, quality, finalYear);
       if (r) rawResults.push(r);
     } else {
-      rawResults = await searchAllSinhalaSubtitles(finalQuery, quality);
+      rawResults = await searchAllSinhalaSubtitles(finalQuery, quality, finalYear);
     }
 
     if (!rawResults || rawResults.length === 0) {
@@ -95,7 +98,8 @@ export default async function handler(req, res) {
         count: 0,
         results: [],
         query: finalQuery,
-        message: `No Sinhala subtitle found across sources (${source}) for "${finalQuery}".`
+        year: finalYear,
+        message: `No Sinhala subtitle found across sources (${source}) for "${finalQuery}"${finalYear ? ` (${finalYear})` : ''}.`
       });
     }
 
@@ -106,6 +110,9 @@ export default async function handler(req, res) {
         postTitle: item.postTitle,
         postUrl: item.postUrl,
         archiveName: item.archiveName,
+        matchedYear: item.matchedYear,
+        matchScore: item.matchScore,
+        yearMatch: item.yearMatch,
         srt: {
           filename: item.srt.name,
           format: item.srt.format,
@@ -176,6 +183,7 @@ export default async function handler(req, res) {
       success: true,
       found: true,
       query: finalQuery,
+      year: finalYear,
       count: formattedResults.length,
       results: formattedResults,
       // Backward-compatible fields
@@ -183,6 +191,9 @@ export default async function handler(req, res) {
       postTitle: primaryResult.postTitle,
       postUrl: primaryResult.postUrl,
       archiveName: primaryResult.archiveName,
+      matchedYear: primaryResult.matchedYear,
+      matchScore: primaryResult.matchScore,
+      yearMatch: primaryResult.yearMatch,
       srt: primaryResult.srt,
       savedToR2,
       catalogKey
