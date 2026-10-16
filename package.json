@@ -1,7 +1,0 @@
-{
-  "name": "hackymax-movies",
-  "version": "1.0.0",
-  "description": "Hacky Max Streaming Platform",
-  "type": "module",
-  "private": true
-}
