@@ -1441,6 +1441,198 @@
       font-weight: 700;
     }
 
+    .source-tag-subz {
+      background: rgba(230, 126, 34, 0.15);
+      border: 1px solid rgba(230, 126, 34, 0.4);
+      color: #E67E22;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    /* Multi-Source Subtitle Selector */
+    .multi-source-box {
+      background: rgba(10, 15, 26, 0.88);
+      border: 1.5px solid rgba(232, 201, 122, 0.35);
+      border-radius: var(--radius-md);
+      padding: 1.2rem;
+      margin-bottom: 1.2rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(10px);
+    }
+
+    .multi-source-header {
+      margin-bottom: 1rem;
+    }
+
+    .multi-source-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .multi-source-sub {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .multi-source-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    .source-option-card {
+      background: rgba(18, 24, 38, 0.95);
+      border: 1.5px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .source-option-card:hover {
+      border-color: rgba(232, 201, 122, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+    }
+
+    .source-option-card.selected {
+      border-color: var(--gold);
+      background: linear-gradient(135deg, rgba(232, 201, 122, 0.12), rgba(18, 24, 38, 0.98));
+      box-shadow: 0 0 20px rgba(232, 201, 122, 0.25);
+    }
+
+    .source-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .source-badge-pill {
+      font-size: 0.76rem;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .source-badge-baiscope {
+      background: rgba(46, 204, 113, 0.18);
+      border: 1px solid #2ECC71;
+      color: #2ECC71;
+    }
+
+    .source-badge-zoom {
+      background: rgba(52, 152, 219, 0.18);
+      border: 1px solid #3498DB;
+      color: #3498DB;
+    }
+
+    .source-badge-subz {
+      background: rgba(230, 126, 34, 0.18);
+      border: 1px solid #E67E22;
+      color: #E67E22;
+    }
+
+    .source-card-title {
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: #fff;
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .source-card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .source-meta-tag {
+      background: rgba(255, 255, 255, 0.06);
+      padding: 2px 7px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .source-card-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .btn-select-sub {
+      flex: 1;
+      background: linear-gradient(135deg, #E8C97A 0%, #C9A44E 100%);
+      color: #07090F;
+      border: none;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn-select-sub:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+
+    .source-option-card.selected .btn-select-sub {
+      background: #2ECC71;
+      color: #000;
+    }
+
+    .btn-card-download {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-card-download:hover {
+      background: rgba(52, 152, 219, 0.25);
+      border-color: #3498DB;
+      color: #70A1FF;
+    }
+
     .hacky-admin-badge {
       display: inline-flex;
       align-items: center;
@@ -1728,12 +1920,24 @@
             <span class="autofetch-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
             <div>
               <div class="autofetch-title">Auto-Fetch Sinhala Subtitle from Web</div>
-              <div class="autofetch-sub">Searches Baiscope.lk &amp; Zoom.lk, extracts the ZIP/RAR in memory, and selects the correct Sinhala .srt</div>
+              <div class="autofetch-sub">Searches Baiscope.lk, Zoom.lk &amp; Subz.lk concurrently, auto-extracts ZIP archives, and lets you choose your preferred release</div>
             </div>
           </div>
           <button type="button" class="btn-autofetch" id="btnAutoFetchSub" onclick="triggerAutoFetchSub()">
-            <i class="fa-solid fa-cloud-arrow-down"></i> <span>Auto-Find &amp; Select SRT</span>
+            <i class="fa-solid fa-cloud-arrow-down"></i> <span>Search All 3 Sources</span>
           </button>
+        </div>
+
+        <!-- Multi-Source Results List -->
+        <div id="multiSourceResults" class="multi-source-box" style="display:none;">
+          <div class="multi-source-header">
+            <div class="multi-source-title">
+              <i class="fa-solid fa-layer-group" style="color:var(--gold);"></i>
+              <span id="multiSourceCount">Available Sinhala Subtitles</span>
+            </div>
+            <div class="multi-source-sub">Compare releases found across Baiscope, Zoom &amp; Subz. Click "Select" to load into player or download the .srt directly:</div>
+          </div>
+          <div id="multiSourceList" class="multi-source-grid"></div>
         </div>
 
         <div style="display:flex;align-items:center;margin:1rem 0;color:var(--text-muted);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;">
@@ -2219,10 +2423,22 @@
       if (badge) badge.style.display = 'none';
       const dlBtn = document.getElementById('btnDownloadExtracted');
       if (dlBtn) dlBtn.style.display = 'none';
+      // Deselect any active card
+      selectedResultIndex = -1;
+      (autofetchedResults || []).forEach((_, idx) => {
+        const c = document.getElementById(`sourceCard_${idx}`);
+        if (c) {
+          c.classList.remove('selected');
+          const selectBtn = c.querySelector('.btn-select-sub');
+          if (selectBtn) selectBtn.innerHTML = '<i class="fa-solid fa-check"></i> <span>Select Subtitle</span>';
+        }
+      });
     }
 
-    // ── Auto-Fetch Sinhala Subtitle from Baiscope / Zoom ─────────────────────
+    // ── Auto-Fetch Sinhala Subtitles from Baiscope / Zoom / Subz ─────────────
     let lastExtractedSrt = null;
+    let autofetchedResults = [];
+    let selectedResultIndex = -1;
 
     async function triggerAutoFetchSub() {
       if (!selectedTitle) {
@@ -2234,7 +2450,7 @@
       const origText = btn ? btn.innerHTML : '';
       if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Searching Web…</span>';
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Searching 3 Sources…</span>';
       }
 
       const titleName = selectedTitle.title || selectedTitle.name || '';
@@ -2242,7 +2458,7 @@
       const season = isTv ? document.getElementById('tvSeasonInput').value : 1;
       const episode = isTv ? document.getElementById('tvEpisodeInput').value : 1;
 
-      showToast(`🔍 Searching Baiscope & Zoom for "${titleName}"...`);
+      showToast(`🔍 Searching Baiscope, Zoom & Subz for "${titleName}"...`);
 
       try {
         const queryParams = new URLSearchParams({
@@ -2250,7 +2466,8 @@
           tmdbId: selectedTitle.id,
           type: selectedTitle.media_type || 'movie',
           season,
-          episode
+          episode,
+          source: 'all'
         });
 
         const res = await fetch(`/api/sub-autofetch?${queryParams.toString()}`);
@@ -2260,39 +2477,24 @@
           throw new Error(data.error || 'Failed to search subtitles');
         }
 
-        if (!data.found || !data.srt) {
-          showToast(`ℹ️ No subtitle found on Baiscope or Zoom for "${titleName}".`);
+        const results = Array.isArray(data.results) && data.results.length > 0
+          ? data.results
+          : (data.srt ? [data] : []);
+
+        if (results.length === 0) {
+          showToast(`ℹ️ No subtitle found on Baiscope, Zoom or Subz for "${titleName}".`);
+          const resultsBox = document.getElementById('multiSourceResults');
+          if (resultsBox) resultsBox.style.display = 'none';
           return;
         }
 
-        // Create Virtual File from extracted SRT
-        const rawFileName = (data.srt.filename || `${titleName}.srt`).split('/').pop().split('\\').pop();
-        const blob = new Blob([data.srt.content], { type: 'text/plain;charset=utf-8' });
-        const virtualFile = new File([blob], rawFileName, { type: 'text/plain' });
+        autofetchedResults = results;
+        renderMultiSourceResults(results);
 
-        lastExtractedSrt = {
-          blob,
-          filename: rawFileName,
-          source: data.source,
-          lineCount: data.srt.lineCount
-        };
+        // Auto-select first candidate by default
+        selectSubtitleSource(0, false);
 
-        // Process file into preview
-        processFile(virtualFile);
-
-        // Update Source badge & download button
-        const sourceBadge = document.getElementById('fileSourceBadge');
-        if (sourceBadge) {
-          const isBaiscope = (data.source || '').includes('baiscope');
-          sourceBadge.className = isBaiscope ? 'source-tag-baiscope' : 'source-tag-zoom';
-          sourceBadge.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${data.source}`;
-          sourceBadge.style.display = 'inline-flex';
-        }
-
-        const dlBtn = document.getElementById('btnDownloadExtracted');
-        if (dlBtn) dlBtn.style.display = 'inline-flex';
-
-        showToast(`🎉 Found on ${data.source}! Selected ${data.srt.lineCount || ''} lines.`);
+        showToast(`🎉 Found ${results.length} subtitle source${results.length > 1 ? 's' : ''}!`);
 
       } catch (err) {
         console.error('[sub-autofetch] Error:', err);
@@ -2303,6 +2505,148 @@
           btn.innerHTML = origText;
         }
       }
+    }
+
+    function renderMultiSourceResults(results) {
+      const box = document.getElementById('multiSourceResults');
+      const list = document.getElementById('multiSourceList');
+      const countEl = document.getElementById('multiSourceCount');
+      if (!box || !list) return;
+
+      countEl.textContent = `Available Subtitles (${results.length} found)`;
+      list.innerHTML = '';
+
+      results.forEach((item, idx) => {
+        const isBaiscope = (item.source || '').includes('baiscope');
+        const isZoom = (item.source || '').includes('zoom');
+        const isSubz = (item.source || '').includes('subz');
+
+        const badgeClass = isBaiscope
+          ? 'source-badge-baiscope'
+          : (isZoom ? 'source-badge-zoom' : 'source-badge-subz');
+
+        const badgeIcon = isBaiscope
+          ? 'fa-film'
+          : (isZoom ? 'fa-video' : 'fa-closed-captioning');
+
+        const lineCount = item.srt?.lineCount || 0;
+        const sizeFormatted = formatBytes(item.srt?.sizeBytes || (item.srt?.content ? item.srt.content.length : 0));
+        const rawFileName = (item.srt?.filename || 'subtitle.srt').split('/').pop().split('\\').pop();
+
+        const card = document.createElement('div');
+        card.className = `source-option-card ${idx === selectedResultIndex ? 'selected' : ''}`;
+        card.id = `sourceCard_${idx}`;
+        card.innerHTML = `
+          <div>
+            <div class="source-card-top">
+              <span class="source-badge-pill ${badgeClass}">
+                <i class="fa-solid ${badgeIcon}"></i> ${item.source}
+              </span>
+              ${item.postUrl ? `<a href="${item.postUrl}" target="_blank" rel="noopener" style="font-size:0.75rem;color:var(--gold);text-decoration:none;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Visit Post</a>` : ''}
+            </div>
+            <div class="source-card-title" title="${item.postTitle || rawFileName}" style="margin-top:8px;">
+              ${item.postTitle || rawFileName}
+            </div>
+          </div>
+
+          <div style="font-size:0.8rem;color:#cbd5e1;word-break:break-all;display:flex;align-items:center;gap:6px;">
+            <i class="fa-solid fa-file-lines" style="color:var(--gold);"></i>
+            <span>${rawFileName}</span>
+          </div>
+
+          <div class="source-card-meta">
+            <span class="source-meta-tag"><i class="fa-solid fa-list-ol"></i> ${lineCount.toLocaleString()} cues</span>
+            <span class="source-meta-tag"><i class="fa-solid fa-hard-drive"></i> ${sizeFormatted}</span>
+            ${item.srt?.sinhalaDetected ? '<span class="source-meta-tag" style="color:#2ECC71;border-color:rgba(46,204,113,0.3);"><i class="fa-solid fa-check"></i> Sinhala Verified</span>' : ''}
+          </div>
+
+          <div class="source-card-actions">
+            <button type="button" class="btn-select-sub" onclick="selectSubtitleSource(${idx}, true)">
+              <i class="fa-solid ${idx === selectedResultIndex ? 'fa-check-double' : 'fa-check'}"></i>
+              <span>${idx === selectedResultIndex ? 'Selected & Ready' : 'Select Subtitle'}</span>
+            </button>
+            <button type="button" class="btn-card-download" onclick="downloadSubtitleSource(${idx})" title="Direct download .srt">
+              <i class="fa-solid fa-download"></i> .SRT
+            </button>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+
+      box.style.display = 'block';
+      box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function selectSubtitleSource(index, notify = true) {
+      if (!autofetchedResults || !autofetchedResults[index]) return;
+      const item = autofetchedResults[index];
+      selectedResultIndex = index;
+
+      // Update card selected classes
+      autofetchedResults.forEach((_, idx) => {
+        const c = document.getElementById(`sourceCard_${idx}`);
+        if (c) {
+          if (idx === index) {
+            c.classList.add('selected');
+            const selectBtn = c.querySelector('.btn-select-sub');
+            if (selectBtn) selectBtn.innerHTML = '<i class="fa-solid fa-check-double"></i> <span>Selected & Ready</span>';
+          } else {
+            c.classList.remove('selected');
+            const selectBtn = c.querySelector('.btn-select-sub');
+            if (selectBtn) selectBtn.innerHTML = '<i class="fa-solid fa-check"></i> <span>Select Subtitle</span>';
+          }
+        }
+      });
+
+      const rawFileName = (item.srt.filename || `${selectedTitle?.title || 'subtitle'}.srt`).split('/').pop().split('\\').pop();
+      const blob = new Blob([item.srt.content], { type: 'text/plain;charset=utf-8' });
+      const virtualFile = new File([blob], rawFileName, { type: 'text/plain' });
+
+      lastExtractedSrt = {
+        blob,
+        filename: rawFileName,
+        source: item.source,
+        lineCount: item.srt.lineCount
+      };
+
+      // Process into preview box
+      processFile(virtualFile);
+
+      // Update Source badge & download button in preview
+      const sourceBadge = document.getElementById('fileSourceBadge');
+      if (sourceBadge) {
+        const isBaiscope = (item.source || '').includes('baiscope');
+        const isZoom = (item.source || '').includes('zoom');
+        const isSubz = (item.source || '').includes('subz');
+        sourceBadge.className = isBaiscope
+          ? 'source-tag-baiscope'
+          : (isZoom ? 'source-tag-zoom' : 'source-tag-subz');
+        sourceBadge.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${item.source}`;
+        sourceBadge.style.display = 'inline-flex';
+      }
+
+      const dlBtn = document.getElementById('btnDownloadExtracted');
+      if (dlBtn) dlBtn.style.display = 'inline-flex';
+
+      if (notify) {
+        showToast(`✓ Loaded subtitle from ${item.source} (${item.srt.lineCount} cues)`);
+      }
+    }
+
+    function downloadSubtitleSource(index) {
+      if (!autofetchedResults || !autofetchedResults[index]) return;
+      const item = autofetchedResults[index];
+      const rawFileName = (item.srt.filename || `${selectedTitle?.title || 'subtitle'}.srt`).split('/').pop().split('\\').pop();
+      const blob = new Blob([item.srt.content], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = rawFileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`📥 Downloading ${rawFileName}`);
     }
 
     function downloadExtractedSrt() {

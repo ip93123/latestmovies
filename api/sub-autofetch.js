@@ -1,4 +1,10 @@
-import { autoFetchSinhalaSubtitle, searchAndExtractBaiscope, searchAndExtractZoom } from '../lib/sub-scrapers.js';
+import {
+  autoFetchSinhalaSubtitle,
+  searchAndExtractBaiscope,
+  searchAndExtractZoom,
+  searchAndExtractSubz,
+  searchAllSinhalaSubtitles
+} from '../lib/sub-scrapers.js';
 import { loadCatalogAsync, saveCatalog, verifyToken } from './sub-api.js';
 import { getR2Config, putR2Object } from '../lib/r2-helper.js';
 
@@ -29,7 +35,7 @@ export default async function handler(req, res) {
     season = 1,
     episode = 1,
     quality = '720p',
-    source = 'all', // 'all', 'baiscope', 'zoom'
+    source = 'all', // 'all', 'baiscope', 'zoom', 'subz'
     save = false
   } = queryParams;
 
@@ -67,33 +73,58 @@ export default async function handler(req, res) {
   }
 
   try {
-    let result = null;
+    let rawResults = [];
 
     if (source === 'baiscope') {
-      result = await searchAndExtractBaiscope(finalQuery, quality);
+      const r = await searchAndExtractBaiscope(finalQuery, quality);
+      if (r) rawResults.push(r);
     } else if (source === 'zoom') {
-      result = await searchAndExtractZoom(finalQuery, quality);
+      const r = await searchAndExtractZoom(finalQuery, quality);
+      if (r) rawResults.push(r);
+    } else if (source === 'subz') {
+      const r = await searchAndExtractSubz(finalQuery, quality);
+      if (r) rawResults.push(r);
     } else {
-      result = await autoFetchSinhalaSubtitle(finalQuery, quality);
+      rawResults = await searchAllSinhalaSubtitles(finalQuery, quality);
     }
 
-    if (!result || !result.srt) {
+    if (!rawResults || rawResults.length === 0) {
       return res.status(200).json({
         success: true,
         found: false,
+        count: 0,
+        results: [],
         query: finalQuery,
-        message: `No Sinhala subtitle found on ${source === 'all' ? 'Baiscope.lk or Zoom.lk' : source} for "${finalQuery}".`
+        message: `No Sinhala subtitle found across sources (${source}) for "${finalQuery}".`
       });
     }
 
-    const { srt, postTitle, postUrl, archiveName } = result;
-    const lineCount = (srt.content.match(/-->/g) || []).length;
+    const formattedResults = rawResults.map(item => {
+      const lineCount = (item.srt?.content?.match(/-->/g) || []).length;
+      return {
+        source: item.source,
+        postTitle: item.postTitle,
+        postUrl: item.postUrl,
+        archiveName: item.archiveName,
+        srt: {
+          filename: item.srt.name,
+          format: item.srt.format,
+          sinhalaDetected: item.srt.sinhalaDetected,
+          lineCount,
+          sizeBytes: Buffer.byteLength(item.srt.content || '', 'utf8'),
+          preview: (item.srt.content || '').slice(0, 1000),
+          content: item.srt.content
+        }
+      };
+    });
+
+    const primaryResult = formattedResults[0];
     let savedToR2 = false;
     let catalogKey = null;
 
     // Optional Auto-Save to R2 and Catalog if requested & tmdbId exists
     const shouldSave = save === true || save === 'true' || save === '1';
-    if (shouldSave && tmdbId) {
+    if (shouldSave && tmdbId && primaryResult?.srt?.content) {
       const authHeader = req.headers.authorization || '';
       const token = authHeader.replace(/^Bearer\s+/i, '') || queryParams.token;
       const verified = verifyToken(token);
@@ -109,7 +140,7 @@ export default async function handler(req, res) {
           if (r2Config.isConfigured) {
             await putR2Object({
               key: r2Path,
-              body: srt.content,
+              body: primaryResult.srt.content,
               contentType: 'text/plain; charset=utf-8'
             });
 
@@ -122,9 +153,9 @@ export default async function handler(req, res) {
               season: type === 'tv' ? Number(season) : undefined,
               episode: type === 'tv' ? Number(episode) : undefined,
               format: 'srt',
-              source: result.source,
-              originalFile: srt.name,
-              sizeBytes: Buffer.byteLength(srt.content, 'utf8'),
+              source: primaryResult.source,
+              originalFile: primaryResult.srt.filename,
+              sizeBytes: primaryResult.srt.sizeBytes,
               uploader: verified.u || 'AutoBot',
               uploadedAt: Date.now(),
               url: r2Config.publicDomain ? `${r2Config.publicDomain.replace(/\/$/, '')}/${r2Path}` : `/api/sub-api?action=download&key=${catalogKey}`
@@ -142,19 +173,14 @@ export default async function handler(req, res) {
       success: true,
       found: true,
       query: finalQuery,
-      source: result.source,
-      postTitle,
-      postUrl,
-      archiveName,
-      srt: {
-        filename: srt.name,
-        format: srt.format,
-        sinhalaDetected: srt.sinhalaDetected,
-        lineCount,
-        sizeBytes: Buffer.byteLength(srt.content, 'utf8'),
-        preview: srt.content.slice(0, 1000),
-        content: srt.content
-      },
+      count: formattedResults.length,
+      results: formattedResults,
+      // Backward-compatible fields
+      source: primaryResult.source,
+      postTitle: primaryResult.postTitle,
+      postUrl: primaryResult.postUrl,
+      archiveName: primaryResult.archiveName,
+      srt: primaryResult.srt,
       savedToR2,
       catalogKey
     });
