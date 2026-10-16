@@ -889,6 +889,9 @@
     .card-rt-badge .rt-icon {
       font-size: 0.72rem;
       line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .card-rt-badge .rt-val {
@@ -11855,11 +11858,14 @@
       return null;
     }
 
+    const RT_SPLAT_SVG = '<svg class="rt-splat-svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" style="display:block;flex-shrink:0;"><path d="M12.5 2.1c-.8-.2-1.7.3-1.9 1.1l-.3 1.3c-.2.7-.8 1.2-1.5 1.3l-1.3.1c-.8.1-1.5.8-1.4 1.6l.1 1.3c.1.7-.2 1.4-.8 1.8L4.3 11c-.7.5-.9 1.4-.5 2.1l.6 1.1c.4.6.4 1.4.1 2l-.6 1.1c-.4.7-.2 1.7.5 2.2l1.1.8c.6.4.9 1.1.9 1.8v1.3c0 .8.7 1.5 1.5 1.5h1.3c.7 0 1.4.4 1.8.9l.8 1.1c.5.7 1.4.9 2.1.5l1.1-.6c.6-.4 1.4-.4 2-.1l1.1.6c.7.4 1.7.2 2.2-.5l.8-1.1c.4-.6 1.1-.9 1.8-.9h1.3c.8 0 1.5-.7 1.5-1.5v-1.3c0-.7.4-1.4.9-1.8l1.1-.8c.7-.5.9-1.4.5-2.2l-.6-1.1c-.4-.6-.4-1.4-.1-2l.6-1.1c.4-.7.2-1.7-.5-2.1l-1.1-.8c-.6-.4-.9-1.1-.9-1.8V9.6c0-.8-.7-1.5-1.5-1.5h-1.3c-.7 0-1.4-.4-1.8-.9l-.8-1.1c-.5-.7-1.4-.9-2.1-.5l-1.1.6c-.6.4-1.4.4-2 .1l-1.1-.6c-.2-.1-.5-.2-.7-.2z"/></svg>';
+    const RT_MODAL_SPLAT_SVG = '<svg class="rt-splat-svg" width="14" height="14" viewBox="0 0 24 24" fill="#8EC549" style="vertical-align:-2px;margin-right:2px;display:inline-block;"><path d="M12.5 2.1c-.8-.2-1.7.3-1.9 1.1l-.3 1.3c-.2.7-.8 1.2-1.5 1.3l-1.3.1c-.8.1-1.5.8-1.4 1.6l.1 1.3c.1.7-.2 1.4-.8 1.8L4.3 11c-.7.5-.9 1.4-.5 2.1l.6 1.1c.4.6.4 1.4.1 2l-.6 1.1c-.4.7-.2 1.7.5 2.2l1.1.8c.6.4.9 1.1.9 1.8v1.3c0 .8.7 1.5 1.5 1.5h1.3c.7 0 1.4.4 1.8.9l.8 1.1c.5.7 1.4.9 2.1.5l1.1-.6c.6-.4 1.4-.4 2-.1l1.1.6c.7.4 1.7.2 2.2-.5l.8-1.1c.4-.6 1.1-.9 1.8-.9h1.3c.8 0 1.5-.7 1.5-1.5v-1.3c0-.7.4-1.4.9-1.8l1.1-.8c.7-.5.9-1.4.5-2.2l-.6-1.1c-.4-.6-.4-1.4-.1-2l.6-1.1c.4-.7.2-1.7-.5-2.1l-1.1-.8c-.6-.4-.9-1.1-.9-1.8V9.6c0-.8-.7-1.5-1.5-1.5h-1.3c-.7 0-1.4-.4-1.8-.9l-.8-1.1c-.5-.7-1.4-.9-2.1-.5l-1.1.6c-.6.4-1.4.4-2 .1l-1.1-.6c-.2-.1-.5-.2-.7-.2z"/></svg>';
+
     function applyRtBadgeToEl(el, rtData) {
       if (!el || !rtData || !rtData.score) return;
       const scoreNum = parseInt(rtData.score, 10);
       const isRotten = rtData.sentiment === 'NEGATIVE' || (scoreNum && scoreNum < 60);
-      const icon = isRotten ? '🟢' : '🍅';
+      const icon = isRotten ? RT_SPLAT_SVG : '🍅';
       el.className = `card-rt-badge ${isRotten ? 'rt-rotten' : 'rt-fresh'}`;
       el.innerHTML = `<span class="rt-icon">${icon}</span><span class="rt-val">${rtData.score}</span>`;
       el.style.display = 'inline-flex';
@@ -11905,7 +11911,7 @@
         const isRotten = data.sentiment === 'NEGATIVE' || (scoreNum && scoreNum < 60);
         rtEl.className = `rating-badge rt-badge ${isRotten ? 'rt-rotten' : 'rt-fresh'}`;
         const iconEl = rtEl.querySelector('.rt-icon');
-        if (iconEl) iconEl.textContent = isRotten ? '🟢' : '🍅';
+        if (iconEl) iconEl.innerHTML = isRotten ? RT_MODAL_SPLAT_SVG : '🍅';
         rtEl.style.display = 'inline-flex';
       }
 

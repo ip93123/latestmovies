@@ -36,9 +36,28 @@ async function scrapeRottenTomatoes(title, year, type) {
       }
     }
 
-    let candidate = rows.find(r => (r.year === String(year) || !year) && r.score);
+    const cleanQ = title.toLowerCase().replace(/[^a-z0-9]/g, '');
+    let candidate = rows.find(r => {
+      if (!r.score) return false;
+      const cleanR = r.title.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const isTitleMatch = cleanR === cleanQ || cleanR.startsWith(cleanQ) || cleanQ.startsWith(cleanR);
+      if (!isTitleMatch) return false;
+      if (year && r.year) {
+        const diff = Math.abs(parseInt(r.year, 10) - parseInt(year, 10));
+        if (diff > 1) return false;
+      }
+      return true;
+    });
+
     if (!candidate && rows.length > 0) {
-      candidate = rows.find(r => r.score);
+      candidate = rows.find(r => {
+        if (!r.score) return false;
+        if (year && r.year) {
+          const diff = Math.abs(parseInt(r.year, 10) - parseInt(year, 10));
+          if (diff > 1) return false;
+        }
+        return true;
+      });
     }
     return candidate || null;
   } catch (_) {
@@ -98,19 +117,31 @@ export default async function handler(req, res) {
   // Extract ratings if OMDb succeeded
   if (omdbData) {
     const rtItem = (omdbData.Ratings || []).find(r => r.Source === 'Rotten Tomatoes');
-    const rtVal = rtItem ? rtItem.Value : null; // e.g. "86%"
-    const scoreNum = rtVal ? parseInt(rtVal, 10) : null;
+    let rtVal = rtItem ? rtItem.Value : null; // e.g. "86%"
+    let scoreNum = rtVal ? parseInt(rtVal, 10) : null;
+    let sentiment = (scoreNum && scoreNum >= 60) ? 'POSITIVE' : (scoreNum ? 'NEGATIVE' : null);
+
+    // If OMDb didn't have RT rating, check direct RT scraper
+    if (!rtVal) {
+      const queryTitle = title || omdbData.Title || id;
+      const rtDirect = await scrapeRottenTomatoes(queryTitle, year || omdbData.Year, type);
+      if (rtDirect && rtDirect.score) {
+        scoreNum = parseInt(rtDirect.score, 10);
+        rtVal = `${scoreNum}%`;
+        sentiment = rtDirect.sentiment || ((scoreNum >= 60) ? 'POSITIVE' : 'NEGATIVE');
+      }
+    }
 
     res.setHeader('Cache-Control', 'public, s-maxage=604800, stale-while-revalidate=86400');
     return res.status(200).json({
       success: true,
-      source: 'omdb',
+      source: rtVal && !rtItem ? 'omdb+rt_direct' : 'omdb',
       title: omdbData.Title || title,
       year: omdbData.Year || year,
       imdbRating: omdbData.imdbRating || null,
       rottenTomatoes: rtVal,
       rottenTomatoesScore: scoreNum,
-      rottenTomatoesSentiment: (scoreNum && scoreNum >= 60) ? 'POSITIVE' : (scoreNum ? 'NEGATIVE' : null)
+      rottenTomatoesSentiment: sentiment
     });
   }
 
