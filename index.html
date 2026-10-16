@@ -12994,6 +12994,8 @@
         const [startStr, endStr] = lines[timingIdx].split('-->').map(s => s.trim());
         const text = lines.slice(timingIdx + 1).join('\n')
           .replace(/\{[^}]*\}/g, '')
+          .replace(/\\N/g, '\n')
+          .replace(/\\h/g, ' ')
           .replace(/<[^>]+>/g, '').trim(); // strip ASS & VTT tags
         if (!text) continue;
         cues.push({ start: vttTimeToMs(startStr), end: vttTimeToMs(endStr), text });
@@ -13016,6 +13018,8 @@
         const [startStr, endStr] = lines[timingIdx].split('-->').map(s => s.trim());
         const text = lines.slice(timingIdx + 1).join('\n')
           .replace(/\{[^}]*\}/g, '')
+          .replace(/\\N/g, '\n')
+          .replace(/\\h/g, ' ')
           .replace(/<[^>]+>/g, '').trim(); // strip ASS & HTML tags
         if (!text) continue;
         cues.push({ start: vttTimeToMs(startStr), end: vttTimeToMs(endStr), text });
