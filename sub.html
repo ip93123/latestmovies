@@ -2629,7 +2629,7 @@
       dropdown.innerHTML = valid.map(item => {
         const title = item.title || item.name || 'Untitled';
         const year = (item.release_date || item.first_air_date || '').slice(0, 4) || 'N/A';
-        const poster = item.poster_path ? `/img/w92${item.poster_path}` : 'logo.png';
+        const poster = item.poster_path ? `https://image.tmdb.org/t/p/w92${item.poster_path}` : 'logo.png';
         const isTv = item.media_type === 'tv';
 
         return `
@@ -2666,7 +2666,7 @@
       document.getElementById('tmdbSearchInput').value = item.title || item.name;
 
       const isTv = item.media_type === 'tv';
-      const poster = item.poster_path ? `/img/w185${item.poster_path}` : 'logo.png';
+      const poster = item.poster_path ? `https://image.tmdb.org/t/p/w185${item.poster_path}` : 'logo.png';
       const year = (item.release_date || item.first_air_date || '').slice(0, 4);
 
       document.getElementById('selPoster').src = poster;

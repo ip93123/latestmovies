@@ -78,7 +78,7 @@ export default async function handler(req, res) {
     }
   }
 
-  // Prevent caching so new server labels appear instantly
-  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  // Edge CDN caching to prevent origin execution & transfer drain
+  res.setHeader('Cache-Control', 'public, max-age=600, s-maxage=3600, stale-while-revalidate=86400');
   res.status(200).json({ urls, labels });
 }

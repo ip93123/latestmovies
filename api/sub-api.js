@@ -265,11 +265,16 @@ export async function saveCatalog(catalog) {
 
 async function handleCatalog(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-  res.setHeader('Pragma', 'no-cache');
-  res.setHeader('Expires', '0');
 
   const { id, type = 'movie', season = 1, episode = 1, recent, all, fresh } = req.query;
+
+  if (fresh === '1' || fresh === 'true') {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+  } else {
+    // Edge CDN caching (reduces redundant serverless invocations & Fast Origin Transfer)
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
+  }
   const catalog = await loadCatalogAsync(fresh === '1' || fresh === 'true');
 
   if (all === '1' || all === 'true') {
