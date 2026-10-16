@@ -2301,21 +2301,28 @@
       box-shadow: 0 0 0 1px rgba(var(--accent1), 0.08),
         0 32px 80px rgba(0, 0, 0, 0.6),
         0 0 120px rgba(var(--accent1), 0.08);
-      width: min(860px, 94vw);
+      width: min(920px, 95vw);
       max-height: 92vh;
       overflow-y: auto;
       position: relative;
       display: grid;
-      grid-template-columns: 280px 1fr;
-      gap: 0
+      grid-template-columns: 300px 1fr;
+      gap: 0;
+    }
+
+    .modal-left-col {
+      width: 300px;
+      flex-shrink: 0;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      background: rgba(8, 11, 18, 0.45);
     }
 
     .modal-poster {
-      width: 280px;
+      width: 100%;
       flex-shrink: 0;
-      align-self: start;
-      position: sticky;
-      top: 0;
+      position: relative;
     }
 
     .modal-poster img {
@@ -2323,9 +2330,393 @@
       height: auto;
       aspect-ratio: 2/3;
       object-fit: cover;
-      border-radius: 16px 0 0 16px;
+      border-radius: 19px 0 0 0;
       display: block;
-      min-height: 360px;
+      min-height: 380px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    /* ── Comments & Recommendations (Glass Theme) ───────────────────── */
+    .modal-comments-section {
+      padding: 1.15rem 1rem 1.4rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(10, 14, 23, 0.55);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .comments-recommend-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 9px 12px;
+      background: linear-gradient(135deg, rgba(232, 201, 122, 0.09) 0%, rgba(201, 164, 78, 0.04) 100%);
+      border: 1px solid rgba(232, 201, 122, 0.28);
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    }
+
+    .recommend-card-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .recommend-card-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(232, 201, 122, 0.18);
+      border: 1px solid rgba(232, 201, 122, 0.35);
+      color: var(--gold, #E8C97A);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82rem;
+      flex-shrink: 0;
+      transition: all 0.25s ease;
+    }
+
+    .recommend-card-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      line-height: 1.2;
+    }
+
+    .recommend-card-count {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.65);
+      line-height: 1.2;
+      margin-top: 1px;
+    }
+
+    .btn-recommend-toggle {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #fff;
+      font-size: 0.76rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      flex-shrink: 0;
+      font-family: inherit;
+    }
+
+    .btn-recommend-toggle:hover {
+      background: rgba(232, 201, 122, 0.18);
+      border-color: var(--gold, #E8C97A);
+      color: var(--gold, #E8C97A);
+      transform: translateY(-1px);
+    }
+
+    .btn-recommend-toggle.active {
+      background: linear-gradient(135deg, #2ECC71 0%, #27ae60 100%);
+      color: #07090F;
+      border-color: #2ECC71;
+      box-shadow: 0 0 14px rgba(46, 204, 113, 0.45);
+    }
+
+    .comments-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .comments-heading-wrap {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .comments-title-icon {
+      color: var(--gold, #E8C97A);
+      font-size: 0.85rem;
+    }
+
+    .comments-title-text {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.3px;
+    }
+
+    .comments-count-pill {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--gold, #E8C97A);
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 1px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .comments-refresh-btn {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      transition: color 0.2s, transform 0.2s;
+    }
+    .comments-refresh-btn:hover {
+      color: var(--gold, #E8C97A);
+      transform: rotate(45deg);
+    }
+
+    .comment-input-form {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 9px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      transition: border-color 0.2s;
+    }
+
+    .comment-input-form:focus-within {
+      border-color: rgba(232, 201, 122, 0.4);
+      box-shadow: 0 0 12px rgba(232, 201, 122, 0.15);
+    }
+
+    .comment-user-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 4px 8px;
+    }
+
+    .comment-user-icon {
+      font-size: 0.72rem;
+      color: var(--gold, #E8C97A);
+      flex-shrink: 0;
+    }
+
+    .comment-user-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-size: 0.76rem;
+      font-family: inherit;
+    }
+    .comment-user-input::placeholder { color: rgba(255, 255, 255, 0.35); }
+
+    .comment-msg-input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 6px 8px;
+      color: #fff;
+      font-size: 0.76rem;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 48px;
+      outline: none;
+      line-height: 1.35;
+    }
+    .comment-msg-input::placeholder { color: rgba(255, 255, 255, 0.35); }
+    .comment-msg-input:focus { border-color: rgba(232, 201, 122, 0.45); }
+
+    .comment-form-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    .comment-rec-toggle-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.85);
+      user-select: none;
+    }
+
+    .comment-rec-checkbox { display: none; }
+
+    .comment-rec-switch {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .comment-rec-checkbox:checked + .comment-rec-switch {
+      background: #2ECC71;
+      border-color: #2ECC71;
+    }
+    .comment-rec-checkbox:checked + .comment-rec-switch::after {
+      content: '✓';
+      font-size: 10px;
+      font-weight: 800;
+      color: #07090F;
+    }
+
+    .btn-post-comment {
+      background: linear-gradient(135deg, #E8C97A 0%, #C9A44E 100%);
+      color: #07090F;
+      border: none;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: transform 0.15s, opacity 0.15s;
+      font-family: inherit;
+    }
+    .btn-post-comment:hover {
+      transform: translateY(-1px);
+      opacity: 0.93;
+    }
+    .btn-post-comment:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .comments-stream-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 380px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .comments-stream-list::-webkit-scrollbar { width: 4px; }
+    .comments-stream-list::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 4px; }
+    .comments-stream-list::-webkit-scrollbar-thumb { background: rgba(232, 201, 122, 0.25); border-radius: 4px; }
+    .comments-stream-list::-webkit-scrollbar-thumb:hover { background: rgba(232, 201, 122, 0.5); }
+
+    .comment-bubble-card {
+      background: rgba(255, 255, 255, 0.032);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 10px;
+      padding: 9px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .comment-bubble-card:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .comment-bubble-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .comment-author-wrap {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .comment-avatar-circle {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(232, 201, 122, 0.3) 0%, rgba(201, 164, 78, 0.15) 100%);
+      border: 1px solid rgba(232, 201, 122, 0.4);
+      color: var(--gold, #E8C97A);
+      font-size: 0.65rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      text-transform: uppercase;
+    }
+
+    .comment-author-name {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: #fff;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .comment-time-ago {
+      font-size: 0.64rem;
+      color: rgba(255, 255, 255, 0.4);
+      flex-shrink: 0;
+    }
+
+    .comment-rec-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: rgba(46, 204, 113, 0.12);
+      border: 1px solid rgba(46, 204, 113, 0.28);
+      color: #2ECC71;
+      font-size: 0.62rem;
+      font-weight: 700;
+      width: fit-content;
+    }
+
+    .comment-bubble-text {
+      font-size: 0.74rem;
+      color: rgba(255, 255, 255, 0.88);
+      line-height: 1.4;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+
+    .comments-empty-state {
+      padding: 1.5rem 0.5rem;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.74rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .comments-empty-state i {
+      font-size: 1.3rem;
+      color: rgba(232, 201, 122, 0.35);
     }
 
     .modal-body {
@@ -9441,7 +9832,70 @@
   <!-- MODAL -->
   <div id="modal">
     <div class="modal-box" id="modalBox">
-      <div class="modal-poster"><img id="modalPoster" src="" alt="" loading="eager" decoding="async"></div>
+      <div class="modal-left-col" id="modalLeftCol">
+        <div class="modal-poster"><img id="modalPoster" src="" alt="" loading="eager" decoding="async"></div>
+
+        <!-- Glass Comments & Recommendations Container (Directly under Poster Banner) -->
+        <div class="modal-comments-section" id="modalCommentsSection">
+          <!-- Glass Recommendation Hero Card -->
+          <div class="comments-recommend-card" id="commentsRecommendCard">
+            <div class="recommend-card-info">
+              <span class="recommend-card-icon" id="recommendCardIcon">
+                <i class="fa-solid fa-heart"></i>
+              </span>
+              <div>
+                <div class="recommend-card-title">Recommendation</div>
+                <div class="recommend-card-count" id="recommendCountText">0 recommended</div>
+              </div>
+            </div>
+            <button type="button" class="btn-recommend-toggle" id="btnRecommendAction" onclick="toggleMovieRecommendation()" title="Recommend this title">
+              <i class="fa-regular fa-thumbs-up" id="btnRecommendIcon"></i>
+              <span id="btnRecommendLabel">Recommend</span>
+            </button>
+          </div>
+
+          <!-- Comments Header & Count -->
+          <div class="comments-header-row">
+            <div class="comments-heading-wrap">
+              <i class="fa-solid fa-comments comments-title-icon"></i>
+              <span class="comments-title-text">Comments &amp; Reviews</span>
+              <span class="comments-count-pill" id="modalCommentsCount">0</span>
+            </div>
+            <button type="button" class="comments-refresh-btn" onclick="reloadModalComments(true)" title="Refresh comments">
+              <i class="fa-solid fa-rotate-right" id="commentsRefreshIcon"></i>
+            </button>
+          </div>
+
+          <!-- Comment Input Form (Glass Card) -->
+          <form class="comment-input-form" id="commentForm" onsubmit="handlePostComment(event)">
+            <div class="comment-user-wrap">
+              <i class="fa-regular fa-user comment-user-icon"></i>
+              <input type="text" id="commentUsernameInput" class="comment-user-input" placeholder="Your name..." maxlength="30" required autocomplete="nickname">
+            </div>
+            <textarea id="commentTextInput" class="comment-msg-input" placeholder="Write a comment or review..." rows="2" maxlength="450" required></textarea>
+            <div class="comment-form-footer">
+              <label class="comment-rec-toggle-label" title="Tag your review with 'Recommended'">
+                <input type="checkbox" id="commentRecommendCheck" class="comment-rec-checkbox" checked>
+                <span class="comment-rec-switch"></span>
+                <span class="comment-rec-label-text"><i class="fa-solid fa-thumbs-up" style="color:#2ECC71;margin-right:2px;font-size:0.75rem;"></i> Recommend</span>
+              </label>
+              <button type="submit" class="btn-post-comment" id="btnSubmitComment">
+                <span>Post</span>
+                <i class="fa-solid fa-paper-plane" style="font-size:0.75rem;"></i>
+              </button>
+            </div>
+          </form>
+
+          <!-- Comments Stream List -->
+          <div class="comments-stream-list" id="modalCommentsList">
+            <div class="comments-empty-state">
+              <i class="fa-regular fa-message"></i>
+              <span>No comments yet. Be the first to review!</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="modal-body">
         <div class="modal-top-actions">
           <button class="popup-home" id="modalWishlistBtn" title="Add to WishList">🔖</button>
@@ -12583,6 +13037,11 @@
       document.getElementById('modalRatings').innerHTML = '';
       document.getElementById('modalMeta').innerHTML = '';
 
+      // Initialize Comments & Recommendations for this title
+      if (typeof initModalComments === 'function') {
+        initModalComments(id, type);
+      }
+
       // Instant ready state for Hero Play button
       const heroBtnInit = document.getElementById('modalHeroPlayBtn');
       const heroTextInit = document.getElementById('modalHeroPlayText');
@@ -12901,6 +13360,265 @@
         closeModalInternal();
       }
     });
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // COMMENTS & RECOMMENDATIONS MODULE (GLASS THEME)
+    // ══════════════════════════════════════════════════════════════════════════
+    let _activeCommentMovieId = null;
+    let _activeCommentMovieType = 'movie';
+
+    function showToast(msg) {
+      let t = document.getElementById('globalToastMsg');
+      if (!t) {
+        t = document.createElement('div');
+        t.id = 'globalToastMsg';
+        t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(12,16,25,0.92);backdrop-filter:blur(16px);border:1px solid rgba(232,201,122,0.4);color:#fff;padding:9px 18px;border-radius:30px;font-size:0.82rem;font-weight:700;z-index:999999;box-shadow:0 8px 30px rgba(0,0,0,0.6);opacity:0;transition:all 0.25s cubic-bezier(0.16,1,0.3,1);pointer-events:none;display:flex;align-items:center;gap:8px;font-family:Inter,sans-serif;';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      t.style.transform = 'translateX(-50%) translateY(0)';
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => {
+        t.style.opacity = '0';
+        t.style.transform = 'translateX(-50%) translateY(20px)';
+      }, 2800);
+    }
+
+    function isMovieRecommendedLocally(id) {
+      return localStorage.getItem('hacky_rec_' + id) === '1';
+    }
+
+    function updateRecommendBtnUI(isRec) {
+      const btn = document.getElementById('btnRecommendAction');
+      const icon = document.getElementById('btnRecommendIcon');
+      const label = document.getElementById('btnRecommendLabel');
+      if (!btn || !icon || !label) return;
+
+      if (isRec) {
+        btn.classList.add('active');
+        icon.className = 'fa-solid fa-thumbs-up';
+        label.textContent = 'Recommended';
+      } else {
+        btn.classList.remove('active');
+        icon.className = 'fa-regular fa-thumbs-up';
+        label.textContent = 'Recommend';
+      }
+    }
+
+    function initModalComments(id, type = 'movie') {
+      _activeCommentMovieId = String(id);
+      _activeCommentMovieType = type;
+
+      const userInp = document.getElementById('commentUsernameInput');
+      if (userInp) {
+        userInp.value = localStorage.getItem('hacky_comment_username') || '';
+      }
+
+      // Check if user already recommended this title
+      updateRecommendBtnUI(isMovieRecommendedLocally(id));
+
+      // Reset input form
+      const txtInp = document.getElementById('commentTextInput');
+      if (txtInp) txtInp.value = '';
+      const recCheck = document.getElementById('commentRecommendCheck');
+      if (recCheck) recCheck.checked = true;
+
+      // Load comments from API
+      reloadModalComments(false);
+    }
+
+    async function toggleMovieRecommendation() {
+      if (!_activeCommentMovieId) return;
+      const id = _activeCommentMovieId;
+      const wasRec = isMovieRecommendedLocally(id);
+      const isNowRec = !wasRec;
+
+      // Optimistic UI update
+      if (isNowRec) {
+        localStorage.setItem('hacky_rec_' + id, '1');
+      } else {
+        localStorage.removeItem('hacky_rec_' + id);
+      }
+      updateRecommendBtnUI(isNowRec);
+
+      const countEl = document.getElementById('recommendCountText');
+      let currentNum = parseInt((countEl?.textContent || '0').match(/\d+/) || [0]);
+      let nextNum = Math.max(0, currentNum + (isNowRec ? 1 : -1));
+      if (countEl) countEl.textContent = `${nextNum} recommended`;
+
+      if (isNowRec) {
+        showToast('🎉 You recommended this title!');
+      }
+
+      try {
+        const res = await fetch('/api/comments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'recommend',
+            tmdbId: id,
+            type: _activeCommentMovieType,
+            delta: isNowRec ? 1 : -1
+          })
+        });
+        const data = await res.json();
+        if (data.success && typeof data.recommendationsCount === 'number') {
+          if (countEl) countEl.textContent = `${data.recommendationsCount} recommended`;
+        }
+      } catch (err) {
+        console.warn('[comments] Failed to sync recommendation:', err);
+      }
+    }
+
+    function formatTimeAgo(ts) {
+      if (!ts) return 'recently';
+      const sec = Math.floor((Date.now() - Number(ts)) / 1000);
+      if (sec < 60) return 'just now';
+      const min = Math.floor(sec / 60);
+      if (min < 60) return `${min}m ago`;
+      const hrs = Math.floor(min / 60);
+      if (hrs < 24) return `${hrs}h ago`;
+      const days = Math.floor(hrs / 24);
+      if (days < 30) return `${days}d ago`;
+      return new Date(ts).toLocaleDateString();
+    }
+
+    async function reloadModalComments(showNotice = false) {
+      if (!_activeCommentMovieId) return;
+      const id = _activeCommentMovieId;
+      const listEl = document.getElementById('modalCommentsList');
+      const countEl = document.getElementById('modalCommentsCount');
+      const recCountEl = document.getElementById('recommendCountText');
+      const refreshIcon = document.getElementById('commentsRefreshIcon');
+
+      if (refreshIcon) refreshIcon.classList.add('fa-spin');
+
+      try {
+        const res = await fetch(`/api/comments?tmdbId=${id}&type=${_activeCommentMovieType}&_t=${Date.now()}`);
+        const data = await res.json();
+
+        if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+
+        if (data && data.success) {
+          if (recCountEl) recCountEl.textContent = `${data.recommendationsCount || 0} recommended`;
+          if (countEl) countEl.textContent = String((data.comments || []).length);
+
+          if (!listEl) return;
+          if (!data.comments || data.comments.length === 0) {
+            listEl.innerHTML = `
+              <div class="comments-empty-state">
+                <i class="fa-regular fa-message"></i>
+                <span>No comments yet. Be the first to review!</span>
+              </div>
+            `;
+            return;
+          }
+
+          listEl.innerHTML = data.comments.map(c => {
+            const initial = (c.username || 'A').charAt(0).toUpperCase();
+            const timeStr = formatTimeAgo(c.createdAt);
+            const safeUser = (c.username || 'Anonymous').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safeComment = (c.comment || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const recBadge = c.recommended
+              ? `<span class="comment-rec-badge"><i class="fa-solid fa-thumbs-up"></i> Recommended</span>`
+              : '';
+
+            return `
+              <div class="comment-bubble-card">
+                <div class="comment-bubble-header">
+                  <div class="comment-author-wrap">
+                    <span class="comment-avatar-circle">${initial}</span>
+                    <span class="comment-author-name">${safeUser}</span>
+                  </div>
+                  <span class="comment-time-ago">${timeStr}</span>
+                </div>
+                ${recBadge}
+                <div class="comment-bubble-text">${safeComment}</div>
+              </div>
+            `;
+          }).join('');
+
+          if (showNotice) {
+            showToast('✓ Comments updated');
+          }
+        }
+      } catch (err) {
+        if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+        console.warn('[comments] Load comments error:', err);
+      }
+    }
+
+    async function handlePostComment(event) {
+      if (event) event.preventDefault();
+      if (!_activeCommentMovieId) return;
+
+      const userInp = document.getElementById('commentUsernameInput');
+      const textInp = document.getElementById('commentTextInput');
+      const recCheck = document.getElementById('commentRecommendCheck');
+      const submitBtn = document.getElementById('btnSubmitComment');
+
+      const username = (userInp?.value || '').trim() || 'Anonymous';
+      const comment = (textInp?.value || '').trim();
+      const recommended = Boolean(recCheck?.checked);
+
+      if (!comment) {
+        showToast('Please enter your comment');
+        return;
+      }
+
+      // Remember username
+      localStorage.setItem('hacky_comment_username', username);
+
+      // Disable button
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+      }
+
+      try {
+        const res = await fetch('/api/comments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'comment',
+            tmdbId: _activeCommentMovieId,
+            type: _activeCommentMovieType,
+            username,
+            comment,
+            recommended
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Failed to post comment');
+        }
+
+        // Reset text input
+        if (textInp) textInp.value = '';
+
+        // If user checked recommend, mark movie as recommended locally
+        if (recommended) {
+          localStorage.setItem('hacky_rec_' + _activeCommentMovieId, '1');
+          updateRecommendBtnUI(true);
+        }
+
+        showToast('🎉 Comment posted successfully!');
+
+        // Reload comments list
+        await reloadModalComments(false);
+
+      } catch (err) {
+        console.error('[comments] Post error:', err);
+        showToast(`❌ Could not post comment: ${err.message}`);
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span>Post</span> <i class="fa-solid fa-paper-plane" style="font-size:0.75rem;"></i>';
+        }
+      }
+    }
 
     // ── Go Home buttons — close ALL overlays and return cleanly to the home page ──
     function goHome() {
@@ -16725,10 +17443,7 @@
       const isAutoLive = sName.toLowerCase().includes('sonic') || sName.toLowerCase().includes('vidzee') || url.includes('vidzee') || sName.toLowerCase().includes('bolt') || sName.toLowerCase().includes('vidbolt') || url.includes('vidbolt') || sName.toLowerCase().includes('hackymax') || sName.toLowerCase().includes('infinity') || sName.toLowerCase().includes('spark') || sName.toLowerCase().includes('nebula') || sName.toLowerCase().includes('vortex') || sName.toLowerCase().includes('nova') || sName.toLowerCase().includes('vidy') || sName.toLowerCase().includes('vidstuck') || sName.toLowerCase().includes('cinezo') || sName.toLowerCase().includes('stellar');
       _markSubSyncAutoLive(isAutoLive);
 
-      const rawSubId = _currentModalId || window._currentPlayingId || (window._currentModalItem && window._currentModalItem.id) || new URLSearchParams(window.location.search).get('m') || new URLSearchParams(window.location.search).get('s');
-      const activeSubId = rawSubId ? (String(rawSubId).includes('-') ? (parseInt(rawSubId, 10) || rawSubId) : rawSubId) : null;
-      const subKey = (_currentModalType === 'tv') ? `${activeSubId}_S${_selectedSeason || 1}_E${_selectedEpisode || 1}` : String(activeSubId);
-      const hasSinhalaSub = activeSubId ? hasSinhalaSubtitle(activeSubId, subKey) : false;
+
 
       if (hasSinhalaSub) {
         const tipHtml = '<div class="sub-toast-tip"><i class="fa-solid fa-circle-info"></i> යම් කිසි සබ්ටයිටල් එකක් මැච් නොවුනොත් වෙනත් ප්ලේයර් එකක් භාවිතා කරන්න.</div>';

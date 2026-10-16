@@ -9,6 +9,7 @@
     { "source": "/api/sub-catalog", "destination": "/api/sub-api?action=catalog" },
     { "source": "/api/sub-delete", "destination": "/api/sub-api?action=delete" },
     { "source": "/api/sub-autofetch", "destination": "/api/sub-autofetch" },
+    { "source": "/api/comments", "destination": "/api/comments" },
     { "source": "/api/sinmax", "destination": "/api/hackymax" },
     { "source": "/api/zeemax", "destination": "/api/hackymax" },
     { "source": "/img/(.*)", "destination": "https://image.tmdb.org/t/p/$1" }
