@@ -256,12 +256,15 @@
 
     /* Centered Floating Nav Pill */
     .nav-pill {
-      position: relative;
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
       display: inline-flex;
       align-items: center;
       gap: 3px;
       height: 48px;
-      padding: 4px 6px;
+      padding: 4px;
       border-radius: 999px;
       pointer-events: auto;
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.035) 42%, rgba(8, 17, 24, 0.88));
@@ -270,22 +273,22 @@
       -webkit-backdrop-filter: blur(16px) saturate(140%);
       border: 1px solid rgba(255, 255, 255, 0.2);
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-      z-index: 10;
-      transition: all 0.3s ease;
+      z-index: 950;
+      transition: top 0.28s cubic-bezier(0.22, 1, 0.36, 1), transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     /* Sliding White Active Indicator */
     .nav-indicator {
       position: absolute;
-      top: 4px;
+      top: 0;
       left: 0;
       height: 40px;
       width: 60px;
       border-radius: 999px;
       background: #ffffff;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), width 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-      will-change: transform, width;
+      transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), width 0.32s cubic-bezier(0.22, 1, 0.36, 1), height 0.32s ease;
+      will-change: transform, width, height;
       pointer-events: none;
       z-index: 1;
     }
@@ -301,11 +304,11 @@
     .nav-tab {
       position: relative;
       height: 40px;
-      padding: 0 16px;
+      padding: 0 18px;
       border: none;
       background: transparent;
       color: rgba(255, 255, 255, 0.82);
-      font-family: 'Noto Sans Sinhala', 'Inter', -apple-system, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-size: 13.5px;
       font-weight: 700;
       cursor: pointer;
@@ -316,6 +319,11 @@
       align-items: center;
       justify-content: center;
       text-decoration: none;
+    }
+
+    .nav-tab[data-tab="sub"] {
+      font-family: 'Noto Sans Sinhala', 'Inter', -apple-system, sans-serif;
+      font-size: 13px;
     }
 
     .nav-tab:hover {
@@ -491,52 +499,70 @@
     @media (max-width: 800px) {
       .topbar {
         position: fixed !important;
-        inset: 0 !important;
-        height: auto !important;
-        padding: 0 !important;
-        pointer-events: none !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: auto !important;
+        height: 56px !important;
+        padding: 0 14px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        background: rgba(8, 17, 24, 0.90) !important;
+        backdrop-filter: blur(16px) saturate(140%) !important;
+        -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5) !important;
+        z-index: 1000 !important;
+        pointer-events: auto !important;
         transform: none !important;
-        z-index: 700 !important;
       }
       .nav-brand {
-        position: fixed !important;
-        top: 14px !important;
-        left: 16px !important;
+        position: static !important;
+        top: auto !important;
+        left: auto !important;
         transform: none !important;
-        z-index: 1501 !important;
+        z-index: auto !important;
         pointer-events: auto !important;
+        display: flex !important;
+        align-items: center !important;
       }
       .nav-brand:hover {
         transform: scale(1.03) !important;
       }
       .nav-brand img {
-        height: 48px;
-        width: auto;
-        max-width: 190px;
-        object-fit: contain;
+        height: 38px !important;
+        width: auto !important;
+        max-width: 150px !important;
+        object-fit: contain !important;
       }
       .nav-right-actions {
-        position: fixed !important;
-        top: 14px !important;
-        right: 16px !important;
+        position: static !important;
+        top: auto !important;
+        right: auto !important;
         transform: none !important;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        z-index: 1501 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        z-index: auto !important;
         pointer-events: auto !important;
       }
       .nav-search-bar {
-        display: none !important; /* Mobile has 🔍 inside the bottom floating nav-pill */
+        display: none !important;
       }
       .nav-wp-pill-btn span {
-        display: none;
+        display: none !important;
       }
       .nav-wp-pill-btn {
-        width: 40px;
-        height: 40px;
-        padding: 0;
-        justify-content: center;
+        width: 36px !important;
+        height: 36px !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        justify-content: center !important;
+      }
+      .nav-mobile-toggle {
+        width: 36px !important;
+        height: 36px !important;
       }
 
       /* Bottom Floating Pill on Mobile */
@@ -548,12 +574,13 @@
         transform: translateX(-50%) !important;
         width: calc(100vw - 20px) !important;
         max-width: 440px !important;
-        height: 52px !important;
-        padding: 4px 6px !important;
+        height: 48px !important;
+        padding: 4px !important;
         justify-content: space-between !important;
         background: rgba(8, 17, 24, 0.95) !important;
         border: 1px solid rgba(255, 255, 255, 0.22) !important;
-        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+        border-radius: 999px !important;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
         z-index: 2500 !important;
         pointer-events: auto !important;
         backdrop-filter: blur(20px) saturate(150%) !important;
@@ -561,36 +588,49 @@
       }
 
       .nav-indicator {
-        height: 44px;
-        top: 4px;
+        height: 40px !important;
+        top: 0 !important;
       }
 
       .tab-links {
-        width: 100%;
-        justify-content: space-around;
+        width: 100% !important;
+        justify-content: space-between !important;
+        gap: 2px !important;
       }
 
       .nav-tab {
-        flex: 1;
-        height: 44px;
-        padding: 0 4px;
-        font-size: 12px;
+        flex: 1 !important;
+        height: 40px !important;
+        padding: 0 4px !important;
+        font-size: 12px !important;
+        border-radius: 999px !important;
+      }
+
+      .nav-tab[data-tab="sub"] {
+        font-size: 11.5px !important;
       }
 
       .nav-divider {
-        display: none;
+        display: block !important;
+        width: 1px !important;
+        height: 18px !important;
+        background: rgba(255, 255, 255, 0.18) !important;
+        margin: 0 4px !important;
       }
 
       .nav-actions {
-        margin-right: 2px;
+        display: flex !important;
+        align-items: center !important;
+        margin-right: 2px !important;
       }
 
       .nav-action {
-        width: 36px;
-        height: 36px;
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 50% !important;
       }
       .nav-action.nav-wp-action {
-        display: none; /* Already on top-right of mobile header */
+        display: none !important;
       }
       .category-view-overlay {
         padding-top: 66px !important;
@@ -598,6 +638,32 @@
       }
       .cat-page-header {
         padding: 0.65rem 1rem !important;
+      }
+      body {
+        padding-bottom: 84px !important;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .nav-pill {
+        width: calc(100vw - 12px) !important;
+        padding: 3px !important;
+        height: 46px !important;
+      }
+      .nav-tab {
+        height: 38px !important;
+        font-size: 11px !important;
+        padding: 0 2px !important;
+      }
+      .nav-indicator {
+        height: 38px !important;
+      }
+      .nav-action {
+        width: 32px !important;
+        height: 32px !important;
+      }
+      .nav-divider {
+        margin: 0 2px !important;
       }
     }
 
@@ -10086,7 +10152,33 @@
       <img src="logo.png?v=3" alt="Hacky Max">
     </div>
 
-    <!-- Centered Floating Pill Navigation (Floating Bottom on Mobile!) -->
+    <!-- Right Side Quick Actions (Desktop search bar & Watch Party pill) -->
+    <div class="nav-right-actions">
+      <div class="nav-search-bar" id="navSearch" onclick="openSearch()" title="Search Movies & TV">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input type="text" placeholder="Search..." id="navSearchInput" readonly>
+      </div>
+
+      <button class="nav-wp-pill-btn" onclick="window.openWatchPartyModal && window.openWatchPartyModal('join')" title="Watch Party with friends">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="19" cy="9" r="3"/><path d="M23 21v-2a3 3 0 0 0-3-3h-1"/>
+        </svg>
+        <span>Party</span>
+      </button>
+
+      <!-- Mobile Navigation Hamburger Button (for full category drawer) -->
+      <button id="navMobileToggle" class="nav-mobile-toggle" aria-label="Toggle navigation menu" onclick="window.toggleMobileNav()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Centered Floating Pill Navigation (Floating Bottom on Mobile!) -->
     <nav class="nav-pill" id="navPill" aria-label="Primary navigation">
       <span class="nav-indicator" id="navIndicator"></span>
       <div class="tab-links" id="navTabLinks">
@@ -10115,31 +10207,6 @@
       </div>
     </nav>
 
-    <!-- Right Side Quick Actions (Desktop search bar & Watch Party pill) -->
-    <div class="nav-right-actions">
-      <div class="nav-search-bar" id="navSearch" onclick="openSearch()" title="Search Movies & TV">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <circle cx="11" cy="11" r="8" />
-          <line x1="21" y1="21" x2="16.65" y2="16.65" />
-        </svg>
-        <input type="text" placeholder="Search..." id="navSearchInput" readonly>
-      </div>
-
-      <button class="nav-wp-pill-btn" onclick="window.openWatchPartyModal && window.openWatchPartyModal('join')" title="Watch Party with friends">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="19" cy="9" r="3"/><path d="M23 21v-2a3 3 0 0 0-3-3h-1"/>
-        </svg>
-        <span>Party</span>
-      </button>
-
-      <!-- Mobile Navigation Hamburger Button (for full category drawer) -->
-      <button id="navMobileToggle" class="nav-mobile-toggle" aria-label="Toggle navigation menu" onclick="window.toggleMobileNav()">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-    </div>
-  </header>
 
   <!-- MOBILE NAVIGATION DRAWER -->
   <div id="mobileNavDrawer" class="mobile-nav-drawer">
@@ -18545,12 +18612,15 @@
       tabs.forEach(t => t.classList.remove('active'));
       activeBtn.classList.add('active');
 
+      // Sub-pixel concentric alignment inside pill container
       const pillRect = pill.getBoundingClientRect();
       const btnRect = activeBtn.getBoundingClientRect();
-      const left = btnRect.left - pillRect.left;
+      const left = btnRect.left - pillRect.left - (pill.clientLeft || 0);
+      const top = btnRect.top - pillRect.top - (pill.clientTop || 0);
 
-      indicator.style.width = `${btnRect.width}px`;
-      indicator.style.transform = `translate3d(${left}px, 0, 0)`;
+      indicator.style.width = `${Math.round(btnRect.width * 10) / 10}px`;
+      indicator.style.height = `${Math.round(btnRect.height * 10) / 10}px`;
+      indicator.style.transform = `translate3d(${Math.round(left * 10) / 10}px, ${Math.round(top * 10) / 10}px, 0)`;
     }
     window.setNavActive = setNavActive;
 
@@ -18588,16 +18658,30 @@
       }
     };
 
-    // Auto reposition indicator on resize and initial load
+    // Auto reposition indicator on resize, font load, and layout shifts
     window.addEventListener('resize', () => {
       if (_currentActiveNavTab) setNavActive(_currentActiveNavTab);
     });
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => {
+        if (_currentActiveNavTab) setNavActive(_currentActiveNavTab);
+      });
+    }
+    const navPillEl = document.getElementById('navPill');
+    if (navPillEl && window.ResizeObserver) {
+      new ResizeObserver(() => {
+        if (_currentActiveNavTab) setNavActive(_currentActiveNavTab);
+      }).observe(navPillEl);
+    }
+
     const _urlCat = new URLSearchParams(window.location.search).get('cat') || new URLSearchParams(window.location.search).get('category');
     if (!_urlCat) {
       window.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => setNavActive('home'), 150);
+        setTimeout(() => setNavActive('home'), 50);
+        setTimeout(() => setNavActive('home'), 200);
       });
-      setTimeout(() => setNavActive('home'), 350);
+      setTimeout(() => setNavActive('home'), 100);
+      setTimeout(() => setNavActive('home'), 400);
     }
 
     // NAV SCROLL
