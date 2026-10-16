@@ -8622,7 +8622,90 @@
       contain: layout style !important;    /* faster layout recalc */
       backdrop-filter: none !important;
       background: var(--card) !important;  /* solid, no blur needed */
-      min-width: 200px;
+      width: 210px !important;
+      min-width: 210px !important;
+      max-width: 210px !important;
+      flex: 0 0 210px !important;
+    }
+
+    /* 2b. TV Grid layout & spacing for 2-row Latest Movies and Latest TV Shows */
+    .device-tv #moviesGrid:not(.expanded),
+    .device-tv #tvGrid:not(.expanded),
+    .tv-mode #moviesGrid:not(.expanded),
+    .tv-mode #tvGrid:not(.expanded) {
+      display: grid !important;
+      grid-template-rows: repeat(2, auto) !important;
+      grid-auto-flow: column !important;
+      grid-auto-columns: 210px !important;
+      gap: 2.2rem 1.6rem !important;
+      padding: 0.8rem 0.6rem 2rem 0.6rem !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      align-content: start !important;
+    }
+
+    .device-tv #moviesGrid:not(.expanded) .movie-card,
+    .device-tv #tvGrid:not(.expanded) .movie-card,
+    .tv-mode #moviesGrid:not(.expanded) .movie-card,
+    .tv-mode #tvGrid:not(.expanded) .movie-card {
+      width: 210px !important;
+      min-width: 210px !important;
+      max-width: 210px !important;
+      flex: 0 0 210px !important;
+    }
+
+    /* Expanded grid on TV */
+    .device-tv #moviesGrid.expanded,
+    .device-tv #tvGrid.expanded,
+    .tv-mode #moviesGrid.expanded,
+    .tv-mode #tvGrid.expanded {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      gap: 2.2rem 1.6rem !important;
+      justify-content: center !important;
+      padding: 1.5rem 1rem !important;
+    }
+
+    /* Single-row horizontal carousels on TV */
+    .device-tv .cards-grid,
+    .tv-mode .cards-grid {
+      gap: 1.6rem !important;
+      padding: 0.8rem 0.6rem 1.8rem 0.6rem !important;
+    }
+
+    .device-tv .cards-grid .movie-card,
+    .tv-mode .cards-grid .movie-card {
+      flex: 0 0 210px !important;
+      width: 210px !important;
+      min-width: 210px !important;
+      max-width: 210px !important;
+    }
+
+    /* TV card poster and text sizing */
+    .device-tv .movie-card .card-poster,
+    .tv-mode .movie-card .card-poster {
+      width: 100% !important;
+      aspect-ratio: 2 / 3 !important;
+      height: 315px !important;
+      overflow: hidden !important;
+    }
+
+    .device-tv .movie-card .card-info,
+    .tv-mode .movie-card .card-info {
+      padding: 0.9rem 0.85rem !important;
+    }
+
+    .device-tv .movie-card .card-title,
+    .tv-mode .movie-card .card-title {
+      font-size: 1.05rem !important;
+      font-weight: 600 !important;
+      line-height: 1.3 !important;
+    }
+
+    .device-tv .movie-card .card-meta,
+    .tv-mode .movie-card .card-meta {
+      font-size: 0.85rem !important;
+      margin-top: 0.35rem !important;
     }
 
     /* 3. Remove all box-shadow complexity on cards (no neon glow) */
