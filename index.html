@@ -7927,127 +7927,188 @@
       pointer-events: none;
     }
 
-    /* ── GENRE & FILTER BARS ────────────────────────────────────────────────── */
+    /* ── GENRE & FILTER BARS (PREMIUM FROSTED GLASS) ────────────────────────── */
     .genre-bar {
       display: flex;
-      gap: .4rem;
-      padding: 0 3rem .75rem;
+      gap: 0.5rem;
+      padding: 0 3rem 0.85rem;
       flex-wrap: wrap;
       align-items: center;
     }
 
-    .genre-pill {
+    .genre-pill,
+    .lang-pill {
       display: inline-flex;
       align-items: center;
-      padding: .32rem .8rem;
-      border-radius: 50px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,.025);
-      color: var(--muted);
-      font-size: .75rem;
+      justify-content: center;
+      padding: 0.38rem 0.95rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(11, 18, 30, 0.65);
+      backdrop-filter: blur(14px) saturate(140%);
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 0.78rem;
       font-family: inherit;
       font-weight: 600;
+      letter-spacing: 0.015em;
       cursor: pointer;
-      transition: all .18s;
+      transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
       white-space: nowrap;
       user-select: none;
+      text-decoration: none;
     }
 
-    .genre-pill:hover {
-      border-color: rgba(var(--accent1), .5);
-      background: rgba(var(--accent1), .08);
-      color: var(--text);
+    .genre-pill:hover,
+    .lang-pill:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 100%), rgba(20, 32, 52, 0.78);
+      color: #FFFFFF;
+      transform: translateY(-1.5px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.26);
     }
 
-    .genre-pill.active {
-      background: rgb(var(--accent1));
-      border-color: rgb(var(--accent1));
-      color: #07090F;
-      font-weight: 700;
-      box-shadow: 0 2px 10px rgba(var(--accent1), .35);
+    .genre-pill.active,
+    .lang-pill.active {
+      background: linear-gradient(135deg, #F5BA42 0%, #D89824 100%) !important;
+      border-color: rgba(255, 235, 175, 0.88) !important;
+      color: #07090F !important;
+      font-weight: 750 !important;
+      box-shadow: 0 4px 18px rgba(232, 186, 66, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.42) !important;
+      transform: translateY(-0.5px);
     }
 
     /* Filter Row (Language & Year) */
     .filter-row {
       display: flex;
       align-items: center;
-      gap: .45rem;
-      padding: 0 3rem 1.3rem;
+      gap: 0.5rem;
+      padding: 0 3rem 1.4rem;
       flex-wrap: wrap;
     }
 
     .filter-label {
-      font-size: .72rem;
-      font-weight: 700;
-      color: var(--muted);
-      letter-spacing: .05em;
+      font-size: 0.74rem;
+      font-weight: 750;
+      color: rgba(255, 255, 255, 0.52);
+      letter-spacing: 0.07em;
       text-transform: uppercase;
       white-space: nowrap;
-      margin-right: .15rem;
+      margin-right: 0.15rem;
     }
 
     .filter-sep {
       display: inline-block;
       width: 1px;
-      height: 16px;
-      background: rgba(255,255,255,.12);
-      margin: 0 .45rem;
-    }
-
-    .lang-pill {
-      display: inline-flex;
-      align-items: center;
-      padding: .32rem .8rem;
-      border-radius: 50px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,.025);
-      color: var(--muted);
-      font-size: .75rem;
-      font-family: inherit;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all .18s;
-      white-space: nowrap;
-      user-select: none;
-    }
-
-    .lang-pill:hover {
-      border-color: rgba(var(--accent1), .5);
-      background: rgba(var(--accent1), .08);
-      color: var(--text);
-    }
-
-    .lang-pill.active {
-      background: rgb(var(--accent1));
-      border-color: rgb(var(--accent1));
-      color: #07090F;
-      font-weight: 700;
-      box-shadow: 0 2px 10px rgba(var(--accent1), .35);
+      height: 18px;
+      background: rgba(255, 255, 255, 0.16);
+      margin: 0 0.5rem;
     }
 
     .year-select {
       appearance: none;
       -webkit-appearance: none;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border);
-      border-radius: 50px;
-      color: var(--muted);
-      font-size: .75rem;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(11, 18, 30, 0.65);
+      backdrop-filter: blur(14px) saturate(140%);
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+      border-radius: 999px;
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 0.78rem;
       font-family: inherit;
       font-weight: 600;
-      padding: .32rem 1.8rem .32rem .85rem;
+      padding: 0.38rem 2.1rem 0.38rem 1rem;
       cursor: pointer;
       outline: none;
-      transition: all .18s;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23CCC' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
-      background-position: right .65rem center;
+      background-position: right 0.75rem center;
     }
 
     .year-select:hover, .year-select:focus {
-      border-color: rgba(var(--accent1), .5);
-      color: var(--text);
-      background-color: rgba(var(--accent1), .06);
+      border-color: rgba(255, 255, 255, 0.32);
+      color: #FFFFFF;
+      background-color: rgba(20, 32, 52, 0.8);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.26);
+    }
+
+    .year-select option {
+      background: #0B111E;
+      color: #E2E8F0;
+    }
+
+    /* ── DEDICATED CATEGORY VIEW FILTERS ───────────────────────────────────── */
+    .cat-filters-wrap {
+      width: 100%;
+      max-width: 1540px;
+      margin: 0 auto;
+      padding: 0 2.5rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.65rem;
+      z-index: 10;
+      position: relative;
+    }
+    .cat-genre-bar {
+      padding: 0;
+      justify-content: center;
+      width: 100%;
+    }
+    .cat-filter-row {
+      padding: 0;
+      justify-content: center;
+      width: 100%;
+    }
+
+    /* Mobile & Touch Horizontal Scrolling for Filters */
+    @media (max-width: 768px) {
+      .genre-bar,
+      .cat-genre-bar {
+        padding: 0 1rem 0.6rem !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        justify-content: flex-start !important;
+        -webkit-overflow-scrolling: touch !important;
+        touch-action: pan-x pan-y !important;
+        scrollbar-width: none !important;
+      }
+      .genre-bar::-webkit-scrollbar,
+      .cat-genre-bar::-webkit-scrollbar {
+        display: none !important;
+      }
+      .filter-row,
+      .cat-filter-row {
+        padding: 0 1rem 0.9rem !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        justify-content: flex-start !important;
+        -webkit-overflow-scrolling: touch !important;
+        touch-action: pan-x pan-y !important;
+        scrollbar-width: none !important;
+      }
+      .filter-row::-webkit-scrollbar,
+      .cat-filter-row::-webkit-scrollbar {
+        display: none !important;
+      }
+      .cat-filters-wrap {
+        padding: 0 0 0.5rem !important;
+        gap: 0.45rem !important;
+      }
+      .genre-pill,
+      .lang-pill {
+        padding: 0.35rem 0.85rem !important;
+        font-size: 0.75rem !important;
+        flex-shrink: 0 !important;
+      }
+      .year-select {
+        padding: 0.35rem 1.8rem 0.35rem 0.85rem !important;
+        font-size: 0.75rem !important;
+        flex-shrink: 0 !important;
+      }
     }
 
     /* SEARCH */
@@ -9824,12 +9885,37 @@
                   linear-gradient(0deg, rgba(7,9,15,1) 0%, transparent 40%) !important;
     }
 
-    /* 17. Genre pills — no hover transforms or complex box-shadows */
+    /* 17. Genre & Filter pills & dropdowns on TV — zero backdrop-filter, crisp focus ring, no lags */
     .device-tv .genre-pill,
-    .tv-mode .genre-pill {
+    .tv-mode .genre-pill,
+    .device-tv .lang-pill,
+    .tv-mode .lang-pill,
+    .device-tv .year-select,
+    .tv-mode .year-select {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      background: #0E1626 !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.22) !important;
+      box-shadow: none !important;
       transition: none !important;
       transform: none !important;
-      box-shadow: none !important;
+    }
+    .device-tv .genre-pill.active,
+    .tv-mode .genre-pill.active,
+    .device-tv .lang-pill.active,
+    .tv-mode .lang-pill.active {
+      background: #E8C97A !important;
+      border-color: #E8C97A !important;
+      color: #07090F !important;
+    }
+    .device-tv .genre-pill:focus,
+    .tv-mode .genre-pill:focus,
+    .device-tv .lang-pill:focus,
+    .tv-mode .lang-pill:focus,
+    .device-tv .year-select:focus,
+    .tv-mode .year-select:focus {
+      outline: 2.5px solid #E8C97A !important;
+      outline-offset: 2px !important;
     }
 
     /* 18. Category view overlay — kill entrance animation */
@@ -11134,6 +11220,24 @@
       <div class="cat-header-titles">
         <h1 class="cat-page-title" id="catPageTitle">Category</h1>
         <div class="cat-page-sub" id="catPageSub">Explore top rated &amp; popular titles</div>
+      </div>
+    </div>
+
+    <!-- DEDICATED GLASS FILTERS FOR CATEGORY VIEW (MOVIES & TV SERIES) -->
+    <div id="catFiltersWrap" class="cat-filters-wrap" style="display:none">
+      <div class="genre-bar cat-genre-bar" id="catGenreBar"></div>
+      <div class="filter-row cat-filter-row" id="catFilterRow">
+        <span class="filter-label">Language:</span>
+        <button class="lang-pill active" data-lang="">All</button>
+        <button class="lang-pill" data-lang="ko">Korean</button>
+        <button class="lang-pill" data-lang="ta">Tamil</button>
+        <button class="lang-pill" data-lang="ml">Malayalam</button>
+        <button class="lang-pill" data-lang="hi">Hindi</button>
+        <span class="filter-sep"></span>
+        <span class="filter-label">Year:</span>
+        <select class="year-select" id="catYearSelect">
+          <option value="">All Years</option>
+        </select>
       </div>
     </div>
 
@@ -13256,6 +13360,21 @@
         } catch (_) {}
       }
 
+      // Category Glass Filters (for Movies & TV Series)
+      const catFiltersWrap = document.getElementById('catFiltersWrap');
+      const isMovieOrTv = (catType === 'movies' || catType === 'movie' || catType === 'tvshows' || catType === 'tv' || catType === 'series');
+      if (catFiltersWrap) {
+        if (isMovieOrTv) {
+          catFiltersWrap.style.display = 'flex';
+          setupCatFilters(catType, catKey);
+        } else {
+          catFiltersWrap.style.display = 'none';
+          _catActiveGenre = null;
+          _catActiveLang = '';
+          _catActiveYear = '';
+        }
+      }
+
       if (_tvMode) {
         setTimeout(() => {
           const backBtn = document.getElementById('catBackBtn');
@@ -13271,6 +13390,12 @@
       if (overlay) overlay.classList.remove('open');
       document.body.style.overflow = '';
       if (typeof setNavActive === 'function') setNavActive('home');
+
+      _catActiveGenre = null;
+      _catActiveLang = '';
+      _catActiveYear = '';
+      const catFiltersWrap = document.getElementById('catFiltersWrap');
+      if (catFiltersWrap) catFiltersWrap.style.display = 'none';
 
       // Resume hero if returned to top of homepage
       if (!_isHeroBlocked() && window.scrollY < 300) {
@@ -13318,6 +13443,7 @@
           _currentCatType = 'movies';
           _currentCatItemData = { title: '<i class="fa-solid fa-film"></i> Movies', sub: 'Explore latest & popular movies' };
         }
+        setupCatFilters(_currentCatType, 'all');
         const titleEl = document.getElementById('catPageTitle');
         const subEl = document.getElementById('catPageSub');
         if (titleEl) titleEl.innerHTML = _currentCatItemData.title;
@@ -13364,8 +13490,12 @@
         }
 
         if (_currentCatType === 'movies' || _currentCatType === 'movie') {
+          let params = 'sort_by=popularity.desc&language=en-US';
+          if (_catActiveGenre) params += `&with_genres=${_catActiveGenre}`;
+          if (_catActiveYear)  params += `&primary_release_year=${_catActiveYear}`;
+          if (_catActiveLang)  params += `&with_original_language=${_catActiveLang}`;
           const fetchPromises = pageIndices.map(p =>
-            tmdb(`/discover/movie?sort_by=popularity.desc&page=${p}&language=en-US`).catch(() => null)
+            tmdb(`/discover/movie?${params}&page=${p}`).catch(() => null)
           );
           const responses = await Promise.all(fetchPromises);
           responses.forEach(tmdbData => {
@@ -13375,8 +13505,12 @@
             }
           });
         } else if (_currentCatType === 'tvshows' || _currentCatType === 'tv' || _currentCatType === 'series') {
+          let params = 'sort_by=popularity.desc&language=en-US';
+          if (_catActiveGenre) params += `&with_genres=${_catActiveGenre}`;
+          if (_catActiveYear)  params += `&first_air_date_year=${_catActiveYear}`;
+          if (_catActiveLang)  params += `&with_original_language=${_catActiveLang}`;
           const fetchPromises = pageIndices.map(p =>
-            tmdb(`/discover/tv?sort_by=popularity.desc&page=${p}&language=en-US`).catch(() => null)
+            tmdb(`/discover/tv?${params}&page=${p}`).catch(() => null)
           );
           const responses = await Promise.all(fetchPromises);
           responses.forEach(tmdbData => {
@@ -13505,9 +13639,26 @@
 
         if (grid) {
           const cardsHtml = pageItems.map(m => buildCard(m, null, _currentCatMediaType, null)).join('');
-          grid.innerHTML = cardsHtml || `<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--muted)">No titles found in this category.</div>`;
+          grid.innerHTML = cardsHtml || `<div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--muted)">No titles found matching the selected filters.</div>`;
           addCardListeners(grid, '.movie-card');
           hydrateSectionRtRatings(pageItems.slice(0, 30), _currentCatMediaType);
+        }
+
+        // Dynamic subtitle reflecting filter selections
+        const subEl = document.getElementById('catPageSub');
+        if ((_currentCatType === 'movies' || _currentCatType === 'movie' || _currentCatType === 'tvshows' || _currentCatType === 'tv' || _currentCatType === 'series') && subEl) {
+          const isMovie = (_currentCatType === 'movies' || _currentCatType === 'movie');
+          const genreList = isMovie ? MOVIE_GENRES : TV_GENRES;
+          const activeG = genreList.find(g => g.id === _catActiveGenre);
+          const langNames = { ko: 'Korean', ta: 'Tamil', ml: 'Malayalam', hi: 'Hindi' };
+          const activeL = _catActiveLang ? (langNames[_catActiveLang] || _catActiveLang) : null;
+          const activeY = _catActiveYear || null;
+          const activeParts = [activeG ? activeG.name : null, activeL, activeY].filter(Boolean);
+          if (activeParts.length) {
+            subEl.textContent = `Filtered: ${activeParts.join(' • ')} (${isMovie ? 'Movies' : 'TV Series'})`;
+          } else {
+            subEl.textContent = _currentCatItemData ? _currentCatItemData.sub : (isMovie ? 'Explore latest & popular movies' : 'Explore top rated & popular TV series');
+          }
         }
 
         renderCategoryPagination(page, totalViewPages);
@@ -13670,6 +13821,79 @@
     let _activeTvYear    = '';
     let _activeMovieLang = '';
     let _activeTvLang    = '';
+
+    let _catActiveGenre = null;
+    let _catActiveLang = '';
+    let _catActiveYear = '';
+
+    function setupCatFilters(catType, catKey) {
+      const isMovie = (catType === 'movies' || catType === 'movie');
+      const genres = isMovie ? MOVIE_GENRES : TV_GENRES;
+      const genreBar = document.getElementById('catGenreBar');
+      const yearSel = document.getElementById('catYearSelect');
+      const langRow = document.getElementById('catFilterRow');
+
+      // If user came via specific genre key
+      if (catKey && catKey !== 'all' && !isNaN(catKey)) {
+        _catActiveGenre = parseInt(catKey);
+      }
+
+      // Populate Category Year Select options
+      if (yearSel) {
+        if (yearSel.options.length <= 1) {
+          const curYear = new Date().getFullYear();
+          let opts = '';
+          for (let y = curYear; y >= 1970; y--) {
+            opts += `<option value="${y}">${y}</option>`;
+          }
+          yearSel.innerHTML = '<option value="">All Years</option>' + opts;
+          yearSel.onchange = (e) => {
+            _catActiveYear = e.target.value;
+            _currentCatPage = 1;
+            loadCategoryTitles(1);
+          };
+        }
+        yearSel.value = _catActiveYear || '';
+      }
+
+      // Populate Category Genre Bar Pills
+      if (genreBar) {
+        genreBar.innerHTML = genres.map(g =>
+          `<button class="genre-pill ${(_catActiveGenre === g.id) ? 'active' : ''}" data-gid="${g.id}">${g.name}</button>`
+        ).join('');
+
+        genreBar.querySelectorAll('.genre-pill').forEach(pill => {
+          pill.onclick = () => {
+            const gid = parseInt(pill.dataset.gid);
+            const wasActive = pill.classList.contains('active');
+            genreBar.querySelectorAll('.genre-pill').forEach(p => p.classList.remove('active'));
+            if (!wasActive) {
+              pill.classList.add('active');
+              _catActiveGenre = gid;
+            } else {
+              _catActiveGenre = null;
+            }
+            _currentCatPage = 1;
+            loadCategoryTitles(1);
+          };
+        });
+      }
+
+      // Wire Category Language Pills
+      if (langRow) {
+        langRow.querySelectorAll('.lang-pill').forEach(pill => {
+          const pLang = pill.dataset.lang || '';
+          pill.classList.toggle('active', pLang === (_catActiveLang || ''));
+          pill.onclick = () => {
+            langRow.querySelectorAll('.lang-pill').forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            _catActiveLang = pill.dataset.lang || '';
+            _currentCatPage = 1;
+            loadCategoryTitles(1);
+          };
+        });
+      }
+    }
 
     async function loadDiscoverMovies() {
       const grid = document.getElementById('moviesGrid');
