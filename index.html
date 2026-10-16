@@ -1810,10 +1810,20 @@
     }
 
     .movie-card:hover .card-sinsub-badge,
-    .trending-card:hover .card-sinsub-badge {
+    .trending-card:hover .card-sinsub-badge,
+    .top10-item:hover .card-sinsub-badge {
       transform: scale(1.06);
       border-color: var(--gold, #E8C97A);
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.85), 0 0 14px rgba(232, 201, 122, 0.45);
+    }
+
+    .top10-card .card-sinsub-badge {
+      position: absolute !important;
+      top: 8px !important;
+      right: 8px !important;
+      z-index: 6 !important;
+      margin: 0 !important;
+      pointer-events: none;
     }
 
     .trending-poster .card-sinsub-badge {
@@ -13042,6 +13052,7 @@
             row.innerHTML = cached.slice(0, 10).map((item, i) => buildTop10MovieCard(item, i + 1)).join('');
             addCardListeners(row, '.top10-item');
             hydrateSectionRtRatings(cached.slice(0, 10));
+            refreshAllSinSubBadges();
             hasCached = true;
           }
         }
@@ -13068,6 +13079,7 @@
           try { localStorage.setItem('hm_top10_today_cache', JSON.stringify(items)); } catch (_) {}
           addCardListeners(row, '.top10-item');
           hydrateSectionRtRatings(items);
+          refreshAllSinSubBadges();
 
           if (window.DEVICE && window.DEVICE.isTV) {
             gsap.set(row.children, { opacity: 1 });
@@ -13098,16 +13110,42 @@
       if (cat) {
         const deleted = Array.isArray(cat._deletedKeys) ? cat._deletedKeys : [];
         if (deleted.includes(sk) || deleted.includes(sid)) return false;
-        if (cat[sk] || cat[sid]) return true;
+        if (cat[sk] || cat[sid] || cat[`movie-${sid}`] || cat[`tv-${sid}`]) return true;
         for (const k in cat) {
-          if (k === sid || k.startsWith(sid + '_')) return true;
+          if (!cat[k]) continue;
+          if (deleted.includes(k)) continue;
+          if (k === sid || k.startsWith(sid + '_') || k === `movie-${sid}` || k.startsWith(`tv-${sid}-`)) return true;
+          if (cat[k].tmdbId && String(cat[k].tmdbId) === sid) return true;
         }
       }
       const map = (typeof SUBTITLE_MAP !== 'undefined' && SUBTITLE_MAP) || window.SUBTITLE_MAP;
-      if (map && (map[sk] || map[sid])) return true;
+      if (map) {
+        if (map[sk] || map[sid] || map[`movie-${sid}`] || map[`tv-${sid}`]) return true;
+        for (const k in map) {
+          if (k === sid || k.startsWith(sid + '_') || k === `movie-${sid}` || k.startsWith(`tv-${sid}-`)) return true;
+        }
+      }
       if (typeof SINSUB_MOVIE_IDS !== 'undefined' && Array.isArray(SINSUB_MOVIE_IDS) && SINSUB_MOVIE_IDS.includes(sid)) return true;
       if (typeof SINSUB_TV_IDS !== 'undefined' && Array.isArray(SINSUB_TV_IDS) && SINSUB_TV_IDS.includes(sid)) return true;
       return false;
+    }
+
+    function refreshAllSinSubBadges() {
+      document.querySelectorAll('.movie-card[data-id], .trending-card[data-id], .top10-item[data-id]').forEach(card => {
+        const cid = card.getAttribute('data-id');
+        if (hasSinhalaSubtitle(cid)) {
+          const target = card.classList.contains('top10-item')
+            ? card.querySelector('.top10-card')
+            : card.querySelector('.card-poster, .trending-poster');
+          if (target && !target.querySelector('.card-sinsub-badge')) {
+            const badge = document.createElement('div');
+            badge.className = 'card-sinsub-badge top10-sinsub-badge';
+            badge.title = 'Sinhala Subtitle Available';
+            badge.innerHTML = `<img src="/sinhala-sub.png" alt="Sinhala Subtitle">`;
+            target.appendChild(badge);
+          }
+        }
+      });
     }
 
     const SINSUB_MOVIE_IDS = [
@@ -13173,20 +13211,8 @@
               }
             });
 
-            // Auto-apply Sinhala Subtitle badge to any rendered cards
-            document.querySelectorAll('.movie-card[data-id], .trending-card[data-id]').forEach(card => {
-              const cid = card.getAttribute('data-id');
-              if (hasSinhalaSubtitle(cid)) {
-                const poster = card.querySelector('.card-poster, .trending-poster');
-                if (poster && !poster.querySelector('.card-sinsub-badge')) {
-                  const badge = document.createElement('div');
-                  badge.className = 'card-sinsub-badge';
-                  badge.title = 'Sinhala Subtitle Available';
-                  badge.innerHTML = `<img src="/sinhala-sub.png" alt="Sinhala Subtitle">`;
-                  poster.appendChild(badge);
-                }
-              }
-            });
+            // Auto-apply Sinhala Subtitle badge to all rendered cards including Top 10
+            refreshAllSinSubBadges();
           }
         }
       } catch (_) {}
@@ -16885,6 +16911,9 @@
       '41727_S4_E7': '/Subtitle/Banshee/S04E07.srt',
       '41727_S4_E8': '/Subtitle/Banshee/S04E08.srt',
     };
+    if (typeof refreshAllSinSubBadges === 'function') {
+      try { refreshAllSinSubBadges(); } catch (_) {}
+    }
 
     // ════════════════════════════════════════════════════════════════════════
     //  MAX PLAYER SETTINGS — subtitle style, quality, playback, auto-next
