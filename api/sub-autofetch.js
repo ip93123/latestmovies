@@ -28,6 +28,22 @@ export default async function handler(req, res) {
   }
 
   const queryParams = req.method === 'GET' ? req.query : (req.body || {});
+
+  if (queryParams.testCurl) {
+    try {
+      const { execSync } = await import('child_process');
+      const curlPath = execSync('which curl || where curl || echo NO_CURL').toString().trim();
+      let curlTest = '';
+      try {
+        curlTest = execSync('curl -s -I "https://cineru.lk/?s=Animals"').toString().slice(0, 300);
+      } catch (err) {
+        curlTest = 'curl execution error: ' + err.message;
+      }
+      return res.status(200).json({ curlPath, curlTest, nodeVersion: process.version, arch: process.arch, platform: process.platform });
+    } catch (e) {
+      return res.status(200).json({ error: e.message });
+    }
+  }
   const {
     q,
     title,
