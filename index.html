@@ -209,6 +209,7 @@
       top: 16px;
       left: 0;
       right: 0;
+      height: 48px;
       z-index: 900;
       display: flex;
       align-items: center;
@@ -246,7 +247,7 @@
     }
 
     .nav-brand img {
-      height: 64px;
+      height: 54px;
       width: auto;
       max-width: 270px;
       object-fit: contain;
@@ -669,7 +670,9 @@
 
     /* TV Mode adjustments */
     .device-tv .topbar,
-    .tv-mode .topbar {
+    .tv-mode .topbar,
+    .device-tv .nav-pill,
+    .tv-mode .nav-pill {
       top: 24px;
     }
     .device-tv .nav-pill,
@@ -10562,13 +10565,24 @@
     function _isHeroBlocked() {
       const overlayOpen = document.getElementById('playerOverlay')?.classList.contains('open');
       const modalOpen = document.getElementById('modal')?.classList.contains('open');
+      const catOpen = document.getElementById('categoryViewOverlay')?.classList.contains('open');
+      const searchOpen = document.getElementById('searchOverlay')?.classList.contains('open');
+      const wishlistOpen = document.getElementById('wishlistOverlay')?.classList.contains('open');
+      const wpModalOpen = document.getElementById('wpModal')?.classList.contains('open');
       const params = new URLSearchParams(window.location.search);
-      const hasDirectPlay = params.has('m') || params.has('s') || params.has('party');
-      return Boolean(overlayOpen || modalOpen || hasDirectPlay);
+      const hasSubPageParam = params.has('m') || params.has('s') || params.has('party') ||
+                              params.has('cat') || params.has('category') ||
+                              params.has('search') || params.has('q') ||
+                              params.has('wishlist') || params.has('mylist');
+      return Boolean(overlayOpen || modalOpen || catOpen || searchOpen || wishlistOpen || wpModalOpen || hasSubPageParam);
     }
 
     function _destroyHeroPlayer() {
       _pendingTrailerKey = null;
+      if (typeof heroTimer !== 'undefined' && heroTimer) {
+        clearInterval(heroTimer);
+        heroTimer = null;
+      }
       if (ytPlayer && typeof ytPlayer.destroy === 'function') {
         try { ytPlayer.destroy(); } catch (_) {}
       }
@@ -11329,9 +11343,17 @@
       heroMovies = movies.slice(0, 6);
       const dotsEl = document.getElementById('heroDots');
       dotsEl.innerHTML = heroMovies.map((_, i) => `<div class="hero-dot ${i === 0 ? 'active' : ''}" data-i="${i}"></div>`).join('');
-      dotsEl.querySelectorAll('.hero-dot').forEach(d => d.addEventListener('click', () => { clearInterval(heroTimer); setHero(+d.dataset.i); heroTimer = setInterval(() => setHero((heroIdx + 1) % heroMovies.length), 15000); }));
+      dotsEl.querySelectorAll('.hero-dot').forEach(d => d.addEventListener('click', () => {
+        clearInterval(heroTimer);
+        setHero(+d.dataset.i);
+        if (!_isHeroBlocked()) {
+          heroTimer = setInterval(() => setHero((heroIdx + 1) % heroMovies.length), 15000);
+        }
+      }));
       setHero(0, true);
-      heroTimer = setInterval(() => setHero((heroIdx + 1) % heroMovies.length), 15000);
+      if (!_isHeroBlocked()) {
+        heroTimer = setInterval(() => setHero((heroIdx + 1) % heroMovies.length), 15000);
+      }
 
       // ── Touch swipe & scroll-wheel navigation on hero ──────────────────────
       const heroEl = document.getElementById('hero');
@@ -12001,6 +12023,16 @@
       _currentCatMediaType = (catType === 'tvshows' || catType === 'tv' || catType === 'series') ? 'tv' : 'movie';
       _currentCatPage = 1;
 
+      // Stop hero trailer & carousel while browsing category
+      if (typeof _destroyHeroPlayer === 'function') _destroyHeroPlayer();
+      if (typeof heroTimer !== 'undefined' && heroTimer) {
+        clearInterval(heroTimer);
+        heroTimer = null;
+      }
+      if (typeof ytPlayer !== 'undefined' && ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+        try { ytPlayer.pauseVideo(); } catch (_) {}
+      }
+
       // Find metadata
       if (catType === 'movies' || catType === 'movie') {
         _currentCatItemData = { title: title || '<i class="fa-solid fa-film"></i> Movies', sub: sub || 'Explore latest & popular movies' };
@@ -12073,6 +12105,20 @@
       if (overlay) overlay.classList.remove('open');
       document.body.style.overflow = '';
       if (typeof setNavActive === 'function') setNavActive('home');
+
+      // Resume hero if returned to top of homepage
+      if (!_isHeroBlocked() && window.scrollY < 300) {
+        if (!isYtApiReady && typeof loadYouTubeAPI === 'function') {
+          loadYouTubeAPI();
+        }
+        if (typeof heroTimer !== 'undefined') {
+          clearInterval(heroTimer);
+          if (heroMovies && heroMovies.length) {
+            heroTimer = setInterval(() => setHero((heroIdx + 1) % heroMovies.length), 15000);
+            setHero(heroIdx);
+          }
+        }
+      }
 
       if (_tvMode) {
         setTimeout(() => {
@@ -18040,11 +18086,8 @@
           try { ytPlayer.pauseVideo(); } catch (e) { }
         }
       } else {
-        // Tab visible again — resume only if no overlay is open
-        const mOpen = document.getElementById('modal')?.classList.contains('open');
-        const pOpen = document.getElementById('playerOverlay')?.classList.contains('open');
-        const sOpen = document.getElementById('searchOverlay')?.classList.contains('open');
-        if (!mOpen && !pOpen && !sOpen && heroMovies.length) {
+        // Tab visible again — resume only if no overlay or subpage is active
+        if (!_isHeroBlocked() && heroMovies.length) {
           heroTimer = setInterval(() => setHero((heroIdx + 1) % heroMovies.length), 15000);
           if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
             try { ytPlayer.playVideo(); } catch (e) { }
@@ -18380,12 +18423,29 @@
     document.getElementById('navSearchInput').addEventListener('click', openSearch);
     document.getElementById('searchClose').addEventListener('click', closeSearch);
     function openSearch() {
+      if (typeof heroTimer !== 'undefined' && heroTimer) {
+        clearInterval(heroTimer);
+        heroTimer = null;
+      }
+      if (typeof ytPlayer !== 'undefined' && ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+        try { ytPlayer.pauseVideo(); } catch (_) {}
+      }
       searchOverlay.classList.add('open');
       gsap.fromTo('.search-input-wrap', { y: -30, opacity: 0 }, { y: 0, opacity: 1, duration: .4, ease: 'power3.out' });
       document.getElementById('searchInput').focus();
     }
     function closeSearch() {
-      gsap.to(searchOverlay, { opacity: 0, duration: .2, onComplete: () => { searchOverlay.classList.remove('open'); searchOverlay.style.opacity = ''; } });
+      gsap.to(searchOverlay, { opacity: 0, duration: .2, onComplete: () => {
+        searchOverlay.classList.remove('open');
+        searchOverlay.style.opacity = '';
+        if (!_isHeroBlocked() && window.scrollY < 300 && heroMovies && heroMovies.length) {
+          clearInterval(heroTimer);
+          heroTimer = setInterval(() => setHero((heroIdx + 1) % heroMovies.length), 15000);
+          if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
+            try { ytPlayer.playVideo(); } catch (_) {}
+          }
+        }
+      } });
     }
     // ─── DEVICE DETECTION ────────────────────────────────────────────────────
     // Detects PC / Mobile / TV on page load via User Agent + screen signals.
@@ -19020,7 +19080,7 @@
               sub: displaySub
             }, '', window.location.href);
           } catch (_) { }
-        }, 500);
+        }, 50);
       }
 
       // 0ms Instant First Paint: Hydrate Hero immediately from cache
@@ -19193,6 +19253,13 @@
     }
 
     function openWishlist() {
+      if (typeof heroTimer !== 'undefined' && heroTimer) {
+        clearInterval(heroTimer);
+        heroTimer = null;
+      }
+      if (typeof ytPlayer !== 'undefined' && ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+        try { ytPlayer.pauseVideo(); } catch (_) {}
+      }
       const overlay = document.getElementById('wishlistOverlay');
       if (!overlay) return;
       if (typeof setNavActive === 'function') setNavActive('mylist');
@@ -19210,6 +19277,13 @@
         opacity: 0, duration: 0.25, ease: 'power2.in', onComplete: () => {
           overlay.classList.remove('open');
           overlay.style.opacity = '';
+          if (!_isHeroBlocked() && window.scrollY < 300 && heroMovies && heroMovies.length) {
+            clearInterval(heroTimer);
+            heroTimer = setInterval(() => setHero((heroIdx + 1) % heroMovies.length), 15000);
+            if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
+              try { ytPlayer.playVideo(); } catch (_) {}
+            }
+          }
         }
       });
     }
