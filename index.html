@@ -11588,6 +11588,112 @@
       return Boolean(overlayOpen || modalOpen || catOpen || searchOpen || wishlistOpen || wpModalOpen || hasSubPageParam);
     }
 
+    let _heroInView = true;
+
+    function _isHeroElementInView() {
+      const hero = document.getElementById('hero');
+      if (!hero) return false;
+      const rect = hero.getBoundingClientRect();
+      // Hero section: considered in-view when at least ~180px is visible on screen
+      return rect.bottom > 180 && rect.top < (window.innerHeight - 80);
+    }
+
+    function _pauseHeroMediaOnScrollAway() {
+      if (typeof ytPlayer !== 'undefined' && ytPlayer) {
+        if (typeof ytPlayer.pauseVideo === 'function') {
+          try { ytPlayer.pauseVideo(); } catch (_) {}
+        }
+        if (typeof ytPlayer.mute === 'function') {
+          try { ytPlayer.mute(); } catch (_) {}
+        }
+      }
+      if (typeof heroTimer !== 'undefined' && heroTimer) {
+        clearInterval(heroTimer);
+        heroTimer = null;
+      }
+    }
+
+    function _resumeHeroMediaOnScrollBack() {
+      if (_isHeroBlocked()) return;
+
+      if (typeof ytPlayer !== 'undefined' && ytPlayer) {
+        if (typeof ytPlayer.playVideo === 'function') {
+          try { ytPlayer.playVideo(); } catch (_) {}
+        }
+        const isMuted = localStorage.getItem('hackyMax_trailerMuted') === 'true';
+        const muteBtn = document.getElementById('heroMuteBtn');
+        if (!isMuted && typeof ytPlayer.unMute === 'function') {
+          try {
+            ytPlayer.unMute();
+            ytPlayer.setVolume(50);
+            if (muteBtn) muteBtn.innerHTML = '🔊';
+          } catch (_) {}
+        } else if (isMuted && typeof ytPlayer.mute === 'function') {
+          try {
+            ytPlayer.mute();
+            if (muteBtn) muteBtn.innerHTML = '🔇';
+          } catch (_) {}
+        }
+        const heroVideo = document.getElementById('heroVideoContainer');
+        if (heroVideo && !_isHeroBlocked()) heroVideo.style.opacity = '0.65';
+      } else if (_pendingTrailerKey && isYtApiReady) {
+        _createHeroPlayer(_pendingTrailerKey);
+        _pendingTrailerKey = null;
+      }
+
+      if (!heroTimer && typeof heroMovies !== 'undefined' && heroMovies && heroMovies.length) {
+        clearInterval(heroTimer);
+        heroTimer = setInterval(() => setHero((heroIdx + 1) % heroMovies.length), 15000);
+      }
+    }
+
+    function _handleHeroInViewChange(inView) {
+      if (inView === _heroInView) return;
+      _heroInView = inView;
+      if (!_heroInView) {
+        _pauseHeroMediaOnScrollAway();
+      } else {
+        _resumeHeroMediaOnScrollBack();
+      }
+    }
+
+    function _checkHeroScrollVisibility() {
+      const inView = _isHeroElementInView();
+      _handleHeroInViewChange(inView);
+    }
+
+    function _checkTrailersScrollVisibility() {
+      const sec = document.getElementById('trailers');
+      if (!sec) return;
+      const rect = sec.getBoundingClientRect();
+      const inView = rect.bottom > 80 && rect.top < (window.innerHeight - 50);
+      if (!inView && typeof _trailerPlayers === 'object') {
+        Object.keys(_trailerPlayers).forEach(k => {
+          const p = _trailerPlayers[k];
+          if (p && p.iframe) {
+            try { p.iframe.remove(); } catch (_) {}
+          }
+          delete _trailerPlayers[k];
+        });
+      }
+    }
+
+    function initHeroScrollObserver() {
+      const heroEl = document.getElementById('hero');
+      if (!heroEl) return;
+      if ('IntersectionObserver' in window) {
+        const obs = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            const inView = entry.isIntersecting && entry.intersectionRatio >= 0.2;
+            _handleHeroInViewChange(inView);
+          });
+        }, {
+          threshold: [0, 0.2, 0.5, 0.8]
+        });
+        obs.observe(heroEl);
+      }
+    }
+
     function _destroyHeroPlayer() {
       _pendingTrailerKey = null;
       if (typeof heroTimer !== 'undefined' && heroTimer) {
@@ -11692,6 +11798,14 @@
                 _destroyHeroPlayer();
                 return;
               }
+              if (!_heroInView || !_isHeroElementInView()) {
+                _heroInView = false;
+                try {
+                  e.target.pauseVideo();
+                  e.target.mute();
+                } catch (_) {}
+                return;
+              }
               e.target.setVolume(50);
               if (!isMuted) {
                 autoPlayAttempted = true;
@@ -11699,7 +11813,7 @@
                 setTimeout(() => { autoPlayAttempted = false; }, 2000);
               }
               setTimeout(() => {
-                if (!_isHeroBlocked() && heroVideo) heroVideo.style.opacity = '0.65';
+                if (!_isHeroBlocked() && _heroInView && heroVideo) heroVideo.style.opacity = '0.65';
               }, 1500);
             },
             onStateChange: (e) => {
@@ -12435,7 +12549,7 @@
         const mOpen = document.getElementById('modal')?.classList.contains('open');
         const pOpen = document.getElementById('playerOverlay')?.classList.contains('open');
         const sOpen = document.getElementById('searchOverlay')?.classList.contains('open');
-        if (mOpen || pOpen || sOpen) return;
+        if (mOpen || pOpen || sOpen || !_heroInView) return;
       }
 
       heroIdx = idx;
@@ -20284,7 +20398,7 @@
       setTimeout(() => setNavActive('home'), 400);
     }
 
-    // NAV SCROLL
+    // NAV SCROLL & NOW SHOWING / TRAILERS SCROLL VISIBILITY
     let _scrollRaf = null;
     window.addEventListener('scroll', () => {
       if (_scrollRaf) return;
@@ -20298,6 +20412,8 @@
             nav.classList.remove('scrolled');
           }
         }
+        _checkHeroScrollVisibility();
+        _checkTrailersScrollVisibility();
       });
     }, { passive: true });
 
@@ -20585,6 +20701,12 @@
           }
         });
       }
+
+      // Initialize hero & trailers scroll visibility observation
+      try {
+        initHeroScrollObserver();
+        _checkHeroScrollVisibility();
+      } catch (_) {}
     }
 
     const WL_KEY = 'hackyMax_wishlist';
