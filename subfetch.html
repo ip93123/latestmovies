@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automated Subtitle Hunter &amp; Batch Studio — HackyStream</title>
+  <meta name="description" content="Automated bulk Sinhala subtitle hunting across Baiscope, Zoom, and Subz with TMDB discover filters and 1-click cloud sync.">
+  <link rel="icon" href="/logo.png" type="image/png">
+
+  <!-- Google Fonts & Font Awesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-dark: #07090F;
+      --bg-card: rgba(14, 20, 32, 0.85);
+      --bg-card-hover: rgba(22, 30, 48, 0.95);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-gold: rgba(232, 201, 122, 0.4);
+      --gold: #E8C97A;
+      --gold-dark: #C9A44E;
+      --gold-glow: rgba(232, 201, 122, 0.25);
+      --green: #2ECC71;
+      --green-glow: rgba(46, 204, 113, 0.25);
+      --blue: #3498DB;
+      --orange: #E67E22;
+      --red: #E74C3C;
+      --text: #F1F5F9;
+      --text-muted: #94A3B8;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(232, 201, 122, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(52, 152, 219, 0.05) 0%, transparent 40%);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* ── Top Navigation Bar ── */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 9, 15, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 0.9rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #07090F;
+      font-weight: 900;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 14px var(--gold-glow);
+    }
+
+    .brand-text h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-badge {
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(232, 201, 122, 0.2), rgba(201, 164, 78, 0.3));
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      letter-spacing: 0.5px;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-nav {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      color: var(--text);
+      text-decoration: none;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .btn-nav:hover {
+      background: rgba(232, 201, 122, 0.15);
+      border-color: var(--gold);
+      color: #fff;
+    }
+
+    .user-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(232, 201, 122, 0.1);
+      border: 1px solid var(--border-gold);
+      color: var(--gold);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    /* ── Sticky Filter & Control Center ── */
+    .controls-wrapper {
+      position: sticky;
+      top: 61px;
+      z-index: 900;
+      background: rgba(11, 15, 25, 0.94);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(232, 201, 122, 0.2);
+      padding: 1rem 1.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .controls-grid {
+      max-width: 1500px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      align-items: end;
+    }
+
+    .control-item {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .control-label {
+      font-size: 0.73rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .control-select, .control-input {
+      background: #0B0F19;
+      border: 1.5px solid var(--border);
+      color: #fff;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+
+    .control-select:focus, .control-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 14px var(--gold-glow);
+    }
+
+    .control-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-fetch {
+      background: linear-gradient(135deg, #E8C97A 0%, #C9A44E 100%);
+      color: #07090F;
+      border: none;
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      box-shadow: 0 4px 16px var(--gold-glow);
+      flex: 1;
+      white-space: nowrap;
+    }
+
+    .btn-fetch:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(232, 201, 122, 0.45);
+    }
+
+    .btn-reset {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-reset:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+
+    /* ── Batch Action Banner ── */
+    .batch-bar {
+      max-width: 1500px;
+      margin: 1.2rem auto 0;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .batch-stats {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.9rem;
+    }
+
+    .stat-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stat-pill.missing {
+      background: rgba(231, 76, 60, 0.12);
+      border-color: rgba(231, 76, 60, 0.4);
+      color: #FF7675;
+      font-weight: 700;
+    }
+
+    .stat-pill.active {
+      background: rgba(46, 204, 113, 0.12);
+      border-color: rgba(46, 204, 113, 0.4);
+      color: #2ECC71;
+      font-weight: 700;
+    }
+
+    .batch-buttons {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-batch-hunt {
+      background: rgba(52, 152, 219, 0.15);
+      border: 1.5px solid #3498DB;
+      color: #70A1FF;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn-batch-hunt:hover {
+      background: rgba(52, 152, 219, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-batch-autoadd {
+      background: linear-gradient(135deg, #2ECC71 0%, #27AE60 100%);
+      color: #07090F;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      box-shadow: 0 4px 14px var(--green-glow);
+    }
+
+    .btn-batch-autoadd:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(46, 204, 113, 0.45);
+    }
+
+    .batch-progress-box {
+      max-width: 1500px;
+      margin: 10px auto 0;
+      padding: 0 1.5rem;
+      display: none;
+      width: 100%;
+    }
+
+    .progress-bar-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #E8C97A, #2ECC71);
+      transition: width 0.3s ease;
+    }
+
+    /* ── Main Content & Movie Grid ── */
+    .main-container {
+      max-width: 1500px;
+      margin: 1.5rem auto 3rem;
+      padding: 0 1.5rem;
+      flex: 1;
+      width: 100%;
+    }
+
+    .movies-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 18px;
+    }
+
+    /* ── Movie Card ── */
+    .movie-card {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.25s ease;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .movie-card:hover {
+      border-color: rgba(232, 201, 122, 0.35);
+      transform: translateY(-3px);
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    .movie-card.has-active-sub {
+      border-color: rgba(46, 204, 113, 0.4);
+    }
+
+    .movie-card-header {
+      display: flex;
+      gap: 14px;
+      padding: 14px;
+      background: rgba(18, 24, 38, 0.6);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .movie-poster-wrap {
+      width: 72px;
+      height: 108px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background: #151C2C;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .movie-poster {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .movie-rating-badge {
+      position: absolute;
+      bottom: 4px;
+      left: 4px;
+      background: rgba(0, 0, 0, 0.85);
+      border: 1px solid rgba(232, 201, 122, 0.4);
+      color: var(--gold);
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .movie-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .movie-title-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .movie-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .movie-meta-tags {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .meta-tag {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+
+    .sub-status-pill {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 6px;
+      width: fit-content;
+    }
+
+    .sub-status-pill.missing {
+      background: rgba(231, 76, 60, 0.15);
+      border: 1px solid #E74C3C;
+      color: #FF7675;
+    }
+
+    .sub-status-pill.live {
+      background: rgba(46, 204, 113, 0.15);
+      border: 1px solid #2ECC71;
+      color: #2ECC71;
+    }
+
+    /* ── Subtitle Drawer under movie ── */
+    .movie-sub-drawer {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .drawer-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .btn-hunt-single {
+      background: rgba(232, 201, 122, 0.12);
+      border: 1px solid var(--border-gold);
+      color: var(--gold);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn-hunt-single:hover {
+      background: rgba(232, 201, 122, 0.25);
+      transform: translateY(-1px);
+    }
+
+    .btn-hunt-single:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Sub Candidates List */
+    .candidates-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .candidate-card {
+      background: rgba(10, 15, 25, 0.9);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .candidate-card:hover {
+      border-color: rgba(232, 201, 122, 0.35);
+    }
+
+    .candidate-card.synced {
+      border-color: #2ECC71;
+      background: rgba(46, 204, 113, 0.08);
+    }
+
+    .candidate-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .source-badge {
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .source-baiscope {
+      background: rgba(46, 204, 113, 0.15);
+      border: 1px solid #2ECC71;
+      color: #2ECC71;
+    }
+
+    .source-zoom {
+      background: rgba(52, 152, 219, 0.15);
+      border: 1px solid #3498DB;
+      color: #3498DB;
+    }
+
+    .source-subz {
+      background: rgba(230, 126, 34, 0.15);
+      border: 1px solid #E67E22;
+      color: #E67E22;
+    }
+
+    .candidate-meta {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .candidate-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .candidate-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .btn-add-r2 {
+      flex: 1;
+      background: linear-gradient(135deg, #E8C97A 0%, #C9A44E 100%);
+      color: #07090F;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn-add-r2:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+
+    .btn-add-r2.done {
+      background: #2ECC71;
+      color: #000;
+      cursor: default;
+      transform: none;
+    }
+
+    .btn-cand-tool {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 6px 9px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-cand-tool:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    /* Skeleton Loading */
+    .skeleton-box {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.04) 75%);
+      background-size: 200% 100%;
+      animation: skeletonLoading 1.5s infinite;
+      border-radius: var(--radius-sm);
+      height: 48px;
+    }
+
+    @keyframes skeletonLoading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ── Empty State / Toast ── */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 1rem;
+      color: var(--text-muted);
+      grid-column: 1 / -1;
+    }
+
+    .empty-icon {
+      font-size: 3rem;
+      color: var(--gold);
+      margin-bottom: 1rem;
+      opacity: 0.8;
+    }
+
+    .empty-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #0E1420;
+      border: 1.5px solid var(--gold);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 20px var(--gold-glow);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      font-weight: 600;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+      max-width: 420px;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #0E1420;
+      border: 1.5px solid var(--border-gold);
+      border-radius: var(--radius-md);
+      width: 100%;
+      max-width: 700px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.9);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .modal-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      color: #fff;
+    }
+
+    .modal-body {
+      padding: 16px 20px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      background: #07090F;
+      color: #cbd5e1;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="top-nav">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <a href="/" class="brand-group">
+        <div class="brand-logo"><i class="fa-solid fa-play"></i></div>
+        <div class="brand-text">
+          <h1>HackyStream <span class="brand-badge"><i class="fa-solid fa-bolt"></i> Sub Hunter</span></h1>
+        </div>
+      </a>
+    </div>
+
+    <div class="nav-actions">
+      <a href="/sub" class="btn-nav">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        <span>Manual Sub Portal</span>
+      </a>
+      <a href="/" class="btn-nav">
+        <i class="fa-solid fa-film"></i>
+        <span>Main Catalog</span>
+      </a>
+      <div id="authPill" class="user-pill" style="display:none;">
+        <i class="fa-solid fa-user-shield"></i>
+        <span id="authUsername">Admin</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Sticky Controls Bar -->
+  <section class="controls-wrapper">
+    <div class="controls-grid">
+      
+      <!-- Year -->
+      <div class="control-item">
+        <label class="control-label"><i class="fa-solid fa-calendar"></i> Year</label>
+        <select id="filterYear" class="control-select">
+          <option value="2026" selected>2026</option>
+          <option value="2025">2025</option>
+          <option value="2024">2024</option>
+          <option value="2023">2023</option>
+          <option value="2022">2022</option>
+          <option value="2020-2021">2020 - 2021</option>
+          <option value="all">All Years</option>
+        </select>
+      </div>
+
+      <!-- Rating -->
+      <div class="control-item">
+        <label class="control-label"><i class="fa-solid fa-star"></i> Min Rating</label>
+        <select id="filterRating" class="control-select">
+          <option value="all" selected>All Ratings</option>
+          <option value="6.0">⭐ 6.0+</option>
+          <option value="7.0">⭐ 7.0+</option>
+          <option value="7.5">⭐ 7.5+</option>
+          <option value="8.0">⭐ 8.0+</option>
+          <option value="8.5">⭐ 8.5+</option>
+        </select>
+      </div>
+
+      <!-- Trending / Sort -->
+      <div class="control-item">
+        <label class="control-label"><i class="fa-solid fa-arrow-down-short-wide"></i> Sort / Mode</label>
+        <select id="filterSort" class="control-select">
+          <option value="popularity.desc" selected>🔥 Most Popular</option>
+          <option value="trending_week">📈 Trending This Week</option>
+          <option value="trending_day">⚡ Trending Today</option>
+          <option value="vote_average.desc">🏆 Top Rated (TMDB)</option>
+          <option value="release_date.desc">🎬 Recent Release</option>
+        </select>
+      </div>
+
+      <!-- Language -->
+      <div class="control-item">
+        <label class="control-label"><i class="fa-solid fa-language"></i> Language</label>
+        <select id="filterLang" class="control-select">
+          <option value="all" selected>All Languages</option>
+          <option value="ta">🇮🇳 Tamil (தமிழ்)</option>
+          <option value="hi">🇮🇳 Hindi (हिन्दी)</option>
+          <option value="ml">🇮🇳 Malayalam (മലയാളം)</option>
+          <option value="te">🇮🇳 Telugu (తెలుగు)</option>
+          <option value="en">🇺🇸 English</option>
+          <option value="ko">🇰🇷 Korean</option>
+          <option value="ja">🇯🇵 Japanese</option>
+          <option value="si">🇱🇰 Sinhala</option>
+        </select>
+      </div>
+
+      <!-- Subtitle Status -->
+      <div class="control-item">
+        <label class="control-label"><i class="fa-solid fa-filter"></i> Subtitle Status</label>
+        <select id="filterStatus" class="control-select">
+          <option value="missing" selected>⚠️ Missing Subtitle Only</option>
+          <option value="has_sub">✅ Already Subtitled</option>
+          <option value="all">🌐 All Movies</option>
+        </select>
+      </div>
+
+      <!-- Limit -->
+      <div class="control-item" style="max-width:110px;">
+        <label class="control-label"><i class="fa-solid fa-list-ol"></i> Limit</label>
+        <select id="filterLimit" class="control-select">
+          <option value="12">12 Movies</option>
+          <option value="20" selected>20 Movies</option>
+          <option value="40">40 Movies</option>
+          <option value="60">60 Movies</option>
+        </select>
+      </div>
+
+      <!-- Keyword Search -->
+      <div class="control-item" style="min-width:180px;">
+        <label class="control-label"><i class="fa-solid fa-magnifying-glass"></i> Search Title</label>
+        <input type="text" id="filterQuery" class="control-input" placeholder="Title (e.g. Dhurandhar)...">
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="control-actions">
+        <button type="button" class="btn-fetch" id="btnFetchMovies" onclick="loadDiscoveredMovies()">
+          <i class="fa-solid fa-arrows-rotate"></i> <span>Fetch</span>
+        </button>
+        <button type="button" class="btn-reset" onclick="resetFilters()" title="Reset Filters">
+          <i class="fa-solid fa-rotate-left"></i>
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Batch Action Banner -->
+  <section class="batch-bar">
+    <div class="batch-stats">
+      <span id="statTotal" class="stat-pill"><i class="fa-solid fa-film"></i> 0 Movies</span>
+      <span id="statMissing" class="stat-pill missing"><i class="fa-solid fa-triangle-exclamation"></i> 0 Missing Sub</span>
+      <span id="statLive" class="stat-pill active"><i class="fa-solid fa-circle-check"></i> 0 Active Sub</span>
+    </div>
+
+    <div class="batch-buttons">
+      <button type="button" class="btn-batch-hunt" id="btnBatchHunt" onclick="startBatchHunt()">
+        <i class="fa-solid fa-magnifying-glass-arrow-right"></i> <span>Auto-Hunt All Visible</span>
+      </button>
+      <button type="button" class="btn-batch-autoadd" id="btnBatchAutoAdd" onclick="startBatchAutoAdd()">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Auto-Commit All Matches</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Progress Bar Box -->
+  <div class="batch-progress-box" id="batchProgressBox">
+    <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);margin-bottom:4px;">
+      <span id="progressText">Processing batch...</span>
+      <span id="progressPercent">0%</span>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progressBarFill"></div>
+    </div>
+  </div>
+
+  <!-- Main Movie Grid -->
+  <main class="main-container">
+    <div class="movies-grid" id="moviesGrid">
+      <div class="empty-state">
+        <div class="empty-icon"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
+        <div class="empty-title">Loading Movies...</div>
+        <div>Fetching latest titles and comparing with subtitle catalog...</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Preview Modal -->
+  <div class="modal-backdrop" id="previewModal" onclick="closePreviewModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title" id="previewModalTitle">Subtitle Preview</div>
+        <button type="button" class="modal-close" onclick="closePreviewModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="previewModalBody"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toastBox">
+    <i class="fa-solid fa-circle-info" style="color:var(--gold);"></i>
+    <span id="toastMsg">Ready</span>
+  </div>
+
+  <script>
+    // ── Global State ──
+    let discoveredMovies = [];
+    let movieHuntCache = {}; // { [tmdbId]: { loading: boolean, results: [...] } }
+    let isBatchRunning = false;
+
+    // Check Auth Token
+    function getAuthToken() {
+      return localStorage.getItem('hacky_admin_token') || '';
+    }
+
+    function checkAuthUI() {
+      const token = getAuthToken();
+      const pill = document.getElementById('authPill');
+      const userEl = document.getElementById('authUsername');
+      if (token) {
+        try {
+          const parts = token.split('.');
+          if (parts.length === 3) {
+            const payload = JSON.parse(atob(parts[1]));
+            if (payload.u) {
+              userEl.textContent = payload.u + (payload.r === 'admin' ? ' (Admin)' : '');
+              pill.style.display = 'inline-flex';
+            }
+          }
+        } catch (_) {}
+      }
+    }
+
+    // ── Toast Notification ──
+    let toastTimeout = null;
+    function showToast(msg, duration = 3500) {
+      const box = document.getElementById('toastBox');
+      const txt = document.getElementById('toastMsg');
+      if (!box || !txt) return;
+      txt.innerHTML = msg;
+      box.classList.add('show');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => box.classList.remove('show'), duration);
+    }
+
+    function formatBytes(bytes) {
+      if (!bytes || bytes === 0) return '0 B';
+      const k = 1024;
+      const dm = 1;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+    // ── Discover & Filter Movies ──
+    async function loadDiscoveredMovies() {
+      const grid = document.getElementById('moviesGrid');
+      const btn = document.getElementById('btnFetchMovies');
+      const origText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Fetching…</span>';
+
+      grid.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
+          <div class="empty-title">Fetching Movies...</div>
+          <div>Querying TMDB and verifying subtitle catalog differences...</div>
+        </div>
+      `;
+
+      try {
+        const year = document.getElementById('filterYear').value;
+        const rating = document.getElementById('filterRating').value;
+        const sort = document.getElementById('filterSort').value;
+        const language = document.getElementById('filterLang').value;
+        const status = document.getElementById('filterStatus').value;
+        const limit = document.getElementById('filterLimit').value;
+        const q = document.getElementById('filterQuery').value.trim();
+
+        const params = new URLSearchParams({
+          year,
+          rating,
+          sort,
+          language,
+          status,
+          limit,
+          q
+        });
+
+        const res = await fetch(`/api/sub-discover?${params.toString()}`);
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Failed to fetch movies');
+        }
+
+        discoveredMovies = data.movies || [];
+        updateStats();
+        renderMoviesGrid();
+
+        showToast(`✨ Loaded ${discoveredMovies.length} movies (${data.filters.status})`);
+
+      } catch (err) {
+        console.error('[subfetch] Discover error:', err);
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon" style="color:var(--red);"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="empty-title">Error Loading Movies</div>
+            <div>${err.message}</div>
+          </div>
+        `;
+        showToast(`❌ Error: ${err.message}`);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = origText;
+      }
+    }
+
+    function updateStats() {
+      const total = discoveredMovies.length;
+      const missing = discoveredMovies.filter(m => !m.hasSubtitle).length;
+      const live = total - missing;
+
+      document.getElementById('statTotal').innerHTML = `<i class="fa-solid fa-film"></i> ${total} Movies`;
+      document.getElementById('statMissing').innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${missing} Missing Sub`;
+      document.getElementById('statLive').innerHTML = `<i class="fa-solid fa-circle-check"></i> ${live} Active Sub`;
+    }
+
+    function resetFilters() {
+      document.getElementById('filterYear').value = '2026';
+      document.getElementById('filterRating').value = 'all';
+      document.getElementById('filterSort').value = 'popularity.desc';
+      document.getElementById('filterLang').value = 'all';
+      document.getElementById('filterStatus').value = 'missing';
+      document.getElementById('filterLimit').value = '20';
+      document.getElementById('filterQuery').value = '';
+      loadDiscoveredMovies();
+    }
+
+    // ── Render Movie Cards ──
+    function renderMoviesGrid() {
+      const grid = document.getElementById('moviesGrid');
+      if (!discoveredMovies || discoveredMovies.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon"><i class="fa-solid fa-clapperboard"></i></div>
+            <div class="empty-title">No Movies Found</div>
+            <div>Try adjusting your filters (change Year, Language, or Subtitle Status).</div>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = '';
+      discoveredMovies.forEach((m, idx) => {
+        const card = document.createElement('div');
+        card.className = `movie-card ${m.hasSubtitle ? 'has-active-sub' : ''}`;
+        card.id = `movieCard_${m.id}`;
+
+        const langBadge = (m.original_language || 'en').toUpperCase();
+        const posterUrl = m.poster_path || '/logo.png';
+        const ratingStr = m.vote_average ? m.vote_average.toFixed(1) : 'N/A';
+
+        card.innerHTML = `
+          <div class="movie-card-header">
+            <div class="movie-poster-wrap">
+              <img src="${posterUrl}" alt="${m.title}" class="movie-poster" loading="lazy" onerror="this.src='/logo.png'">
+              <div class="movie-rating-badge"><i class="fa-solid fa-star"></i> ${ratingStr}</div>
+            </div>
+
+            <div class="movie-info">
+              <div>
+                <div class="movie-title-row">
+                  <div class="movie-title" title="${m.title}">${m.title}</div>
+                  <a href="/?cat=language&id=si&m=${m.id}" target="_blank" title="Play on Site" style="color:var(--gold);font-size:0.85rem;text-decoration:none;">
+                    <i class="fa-solid fa-play"></i>
+                  </a>
+                </div>
+                <div class="movie-meta-tags">
+                  <span class="meta-tag"><i class="fa-regular fa-calendar"></i> ${m.year || '2026'}</span>
+                  <span class="meta-tag"><i class="fa-solid fa-globe"></i> ${langBadge}</span>
+                  <span class="meta-tag">ID: ${m.id}</span>
+                </div>
+              </div>
+
+              <div id="subStatusContainer_${m.id}">
+                ${m.hasSubtitle ? `
+                  <div class="sub-status-pill live">
+                    <i class="fa-solid fa-circle-check"></i> Subtitle Active (Catalog)
+                  </div>
+                ` : `
+                  <div class="sub-status-pill missing">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Missing Subtitle
+                  </div>
+                `}
+              </div>
+            </div>
+          </div>
+
+          <!-- Subtitle Candidates Drawer -->
+          <div class="movie-sub-drawer">
+            <div class="drawer-title-row">
+              <span><i class="fa-solid fa-closed-captioning"></i> Sinhala Subtitles</span>
+              <button type="button" class="btn-hunt-single" id="btnHunt_${m.id}" onclick="huntSubtitleSingle(${m.id})">
+                <i class="fa-solid fa-magnifying-glass"></i> <span>Hunt Sub</span>
+              </button>
+            </div>
+
+            <div class="candidates-list" id="candidatesList_${m.id}">
+              ${m.hasSubtitle ? `
+                <div style="font-size:0.75rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;">
+                  <i class="fa-solid fa-link" style="color:var(--green);"></i>
+                  <span>Live on Stream: ${m.existingSub?.source || 'R2'} (${m.existingSub?.format || 'srt'})</span>
+                </div>
+              ` : `
+                <div style="font-size:0.75rem;color:var(--text-muted);">
+                  Click "Hunt Sub" to search Baiscope, Zoom &amp; Subz for this movie.
+                </div>
+              `}
+            </div>
+          </div>
+        `;
+
+        grid.appendChild(card);
+      });
+    }
+
+    // ── Single Movie Hunt ──
+    async function huntSubtitleSingle(tmdbId) {
+      const movie = discoveredMovies.find(m => m.id === tmdbId);
+      if (!movie) return;
+
+      const btn = document.getElementById(`btnHunt_${tmdbId}`);
+      const list = document.getElementById(`candidatesList_${tmdbId}`);
+      if (!list) return;
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Hunting…</span>';
+      }
+
+      list.innerHTML = `<div class="skeleton-box"></div>`;
+
+      try {
+        const queryParams = new URLSearchParams({
+          q: movie.title,
+          tmdbId: movie.id,
+          type: 'movie',
+          source: 'all'
+        });
+
+        const res = await fetch(`/api/sub-autofetch?${queryParams.toString()}`);
+        const data = await res.json();
+
+        const results = Array.isArray(data.results) && data.results.length > 0
+          ? data.results
+          : (data.srt ? [data] : []);
+
+        movieHuntCache[tmdbId] = results;
+        renderCandidateResults(tmdbId, results);
+
+        if (results.length > 0) {
+          showToast(`🎯 Found ${results.length} sub source${results.length > 1 ? 's' : ''} for "${movie.title}"`);
+        } else {
+          showToast(`ℹ️ No sub found on Baiscope, Zoom or Subz for "${movie.title}"`);
+        }
+
+      } catch (err) {
+        console.error('[subfetch] Hunt error for', movie.title, err);
+        list.innerHTML = `<div style="font-size:0.78rem;color:var(--red);"><i class="fa-solid fa-circle-exclamation"></i> Search error: ${err.message}</div>`;
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> <span>Re-Hunt</span>';
+        }
+      }
+    }
+
+    function renderCandidateResults(tmdbId, results) {
+      const list = document.getElementById(`candidatesList_${tmdbId}`);
+      if (!list) return;
+
+      if (!results || results.length === 0) {
+        list.innerHTML = `
+          <div style="font-size:0.75rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;">
+            <i class="fa-solid fa-ban" style="color:#E74C3C;"></i>
+            <span>No subtitle found on Baiscope, Zoom, or Subz.</span>
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = '';
+      results.forEach((item, idx) => {
+        const isBaiscope = (item.source || '').includes('baiscope');
+        const isZoom = (item.source || '').includes('zoom');
+        const isSubz = (item.source || '').includes('subz');
+
+        const badgeClass = isBaiscope
+          ? 'source-baiscope'
+          : (isZoom ? 'source-zoom' : 'source-subz');
+
+        const lineCount = item.srt?.lineCount || 0;
+        const sizeStr = formatBytes(item.srt?.sizeBytes || item.srt?.content?.length || 0);
+        const fileName = (item.srt?.filename || 'subtitle.srt').split('/').pop().split('\\').pop();
+
+        const cand = document.createElement('div');
+        cand.className = 'candidate-card';
+        cand.id = `cand_${tmdbId}_${idx}`;
+        cand.innerHTML = `
+          <div class="candidate-header">
+            <span class="source-badge ${badgeClass}"><i class="fa-solid fa-circle-check"></i> ${item.source}</span>
+            <div class="candidate-meta">
+              <span><i class="fa-solid fa-list-ol"></i> ${lineCount} cues</span>
+              <span>•</span>
+              <span>${sizeStr}</span>
+              ${item.srt?.sinhalaDetected ? '<span style="color:#2ECC71;">🇱🇰 Sinhala</span>' : ''}
+            </div>
+          </div>
+
+          <div class="candidate-title" title="${fileName}">${fileName}</div>
+
+          <div class="candidate-actions">
+            <button type="button" class="btn-add-r2" id="btnAddR2_${tmdbId}_${idx}" onclick="saveCandidateToR2(${tmdbId}, ${idx})">
+              <i class="fa-solid fa-cloud-arrow-up"></i> <span>Add to Stream</span>
+            </button>
+            <button type="button" class="btn-cand-tool" onclick="previewCandidate(${tmdbId}, ${idx})" title="Preview Cues">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+            <button type="button" class="btn-cand-tool" onclick="downloadCandidateSrt(${tmdbId}, ${idx})" title="Download .SRT">
+              <i class="fa-solid fa-download"></i>
+            </button>
+          </div>
+        `;
+        list.appendChild(cand);
+      });
+    }
+
+    // ── Save to R2 & Update Catalog ──
+    async function saveCandidateToR2(tmdbId, candIndex) {
+      const movie = discoveredMovies.find(m => m.id === tmdbId);
+      const results = movieHuntCache[tmdbId];
+      if (!movie || !results || !results[candIndex]) return;
+
+      const item = results[candIndex];
+      const btn = document.getElementById(`btnAddR2_${tmdbId}_${candIndex}`);
+      const origText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Saving…</span>';
+
+      try {
+        const token = getAuthToken();
+        const payload = {
+          q: movie.title,
+          tmdbId: movie.id,
+          type: 'movie',
+          source: item.source,
+          save: true,
+          token
+        };
+
+        const res = await fetch('/api/sub-autofetch', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token ? `Bearer ${token}` : ''
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Failed to link subtitle');
+        }
+
+        // Success state
+        btn.classList.add('done');
+        btn.innerHTML = '<i class="fa-solid fa-check-double"></i> <span>Live on Stream</span>';
+
+        const card = document.getElementById(`movieCard_${tmdbId}`);
+        if (card) card.classList.add('has-active-sub');
+
+        const statusContainer = document.getElementById(`subStatusContainer_${tmdbId}`);
+        if (statusContainer) {
+          statusContainer.innerHTML = `
+            <div class="sub-status-pill live">
+              <i class="fa-solid fa-circle-check"></i> Subtitle Active (Saved to R2)
+            </div>
+          `;
+        }
+
+        movie.hasSubtitle = true;
+        updateStats();
+        showToast(`🎉 Subtitle attached for "${movie.title}" via ${item.source}!`);
+
+      } catch (err) {
+        console.error('[subfetch] Save error:', err);
+        btn.disabled = false;
+        btn.innerHTML = origText;
+        showToast(`❌ Error: ${err.message}`);
+      }
+    }
+
+    // ── Preview Modal ──
+    function previewCandidate(tmdbId, candIndex) {
+      const movie = discoveredMovies.find(m => m.id === tmdbId);
+      const results = movieHuntCache[tmdbId];
+      if (!movie || !results || !results[candIndex]) return;
+
+      const item = results[candIndex];
+      const modal = document.getElementById('previewModal');
+      const title = document.getElementById('previewModalTitle');
+      const body = document.getElementById('previewModalBody');
+
+      title.innerHTML = `📄 ${movie.title} — <span style="color:var(--gold);">${item.source}</span>`;
+      body.textContent = (item.srt?.content || 'No content').slice(0, 4000);
+      modal.classList.add('active');
+    }
+
+    function closePreviewModal(e) {
+      if (!e || e.target.id === 'previewModal' || e.target.closest('.modal-close')) {
+        document.getElementById('previewModal').classList.remove('active');
+      }
+    }
+
+    // ── Download .SRT ──
+    function downloadCandidateSrt(tmdbId, candIndex) {
+      const movie = discoveredMovies.find(m => m.id === tmdbId);
+      const results = movieHuntCache[tmdbId];
+      if (!movie || !results || !results[candIndex]) return;
+
+      const item = results[candIndex];
+      const fileName = (item.srt?.filename || `${movie.title}.srt`).split('/').pop().split('\\').pop();
+      const blob = new Blob([item.srt.content], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`📥 Downloading ${fileName}`);
+    }
+
+    // ── Batch Auto-Hunt All Visible ──
+    async function startBatchHunt() {
+      if (isBatchRunning) return;
+      const missingMovies = discoveredMovies.filter(m => !m.hasSubtitle);
+      if (missingMovies.length === 0) {
+        showToast('ℹ️ No missing movies to hunt in current view.');
+        return;
+      }
+
+      isBatchRunning = true;
+      const progressBox = document.getElementById('batchProgressBox');
+      const fill = document.getElementById('progressBarFill');
+      const txt = document.getElementById('progressText');
+      const pct = document.getElementById('progressPercent');
+      progressBox.style.display = 'block';
+
+      let done = 0;
+      showToast(`⚡ Starting batch hunt for ${missingMovies.length} movies...`);
+
+      for (const movie of missingMovies) {
+        txt.textContent = `Hunting: ${movie.title}...`;
+        await huntSubtitleSingle(movie.id);
+        done++;
+        const percent = Math.round((done / missingMovies.length) * 100);
+        fill.style.width = `${percent}%`;
+        pct.textContent = `${percent}%`;
+        // Small delay to prevent browser CPU lock
+        await new Promise(r => setTimeout(r, 300));
+      }
+
+      txt.textContent = `Completed hunting ${missingMovies.length} movies.`;
+      isBatchRunning = false;
+      showToast('🎉 Batch hunt completed!');
+      setTimeout(() => { progressBox.style.display = 'none'; }, 4000);
+    }
+
+    // ── Batch Auto-Commit Top Matches ──
+    async function startBatchAutoAdd() {
+      if (isBatchRunning) return;
+      const candidatesToSave = [];
+
+      discoveredMovies.forEach(m => {
+        if (!m.hasSubtitle && movieHuntCache[m.id] && movieHuntCache[m.id].length > 0) {
+          // Pick best candidate with verified Sinhala
+          const best = movieHuntCache[m.id].find(c => c.srt?.sinhalaDetected) || movieHuntCache[m.id][0];
+          const bestIdx = movieHuntCache[m.id].indexOf(best);
+          candidatesToSave.push({ tmdbId: m.id, candIndex: bestIdx, title: m.title });
+        }
+      });
+
+      if (candidatesToSave.length === 0) {
+        showToast('ℹ️ No subtitle matches ready to commit. Run "Auto-Hunt" first.');
+        return;
+      }
+
+      isBatchRunning = true;
+      const progressBox = document.getElementById('batchProgressBox');
+      const fill = document.getElementById('progressBarFill');
+      const txt = document.getElementById('progressText');
+      const pct = document.getElementById('progressPercent');
+      progressBox.style.display = 'block';
+
+      showToast(`🚀 Auto-committing ${candidatesToSave.length} subtitles to R2 & Catalog...`);
+      let done = 0;
+
+      for (const item of candidatesToSave) {
+        txt.textContent = `Saving: ${item.title}...`;
+        await saveCandidateToR2(item.tmdbId, item.candIndex);
+        done++;
+        const percent = Math.round((done / candidatesToSave.length) * 100);
+        fill.style.width = `${percent}%`;
+        pct.textContent = `${percent}%`;
+        await new Promise(r => setTimeout(r, 400));
+      }
+
+      txt.textContent = `Successfully added ${candidatesToSave.length} subtitles!`;
+      isBatchRunning = false;
+      showToast(`🎉 Batch commit finished! ${candidatesToSave.length} subtitles live.`);
+      setTimeout(() => { progressBox.style.display = 'none'; }, 4000);
+    }
+
+    // ── Init on Page Load ──
+    window.addEventListener('DOMContentLoaded', () => {
+      checkAuthUI();
+      loadDiscoveredMovies();
+
+      // Enter key on search input triggers fetch
+      const qInput = document.getElementById('filterQuery');
+      if (qInput) {
+        qInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            loadDiscoveredMovies();
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>
