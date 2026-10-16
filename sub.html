@@ -1857,6 +1857,13 @@
     .season-ep-item.uploaded {
       border-color: rgba(46, 204, 113, 0.5);
       background: rgba(46, 204, 113, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .season-ep-item.uploading {
+      border-color: rgba(232, 201, 122, 0.7);
+      background: rgba(232, 201, 122, 0.12);
+      box-shadow: 0 0 10px rgba(232, 201, 122, 0.25);
     }
 
     .season-ep-badge {
@@ -3076,76 +3083,112 @@
       const barFill = document.getElementById('progressBarFill');
       const statusText = document.getElementById('progressStatusText');
 
-      const isAuto = currentSeasonPackTargetSeason === 'auto';
-      const targetSeasonLabel = isAuto ? 'All Seasons' : `Season ${currentSeasonPackTargetSeason}`;
+      const total = currentSeasonPackEpisodes.length;
+      let uploadedCount = 0;
+      const defaultSeason = isAuto ? 1 : Number(currentSeasonPackTargetSeason);
 
       if (progressSec) progressSec.classList.add('active');
-      if (stepText) stepText.textContent = `Batch uploading ${targetSeasonLabel} (${currentSeasonPackEpisodes.length} episodes)...`;
-      if (barFill) barFill.style.width = '20%';
-      if (percentText) percentText.textContent = '20%';
-      if (statusText) statusText.textContent = 'Preparing payload and encoding subtitles...';
+      if (stepText) stepText.textContent = `Starting batch upload for ${targetSeasonLabel} (${total} episodes)...`;
+      if (barFill) barFill.style.width = '0%';
+      if (percentText) percentText.textContent = '0%';
+      if (statusText) statusText.textContent = 'Initializing upload queue...';
 
       try {
-        const defaultSeason = isAuto ? 1 : Number(currentSeasonPackTargetSeason);
-        const payload = {
-          action: 'batch_direct',
-          tmdbId: String(selectedTitle.id),
-          type: 'tv',
-          season: defaultSeason,
-          title: selectedTitle.title || selectedTitle.name || '',
-          year: (selectedTitle.release_date || selectedTitle.first_air_date || '').slice(0, 4),
-          episodes: currentSeasonPackEpisodes.map(ep => ({
-            season: isAuto ? (ep.season || 1) : defaultSeason,
-            episode: ep.episode,
-            fileBase64: ep.fileBase64,
-            fileName: ep.fileName
-          }))
-        };
+        for (let idx = 0; idx < total; idx++) {
+          const ep = currentSeasonPackEpisodes[idx];
+          const sNum = isAuto ? (ep.season || 1) : defaultSeason;
+          const epLabel = `S${String(sNum).padStart(2, '0')}E${String(ep.episode).padStart(2, '0')}`;
 
-        if (barFill) barFill.style.width = '50%';
-        if (percentText) percentText.textContent = '50%';
-        if (statusText) statusText.textContent = 'Uploading files to Cloudflare R2 and updating catalog...';
+          // 1. Indicate uploading state on current episode item
+          const itemEl = document.getElementById(`seasonEpItem_${idx}`);
+          const statusEl = document.getElementById(`seasonEpStatus_${idx}`);
+          if (itemEl) itemEl.classList.add('uploading');
+          if (statusEl) {
+            statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="color:var(--gold);"></i> <span style="color:var(--gold);">Linking…</span>';
+          }
 
-        const res = await fetch('/api/sub-api?action=upload', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(payload)
-        });
+          // 2. Update progress section
+          const pctBefore = Math.round((idx / total) * 100);
+          if (barFill) barFill.style.width = `${pctBefore}%`;
+          if (percentText) percentText.textContent = `${pctBefore}%`;
+          if (stepText) stepText.textContent = `Linking ${epLabel} (${idx + 1} of ${total})...`;
+          if (statusText) statusText.textContent = `Streaming ${ep.fileName} to Cloudflare R2...`;
 
-        const data = await res.json();
-        if (!res.ok || !data.success) {
-          throw new Error(data.error || 'Failed to upload season pack');
+          try {
+            const payload = {
+              action: 'batch_direct',
+              tmdbId: String(selectedTitle.id),
+              type: 'tv',
+              season: sNum,
+              title: selectedTitle.title || selectedTitle.name || '',
+              year: (selectedTitle.release_date || selectedTitle.first_air_date || '').slice(0, 4),
+              episodes: [{
+                season: sNum,
+                episode: ep.episode,
+                fileBase64: ep.fileBase64,
+                fileName: ep.fileName
+              }]
+            };
+
+            const res = await fetch('/api/sub-api?action=upload', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+              throw new Error(data.error || `Failed to link episode ${ep.episode}`);
+            }
+
+            // 3. Mark current episode as linked & green in real-time
+            ep.status = 'done';
+            uploadedCount++;
+            if (itemEl) {
+              itemEl.classList.remove('uploading');
+              itemEl.classList.add('uploaded');
+            }
+            if (statusEl) {
+              statusEl.innerHTML = '<i class="fa-solid fa-check"></i> Linked';
+              statusEl.style.color = '#2ECC71';
+            }
+
+            const pctAfter = Math.round((uploadedCount / total) * 100);
+            if (barFill) barFill.style.width = `${pctAfter}%`;
+            if (percentText) percentText.textContent = `${pctAfter}%`;
+            if (statusText) statusText.textContent = `✓ Linked ${epLabel} successfully (${uploadedCount} of ${total})`;
+
+            // Smooth delay so the user visibly sees each episode link
+            await new Promise(r => setTimeout(r, 60));
+
+          } catch (epErr) {
+            console.error(`[season-pack] Failed to upload ${epLabel}:`, epErr);
+            ep.status = 'error';
+            if (itemEl) itemEl.classList.remove('uploading');
+            if (statusEl) {
+              statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Error';
+              statusEl.style.color = '#E74C3C';
+            }
+          }
         }
 
         if (barFill) barFill.style.width = '100%';
         if (percentText) percentText.textContent = '100%';
-        if (statusText) statusText.textContent = `All ${data.count} episodes uploaded successfully to R2!`;
-
-        // Mark all episodes as uploaded
-        currentSeasonPackEpisodes.forEach((ep, idx) => {
-          ep.status = 'done';
-          const item = document.getElementById(`seasonEpItem_${idx}`);
-          if (item) item.classList.add('uploaded');
-          const st = document.getElementById(`seasonEpStatus_${idx}`);
-          if (st) {
-            st.innerHTML = '<i class="fa-solid fa-check"></i> Linked';
-            st.style.color = '#2ECC71';
-          }
-        });
+        if (statusText) statusText.textContent = `All ${uploadedCount} of ${total} episodes uploaded and linked successfully to R2!`;
 
         if (btn) {
-          btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>✓ All ${data.count} Episodes Linked to ${targetSeasonLabel}!</span>`;
+          btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>✓ All ${uploadedCount} Episodes Linked to ${targetSeasonLabel}!</span>`;
         }
 
-        showToast(`🎉 Success! Linked ${data.count} episodes to ${targetSeasonLabel}!`);
+        showToast(`🎉 Success! Linked ${uploadedCount} episodes to ${targetSeasonLabel}!`);
 
         // Refresh status
         setTimeout(() => {
           checkSubtitleStatus();
-        }, 1200);
+        }, 1000);
 
       } catch (err) {
         console.error('[season-pack] Batch upload error:', err);
