@@ -11366,7 +11366,7 @@
     </div>
     <div class="card-info">
       <div class="card-title">${title}</div>
-      <div class="card-sub"><span>${year || '—'}</span><span class="card-rt-badge" id="card-rt-${item.id}" style="display:none;"></span></div>
+      <div class="card-sub"><span>${year || '—'}</span><span class="card-rt-badge" data-rt-id="${item.id}" style="display:none;"></span></div>
       <div class="card-stream-pills">${streamPills}</div>
     </div>
   </div>`;
@@ -11400,7 +11400,7 @@
           </div>` : ''}
       </div>
       <div class="trending-info">
-        ${metaParts ? `<div class="trending-meta"><span>${metaParts}</span><span class="card-rt-badge" id="card-rt-${item.id}" style="display:none;"></span></div>` : ''}
+        ${metaParts ? `<div class="trending-meta"><span>${metaParts}</span><span class="card-rt-badge" data-rt-id="${item.id}" style="display:none;"></span></div>` : ''}
         <div class="trending-title">${title}</div>
         <div class="trending-genres">
           ${genres.map(g => `<span class="trending-genre-tag">${g}</span>`).join('')}
@@ -11880,20 +11880,20 @@
       for (const item of items) {
         if (!item || !item.id) continue;
         const id = item.id;
-        const pill = document.getElementById(`card-rt-${id}`);
-        if (!pill) continue;
+        const pills = document.querySelectorAll(`[data-rt-id="${id}"]`);
+        if (!pills || !pills.length) continue;
 
         const cached = cache[String(id)];
         if (cached && cached.score) {
-          applyRtBadgeToEl(pill, cached);
+          pills.forEach(p => applyRtBadgeToEl(p, cached));
           continue;
         }
 
         const itemType = item._type || type;
         fetchRtRating(item, itemType).then(data => {
           if (data) {
-            const el = document.getElementById(`card-rt-${id}`);
-            if (el) applyRtBadgeToEl(el, data);
+            const els = document.querySelectorAll(`[data-rt-id="${id}"]`);
+            els.forEach(el => applyRtBadgeToEl(el, data));
           }
         });
       }
@@ -12947,7 +12947,7 @@
       addCardListeners(grid, '.movie-card');
       const cards = grid.querySelectorAll('.movie-card');
       buildFilterBar('movieFilterBar', cards, 'all', (id) => { activeMovieFilter = id; filterCards('moviesGrid', id); });
-      hydrateSectionRtRatings(movies.slice(0, 20), 'movie');
+      hydrateSectionRtRatings(movies.slice(0, 30), 'movie');
 
       return movies;
     }
@@ -12990,7 +12990,7 @@
       addCardListeners(grid, '.movie-card');
       const cards = grid.querySelectorAll('.movie-card');
       buildFilterBar('tvFilterBar', cards, 'all', (id) => { activeTVFilter = id; filterCards('tvGrid', id); });
-      hydrateSectionRtRatings(showDetails.slice(0, 20), 'tv');
+      hydrateSectionRtRatings(showDetails.slice(0, 30), 'tv');
 
     }
 
