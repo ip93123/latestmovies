@@ -1,4 +1,4 @@
-import { loadCatalogAsync } from './sub-api.js';
+import { loadCatalogAsync, verifyToken } from './sub-api.js';
 
 const TMDB_KEY = process.env.TMDB_API_KEY || '8265bd1679663a7ea12ac168da84d2e8';
 
@@ -20,6 +20,17 @@ export default async function handler(req, res) {
   }
 
   const queryParams = req.method === 'GET' ? req.query : (req.body || {});
+
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.replace(/^Bearer\s+/i, '') || queryParams.token;
+  const verified = verifyToken(token);
+
+  if (!verified) {
+    return res.status(401).json({
+      success: false,
+      error: 'Unauthorized: Please log in at /sub first to access Sub Hunter'
+    });
+  }
   const {
     year = 'all',
     rating = 'all',

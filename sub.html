@@ -2218,6 +2218,11 @@
         if (res.ok && data.success) {
           showToast(`Welcome back, ${data.user}!`);
           setLoggedIn(data.user, data.token, data.role);
+          const redirectUrl = new URLSearchParams(window.location.search).get('redirect');
+          if (redirectUrl && redirectUrl.startsWith('/')) {
+            window.location.href = redirectUrl;
+            return;
+          }
         } else {
           showToast(data.error || 'Invalid credentials. Please try again.');
         }

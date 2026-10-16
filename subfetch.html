@@ -835,32 +835,60 @@
 </head>
 <body>
 
-  <!-- Top Navigation -->
-  <header class="top-nav">
-    <div style="display:flex;align-items:center;gap:16px;">
-      <a href="/" class="brand-group">
-        <div class="brand-logo"><i class="fa-solid fa-play"></i></div>
-        <div class="brand-text">
-          <h1>HackyStream <span class="brand-badge"><i class="fa-solid fa-bolt"></i> Sub Hunter</span></h1>
-        </div>
-      </a>
-    </div>
-
-    <div class="nav-actions">
-      <a href="/sub" class="btn-nav">
-        <i class="fa-solid fa-cloud-arrow-up"></i>
-        <span>Manual Sub Portal</span>
-      </a>
-      <a href="/" class="btn-nav">
-        <i class="fa-solid fa-film"></i>
-        <span>Main Catalog</span>
-      </a>
-      <div id="authPill" class="user-pill" style="display:none;">
-        <i class="fa-solid fa-user-shield"></i>
-        <span id="authUsername">Admin</span>
+  <!-- Auth Gate Screen (Shown when verifying or unauthorized) -->
+  <div id="authGate" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; text-align: center; background: radial-gradient(circle at 50% 40%, rgba(232, 201, 122, 0.08) 0%, #07090F 70%);">
+    <div style="background: rgba(14, 20, 32, 0.95); border: 1px solid var(--border-gold); border-radius: var(--radius-lg); padding: 2.8rem 2.2rem; max-width: 480px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px var(--gold-glow); backdrop-filter: blur(16px);">
+      <div style="width: 72px; height: 72px; border-radius: 20px; background: linear-gradient(135deg, rgba(232, 201, 122, 0.2), rgba(201, 164, 78, 0.3)); border: 1.5px solid var(--gold); display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--gold); margin: 0 auto 1.5rem auto; box-shadow: 0 0 25px var(--gold-glow);">
+        <i id="gateIcon" class="fa-solid fa-lock"></i>
+      </div>
+      <h2 id="gateTitle" style="font-size: 1.45rem; font-weight: 800; color: #fff; margin-bottom: 0.8rem; letter-spacing: -0.5px;">Studio Login Required</h2>
+      <p id="gateDesc" style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.6; margin-bottom: 1.8rem;">
+        Automated Sub Hunter is restricted to authenticated HackyMax Sub Studio contributors. Please sign in to your studio account.
+      </p>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <a id="gateLoginBtn" href="/sub?redirect=/subfetch" style="text-decoration: none; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); color: #07090F; padding: 12px 24px; border-radius: 999px; font-weight: 800; font-size: 0.92rem; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px var(--gold-glow); transition: transform 0.2s ease;">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i>
+          <span>Sign In at Sub Studio (/sub)</span>
+        </a>
+        <a href="/" style="text-decoration: none; color: var(--text-muted); font-size: 0.82rem; padding: 6px;">
+          ← Return to HackyStream Home
+        </a>
       </div>
     </div>
-  </header>
+  </div>
+
+  <!-- Authenticated Sub Hunter App -->
+  <div id="subfetchApp" style="display: none;">
+
+    <!-- Top Navigation -->
+    <header class="top-nav">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <a href="/" class="brand-group">
+          <div class="brand-logo"><i class="fa-solid fa-play"></i></div>
+          <div class="brand-text">
+            <h1>HackyStream <span class="brand-badge"><i class="fa-solid fa-bolt"></i> Sub Hunter</span></h1>
+          </div>
+        </a>
+      </div>
+
+      <div class="nav-actions">
+        <a href="/sub" class="btn-nav">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <span>Studio Dashboard</span>
+        </a>
+        <a href="/" class="btn-nav">
+          <i class="fa-solid fa-film"></i>
+          <span>Main Catalog</span>
+        </a>
+        <div id="authPill" class="user-pill" style="display:none;align-items:center;gap:8px;">
+          <i class="fa-solid fa-circle-user" style="color:var(--gold);"></i>
+          <span id="authUsername">Admin</span>
+          <button type="button" onclick="handleLogout()" title="Sign Out of Studio" style="background:transparent;border:none;color:var(--text-muted);cursor:pointer;margin-left:6px;font-size:0.85rem;display:inline-flex;align-items:center;padding:2px 4px;transition:color 0.2s;" onmouseover="this.style.color='#E74C3C'" onmouseout="this.style.color='var(--text-muted)'">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          </button>
+        </div>
+      </div>
+    </header>
 
   <!-- Sticky Controls Bar -->
   <section class="controls-wrapper">
@@ -1012,6 +1040,8 @@
     </div>
   </div>
 
+  </div> <!-- /#subfetchApp -->
+
   <!-- Toast Notification -->
   <div class="toast" id="toastBox">
     <i class="fa-solid fa-circle-info" style="color:var(--gold);"></i>
@@ -1024,26 +1054,79 @@
     let movieHuntCache = {}; // { [tmdbId]: { loading: boolean, results: [...] } }
     let isBatchRunning = false;
 
+    const TOKEN_KEY = 'hackymax_sub_token';
+    const USER_KEY = 'hackymax_sub_user';
+
     // Check Auth Token
     function getAuthToken() {
-      return localStorage.getItem('hacky_admin_token') || '';
+      return localStorage.getItem(TOKEN_KEY) || localStorage.getItem('hacky_admin_token') || '';
     }
 
-    function checkAuthUI() {
+    function handleLogout() {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem('hackymax_sub_role');
+      localStorage.removeItem('hacky_admin_token');
+      window.location.replace('/sub');
+    }
+
+    async function checkAuthAndInit() {
+      const gate = document.getElementById('authGate');
+      const app = document.getElementById('subfetchApp');
+      const gateIcon = document.getElementById('gateIcon');
+      const gateTitle = document.getElementById('gateTitle');
+      const gateDesc = document.getElementById('gateDesc');
       const token = getAuthToken();
-      const pill = document.getElementById('authPill');
-      const userEl = document.getElementById('authUsername');
-      if (token) {
-        try {
-          const parts = token.split('.');
-          if (parts.length === 3) {
-            const payload = JSON.parse(atob(parts[1]));
-            if (payload.u) {
-              userEl.textContent = payload.u + (payload.r === 'admin' ? ' (Admin)' : '');
-              pill.style.display = 'inline-flex';
-            }
+
+      if (!token) {
+        // Not logged in: Show lock and redirect after brief notification
+        gate.style.display = 'flex';
+        app.style.display = 'none';
+        gateIcon.className = 'fa-solid fa-lock';
+        gateTitle.textContent = 'Studio Login Required';
+        gateDesc.innerHTML = 'Automated Sub Hunter is restricted to authenticated HackyMax Sub Studio contributors.<br><span style="color:var(--gold);display:inline-block;margin-top:6px;"><i class="fa-solid fa-spinner fa-spin"></i> Redirecting to /sub login…</span>';
+        setTimeout(() => {
+          window.location.replace('/sub?redirect=/subfetch');
+        }, 1200);
+        return;
+      }
+
+      gate.style.display = 'flex';
+      app.style.display = 'none';
+      gateIcon.className = 'fa-solid fa-circle-notch fa-spin';
+      gateTitle.textContent = 'Verifying Studio Credentials…';
+      gateDesc.textContent = 'Authenticating with HackyMax security server...';
+
+      try {
+        const res = await fetch(`/api/sub-auth?token=${encodeURIComponent(token)}`);
+        if (!res.ok) throw new Error('Authentication failed');
+        const data = await res.json();
+
+        if (data.authenticated) {
+          gate.style.display = 'none';
+          app.style.display = 'block';
+
+          const userEl = document.getElementById('authUsername');
+          const pill = document.getElementById('authPill');
+          if (userEl && pill) {
+            const isHackyAdmin = (data.user || '').toLowerCase() === 'hacky' || data.role === 'admin';
+            userEl.innerHTML = `<strong>${data.user}</strong> <span style="font-size:0.72rem;opacity:0.85;margin-left:4px;">(${isHackyAdmin ? '👑 Admin' : '✨ Contributor'})</span>`;
+            pill.style.display = 'inline-flex';
           }
-        } catch (_) {}
+
+          loadDiscoveredMovies();
+        } else {
+          throw new Error(data.error || 'Invalid session');
+        }
+      } catch (err) {
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem('hacky_admin_token');
+        gateIcon.className = 'fa-solid fa-lock';
+        gateTitle.textContent = 'Session Expired';
+        gateDesc.innerHTML = 'Your login session is invalid or has expired.<br><span style="color:var(--gold);display:inline-block;margin-top:6px;"><i class="fa-solid fa-spinner fa-spin"></i> Redirecting to /sub…</span>';
+        setTimeout(() => {
+          window.location.replace('/sub?redirect=/subfetch');
+        }, 1400);
       }
     }
 
@@ -1070,6 +1153,12 @@
 
     // ── Discover & Filter Movies ──
     async function loadDiscoveredMovies() {
+      const token = getAuthToken();
+      if (!token) {
+        checkAuthAndInit();
+        return;
+      }
+
       const grid = document.getElementById('moviesGrid');
       const btn = document.getElementById('btnFetchMovies');
       const origText = btn.innerHTML;
@@ -1103,7 +1192,18 @@
           q
         });
 
-        const res = await fetch(`/api/sub-discover?${params.toString()}`);
+        const res = await fetch(`/api/sub-discover?${params.toString()}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (res.status === 401) {
+          showToast('⚠️ Unauthorized: Please log in at /sub first');
+          setTimeout(() => { window.location.replace('/sub?redirect=/subfetch'); }, 1200);
+          return;
+        }
+
         const data = await res.json();
 
         if (!res.ok || !data.success) {
@@ -1265,7 +1365,10 @@
           source: 'all'
         });
 
-        const res = await fetch(`/api/sub-autofetch?${queryParams.toString()}`);
+        const token = getAuthToken();
+        const res = await fetch(`/api/sub-autofetch?${queryParams.toString()}`, {
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        });
         const data = await res.json();
 
         const results = Array.isArray(data.results) && data.results.length > 0
@@ -1542,8 +1645,7 @@
 
     // ── Init on Page Load ──
     window.addEventListener('DOMContentLoaded', () => {
-      checkAuthUI();
-      loadDiscoveredMovies();
+      checkAuthAndInit();
 
       // Enter key on search input triggers fetch
       const qInput = document.getElementById('filterQuery');
