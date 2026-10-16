@@ -1302,6 +1302,145 @@
       box-shadow: 0 2px 8px rgba(232, 201, 122, 0.3);
     }
 
+    /* Auto-Fetch Sinhala Subtitle Bar & Badges */
+    .autofetch-card {
+      background: linear-gradient(135deg, rgba(232, 201, 122, 0.08), rgba(18, 24, 38, 0.7));
+      border: 1px solid rgba(232, 201, 122, 0.35);
+      border-radius: var(--radius-md);
+      padding: 1.1rem 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.2rem;
+      margin-bottom: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    .autofetch-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .autofetch-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(232, 201, 122, 0.15);
+      border: 1px solid rgba(232, 201, 122, 0.4);
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .autofetch-title {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #fff;
+    }
+
+    .autofetch-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .btn-autofetch {
+      background: linear-gradient(135deg, #E8C97A 0%, #C9A44E 100%);
+      color: #07090F;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      box-shadow: 0 4px 16px rgba(232, 201, 122, 0.35);
+      white-space: nowrap;
+    }
+
+    .btn-autofetch:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 22px rgba(232, 201, 122, 0.5);
+    }
+
+    .btn-autofetch:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-autofetch-sm {
+      background: rgba(232, 201, 122, 0.15);
+      border: 1px solid rgba(232, 201, 122, 0.4);
+      color: var(--gold);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn-autofetch-sm:hover {
+      background: rgba(232, 201, 122, 0.28);
+      color: #fff;
+    }
+
+    .btn-download-srt {
+      background: rgba(52, 152, 219, 0.18);
+      border: 1px solid rgba(52, 152, 219, 0.4);
+      color: #70A1FF;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn-download-srt:hover {
+      background: rgba(52, 152, 219, 0.35);
+      color: #fff;
+    }
+
+    .source-tag-baiscope {
+      background: rgba(46, 204, 113, 0.15);
+      border: 1px solid rgba(46, 204, 113, 0.4);
+      color: #2ECC71;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .source-tag-zoom {
+      background: rgba(52, 152, 219, 0.15);
+      border: 1px solid rgba(52, 152, 219, 0.4);
+      color: #3498DB;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
     .hacky-admin-badge {
       display: inline-flex;
       align-items: center;
@@ -1580,7 +1719,27 @@
       <div class="studio-card" id="uploadStepCard" style="display:none;">
         <div class="studio-card-title">
           <span class="step-badge">2</span>
-          <span>Upload Subtitle File (.srt, .vtt, .sub, .idx — Max 20MB)</span>
+          <span>Upload or Auto-Fetch Subtitle File</span>
+        </div>
+
+        <!-- 1-Click Auto-Fetch from Baiscope / Zoom -->
+        <div class="autofetch-card" id="autoFetchCard">
+          <div class="autofetch-info">
+            <span class="autofetch-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+            <div>
+              <div class="autofetch-title">Auto-Fetch Sinhala Subtitle from Web</div>
+              <div class="autofetch-sub">Searches Baiscope.lk &amp; Zoom.lk, extracts the ZIP/RAR in memory, and selects the correct Sinhala .srt</div>
+            </div>
+          </div>
+          <button type="button" class="btn-autofetch" id="btnAutoFetchSub" onclick="triggerAutoFetchSub()">
+            <i class="fa-solid fa-cloud-arrow-down"></i> <span>Auto-Find &amp; Select SRT</span>
+          </button>
+        </div>
+
+        <div style="display:flex;align-items:center;margin:1rem 0;color:var(--text-muted);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;">
+          <div style="flex:1;height:1px;background:var(--border);"></div>
+          <span style="padding:0 12px;">OR MANUAL UPLOAD</span>
+          <div style="flex:1;height:1px;background:var(--border);"></div>
         </div>
 
         <div id="uploadDropZone" class="upload-zone" onclick="document.getElementById('subFileInput').click()">
@@ -1599,11 +1758,19 @@
           <div class="file-meta">
             <span id="fileBadge" class="file-ext-badge">SRT</span>
             <div>
-              <div id="fileName" class="file-name">filename.srt</div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span id="fileName" class="file-name">filename.srt</span>
+                <span id="fileSourceBadge" style="display:none;"></span>
+              </div>
               <div id="fileSize" class="file-size">0 KB</div>
             </div>
           </div>
-          <button type="button" class="btn-secondary" onclick="clearSelectedFile()">Change File</button>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <button type="button" id="btnDownloadExtracted" class="btn-download-srt" style="display:none;" onclick="downloadExtractedSrt()" title="Download this .srt file to your device">
+              <i class="fa-solid fa-download"></i> <span>Download .srt</span>
+            </button>
+            <button type="button" class="btn-secondary" onclick="clearSelectedFile()">Change File</button>
+          </div>
         </div>
 
         <!-- Real-Time Progress Bar -->
@@ -1978,8 +2145,12 @@
         } else {
           banner.className = 'status-banner not-exists';
           titleEl.innerHTML = '⚠️ No Sinhala Subtitle Yet';
-          subEl.textContent = 'Be the first to upload a Sinhala subtitle for this title!';
-          actionWrap.innerHTML = '';
+          subEl.textContent = 'Auto-fetch from web or upload your own file!';
+          actionWrap.innerHTML = `
+            <button type="button" class="btn-autofetch-sm" onclick="triggerAutoFetchSub()">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Fetch Sub
+            </button>
+          `;
         }
       } catch (err) {
         titleEl.textContent = 'Status check failed';
@@ -2039,10 +2210,112 @@
 
     function clearSelectedFile() {
       selectedFile = null;
+      lastExtractedSrt = null;
       document.getElementById('subFileInput').value = '';
       document.getElementById('uploadDropZone').style.display = 'block';
       document.getElementById('filePreviewBox').style.display = 'none';
       document.getElementById('startUploadBtn').style.display = 'none';
+      const badge = document.getElementById('fileSourceBadge');
+      if (badge) badge.style.display = 'none';
+      const dlBtn = document.getElementById('btnDownloadExtracted');
+      if (dlBtn) dlBtn.style.display = 'none';
+    }
+
+    // ── Auto-Fetch Sinhala Subtitle from Baiscope / Zoom ─────────────────────
+    let lastExtractedSrt = null;
+
+    async function triggerAutoFetchSub() {
+      if (!selectedTitle) {
+        showToast('Please search and select a movie or TV series first.');
+        return;
+      }
+
+      const btn = document.getElementById('btnAutoFetchSub');
+      const origText = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Searching Web…</span>';
+      }
+
+      const titleName = selectedTitle.title || selectedTitle.name || '';
+      const isTv = selectedTitle.media_type === 'tv';
+      const season = isTv ? document.getElementById('tvSeasonInput').value : 1;
+      const episode = isTv ? document.getElementById('tvEpisodeInput').value : 1;
+
+      showToast(`🔍 Searching Baiscope & Zoom for "${titleName}"...`);
+
+      try {
+        const queryParams = new URLSearchParams({
+          q: titleName,
+          tmdbId: selectedTitle.id,
+          type: selectedTitle.media_type || 'movie',
+          season,
+          episode
+        });
+
+        const res = await fetch(`/api/sub-autofetch?${queryParams.toString()}`);
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Failed to search subtitles');
+        }
+
+        if (!data.found || !data.srt) {
+          showToast(`ℹ️ No subtitle found on Baiscope or Zoom for "${titleName}".`);
+          return;
+        }
+
+        // Create Virtual File from extracted SRT
+        const rawFileName = (data.srt.filename || `${titleName}.srt`).split('/').pop().split('\\').pop();
+        const blob = new Blob([data.srt.content], { type: 'text/plain;charset=utf-8' });
+        const virtualFile = new File([blob], rawFileName, { type: 'text/plain' });
+
+        lastExtractedSrt = {
+          blob,
+          filename: rawFileName,
+          source: data.source,
+          lineCount: data.srt.lineCount
+        };
+
+        // Process file into preview
+        processFile(virtualFile);
+
+        // Update Source badge & download button
+        const sourceBadge = document.getElementById('fileSourceBadge');
+        if (sourceBadge) {
+          const isBaiscope = (data.source || '').includes('baiscope');
+          sourceBadge.className = isBaiscope ? 'source-tag-baiscope' : 'source-tag-zoom';
+          sourceBadge.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${data.source}`;
+          sourceBadge.style.display = 'inline-flex';
+        }
+
+        const dlBtn = document.getElementById('btnDownloadExtracted');
+        if (dlBtn) dlBtn.style.display = 'inline-flex';
+
+        showToast(`🎉 Found on ${data.source}! Selected ${data.srt.lineCount || ''} lines.`);
+
+      } catch (err) {
+        console.error('[sub-autofetch] Error:', err);
+        showToast(`❌ Auto-fetch error: ${err.message}`);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origText;
+        }
+      }
+    }
+
+    function downloadExtractedSrt() {
+      if (!selectedFile) return;
+      const url = URL.createObjectURL(selectedFile);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = selectedFile.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`📥 Downloaded ${selectedFile.name}`);
     }
 
     // ── Direct R2 Presigned / Streaming Upload with Real Progress ────────────
