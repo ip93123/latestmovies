@@ -2223,12 +2223,12 @@
             <span class="autofetch-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
             <div>
               <div class="autofetch-title">Auto-Fetch Sinhala Subtitle from Web</div>
-              <div class="autofetch-sub">Searches Baiscope.lk, Zoom.lk, Subz.lk &amp; Cineru.lk concurrently, auto-extracts ZIP archives, and lets you choose your preferred release</div>
+              <div class="autofetch-sub">Searches Baiscope.lk, Zoom.lk &amp; Subz.lk concurrently, auto-extracts ZIP archives, and lets you choose your preferred release</div>
             </div>
           </div>
           <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
             <button type="button" class="btn-autofetch" id="btnAutoFetchSub" onclick="triggerAutoFetchSub()">
-              <i class="fa-solid fa-cloud-arrow-down"></i> <span>Search All 4 Sources</span>
+              <i class="fa-solid fa-cloud-arrow-down"></i> <span>Search All 3 Sources</span>
             </button>
             <div style="display:flex;align-items:center;gap:10px;font-size:0.75rem;color:var(--text-muted);flex-wrap:wrap;">
               <span>Direct Browser Search:</span>
@@ -2245,7 +2245,7 @@
               <i class="fa-solid fa-layer-group" style="color:var(--gold);"></i>
               <span id="multiSourceCount">Available Sinhala Subtitles</span>
             </div>
-            <div class="multi-source-sub">Compare releases found across Baiscope, Zoom, Subz &amp; Cineru. Click "Select" to load into player or download the .srt directly:</div>
+            <div class="multi-source-sub">Compare releases found across Baiscope, Zoom &amp; Subz. Click "Select" to load into player or download the .srt directly:</div>
           </div>
           <div id="multiSourceList" class="multi-source-grid"></div>
 
@@ -2278,7 +2278,7 @@
                 <span>No Sinhala Subtitle Found on Baiscope / Zoom / Subz</span>
               </div>
               <div class="no-subs-message" id="noSubsMessage">
-                Searched Baiscope.lk, Zoom.lk, Subz.lk and Cineru.lk, but no matching Sinhala subtitle was returned by automated cloud search.
+                Searched Baiscope.lk, Zoom.lk and Subz.lk, but no matching Sinhala subtitle was returned by automated cloud search.
               </div>
 
               <!-- Cineru Direct Browser Action Card (Cloudflare Bypass) -->
@@ -2796,7 +2796,7 @@
         } else {
           banner.className = 'status-banner not-exists';
           titleEl.innerHTML = '⚠️ No Sinhala Subtitle Yet';
-          subEl.textContent = autoFetchWeb ? 'Auto-searching Baiscope.lk, Zoom.lk, Subz.lk & Cineru.lk...' : 'Auto-fetch from web or upload your own file!';
+          subEl.textContent = autoFetchWeb ? 'Auto-searching Baiscope.lk, Zoom.lk & Subz.lk...' : 'Auto-fetch from web or upload your own file!';
           actionWrap.innerHTML = '';
 
           // Auto-trigger web subtitle search immediately
@@ -3353,7 +3353,7 @@
       const season = isTv ? document.getElementById('tvSeasonInput').value : 1;
       const episode = isTv ? document.getElementById('tvEpisodeInput').value : 1;
 
-      showToast(`🔍 Searching Baiscope, Zoom, Subz & Cineru for "${titleName}"${releaseYear ? ` (${releaseYear})` : ''}...`);
+      showToast(`🔍 Searching Baiscope, Zoom & Subz for "${titleName}"${releaseYear ? ` (${releaseYear})` : ''}...`);
 
       try {
         const queryParams = new URLSearchParams({
@@ -3386,7 +3386,7 @@
           if (noSubsBox) {
             const noSubsMsg = document.getElementById('noSubsMessage');
             if (noSubsMsg) {
-              noSubsMsg.innerHTML = `Automated search completed for <strong>"${escapeJs(titleName)}"</strong>${releaseYear ? ` (${releaseYear})` : ''} across Baiscope, Zoom, Subz &amp; Cineru.`;
+              noSubsMsg.innerHTML = `Automated search completed for <strong>"${escapeJs(titleName)}"</strong>${releaseYear ? ` (${releaseYear})` : ''} across Baiscope, Zoom &amp; Subz.`;
             }
             const cineruLink = document.getElementById('btnOpenCineruDirect');
             const cineruText = document.getElementById('btnOpenCineruText');

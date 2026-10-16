@@ -1644,7 +1644,7 @@
                 </div>
               ` : `
                 <div style="font-size:0.75rem;color:var(--text-muted);">
-                  Click "Hunt Sub" to search Baiscope, Zoom, Subz &amp; Cineru for this movie.
+                  Click "Hunt Sub" to search Baiscope, Zoom &amp; Subz for this movie.
                 </div>
               `}
             </div>
@@ -1698,7 +1698,7 @@
         if (results.length > 0) {
           showToast(`🎯 Found ${results.length} sub source${results.length > 1 ? 's' : ''} for "${movie.title}"`);
         } else {
-          showToast(`ℹ️ No sub found on Baiscope, Zoom, Subz or Cineru for "${movie.title}"${movieYear ? ` (${movieYear})` : ''}`);
+          showToast(`ℹ️ No sub found on Baiscope, Zoom or Subz for "${movie.title}"${movieYear ? ` (${movieYear})` : ''}`);
         }
 
       } catch (err) {
@@ -1998,7 +1998,7 @@
           if (list) {
             list.innerHTML = `
               <div style="font-size:0.75rem;color:var(--text-muted);">
-                Subtitle removed. Click "Hunt Sub" to search Baiscope, Zoom, Subz &amp; Cineru for this movie.
+                Subtitle removed. Click "Hunt Sub" to search Baiscope, Zoom &amp; Subz for this movie.
               </div>
             `;
           }

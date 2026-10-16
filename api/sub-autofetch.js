@@ -3,7 +3,6 @@ import {
   searchAndExtractBaiscope,
   searchAndExtractZoom,
   searchAndExtractSubz,
-  searchAndExtractCineru,
   searchAllSinhalaSubtitles
 } from '../lib/sub-scrapers.js';
 import { loadCatalogAsync, saveCatalog, verifyToken } from './sub-api.js';
@@ -37,7 +36,7 @@ export default async function handler(req, res) {
     season = 1,
     episode = 1,
     quality = '720p',
-    source = 'all', // 'all', 'baiscope', 'zoom', 'subz', 'cineru'
+    source = 'all', // 'all', 'baiscope', 'zoom', 'subz'
     save = false
   } = queryParams;
 
@@ -87,9 +86,6 @@ export default async function handler(req, res) {
       if (r) rawResults.push(r);
     } else if (source === 'subz') {
       const r = await searchAndExtractSubz(finalQuery, quality, finalYear);
-      if (r) rawResults.push(r);
-    } else if (source === 'cineru') {
-      const r = await searchAndExtractCineru(finalQuery, quality, finalYear);
       if (r) rawResults.push(r);
     } else {
       rawResults = await searchAllSinhalaSubtitles(finalQuery, quality, finalYear);
