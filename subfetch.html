@@ -599,6 +599,76 @@
       animation: pulseGlow 1.5s infinite;
     }
 
+    .btn-remove-sub-pill {
+      background: rgba(231, 76, 60, 0.15);
+      border: 1px solid rgba(231, 76, 60, 0.45);
+      color: #FF7675;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .btn-remove-sub-pill:hover {
+      background: #E74C3C;
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4);
+    }
+
+    .btn-remove-sub-cand {
+      background: rgba(231, 76, 60, 0.15);
+      border: 1px solid rgba(231, 76, 60, 0.45);
+      color: #FF7675;
+      padding: 6px 11px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .btn-remove-sub-cand:hover {
+      background: #E74C3C;
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(231, 76, 60, 0.4);
+    }
+
+    .btn-confirm-delete {
+      background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: inherit;
+      box-shadow: 0 2px 10px rgba(231, 76, 60, 0.35);
+      transition: all 0.2s ease;
+    }
+
+    .btn-confirm-delete:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(231, 76, 60, 0.5);
+    }
+
     /* ── Subtitle Drawer under movie ── */
     .movie-sub-drawer {
       padding: 14px;
@@ -1165,6 +1235,28 @@
     </div>
   </div>
 
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-backdrop" id="deleteConfirmModal" onclick="closeDeleteConfirmModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width:440px;">
+      <div class="modal-header">
+        <div class="modal-title" style="color:#FF7675;"><i class="fa-solid fa-triangle-exclamation"></i> Remove Subtitle</div>
+        <button type="button" class="modal-close" onclick="closeDeleteConfirmModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" style="padding:16px 20px;">
+        <p id="deleteConfirmDesc" style="font-size:0.9rem;color:#F1F5F9;line-height:1.5;">Are you sure you want to remove this Sinhala subtitle?</p>
+        <div style="font-size:0.78rem;color:var(--text-muted);margin-top:8px;">
+          This will immediately detach the subtitle from HackyMax player for all viewers.
+        </div>
+      </div>
+      <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:10px;">
+        <button type="button" class="btn-reset" onclick="closeDeleteConfirmModal()" style="padding:7px 14px;border-radius:6px;background:rgba(255,255,255,0.08);border:1px solid var(--border);color:#fff;cursor:pointer;">Cancel</button>
+        <button type="button" id="btnConfirmDelete" class="btn-confirm-delete" onclick="executeDeleteSubtitle()">
+          <i class="fa-solid fa-trash-can"></i> <span>Remove Subtitle</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   </div> <!-- /#subfetchApp -->
 
   <!-- Toast Notification -->
@@ -1174,6 +1266,27 @@
   </div>
 
   <script>
+    // ── Helper Utilities ──
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function escapeJs(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '\\r');
+    }
+
     // ── Global State ──
     let discoveredMovies = [];
     let movieHuntCache = {}; // { [tmdbId]: { loading: boolean, results: [...] } }
@@ -1460,10 +1573,14 @@
             <div class="movie-info">
               <div>
                 <div class="movie-title-row">
-                  <div class="movie-title" title="${m.title}">${m.title}</div>
-                  <a href="/?m=${m.id}&play=1" target="_blank" class="btn-movie-test-play" title="Test Play on HackyMax Player">
-                    <i class="fa-solid fa-play"></i> <span>Test Play</span>
-                  </a>
+                  <div class="movie-title" title="${escapeHtml(m.title)}">${escapeHtml(m.title)}</div>
+                  <div id="movieHeaderActions_${m.id}" style="display:flex;align-items:center;gap:6px;">
+                    ${m.hasSubtitle ? `
+                      <a href="/?m=${m.id}&play=1" target="_blank" class="btn-movie-test-play" title="Test Play on HackyMax Player">
+                        <i class="fa-solid fa-play"></i> <span>Test Play</span>
+                      </a>
+                    ` : ''}
+                  </div>
                 </div>
                 <div class="movie-meta-tags">
                   <span class="meta-tag"><i class="fa-regular fa-calendar"></i> ${m.year || '2026'}</span>
@@ -1476,11 +1593,14 @@
                 ${m.hasSubtitle ? `
                   <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px;">
                     <div class="sub-status-pill live">
-                      <i class="fa-solid fa-circle-check"></i> Subtitle Active (Catalog)
+                      <i class="fa-solid fa-circle-check"></i> Subtitle Active (${escapeHtml(m.existingSub?.source || 'Saved to R2')})
                     </div>
                     <a href="/?m=${m.id}&play=1" target="_blank" class="btn-test-play-badge" title="Test Play with subtitle in HackyMax Player">
                       <i class="fa-solid fa-play"></i> <span>Test Play</span>
                     </a>
+                    <button type="button" class="btn-remove-sub-pill" onclick="promptDeleteSubtitle(${m.id}, '${escapeJs(m.title)}')" title="Remove this subtitle from stream">
+                      <i class="fa-solid fa-trash-can"></i> <span>Remove Sub</span>
+                    </button>
                   </div>
                 ` : `
                   <div class="sub-status-pill missing">
@@ -1502,14 +1622,19 @@
 
             <div class="candidates-list" id="candidatesList_${m.id}">
               ${m.hasSubtitle ? `
-                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(46,204,113,0.08);border:1px solid rgba(46,204,113,0.3);border-radius:8px;padding:8px 10px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(46,204,113,0.08);border:1px solid rgba(46,204,113,0.3);border-radius:8px;padding:8px 10px;flex-wrap:wrap;">
                   <div style="font-size:0.75rem;color:var(--text);display:flex;align-items:center;gap:6px;">
                     <i class="fa-solid fa-circle-check" style="color:var(--green);"></i>
-                    <span>Live on Stream: <strong>${m.existingSub?.source || 'R2'}</strong> (${m.existingSub?.format || 'srt'})</span>
+                    <span>Live on Stream: <strong>${escapeHtml(m.existingSub?.source || 'R2')}</strong> (${escapeHtml(m.existingSub?.format || 'srt')})</span>
                   </div>
-                  <a href="/?m=${m.id}&play=1" target="_blank" class="btn-test-play-badge" title="Test Play with subtitle in HackyMax Player">
-                    <i class="fa-solid fa-play"></i> <span>Test Play</span>
-                  </a>
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    <a href="/?m=${m.id}&play=1" target="_blank" class="btn-test-play-badge" title="Test Play with subtitle in HackyMax Player">
+                      <i class="fa-solid fa-play"></i> <span>Test Play</span>
+                    </a>
+                    <button type="button" class="btn-remove-sub-pill" onclick="promptDeleteSubtitle(${m.id}, '${escapeJs(m.title)}')" title="Remove this subtitle">
+                      <i class="fa-solid fa-trash-can"></i> <span>Remove</span>
+                    </button>
+                  </div>
                 </div>
               ` : `
                 <div style="font-size:0.75rem;color:var(--text-muted);">
@@ -1646,9 +1771,12 @@
             <button type="button" class="btn-add-r2" id="btnAddR2_${tmdbId}_${idx}" onclick="saveCandidateToR2(${tmdbId}, ${idx})">
               <i class="fa-solid fa-cloud-arrow-up"></i> <span>1-Click Upload</span>
             </button>
-            <a href="/?m=${tmdbId}&play=1" target="_blank" class="btn-test-play-cand" id="btnTestPlay_${tmdbId}_${idx}" title="Test Play on HackyMax Player">
+            <a href="/?m=${tmdbId}&play=1" target="_blank" class="btn-test-play-cand" id="btnTestPlay_${tmdbId}_${idx}" style="display:none;" title="Test Play on HackyMax Player">
               <i class="fa-solid fa-play"></i> <span>Test Play</span>
             </a>
+            <button type="button" class="btn-remove-sub-cand" id="btnRemoveCand_${tmdbId}_${idx}" style="display:none;" onclick="promptDeleteSubtitle(${tmdbId})" title="Remove this subtitle">
+              <i class="fa-solid fa-trash-can"></i> <span>Remove</span>
+            </button>
             <button type="button" class="btn-cand-tool" onclick="previewCandidate(${tmdbId}, ${idx})" title="Preview Cues">
               <i class="fa-solid fa-eye"></i>
             </button>
@@ -1706,9 +1834,16 @@
           btn.innerHTML = '<i class="fa-solid fa-check-double"></i> <span>Live on Stream</span>';
         }
 
+        // Show Test Play & Remove button on this candidate card
         const testBtn = document.getElementById(`btnTestPlay_${tmdbId}_${candIndex}`);
         if (testBtn) {
+          testBtn.style.display = 'inline-flex';
           testBtn.classList.add('highlight-pulse');
+        }
+
+        const remBtn = document.getElementById(`btnRemoveCand_${tmdbId}_${candIndex}`);
+        if (remBtn) {
+          remBtn.style.display = 'inline-flex';
         }
 
         delete userSelectedSubtitles[tmdbId];
@@ -1717,6 +1852,16 @@
 
         const card = document.getElementById(`movieCard_${tmdbId}`);
         if (card) card.classList.add('has-active-sub');
+
+        // Add Test Play to header
+        const headerActions = document.getElementById(`movieHeaderActions_${tmdbId}`);
+        if (headerActions) {
+          headerActions.innerHTML = `
+            <a href="/?m=${tmdbId}&play=1" target="_blank" class="btn-movie-test-play" title="Test Play on HackyMax Player">
+              <i class="fa-solid fa-play"></i> <span>Test Play</span>
+            </a>
+          `;
+        }
 
         const statusContainer = document.getElementById(`subStatusContainer_${tmdbId}`);
         if (statusContainer) {
@@ -1728,11 +1873,15 @@
               <a href="/?m=${tmdbId}&play=1" target="_blank" class="btn-test-play-badge" title="Test Play with subtitle in HackyMax Player">
                 <i class="fa-solid fa-play"></i> <span>Test Play</span>
               </a>
+              <button type="button" class="btn-remove-sub-pill" onclick="promptDeleteSubtitle(${tmdbId}, '${escapeJs(movie.title)}')" title="Remove this subtitle from stream">
+                <i class="fa-solid fa-trash-can"></i> <span>Remove Sub</span>
+              </button>
             </div>
           `;
         }
 
         movie.hasSubtitle = true;
+        movie.existingSub = { source: item.source, format: 'srt' };
         updateStats();
         showToast(`🎉 Subtitle attached for "${movie.title}" via ${item.source}!`);
 
@@ -1743,6 +1892,118 @@
           btn.innerHTML = origText;
         }
         showToast(`❌ Error: ${err.message}`);
+      }
+    }
+
+    // ── Delete Subtitle Dialog & Execution ──
+    let pendingDeleteTmdbId = null;
+    let pendingDeleteTitle = '';
+
+    function promptDeleteSubtitle(tmdbId, title) {
+      const movie = discoveredMovies.find(m => m.id === tmdbId);
+      pendingDeleteTmdbId = tmdbId;
+      pendingDeleteTitle = title || (movie ? movie.title : `Movie ${tmdbId}`);
+      const descEl = document.getElementById('deleteConfirmDesc');
+      if (descEl) {
+        descEl.innerHTML = `Are you sure you want to remove the Sinhala subtitle for <strong>${escapeHtml(pendingDeleteTitle)}</strong>?<br><span style="color:var(--text-muted);font-size:0.82rem;margin-top:6px;display:inline-block;">This will immediately detach it from HackyMax player for all viewers.</span>`;
+      }
+      const modal = document.getElementById('deleteConfirmModal');
+      if (modal) modal.classList.add('active');
+    }
+
+    function closeDeleteConfirmModal(e) {
+      if (!e || e.target.id === 'deleteConfirmModal' || e.target.closest('.modal-close') || e.target.classList.contains('btn-reset')) {
+        pendingDeleteTmdbId = null;
+        pendingDeleteTitle = '';
+        const modal = document.getElementById('deleteConfirmModal');
+        if (modal) modal.classList.remove('active');
+      }
+    }
+
+    async function executeDeleteSubtitle() {
+      if (!pendingDeleteTmdbId) return;
+      const tmdbId = pendingDeleteTmdbId;
+      const token = getAuthToken();
+      if (!token) {
+        showToast('Please sign in to perform this action');
+        closeDeleteConfirmModal({ target: { id: 'deleteConfirmModal' } });
+        return;
+      }
+
+      const btn = document.getElementById('btnConfirmDelete');
+      const origText = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right:6px;"></i> Removing…';
+      }
+
+      try {
+        const res = await fetch('/api/sub-delete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ key: String(tmdbId), tmdbId: String(tmdbId) })
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Failed to remove subtitle');
+        }
+
+        // Subtitle removed successfully
+        const movie = discoveredMovies.find(m => m.id === tmdbId);
+        if (movie) {
+          movie.hasSubtitle = false;
+          delete movie.existingSub;
+        }
+
+        // Update card header (remove Test Play button)
+        const headerActions = document.getElementById(`movieHeaderActions_${tmdbId}`);
+        if (headerActions) headerActions.innerHTML = '';
+
+        // Update status container (back to Missing Subtitle)
+        const statusContainer = document.getElementById(`subStatusContainer_${tmdbId}`);
+        if (statusContainer) {
+          statusContainer.innerHTML = `
+            <div class="sub-status-pill missing">
+              <i class="fa-solid fa-triangle-exclamation"></i> Missing Subtitle
+            </div>
+          `;
+        }
+
+        // Remove active class from movie card
+        const card = document.getElementById(`movieCard_${tmdbId}`);
+        if (card) card.classList.remove('has-active-sub');
+
+        // Reset candidates drawer or candidate buttons if present
+        const candidates = movieHuntCache[tmdbId];
+        if (candidates && candidates.length > 0) {
+          renderCandidateResults(tmdbId, candidates);
+        } else {
+          const list = document.getElementById(`candidatesList_${tmdbId}`);
+          if (list) {
+            list.innerHTML = `
+              <div style="font-size:0.75rem;color:var(--text-muted);">
+                Subtitle removed. Click "Hunt Sub" to search Baiscope, Zoom &amp; Subz for this movie.
+              </div>
+            `;
+          }
+        }
+
+        updateStats();
+        showToast(`🗑️ Subtitle removed successfully!`);
+        closeDeleteConfirmModal({ target: { id: 'deleteConfirmModal' } });
+
+      } catch (err) {
+        console.error('[subfetch] Delete error:', err);
+        showToast(`❌ Error: ${err.message}`);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origText;
+        }
       }
     }
 
