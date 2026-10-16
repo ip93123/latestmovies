@@ -886,6 +886,10 @@
       border-color: rgba(10, 200, 85, 0.35);
     }
 
+    .trailer-meta .card-rt-badge {
+      margin-left: 0;
+    }
+
     .card-rt-badge .rt-icon {
       font-size: 0.72rem;
       line-height: 1;
@@ -10606,7 +10610,7 @@
       <div class="hero-meta">
         <span id="heroYear"></span><span id="heroGenre"></span><span id="heroRuntime"></span>
         <div class="rating-badge imdb-badge" id="heroImdb">⭐ —</div>
-        <div class="rating-badge rt-badge" id="heroRt">🍅 —</div>
+        <div class="rating-badge rt-badge" id="heroRt" style="display:none;"></div>
       </div>
       <p class="hero-plot" id="heroPlot"></p>
       <div class="hero-streaming" id="heroStreaming">
@@ -11705,6 +11709,20 @@
       document.getElementById('heroYear').textContent = (m.release_date || m.first_air_date || '').slice(0, 4);
       document.getElementById('heroPlot').textContent = m.overview || '';
       document.getElementById('heroImdb').textContent = `⭐ ${m.vote_average ? m.vote_average.toFixed(1) : '—'}`;
+
+      const heroRt = document.getElementById('heroRt');
+      if (heroRt) {
+        heroRt.style.display = 'none';
+        fetchRtRating(m, type).then(rt => {
+          if (rt && rt.score) {
+            const scoreNum = parseInt(rt.score, 10);
+            const isRotten = rt.sentiment === 'NEGATIVE' || (scoreNum && scoreNum < 60);
+            heroRt.className = `rating-badge rt-badge ${isRotten ? 'rt-rotten' : 'rt-fresh'}`;
+            heroRt.innerHTML = `<span class="rt-icon" style="margin-right:4px;display:inline-flex;align-items:center;">${isRotten ? RT_MODAL_ROTTEN_SVG : RT_MODAL_FRESH_SVG}</span> ${rt.score}`;
+            heroRt.style.display = 'inline-flex';
+          }
+        });
+      }
 
       // Streaming
       const streamWrap = document.getElementById('heroStreaming');
@@ -13048,6 +13066,7 @@
             <span class="${labelClass}">${labelText}</span>
             <span class="trailer-year">${year}</span>
             ${rating ? `<span class="trailer-rating">⭐ ${rating}</span>` : ''}
+            <span class="card-rt-badge" data-rt-id="${m.id}" style="display:none;"></span>
           </div>
         </div>`;
 
@@ -13123,6 +13142,7 @@
         const card = _buildTrailerCard(m, m._trailerKey);
         row.appendChild(card);
       });
+      hydrateSectionRtRatings(filtered);
 
       gsap.fromTo(row.children,
         { opacity: 0, y: 30, scale: 0.93 },
