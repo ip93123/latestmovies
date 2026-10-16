@@ -13,6 +13,8 @@
   <link rel="icon" type="image/png" sizes="192x192" href="logo.png?v=3">
   <link rel="apple-touch-icon" sizes="180x180" href="logo.png?v=3">
   <link rel="icon" type="image/png" sizes="32x32" href="logo.png?v=3">
+  <link rel="preconnect" href="https://tmdb-img-prox.hackyirl.workers.dev" crossorigin>
+  <link rel="dns-prefetch" href="https://tmdb-img-prox.hackyirl.workers.dev">
   <link rel="preconnect" href="https://image.tmdb.org" crossorigin>
   <link rel="dns-prefetch" href="https://image.tmdb.org">
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
@@ -10505,8 +10507,8 @@
       }
     }
 
-    // Official TMDB Global Edge CDN (Anycast PoPs worldwide with native HTTP/2 & HTTP/3)
-    const TMDB_CDN_IMG = 'https://image.tmdb.org/t/p/';
+    // High-performance Cloudflare Edge Worker Proxy for TMDB Media (Unlimited Free Bandwidth & Worldwide Edge Caching)
+    const TMDB_CDN_IMG = 'https://tmdb-img-prox.hackyirl.workers.dev/t/p/';
     const IMG = TMDB_CDN_IMG;
     const COUNTRY = 'US';
 
@@ -10800,12 +10802,14 @@
       return `${IMG}${s}${cleanPath}`;
     }
 
-    // Direct error handler if any image fails to load
+    // Direct error handler if any image fails to load (with failover to upstream TMDB)
     window.handleImgError = function(img) {
       if (!img || img._hasFailedOver) return;
       img._hasFailedOver = true;
-      if (img.src && img.src.includes('/img/')) {
-        img.src = img.src.replace(/^.*\/img\//, TMDB_CDN_IMG);
+      if (img.src && img.src.includes('tmdb-img-prox.hackyirl.workers.dev')) {
+        img.src = img.src.replace('https://tmdb-img-prox.hackyirl.workers.dev/t/p/', 'https://image.tmdb.org/t/p/');
+      } else if (img.src && img.src.includes('/img/')) {
+        img.src = img.src.replace(/^.*\/img\//, 'https://image.tmdb.org/t/p/');
       }
     };
 
