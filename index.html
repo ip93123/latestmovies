@@ -847,7 +847,53 @@
     .rt-badge {
       background: rgba(250, 50, 10, 0.15);
       border: 1px solid rgba(250, 50, 10, 0.3);
-      color: var(--tomato)
+      color: var(--tomato);
+    }
+
+    .rating-badge.rt-badge.rt-rotten {
+      background: rgba(142, 197, 73, 0.15);
+      border-color: rgba(142, 197, 73, 0.35);
+      color: #8EC549;
+    }
+
+    /* Card Rotten Tomatoes Score Badge (Home Page & Trending) */
+    .card-rt-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #FA320A;
+      background: rgba(250, 50, 10, 0.12);
+      border: 1px solid rgba(250, 50, 10, 0.3);
+      padding: 1px 6px;
+      border-radius: 999px;
+      vertical-align: middle;
+      margin-left: 6px;
+      line-height: 1.2;
+      transition: opacity 0.25s ease;
+    }
+
+    .card-rt-badge.rt-fresh {
+      color: #FA320A;
+      background: rgba(250, 50, 10, 0.14);
+      border-color: rgba(250, 50, 10, 0.35);
+    }
+
+    .card-rt-badge.rt-rotten {
+      color: #8EC549;
+      background: rgba(142, 197, 73, 0.14);
+      border-color: rgba(142, 197, 73, 0.35);
+    }
+
+    .card-rt-badge .rt-icon {
+      font-size: 0.72rem;
+      line-height: 1;
+    }
+
+    .card-rt-badge .rt-val {
+      font-size: 0.68rem;
+      letter-spacing: 0.2px;
     }
 
     .hero-plot {
@@ -11317,7 +11363,7 @@
     </div>
     <div class="card-info">
       <div class="card-title">${title}</div>
-      <div class="card-sub">${year || '—'}</div>
+      <div class="card-sub"><span>${year || '—'}</span><span class="card-rt-badge" id="card-rt-${item.id}" style="display:none;"></span></div>
       <div class="card-stream-pills">${streamPills}</div>
     </div>
   </div>`;
@@ -11351,7 +11397,7 @@
           </div>` : ''}
       </div>
       <div class="trending-info">
-        ${metaParts ? `<div class="trending-meta">${metaParts}</div>` : ''}
+        ${metaParts ? `<div class="trending-meta"><span>${metaParts}</span><span class="card-rt-badge" id="card-rt-${item.id}" style="display:none;"></span></div>` : ''}
         <div class="trending-title">${title}</div>
         <div class="trending-genres">
           ${genres.map(g => `<span class="trending-genre-tag">${g}</span>`).join('')}
@@ -11751,6 +11797,128 @@
         .catch(() => { /* No streams available — keep Play button hidden */ });
     }
 
+    // ── Rotten Tomatoes Ratings Cache & Fetcher ───────────────────────
+    const RT_CACHE_KEY = 'hm_rt_ratings_cache_v1';
+    let _rtCache = null;
+    function getRtCache() {
+      if (_rtCache) return _rtCache;
+      try {
+        _rtCache = JSON.parse(localStorage.getItem(RT_CACHE_KEY) || '{}');
+      } catch (_) {
+        _rtCache = {};
+      }
+      return _rtCache;
+    }
+
+    function saveRtCache(id, data) {
+      try {
+        const cache = getRtCache();
+        cache[String(id)] = {
+          score: data.score,
+          sentiment: data.sentiment,
+          ts: Date.now()
+        };
+        const keys = Object.keys(cache);
+        if (keys.length > 500) {
+          keys.slice(0, 100).forEach(k => delete cache[k]);
+        }
+        localStorage.setItem(RT_CACHE_KEY, JSON.stringify(cache));
+      } catch (_) {}
+    }
+
+    async function fetchRtRating(item, type = 'movie') {
+      if (!item || !item.id) return null;
+      const id = String(item.id);
+      const cache = getRtCache();
+      const existing = cache[id];
+      if (existing && existing.score && (Date.now() - existing.ts < 7 * 86400 * 1000)) {
+        return existing;
+      }
+
+      const title = item.title || item.name || '';
+      const year = (item.release_date || item.first_air_date || '').slice(0, 4);
+      if (!title) return null;
+
+      try {
+        const res = await fetch(`/api/omdb?title=${encodeURIComponent(title)}&year=${encodeURIComponent(year)}&type=${encodeURIComponent(type)}`);
+        if (!res.ok) return null;
+        const json = await res.json();
+        if (json && (json.rottenTomatoes || json.rottenTomatoesScore)) {
+          const score = json.rottenTomatoes || `${json.rottenTomatoesScore}%`;
+          const scoreNum = parseInt(score, 10);
+          const sentiment = json.rottenTomatoesSentiment || (scoreNum >= 60 ? 'POSITIVE' : 'NEGATIVE');
+          const result = { score, sentiment, ts: Date.now() };
+          saveRtCache(id, result);
+          return result;
+        }
+      } catch (_) {}
+      return null;
+    }
+
+    function applyRtBadgeToEl(el, rtData) {
+      if (!el || !rtData || !rtData.score) return;
+      const scoreNum = parseInt(rtData.score, 10);
+      const isRotten = rtData.sentiment === 'NEGATIVE' || (scoreNum && scoreNum < 60);
+      const icon = isRotten ? '🟢' : '🍅';
+      el.className = `card-rt-badge ${isRotten ? 'rt-rotten' : 'rt-fresh'}`;
+      el.innerHTML = `<span class="rt-icon">${icon}</span><span class="rt-val">${rtData.score}</span>`;
+      el.style.display = 'inline-flex';
+    }
+
+    async function hydrateSectionRtRatings(items, type = 'movie') {
+      if (!items || !items.length) return;
+      const cache = getRtCache();
+      for (const item of items) {
+        if (!item || !item.id) continue;
+        const id = item.id;
+        const pill = document.getElementById(`card-rt-${id}`);
+        if (!pill) continue;
+
+        const cached = cache[String(id)];
+        if (cached && cached.score) {
+          applyRtBadgeToEl(pill, cached);
+          continue;
+        }
+
+        const itemType = item._type || type;
+        fetchRtRating(item, itemType).then(data => {
+          if (data) {
+            const el = document.getElementById(`card-rt-${id}`);
+            if (el) applyRtBadgeToEl(el, data);
+          }
+        });
+      }
+    }
+
+    function updateModalRtBadge(item, type) {
+      if (!item || !item.id) return;
+      const id = String(item.id);
+      const cache = getRtCache();
+      const cached = cache[id];
+      const rtEl = document.getElementById('modal-rt');
+      const scoreEl = document.getElementById('modalRtScore');
+
+      function render(data) {
+        if (!rtEl || !scoreEl) return;
+        scoreEl.textContent = data.score;
+        const scoreNum = parseInt(data.score, 10);
+        const isRotten = data.sentiment === 'NEGATIVE' || (scoreNum && scoreNum < 60);
+        rtEl.className = `rating-badge rt-badge ${isRotten ? 'rt-rotten' : 'rt-fresh'}`;
+        const iconEl = rtEl.querySelector('.rt-icon');
+        if (iconEl) iconEl.textContent = isRotten ? '🟢' : '🍅';
+        rtEl.style.display = 'inline-flex';
+      }
+
+      if (cached && cached.score) {
+        render(cached);
+        return;
+      }
+
+      fetchRtRating(item, type).then(data => {
+        if (data && data.score) render(data);
+      });
+    }
+
     // TRENDING
     async function loadTrending() {
       const isTV = window.DEVICE && window.DEVICE.isTV;
@@ -11766,6 +11934,7 @@
           if (Array.isArray(cachedAll) && cachedAll.length) {
             row.innerHTML = cachedAll.slice(0, cardLimit).map((item, i) => buildTrendingCard(item, i + 1, item._type || (item.title ? 'movie' : 'tv'), null)).join('');
             addCardListeners(row, '.trending-card');
+            hydrateSectionRtRatings(cachedAll.slice(0, cardLimit));
             hasCached = true;
           }
         }
@@ -11809,6 +11978,7 @@
         );
       }
       addCardListeners(row, '.trending-card');
+      hydrateSectionRtRatings(all);
       return all;
     }
 
@@ -12768,6 +12938,7 @@
       addCardListeners(grid, '.movie-card');
       const cards = grid.querySelectorAll('.movie-card');
       buildFilterBar('movieFilterBar', cards, 'all', (id) => { activeMovieFilter = id; filterCards('moviesGrid', id); });
+      hydrateSectionRtRatings(movies.slice(0, 20), 'movie');
 
       return movies;
     }
@@ -12810,6 +12981,7 @@
       addCardListeners(grid, '.movie-card');
       const cards = grid.querySelectorAll('.movie-card');
       buildFilterBar('tvFilterBar', cards, 'all', (id) => { activeTVFilter = id; filterCards('tvGrid', id); });
+      hydrateSectionRtRatings(showDetails.slice(0, 20), 'tv');
 
     }
 
@@ -13655,8 +13827,10 @@
 
         document.getElementById('modalRatings').innerHTML = `
       <div class="rating-badge imdb-badge" id="modal-imdb"><i class="fa-solid fa-star" style="color:#F5C518;margin-right:4px;"></i> ${details.vote_average ? details.vote_average.toFixed(1) : '—'} TMDB</div>
+      <div class="rating-badge rt-badge" id="modal-rt" style="display:none;"><span class="rt-icon" style="font-size:0.95rem;margin-right:5px;">🍅</span> <span id="modalRtScore"></span> Rotten Tomatoes</div>
       ${trailerBtn}
     `;
+        updateModalRtBadge(details, type);
         document.getElementById('modalPlot').textContent = details.overview || 'No description available.';
 
         // Episode info panel (TV shows only)
