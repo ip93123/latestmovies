@@ -515,7 +515,8 @@ async function handleUpload(req, res) {
       const epNum = Number(ep.episode);
       if (!epNum || !ep.fileBase64) continue;
 
-      const subKey = `${tmdbId}_S${season}_E${epNum}`;
+      const epSeason = Number(ep.season || season || 1);
+      const subKey = `${tmdbId}_S${epSeason}_E${epNum}`;
       const targetFile = `${subKey}.srt`;
       const fileBuffer = Buffer.from(ep.fileBase64, 'base64');
       const fileKey = `subtitles/${targetFile}`;
@@ -531,7 +532,7 @@ async function handleUpload(req, res) {
           if (ok) {
             publicUrl = r2Config.publicDomain
               ? `${r2Config.publicDomain.replace(/\/$/, '')}/${fileKey}`
-              : `/api/subtitles?id=${tmdbId}&type=tv&season=${season}&episode=${epNum}&serve=1`;
+              : `/api/subtitles?id=${tmdbId}&type=tv&season=${epSeason}&episode=${epNum}&serve=1`;
           }
         } catch (r2Err) {
           console.error(`[sub-batch] Error saving ${fileKey} to R2:`, r2Err.message);
@@ -552,7 +553,7 @@ async function handleUpload(req, res) {
       catalog[subKey] = {
         tmdbId: String(tmdbId),
         mediaType: 'tv',
-        season: Number(season),
+        season: epSeason,
         episode: epNum,
         title: title || `TV Series ${tmdbId}`,
         year: year || '',
@@ -563,7 +564,7 @@ async function handleUpload(req, res) {
         url: publicUrl
       };
 
-      savedEpisodes.push({ episode: epNum, key: subKey, publicUrl });
+      savedEpisodes.push({ season: epSeason, episode: epNum, key: subKey, publicUrl });
     }
 
     await saveCatalog(catalog);
@@ -731,7 +732,7 @@ export default async function handler(req, res) {
   }
 
   // Upload routing
-  if (url.includes('sub-upload') || qAction === 'upload' || bAction === 'presigned' || bAction === 'direct' || bAction === 'confirm') {
+  if (url.includes('sub-upload') || qAction === 'upload' || bAction === 'presigned' || bAction === 'direct' || bAction === 'batch_direct' || bAction === 'confirm') {
     return handleUpload(req, res);
   }
 

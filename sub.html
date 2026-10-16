@@ -1764,12 +1764,53 @@
     .season-pack-controls {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 8px 12px;
-      background: rgba(0, 0, 0, 0.35);
+      gap: 12px;
+      padding: 10px 14px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: var(--radius-sm);
       margin-bottom: 12px;
       flex-wrap: wrap;
+    }
+
+    .season-select-dropdown {
+      background: #151D2A;
+      color: #fff;
+      border: 1.5px solid rgba(232, 201, 122, 0.5);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .season-select-dropdown:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 2px rgba(232, 201, 122, 0.25);
+    }
+
+    .tv-batch-notice-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(135deg, rgba(232, 201, 122, 0.12), rgba(30, 41, 59, 0.8));
+      border: 1px solid rgba(232, 201, 122, 0.4);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      color: #F1F5F9;
+      font-size: 0.86rem;
+      line-height: 1.45;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .tv-batch-notice-badge i {
+      color: var(--gold);
+      font-size: 1.35rem;
+      flex-shrink: 0;
     }
 
     .season-num-input {
@@ -2205,6 +2246,14 @@
           <div style="flex:1;height:1px;background:var(--border);"></div>
         </div>
 
+        <!-- TV Series All Seasons at Once Feature Banner -->
+        <div class="tv-batch-notice-badge" id="tvAllSeasonsNotice">
+          <i class="fa-solid fa-layer-group"></i>
+          <div>
+            <strong style="color:var(--gold);">⚡ TV Series Multi-Season Support:</strong> You can upload TV series <strong>all seasons at once</strong>! Select multiple .srt files or drop a full series .ZIP archive, and every episode will be automatically sorted and mapped to its season.
+          </div>
+        </div>
+
         <div id="uploadDropZone" class="upload-zone" onclick="document.getElementById('subFileInput').click()">
           <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -2212,7 +2261,7 @@
             <line x1="12" y1="3" x2="12" y2="15"></line>
           </svg>
           <div class="upload-title">Choose subtitle file, ZIP season pack, or drag &amp; drop here</div>
-          <div class="upload-sub">Supports single .srt, multi-episode selection, or full season .zip packs up to 25MB</div>
+          <div class="upload-sub">Supports single .srt, multi-episode selection, or <strong>TV series all seasons at once</strong> (.zip archive or multiple files)</div>
           <input type="file" id="subFileInput" class="file-input-hidden" accept=".srt,.vtt,.sub,.idx,.zip" multiple onchange="handleFileSelected(event)">
         </div>
 
@@ -2253,9 +2302,28 @@
 
           <!-- Season Selector Override for Pack -->
           <div class="season-pack-controls" id="seasonPackControls">
-            <label style="font-size:0.8rem;color:var(--text-muted);font-weight:600;">Target Season:</label>
-            <input type="number" id="packSeasonOverride" min="1" max="99" value="1" class="season-num-input" oninput="handlePackSeasonChange(this.value)">
-            <span style="font-size:0.75rem;color:var(--gold);">Episodes will be linked to Season <strong id="packTargetSeasonNum">1</strong></span>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <label style="font-size:0.82rem;color:var(--gold);font-weight:700;"><i class="fa-solid fa-sliders"></i> Target Season:</label>
+              <select id="packSeasonSelect" class="season-select-dropdown" onchange="handlePackSeasonSelectChange(this.value)">
+                <option value="auto">🌟 Auto-Detect (All Seasons at Once)</option>
+                <option value="1">Season 1</option>
+                <option value="2">Season 2</option>
+                <option value="3">Season 3</option>
+                <option value="4">Season 4</option>
+                <option value="5">Season 5</option>
+                <option value="6">Season 6</option>
+                <option value="7">Season 7</option>
+                <option value="8">Season 8</option>
+                <option value="9">Season 9</option>
+                <option value="10">Season 10</option>
+                <option value="custom">Custom Season #...</option>
+              </select>
+            </div>
+            <div id="customSeasonInputWrap" style="display:none;align-items:center;gap:6px;">
+              <span style="font-size:0.8rem;color:var(--text-muted);font-weight:600;">Season #:</span>
+              <input type="number" id="packSeasonOverride" min="1" max="99" value="1" class="season-num-input" oninput="handlePackSeasonChange(this.value)">
+            </div>
+            <span style="font-size:0.75rem;color:#94A3B8;" id="packSeasonHelpText">Mapping to <strong id="packTargetSeasonNum" style="color:var(--gold);">Season 1</strong></span>
           </div>
 
           <!-- Episode Grid / List -->
@@ -2877,8 +2945,10 @@
       const grid = document.getElementById('seasonPackGrid');
       const titleEl = document.getElementById('seasonPackTitle');
       const subEl = document.getElementById('seasonPackSub');
+      const selectEl = document.getElementById('packSeasonSelect');
+      const customWrap = document.getElementById('customSeasonInputWrap');
       const overrideInput = document.getElementById('packSeasonOverride');
-      const targetSeasonEl = document.getElementById('packTargetSeasonNum');
+      const helpText = document.getElementById('packSeasonHelpText');
 
       if (!packBox || !grid) return;
 
@@ -2886,21 +2956,35 @@
       if (singlePreview) singlePreview.style.display = 'none';
       packBox.style.display = 'block';
 
-      titleEl.innerHTML = `<i class="fa-solid fa-boxes-packing" style="color:var(--gold);margin-right:6px;"></i> Season ${currentSeasonPackTargetSeason} Pack (${currentSeasonPackEpisodes.length} Episodes)`;
-      subEl.textContent = `All episodes parsed & ready to be linked to Season ${currentSeasonPackTargetSeason}`;
+      const seasonsFound = [...new Set(currentSeasonPackEpisodes.map(e => e.season).filter(Boolean))];
 
-      if (overrideInput) overrideInput.value = currentSeasonPackTargetSeason;
-      if (targetSeasonEl) targetSeasonEl.textContent = currentSeasonPackTargetSeason;
+      if (seasonsFound.length > 1) {
+        // Multi-season pack!
+        currentSeasonPackTargetSeason = 'auto';
+        if (selectEl) selectEl.value = 'auto';
+        if (customWrap) customWrap.style.display = 'none';
+        titleEl.innerHTML = `<i class="fa-solid fa-boxes-packing" style="color:var(--gold);margin-right:6px;"></i> Full Series Pack (${currentSeasonPackEpisodes.length} Episodes across ${seasonsFound.length} Seasons)`;
+        subEl.textContent = `All seasons detected (${seasonsFound.map(s => 'S' + s).join(', ')}) - ready to upload all seasons at once!`;
+        if (helpText) helpText.innerHTML = `Mapping to <strong style="color:var(--gold);">All Seasons (${seasonsFound.map(s => 'S' + s).join(', ')})</strong>`;
+      } else {
+        const singleSeason = seasonsFound[0] || currentSeasonPackTargetSeason || 1;
+        currentSeasonPackTargetSeason = singleSeason;
+        if (selectEl) {
+          if (selectEl.querySelector(`option[value="${singleSeason}"]`)) {
+            selectEl.value = String(singleSeason);
+            if (customWrap) customWrap.style.display = 'none';
+          } else {
+            selectEl.value = 'custom';
+            if (customWrap) customWrap.style.display = 'inline-flex';
+            if (overrideInput) overrideInput.value = singleSeason;
+          }
+        }
+        titleEl.innerHTML = `<i class="fa-solid fa-boxes-packing" style="color:var(--gold);margin-right:6px;"></i> Season ${singleSeason} Pack (${currentSeasonPackEpisodes.length} Episodes)`;
+        subEl.textContent = `All episodes parsed & ready to be linked to Season ${singleSeason}`;
+        if (helpText) helpText.innerHTML = `Mapping all episodes to <strong style="color:var(--gold);">Season ${singleSeason}</strong>`;
+      }
 
-      grid.innerHTML = currentSeasonPackEpisodes.map((ep, idx) => `
-        <div class="season-ep-item ${ep.status === 'done' ? 'uploaded' : ''}" id="seasonEpItem_${idx}">
-          <span class="season-ep-badge">S${String(currentSeasonPackTargetSeason).padStart(2, '0')}E${String(ep.episode).padStart(2, '0')}</span>
-          <span class="season-ep-name" title="${escapeHtml(ep.fileName)}">${escapeHtml(ep.fileName)}</span>
-          <span id="seasonEpStatus_${idx}" style="font-size:0.75rem;font-weight:700;color:${ep.status === 'done' ? '#2ECC71' : 'var(--text-muted)'};">
-            ${ep.status === 'done' ? '<i class="fa-solid fa-check"></i> Linked' : 'Ready'}
-          </span>
-        </div>
-      `).join('');
+      renderEpisodeBadges();
 
       const btn = document.getElementById('btnBatchUploadSeason');
       if (btn) {
@@ -2909,24 +2993,60 @@
       }
     }
 
+    function renderEpisodeBadges() {
+      const grid = document.getElementById('seasonPackGrid');
+      if (!grid) return;
+      const isAuto = currentSeasonPackTargetSeason === 'auto';
+
+      grid.innerHTML = currentSeasonPackEpisodes.map((ep, idx) => {
+        const sNum = isAuto ? (ep.season || 1) : currentSeasonPackTargetSeason;
+        return `
+          <div class="season-ep-item ${ep.status === 'done' ? 'uploaded' : ''}" id="seasonEpItem_${idx}">
+            <span class="season-ep-badge">S${String(sNum).padStart(2, '0')}E${String(ep.episode).padStart(2, '0')}</span>
+            <span class="season-ep-name" title="${escapeHtml(ep.fileName)}">${escapeHtml(ep.fileName)}</span>
+            <span id="seasonEpStatus_${idx}" style="font-size:0.75rem;font-weight:700;color:${ep.status === 'done' ? '#2ECC71' : 'var(--text-muted)'};">
+              ${ep.status === 'done' ? '<i class="fa-solid fa-check"></i> Linked' : 'Ready'}
+            </span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function handlePackSeasonSelectChange(val) {
+      const customWrap = document.getElementById('customSeasonInputWrap');
+      const helpText = document.getElementById('packSeasonHelpText');
+
+      if (val === 'auto') {
+        currentSeasonPackTargetSeason = 'auto';
+        if (customWrap) customWrap.style.display = 'none';
+        if (helpText) helpText.innerHTML = 'Mapping episodes by <strong style="color:var(--gold);">auto-detected seasons (all seasons at once)</strong>';
+        renderEpisodeBadges();
+        return;
+      }
+
+      if (val === 'custom') {
+        if (customWrap) customWrap.style.display = 'inline-flex';
+        const overrideInput = document.getElementById('packSeasonOverride');
+        const s = parseInt(overrideInput ? overrideInput.value : '1', 10) || 1;
+        handlePackSeasonChange(s);
+        return;
+      }
+
+      if (customWrap) customWrap.style.display = 'none';
+      handlePackSeasonChange(val);
+    }
+
     function handlePackSeasonChange(val) {
       const s = parseInt(val, 10);
       if (isNaN(s) || s < 1) return;
       currentSeasonPackTargetSeason = s;
-      const targetSeasonEl = document.getElementById('packTargetSeasonNum');
-      if (targetSeasonEl) targetSeasonEl.textContent = s;
+      const helpText = document.getElementById('packSeasonHelpText');
+      if (helpText) helpText.innerHTML = `Mapping all episodes to <strong style="color:var(--gold);">Season ${s}</strong>`;
 
       const tvSeasonInput = document.getElementById('tvSeasonInput');
       if (tvSeasonInput) tvSeasonInput.value = s;
 
-      // Re-render items badge
-      currentSeasonPackEpisodes.forEach((ep, idx) => {
-        const item = document.getElementById(`seasonEpItem_${idx}`);
-        if (item) {
-          const badge = item.querySelector('.season-ep-badge');
-          if (badge) badge.textContent = `S${String(s).padStart(2, '0')}E${String(ep.episode).padStart(2, '0')}`;
-        }
-      });
+      renderEpisodeBadges();
     }
 
     async function startBatchSeasonUpload() {
@@ -2956,21 +3076,26 @@
       const barFill = document.getElementById('progressBarFill');
       const statusText = document.getElementById('progressStatusText');
 
+      const isAuto = currentSeasonPackTargetSeason === 'auto';
+      const targetSeasonLabel = isAuto ? 'All Seasons' : `Season ${currentSeasonPackTargetSeason}`;
+
       if (progressSec) progressSec.classList.add('active');
-      if (stepText) stepText.textContent = `Batch uploading Season ${currentSeasonPackTargetSeason} (${currentSeasonPackEpisodes.length} episodes)...`;
+      if (stepText) stepText.textContent = `Batch uploading ${targetSeasonLabel} (${currentSeasonPackEpisodes.length} episodes)...`;
       if (barFill) barFill.style.width = '20%';
       if (percentText) percentText.textContent = '20%';
       if (statusText) statusText.textContent = 'Preparing payload and encoding subtitles...';
 
       try {
+        const defaultSeason = isAuto ? 1 : Number(currentSeasonPackTargetSeason);
         const payload = {
           action: 'batch_direct',
           tmdbId: String(selectedTitle.id),
           type: 'tv',
-          season: currentSeasonPackTargetSeason,
+          season: defaultSeason,
           title: selectedTitle.title || selectedTitle.name || '',
           year: (selectedTitle.release_date || selectedTitle.first_air_date || '').slice(0, 4),
           episodes: currentSeasonPackEpisodes.map(ep => ({
+            season: isAuto ? (ep.season || 1) : defaultSeason,
             episode: ep.episode,
             fileBase64: ep.fileBase64,
             fileName: ep.fileName
@@ -2981,7 +3106,7 @@
         if (percentText) percentText.textContent = '50%';
         if (statusText) statusText.textContent = 'Uploading files to Cloudflare R2 and updating catalog...';
 
-        const res = await fetch('/api/sub-api', {
+        const res = await fetch('/api/sub-api?action=upload', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -3012,10 +3137,10 @@
         });
 
         if (btn) {
-          btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>✓ All ${data.count} Episodes Linked to Season ${currentSeasonPackTargetSeason}!</span>`;
+          btn.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>✓ All ${data.count} Episodes Linked to ${targetSeasonLabel}!</span>`;
         }
 
-        showToast(`🎉 Success! Linked ${data.count} episodes to Season ${currentSeasonPackTargetSeason}!`);
+        showToast(`🎉 Success! Linked ${data.count} episodes to ${targetSeasonLabel}!`);
 
         // Refresh status
         setTimeout(() => {
