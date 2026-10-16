@@ -31,15 +31,26 @@ export default async function handler(req, res) {
 
   if (queryParams.testCurl) {
     try {
-      const { execSync } = await import('child_process');
-      const curlPath = execSync('which curl || where curl || echo NO_CURL').toString().trim();
-      let curlTest = '';
-      try {
-        curlTest = execSync('curl -s -I "https://cineru.lk/?s=Animals"').toString().slice(0, 300);
-      } catch (err) {
-        curlTest = 'curl execution error: ' + err.message;
-      }
-      return res.status(200).json({ curlPath, curlTest, nodeVersion: process.version, arch: process.arch, platform: process.platform });
+      const https = await import('https');
+      const result = await new Promise((resolve) => {
+        const headers = {
+          'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+          'Accept': '*/*'
+        };
+        https.get('https://cineru.lk/?s=Animals', { headers }, (res) => {
+          let text = '';
+          res.on('data', c => text += c);
+          res.on('end', () => {
+            resolve({
+              status: res.statusCode,
+              len: text.length,
+              hasPost: text.includes('animals-2026-sinhala-sub'),
+              title: (text.match(/<title>([\s\S]*?)<\/title>/i) || [])[1]
+            });
+          });
+        }).on('error', e => resolve({ error: e.message }));
+      });
+      return res.status(200).json({ testResult: result });
     } catch (e) {
       return res.status(200).json({ error: e.message });
     }
