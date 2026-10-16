@@ -1190,44 +1190,67 @@
       display: inline-flex;
       align-items: center;
       gap: .6rem;
-      background: var(--gold);
-      color: #07090F;
+      background: linear-gradient(135deg, rgba(232, 201, 122, 0.3) 0%, rgba(232, 201, 122, 0.12) 48%, rgba(8, 17, 24, 0.75) 100%);
+      color: #FFF8E7;
       padding: .75rem 1.8rem;
-      border-radius: 8px;
+      border-radius: 999px;
       font-weight: 700;
       font-size: .9rem;
-      border: none;
+      border: 1px solid rgba(232, 201, 122, 0.45);
       cursor: pointer;
       letter-spacing: .5px;
-      transition: all .3s;
-      font-family: 'Inter', sans-serif
+      backdrop-filter: blur(16px) saturate(140%);
+      -webkit-backdrop-filter: blur(16px) saturate(140%);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45), 0 0 18px rgba(232, 201, 122, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      transition: all .28s cubic-bezier(0.16, 1, 0.3, 1);
+      font-family: 'Inter', sans-serif;
     }
 
     .btn-primary:hover {
-      background: #fff;
-      transform: translateY(-2px)
+      background: linear-gradient(135deg, rgba(232, 201, 122, 0.5) 0%, rgba(232, 201, 122, 0.22) 100%);
+      color: #ffffff;
+      border-color: rgba(232, 201, 122, 0.85);
+      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.55), 0 0 26px rgba(232, 201, 122, 0.35), inset 0 1px 0 #ffffff;
+      transform: translateY(-2px);
     }
 
     .btn-secondary {
       display: inline-flex;
       align-items: center;
       gap: .6rem;
-      background: rgba(255, 255, 255, 0.07);
-      color: var(--text);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 48%, rgba(8, 17, 24, 0.75) 100%);
+      color: #ffffff;
       padding: .75rem 1.8rem;
-      border-radius: 8px;
-      font-weight: 500;
+      border-radius: 999px;
+      font-weight: 600;
       font-size: .9rem;
-      border: 1px solid var(--border);
+      border: 1px solid rgba(255, 255, 255, 0.22);
       cursor: pointer;
       letter-spacing: .5px;
-      transition: all .3s;
-      font-family: 'Inter', sans-serif
+      backdrop-filter: blur(16px) saturate(140%);
+      -webkit-backdrop-filter: blur(16px) saturate(140%);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      transition: all .28s cubic-bezier(0.16, 1, 0.3, 1);
+      font-family: 'Inter', sans-serif;
     }
 
     .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.12);
-      transform: translateY(-2px)
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.08) 100%);
+      border-color: rgba(255, 255, 255, 0.45);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      transform: translateY(-2px);
+    }
+
+    #heroPlay {
+      background: linear-gradient(135deg, rgba(39, 174, 96, 0.45) 0%, rgba(39, 174, 96, 0.18) 50%, rgba(8, 24, 14, 0.8) 100%) !important;
+      border: 1px solid rgba(46, 204, 113, 0.5) !important;
+      color: #ffffff !important;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45), 0 0 20px rgba(46, 204, 113, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    }
+    #heroPlay:hover {
+      background: linear-gradient(135deg, rgba(46, 204, 113, 0.6) 0%, rgba(39, 174, 96, 0.3) 100%) !important;
+      border-color: rgba(46, 204, 113, 0.85) !important;
+      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.55), 0 0 30px rgba(46, 204, 113, 0.45), inset 0 1px 0 #ffffff !important;
     }
 
     .hero-dots {
@@ -2534,14 +2557,19 @@
     .top10-scroll-wrapper {
       position: relative;
       padding: 0 2rem;
+      overflow: visible;
     }
     .top10-row {
       display: flex;
-      gap: 2rem;
+      gap: 1.8rem;
       overflow-x: auto;
+      overflow-y: hidden;
       scrollbar-width: none;
       -ms-overflow-style: none;
       scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x pan-y;
+      overscroll-behavior-x: contain;
       padding: 1.2rem 0.6rem 2rem 0.6rem;
       position: relative;
       z-index: 1;
@@ -2550,16 +2578,16 @@
       display: none;
     }
     .top10-item {
-      flex: 0 0 245px;
+      flex: 0 0 215px;
       position: relative;
       display: flex;
       align-items: flex-end;
-      height: 320px;
+      height: 315px;
       cursor: pointer;
       user-select: none;
       transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
       outline: none;
-      touch-action: pan-y;
+      touch-action: pan-x pan-y;
     }
     .top10-item:focus-visible {
       transform: translateY(-8px) scale(1.03);
@@ -2569,46 +2597,50 @@
       z-index: 10;
     }
 
-    /* ── Netflix Style Glassmorphic Giant Rank Number ── */
+    /* ── Netflix Style Giant Rank Number (Navbar Glassmorphism) ── */
     .top10-rank {
       position: absolute;
-      left: -14px;
+      left: 0;
       bottom: -6px;
       font-family: 'Bebas Neue', 'Outfit', sans-serif;
-      font-size: 9.2rem;
+      font-size: 10.5rem;
       font-weight: 900;
       line-height: 0.72;
       letter-spacing: -3px;
       z-index: 1;
       pointer-events: none;
       user-select: none;
-      /* Deep 3D Frosted Glass Effect with subtle backlight */
-      color: rgba(255, 255, 255, 0.05);
-      -webkit-text-stroke: 2.8px rgba(255, 255, 255, 0.45);
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.12) 45%, rgba(232, 201, 122, 0.35) 100%);
+      /* Frosted Glassmorphism Finish matching Navbar */
+      color: rgba(255, 255, 255, 0.04);
+      -webkit-text-stroke: 2.2px rgba(255, 255, 255, 0.38);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.2) 36%, rgba(8, 17, 24, 0.82) 68%, rgba(255, 255, 255, 0.35) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 20px rgba(232, 201, 122, 0.12));
+      filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 18px rgba(255, 255, 255, 0.1));
       transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .top10-item[data-rank="1"] .top10-rank {
-      left: -8px;
+      left: 4px;
     }
     .top10-item[data-rank="10"] .top10-rank {
-      left: -32px;
-      font-size: 7.6rem;
-      letter-spacing: -7px;
+      left: -4px;
+      font-size: 8.6rem;
+      letter-spacing: -6px;
     }
-    .top10-item:hover .top10-rank {
-      -webkit-text-stroke: 3px var(--gold, #E8C97A);
-      filter: drop-shadow(0 10px 24px rgba(232, 201, 122, 0.55)) drop-shadow(0 0 35px rgba(232, 201, 122, 0.3));
-      transform: scale(1.04) translateX(-4px);
+    .top10-item:hover .top10-rank,
+    .top10-item:focus-visible .top10-rank {
+      -webkit-text-stroke: 2.5px var(--gold, #E8C97A);
+      background: linear-gradient(135deg, #ffffff 0%, var(--gold, #E8C97A) 45%, rgba(8, 17, 24, 0.85) 85%, rgba(232, 201, 122, 0.6) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 28px rgba(232, 201, 122, 0.45));
+      transform: scale(1.03) translateX(-2px);
     }
 
-    /* ── Movie Poster Card ── */
+    /* ── Movie Poster Card (Starts ~1/3 Into Number Like Netflix) ── */
     .top10-card {
-      margin-left: 76px;
-      width: calc(100% - 76px);
+      margin-left: 36px;
+      width: calc(100% - 36px);
       height: 100%;
       border-radius: 14px;
       overflow: hidden;
@@ -2623,6 +2655,14 @@
       justify-content: flex-end;
       transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 2;
+    }
+    .top10-item[data-rank="1"] .top10-card {
+      margin-left: 24px;
+      width: calc(100% - 24px);
+    }
+    .top10-item[data-rank="10"] .top10-card {
+      margin-left: 54px;
+      width: calc(100% - 54px);
     }
     .top10-item:hover .top10-card {
       border-color: rgba(232, 201, 122, 0.55);
@@ -2688,16 +2728,6 @@
       font-weight: 700;
       letter-spacing: 0.3px;
     }
-    .top10-badges-top {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 5px;
-      z-index: 4;
-    }
     .top10-today-tag {
       position: absolute;
       top: 8px;
@@ -2733,7 +2763,7 @@
       }
       .top10-header-wrap {
         padding: 0 1rem;
-        margin-bottom: 1rem;
+        margin-bottom: 0.8rem;
       }
       .top10-header-title {
         font-size: 1.55rem;
@@ -2748,35 +2778,50 @@
       }
       .top10-scroll-wrapper {
         padding: 0 0.8rem;
+        overflow: visible;
       }
       .top10-scroll-btn {
         display: none !important;
       }
       .top10-row {
-        gap: 1.2rem;
-        padding: 0.6rem 0.2rem 1.4rem 0.2rem;
+        gap: 1.1rem;
+        padding: 0.8rem 0.4rem 1.6rem 0.4rem;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-x pan-y;
         scroll-snap-type: x proximity;
       }
       .top10-item {
-        flex: 0 0 185px;
-        height: 250px;
+        flex: 0 0 168px;
+        height: 240px;
         scroll-snap-align: start;
+        touch-action: pan-x pan-y;
       }
       .top10-rank {
-        font-size: 7rem;
-        left: -10px;
-        bottom: -3px;
-        -webkit-text-stroke: 2.2px rgba(255, 255, 255, 0.42);
-      }
-      .top10-item[data-rank="10"] .top10-rank {
-        left: -22px;
-        font-size: 5.8rem;
-        letter-spacing: -4px;
+        font-size: 7.8rem;
+        left: 0;
+        bottom: -4px;
+        -webkit-text-stroke: 1.8px rgba(255, 255, 255, 0.4);
       }
       .top10-card {
-        margin-left: 56px;
-        width: calc(100% - 56px);
+        margin-left: 26px;
+        width: calc(100% - 26px);
         border-radius: 12px;
+      }
+      .top10-item[data-rank="1"] .top10-rank {
+        left: 2px;
+      }
+      .top10-item[data-rank="1"] .top10-card {
+        margin-left: 18px;
+        width: calc(100% - 18px);
+      }
+      .top10-item[data-rank="10"] .top10-rank {
+        left: -3px;
+        font-size: 6.5rem;
+        letter-spacing: -4px;
+      }
+      .top10-item[data-rank="10"] .top10-card {
+        margin-left: 42px;
+        width: calc(100% - 42px);
       }
       .top10-title {
         font-size: 0.82rem;
@@ -2788,20 +2833,40 @@
 
     @media (min-width: 1400px) {
       .top10-item {
-        flex: 0 0 265px;
-        height: 345px;
+        flex: 0 0 235px;
+        height: 335px;
       }
       .top10-card {
-        margin-left: 82px;
-        width: calc(100% - 82px);
+        margin-left: 42px;
+        width: calc(100% - 42px);
+      }
+      .top10-item[data-rank="1"] .top10-card {
+        margin-left: 28px;
+        width: calc(100% - 28px);
+      }
+      .top10-item[data-rank="10"] .top10-card {
+        margin-left: 60px;
+        width: calc(100% - 60px);
       }
       .top10-rank {
-        font-size: 10rem;
+        font-size: 11.5rem;
       }
       .top10-item[data-rank="10"] .top10-rank {
-        font-size: 8.5rem;
-        left: -35px;
+        font-size: 9.6rem;
+        left: -6px;
       }
+    }
+
+    /* TV Mode Performance Protection: No heavy blur passes on TV CPU */
+    body.tv-mode .btn-primary,
+    body.tv-mode .btn-secondary,
+    body.device-tv .btn-primary,
+    body.device-tv .btn-secondary {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      background: rgba(232, 201, 122, 0.22) !important;
+      border: 2px solid rgba(232, 201, 122, 0.65) !important;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6) !important;
     }
 
 
@@ -11212,8 +11277,7 @@
         <span class="hero-streaming-label">Watch on</span>
       </div>
       <div class="hero-btns">
-        <button class="btn-primary" id="heroPlay" style="display:none;background:var(--green);color:#fff;border:none">▶
-          Play</button>
+        <button class="btn-primary" id="heroPlay" style="display:none">▶ Play</button>
         <button class="btn-primary" id="heroWatch">▶ Watch Trailer</button>
         <button class="btn-secondary" id="heroMore">More Info</button>
       </div>
