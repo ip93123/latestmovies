@@ -6397,21 +6397,73 @@
       align-items: center;
       justify-content: center;
       pointer-events: none;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      transition: opacity 0.25s ease;
     }
-    #wpGuestLock.active { display: flex !important; }
+    #wpGuestLock.active {
+      display: flex !important;
+      pointer-events: auto !important;
+    }
     .wp-guest-lock-badge {
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(168,85,247,0.4);
-      border-radius: 16px;
-      padding: 14px 28px;
+      background: rgba(14, 18, 30, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), 0 0 30px rgba(168, 85, 247, 0.25);
+      border-radius: 20px;
+      padding: 18px 32px;
       color: #fff;
       font-family: 'Inter', sans-serif;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: 600;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+      text-align: center;
+      animation: wpNotifIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .wp-guest-lock-sub {
+      font-size: 0.78rem;
+      color: rgba(255, 255, 255, 0.65);
+      font-weight: 400;
+    }
+
+    .wp-host-playpause-btn {
+      background: rgba(168, 85, 247, 0.2) !important;
+      border: 1px solid rgba(168, 85, 247, 0.5) !important;
+      color: #c084fc !important;
+      transition: all 0.2s ease !important;
+    }
+    .wp-host-playpause-btn:hover {
+      background: rgba(168, 85, 247, 0.35) !important;
+      border-color: #a855f7 !important;
+      color: #fff !important;
+      transform: scale(1.06);
+      box-shadow: 0 0 16px rgba(168, 85, 247, 0.5) !important;
+    }
+    .wp-hud-quick-btn {
+      background: rgba(168, 85, 247, 0.25);
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      color: #fff;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.78rem;
+      transition: all 0.2s ease;
+      margin: 0 4px;
+    }
+    .wp-hud-quick-btn:hover {
+      background: #a855f7;
+      color: #fff;
+      transform: scale(1.08);
+      box-shadow: 0 0 12px rgba(168, 85, 247, 0.6);
     }
 
 
@@ -10224,6 +10276,11 @@
         </button>
 
         <span class="floating-divider" id="floatingBarDivider"></span>
+
+        <!-- Watch Party Host Play/Pause Control (Host Only) -->
+        <button class="floating-btn wp-host-playpause-btn" id="wpHostPlayPauseBtn" title="Pause / Resume Watch Party for everyone" style="display:none;" onclick="event.stopPropagation(); window._toggleHostPlayback();">
+          <i class="fa-solid fa-pause" id="wpHostPlayPauseIcon"></i>
+        </button>
 
         <!-- Watch Party button (Round Icon Only) -->
         <button class="floating-btn topbar-wp-btn" id="topbarWatchPartyBtn" title="Watch Party — Watch together with friends">
@@ -15276,8 +15333,10 @@
 
       // ── PAUSE EVENT ──────────────────────────────────────────────────
       if (isExplicitPause) {
+        window._hostManualPaused = true;
         window._externalIsPaused = true;
         _markBufferState(false);
+        if (typeof _updateWpPlayPauseButtons === 'function') _updateWpPlayPauseButtons(false);
         if (typeof _onPlayerPlaybackStateChange === 'function') _onPlayerPlaybackStateChange('pause');
         if (ct !== null) {
           window._subPausedElapsed = Math.round(ct * 1000);
@@ -15305,8 +15364,10 @@
       // ── PLAY EVENT ───────────────────────────────────────────────────
       if (isExplicitPlay) {
         _markBufferState(false);
+        window._hostManualPaused = false;
         window._externalIsPaused = false;
         window._lastExternalMsgTime = Date.now();
+        if (typeof _updateWpPlayPauseButtons === 'function') _updateWpPlayPauseButtons(true);
         if (typeof _onPlayerPlaybackStateChange === 'function') _onPlayerPlaybackStateChange('play');
         if (ct !== null && ct > 0) {
           _subStartTime = Date.now() - (ct * 1000);
@@ -15339,18 +15400,11 @@
       if (ct !== null) {
         window._lastExternalMsgTime = Date.now();
 
-        if (window._externalIsPaused) {
-          // If player was paused and time moved forward by > 0.5s, unpause
-          if (ct > (window._externalCurrentTime || 0) + 0.5) {
-            window._externalIsPaused = false;
-            window._subPausedElapsed = null;
-            _setSubSyncBarPaused(false);
-          } else {
-            // Still paused, just record the position if scrubbed
-            window._externalCurrentTime = ct;
-            window._subPausedElapsed = Math.round(ct * 1000);
-            return;
-          }
+        if (window._externalIsPaused || window._hostManualPaused || (typeof WP !== 'undefined' && WP && !WP.isHost && window._wpHostPaused)) {
+          // Strictly paused — keep time frozen or update scrubbed position, never unpause
+          window._externalCurrentTime = ct;
+          window._subPausedElapsed = Math.round(ct * 1000);
+          return;
         }
 
         if (window._isStreamBuffering) {
@@ -17057,51 +17111,66 @@
           );
           if (isGuestLockedNow) return; // Guests cannot toggle playback
 
-          if (window._externalIsPaused) {
+          if (typeof WP !== 'undefined' && WP && WP.isHost && WP.code && typeof _toggleHostPlayback === 'function') {
+            _toggleHostPlayback();
+            return;
+          }
+
+          if (window._externalIsPaused || window._hostManualPaused) {
             if (window._subPausedElapsed != null) {
               _subStartTime = Date.now() - window._subPausedElapsed;
               window._subPausedElapsed = null;
             }
+            window._hostManualPaused = false;
             window._externalIsPaused = false;
             _setSubSyncBarPaused(false);
             _sendIframeCmd('play');
-
-            if (typeof WP !== 'undefined' && WP && WP.isHost && WP.code && typeof _broadcast === 'function') {
-              _broadcast({
-                type: 'play',
-                ct: _getPlaybackTime(),
-                ts: Date.now(),
-                mId: window._currentPlayingId || _currentModalId,
-                mType: window._currentPlayingType || _currentModalType,
-                season: window._currentPlayingSeason || (typeof _selectedSeason !== 'undefined' && _selectedSeason) || 1,
-                episode: window._currentPlayingEpisode || (typeof _selectedEpisode !== 'undefined' && _selectedEpisode) || 1,
-                serverIndex: typeof _activeServerIndex === 'number' ? _activeServerIndex : 0
-              });
-            }
           } else {
+            window._hostManualPaused = true;
             window._externalIsPaused = true;
             if (_subStartTime) {
               window._subPausedElapsed = Math.max(0, Date.now() - _subStartTime);
             }
             _setSubSyncBarPaused(true);
             _sendIframeCmd('pause');
+          }
+          return;
+        }
 
-            if (typeof WP !== 'undefined' && WP && WP.isHost && WP.code && typeof _broadcast === 'function') {
-              _broadcast({
-                type: 'pause',
-                ct: _getPlaybackTime(),
-                ts: Date.now(),
-                mId: window._currentPlayingId || _currentModalId,
-                mType: window._currentPlayingType || _currentModalType,
-                season: window._currentPlayingSeason || (typeof _selectedSeason !== 'undefined' && _selectedSeason) || 1,
-                episode: window._currentPlayingEpisode || (typeof _selectedEpisode !== 'undefined' && _selectedEpisode) || 1,
-                serverIndex: typeof _activeServerIndex === 'number' ? _activeServerIndex : 0
-              });
-            }
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+          e.preventDefault();
+          const isGuestLockedNow = typeof WP !== 'undefined' && WP && !WP.isHost && (
+            WP.hostConn ||
+            document.getElementById('wpGuestLock')?.classList.contains('active') ||
+            window._wpHostPaused === true
+          );
+          if (isGuestLockedNow) return;
+          const delta = (e.key === 'ArrowLeft') ? -10 : 10;
+          const curTime = (typeof _getPlaybackTime === 'function') ? _getPlaybackTime() : (window._externalCurrentTime || 0);
+          const newCt = Math.max(0, curTime + delta);
+          window._externalCurrentTime = newCt;
+          if (window._externalIsPaused || window._hostManualPaused) {
+            window._subPausedElapsed = Math.round(newCt * 1000);
+          } else {
+            _subStartTime = Date.now() - (newCt * 1000);
+          }
+          _sendIframeCmd('seek', newCt);
+          if (typeof WP !== 'undefined' && WP && WP.isHost && WP.code && typeof _broadcast === 'function') {
+            _broadcast({
+              type: 'seek',
+              ct: newCt,
+              ts: Date.now(),
+              mId: window._currentPlayingId || _currentModalId,
+              mType: window._currentPlayingType || _currentModalType,
+              season: window._currentPlayingSeason || (typeof _selectedSeason !== 'undefined' && _selectedSeason) || 1,
+              episode: window._currentPlayingEpisode || (typeof _selectedEpisode !== 'undefined' && _selectedEpisode) || 1,
+              serverIndex: typeof _activeServerIndex === 'number' ? _activeServerIndex : 0
+            });
           }
           return;
         }
       }
+
       if (!_maxMode) return;
       if (e.key === ' ' || e.code === 'Space') {
         e.preventDefault();
@@ -17145,22 +17214,6 @@
       } else if (e.key === 'c' || e.key === 'C') {
         e.preventDefault();
         _mxsCycleSubtitles();
-      }
-    });
-
-    // Unpause subtitles when user clicks into iframe player (focus moves to iframe)
-    window.addEventListener('blur', () => {
-      const frame = document.getElementById('playerFrame');
-      const overlayOpen = document.getElementById('playerOverlay')?.classList.contains('open');
-      if (overlayOpen && !_maxMode && document.activeElement === frame) {
-        if (window._externalIsPaused) {
-          window._externalIsPaused = false;
-          _subStartTime = Date.now() - (window._subPausedElapsed || 0);
-          window._subPausedElapsed = null;
-          _setSubSyncBarPaused(false);
-          _markBufferState(false);
-          if (!_subRaf) _subRaf = requestAnimationFrame(_subLoop);
-        }
       }
     });
 
@@ -19873,6 +19926,118 @@
 
     let _wpHeartbeatInterval = null;
 
+    function _updateWpPlayPauseButtons(isPlaying) {
+      const topBtn = document.getElementById('wpHostPlayPauseBtn');
+      const topIcon = document.getElementById('wpHostPlayPauseIcon');
+      const quickBtn = document.getElementById('wpHudQuickPlayBtn');
+      const quickIcon = document.getElementById('wpHudQuickPlayIcon');
+
+      if (topBtn) {
+        topBtn.title = isPlaying ? 'Pause Watch Party for everyone' : 'Resume Watch Party for everyone';
+        topBtn.style.color = isPlaying ? '#c084fc' : '#22c55e';
+        topBtn.style.borderColor = isPlaying ? 'rgba(168,85,247,0.5)' : 'rgba(34,197,94,0.6)';
+      }
+      if (topIcon) {
+        topIcon.className = isPlaying ? 'fa-solid fa-pause' : 'fa-solid fa-play';
+      }
+      if (quickBtn) {
+        quickBtn.title = isPlaying ? 'Pause Watch Party for everyone' : 'Resume Watch Party for everyone';
+      }
+      if (quickIcon) {
+        quickIcon.className = isPlaying ? 'fa-solid fa-pause' : 'fa-solid fa-play';
+      }
+    }
+    window._updateWpPlayPauseButtons = _updateWpPlayPauseButtons;
+
+    function _toggleHostPlayback(forcePlayState) {
+      const isCurrentlyPaused = (typeof forcePlayState === 'boolean')
+        ? !forcePlayState
+        : (window._hostManualPaused || window._externalIsPaused);
+      const shouldPlay = isCurrentlyPaused;
+
+      const ct = _getPlaybackTime();
+      const p = new URLSearchParams(window.location.search);
+      const movieId = window._currentPlayingId || _currentModalId || (window._currentModalItem && window._currentModalItem.id) || p.get('m') || p.get('s');
+      const mediaType = window._currentPlayingType || _currentModalType || (p.get('s') ? 'tv' : 'movie');
+      const season = (typeof window._currentPlayingSeason !== 'undefined' && window._currentPlayingSeason) || (typeof _selectedSeason !== 'undefined' && _selectedSeason) || p.get('season') || 1;
+      const episode = (typeof window._currentPlayingEpisode !== 'undefined' && window._currentPlayingEpisode) || (typeof _selectedEpisode !== 'undefined' && _selectedEpisode) || p.get('episode') || 1;
+      const engine = window._currentPlayingEngine || window._currentMaxEngine || p.get('engine') || 'hackymax';
+      const sIdx = typeof _activeServerIndex === 'number' ? _activeServerIndex : 0;
+
+      if (shouldPlay) {
+        window._hostManualPaused = false;
+        window._externalIsPaused = false;
+        window._wpHostPaused = false;
+        window._externalCurrentTime = ct;
+        window._subStartTime = Date.now() - (ct * 1000);
+        window._subPausedElapsed = null;
+        _setSubSyncBarPaused(false);
+        _updateWpPlayPauseButtons(true);
+
+        const v = _vid();
+        if (v && (v.src || v.currentSrc)) {
+          _safePlay(v);
+        } else {
+          _sendIframeCmd('seek', ct);
+          _sendIframeCmd('play');
+        }
+
+        const mm = String(Math.floor(ct / 60)).padStart(2, '0');
+        const ss = String(Math.floor(ct % 60)).padStart(2, '0');
+        _wpToast(`▶ Resumed Watch Party (${mm}:${ss})`);
+
+        if (typeof WP !== 'undefined' && WP && WP.isHost && WP.code && typeof _broadcast === 'function') {
+          _broadcast({
+            type: 'play',
+            ct: ct,
+            ts: Date.now(),
+            mId: movieId,
+            mType: mediaType,
+            season: parseInt(season, 10) || 1,
+            episode: parseInt(episode, 10) || 1,
+            engine: engine,
+            serverIndex: sIdx
+          });
+        }
+      } else {
+        window._hostManualPaused = true;
+        window._externalIsPaused = true;
+        window._wpHostPaused = true;
+        window._externalCurrentTime = ct;
+        window._subPausedElapsed = Math.round(ct * 1000);
+        _setSubSyncBarPaused(true);
+        _updateWpPlayPauseButtons(false);
+
+        const v = _vid();
+        if (v && (v.src || v.currentSrc)) {
+          v.pause();
+        } else {
+          _sendIframeCmd('pause');
+          _sendIframeCmd('seek', ct);
+          setTimeout(() => { _sendIframeCmd('pause'); }, 300);
+        }
+
+        const mm = String(Math.floor(ct / 60)).padStart(2, '0');
+        const ss = String(Math.floor(ct % 60)).padStart(2, '0');
+        _wpToast(`⏸ Paused Watch Party (${mm}:${ss})`);
+
+        if (typeof WP !== 'undefined' && WP && WP.isHost && WP.code && typeof _broadcast === 'function') {
+          _broadcast({
+            type: 'pause',
+            ct: ct,
+            ts: Date.now(),
+            mId: movieId,
+            mType: mediaType,
+            season: parseInt(season, 10) || 1,
+            episode: parseInt(episode, 10) || 1,
+            engine: engine,
+            serverIndex: sIdx
+          });
+        }
+      }
+    }
+    window._toggleHostPlayback = _toggleHostPlayback;
+
     function _startHostHeartbeat() {
       if (_wpHeartbeatInterval) return;
       _wpHeartbeatInterval = setInterval(() => {
@@ -19929,7 +20094,7 @@
     function _getPlaybackTime() {
       const v = _vid();
       if (v && (v.src || v.currentSrc)) return v.currentTime;
-      if (window._externalIsPaused) {
+      if (window._externalIsPaused || window._hostManualPaused || (typeof WP !== 'undefined' && WP && !WP.isHost && window._wpHostPaused)) {
         if (window._subPausedElapsed != null) return window._subPausedElapsed / 1000;
         if (typeof window._externalCurrentTime === 'number') return window._externalCurrentTime;
         return 0;
@@ -19947,10 +20112,11 @@
     function _getIsPlaying() {
       const v = _vid();
       if (v && (v.src || v.currentSrc)) return !v.paused;
+      if (window._hostManualPaused || window._externalIsPaused) return false;
       if (typeof WP !== 'undefined' && WP && !WP.isHost && (document.getElementById('wpGuestLock')?.classList.contains('active') || window._wpHostPaused)) {
         return false;
       }
-      return !window._externalIsPaused;
+      return true;
     }
 
     function _sendIframeCmd(cmd, payload) {
@@ -19969,7 +20135,13 @@
             { type: 'PLAYER_COMMAND', action: 'play' },
             { type: 'media:play' }, { api: 'play' },
             { method: 'play' }, { command: 'play' },
-            { player: true, action: 'play' }
+            { player: true, action: 'play' },
+            { event: 'command', func: 'playVideo', args: '' },
+            { method: 'playVideo' },
+            { type: 'player:play' },
+            { action: 'player:play' },
+            { event: 'player:play' },
+            'play'
           ];
         } else if (cmd === 'pause') {
           msgs = [
@@ -19980,7 +20152,14 @@
             { type: 'PLAYER_COMMAND', action: 'pause' },
             { type: 'media:pause' }, { api: 'pause' },
             { method: 'pause' }, { command: 'pause' },
-            { player: true, action: 'pause' }
+            { player: true, action: 'pause' },
+            { event: 'command', func: 'pauseVideo', args: '' },
+            { method: 'pauseVideo' },
+            { type: 'player:pause' },
+            { action: 'player:pause' },
+            { event: 'player:pause' },
+            { type: 'media:stop' },
+            'pause'
           ];
         } else if (cmd === 'seek') {
           msgs = [
@@ -20001,7 +20180,13 @@
             { action: 'setTime', time: sec },
             { type: 'playerseek', time: sec },
             { type: 'skip', time: sec },
-            { player: true, action: 'seek' + Math.round(sec) }
+            { player: true, action: 'seek' + Math.round(sec) },
+            { player: true, action: 'seek', time: sec },
+            { event: 'command', func: 'seekTo', args: [sec, true] },
+            { method: 'seekTo', value: sec },
+            { action: 'seekTo', value: sec },
+            { type: 'player:seek', time: sec },
+            { action: 'player:seek', time: sec }
           ];
         }
         msgs.forEach(m => {
@@ -20205,13 +20390,24 @@
         if (!isPlaying) {
           // Host is paused
           window._wpHostPaused = true;
-          if (lockEl) lockEl.classList.add('active');
-          if (lockMsg) lockMsg.textContent = 'Host paused';
-
+          window._externalIsPaused = true;
           window._externalCurrentTime = target;
           window._subPausedElapsed = Math.round(target * 1000);
-          window._externalIsPaused = true;
           _setSubSyncBarPaused(true);
+
+          const mm = String(Math.floor(target / 60)).padStart(2, '0');
+          const ss = String(Math.floor(target % 60)).padStart(2, '0');
+          if (lockEl) {
+            lockEl.classList.add('active');
+            const fsElem = document.fullscreenElement || document.webkitFullscreenElement;
+            const playerOverlay = document.getElementById('playerOverlay');
+            if (fsElem && lockEl.parentElement !== fsElem) {
+              fsElem.appendChild(lockEl);
+            } else if (playerOverlay && playerOverlay.classList.contains('open') && lockEl.parentElement !== playerOverlay) {
+              playerOverlay.appendChild(lockEl);
+            }
+          }
+          if (lockMsg) lockMsg.textContent = `Host paused (${mm}:${ss})`;
 
           if (v && (v.src || v.currentSrc)) {
             if (!v.paused) v.pause();
@@ -20265,7 +20461,9 @@
         const target = _calcTargetTime(data, true);
         const lockEl = document.getElementById('wpGuestLock');
         if (lockEl) lockEl.classList.remove('active');
-        _wpToast('▶ Host resumed');
+        const mm = String(Math.floor(target / 60)).padStart(2, '0');
+        const ss = String(Math.floor(target % 60)).padStart(2, '0');
+        _wpToast(`▶ Host resumed (${mm}:${ss})`);
 
         window._wpHostPaused = false;
         window._externalIsPaused = false;
@@ -20293,11 +20491,22 @@
       // ── Handle PAUSE ─────────────────────────────────────────────
       } else if (data.type === 'pause') {
         const target = typeof data.ct === 'number' ? data.ct : _getPlaybackTime();
+        const mm = String(Math.floor(target / 60)).padStart(2, '0');
+        const ss = String(Math.floor(target % 60)).padStart(2, '0');
         const lockEl = document.getElementById('wpGuestLock');
         const lockMsg = document.getElementById('wpGuestLockMsg');
-        if (lockEl) lockEl.classList.add('active');
-        if (lockMsg) lockMsg.textContent = 'Host paused';
-        _wpToast('⏸ Host paused');
+        if (lockEl) {
+          lockEl.classList.add('active');
+          const fsElem = document.fullscreenElement || document.webkitFullscreenElement;
+          const playerOverlay = document.getElementById('playerOverlay');
+          if (fsElem && lockEl.parentElement !== fsElem) {
+            fsElem.appendChild(lockEl);
+          } else if (playerOverlay && playerOverlay.classList.contains('open') && lockEl.parentElement !== playerOverlay) {
+            playerOverlay.appendChild(lockEl);
+          }
+        }
+        if (lockMsg) lockMsg.textContent = `Host paused (${mm}:${ss})`;
+        _wpToast(`⏸ Host paused at ${mm}:${ss}`);
 
         window._wpHostPaused = true;
         window._externalIsPaused = true;
@@ -20435,7 +20644,10 @@
 
       v.addEventListener('play', () => {
         if (!WP.isHost || !WP.code) return;
+        window._hostManualPaused = false;
+        window._externalIsPaused = false;
         _startHostHeartbeat();
+        _updateWpPlayPauseButtons(true);
         _broadcast({
           type: 'play',
           ct: v.currentTime,
@@ -20449,6 +20661,9 @@
       });
       v.addEventListener('pause', () => {
         if (!WP.isHost || !WP.code) return;
+        window._hostManualPaused = true;
+        window._externalIsPaused = true;
+        _updateWpPlayPauseButtons(false);
         _broadcast({
           type: 'pause',
           ct: v.currentTime,
@@ -20501,6 +20716,18 @@
         } else if (playerOverlay && playerOverlay.classList.contains('open') && wpHud.parentElement !== playerOverlay) {
           playerOverlay.appendChild(wpHud);
         }
+      }
+
+      // Update host play/pause control button visibility
+      const wpHostPlayBtn = document.getElementById('wpHostPlayPauseBtn');
+      const wpHudQuickBtn = document.getElementById('wpHudQuickPlayBtn');
+      if (WP.isHost) {
+        if (wpHostPlayBtn) wpHostPlayBtn.style.display = 'inline-flex';
+        if (wpHudQuickBtn) wpHudQuickBtn.style.display = 'inline-flex';
+        _updateWpPlayPauseButtons(!window._externalIsPaused && !window._hostManualPaused);
+      } else {
+        if (wpHostPlayBtn) wpHostPlayBtn.style.display = 'none';
+        if (wpHudQuickBtn) wpHudQuickBtn.style.display = 'none';
       }
 
       // Update active dots safely
@@ -20706,6 +20933,13 @@
       if (topbarWp) topbarWp.classList.remove('active');
       const guestLock = document.getElementById('wpGuestLock');
       if (guestLock) guestLock.classList.remove('active');
+
+      window._hostManualPaused = false;
+      window._wpHostPaused = false;
+      const wpHostPlayBtn = document.getElementById('wpHostPlayPauseBtn');
+      if (wpHostPlayBtn) wpHostPlayBtn.style.display = 'none';
+      const wpHudQuickBtn = document.getElementById('wpHudQuickPlayBtn');
+      if (wpHudQuickBtn) wpHudQuickBtn.style.display = 'none';
 
       document.getElementById('wpRoomCode').textContent = '------';
       document.getElementById('wpShareUrl').textContent  = '';
@@ -21312,6 +21546,10 @@
         <div id="wpHudRole" style="font-size:0.62rem;color:rgba(255,255,255,0.45);letter-spacing:1px;text-transform:uppercase;">HOST</div>
         <div id="wpHudCount" style="font-size:0.78rem;font-weight:600;color:#fff;">1 watching</div>
       </div>
+      <!-- Host 1-Click Play/Pause Quick Control -->
+      <button id="wpHudQuickPlayBtn" class="wp-hud-quick-btn" title="Pause Watch Party for everyone" style="display:none;" onclick="event.stopPropagation(); window._toggleHostPlayback();">
+        <i class="fa-solid fa-pause" id="wpHudQuickPlayIcon"></i>
+      </button>
       <div id="wpHudDot" style="width:8px;height:8px;background:#00ff88;border-radius:50%;animation:wpPulse 1.5s infinite;box-shadow:0 0 6px #00ff88;"></div>
       <div style="font-size:0.65rem;color:rgba(255,255,255,0.5);margin-left:-2px;transition:transform 0.2s;" id="wpHudChevron">▾</div>
     </div>
@@ -21336,8 +21574,11 @@
   <!-- Guest locked overlay -->
   <div id="wpGuestLock">
     <div class="wp-guest-lock-badge">
-      <span style="font-size:1.4rem;">⏸</span>
-      <span id="wpGuestLockMsg">Host paused</span>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:1.4rem;">⏸</span>
+        <span id="wpGuestLockMsg">Host paused</span>
+      </div>
+      <span class="wp-guest-lock-sub">Playback is synced · Will resume when Host plays</span>
     </div>
   </div>
 
