@@ -518,6 +518,87 @@
       color: #2ECC71;
     }
 
+    .btn-test-play-cand {
+      background: linear-gradient(135deg, #00C0FF 0%, #0076FF 100%);
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 10px rgba(0, 192, 255, 0.35);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-test-play-cand:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(0, 192, 255, 0.6);
+      color: #fff;
+    }
+
+    .btn-test-play-badge {
+      background: linear-gradient(135deg, #00C0FF 0%, #0076FF 100%);
+      color: #fff;
+      text-decoration: none;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 2px 8px rgba(0, 192, 255, 0.35);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-test-play-badge:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(0, 192, 255, 0.6);
+      color: #fff;
+    }
+
+    .btn-movie-test-play {
+      background: linear-gradient(135deg, rgba(0, 192, 255, 0.15), rgba(0, 118, 255, 0.25));
+      border: 1px solid rgba(0, 192, 255, 0.4);
+      color: #00C0FF;
+      text-decoration: none;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .btn-movie-test-play:hover {
+      background: #00C0FF;
+      color: #050d1a;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 12px rgba(0, 192, 255, 0.45);
+    }
+
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(0, 192, 255, 0.7); }
+      70% { box-shadow: 0 0 0 8px rgba(0, 192, 255, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 192, 255, 0); }
+    }
+
+    .highlight-pulse {
+      animation: pulseGlow 1.5s infinite;
+    }
+
     /* ── Subtitle Drawer under movie ── */
     .movie-sub-drawer {
       padding: 14px;
@@ -1380,8 +1461,8 @@
               <div>
                 <div class="movie-title-row">
                   <div class="movie-title" title="${m.title}">${m.title}</div>
-                  <a href="/?cat=language&id=si&m=${m.id}" target="_blank" title="Play on Site" style="color:var(--gold);font-size:0.85rem;text-decoration:none;">
-                    <i class="fa-solid fa-play"></i>
+                  <a href="/?m=${m.id}&play=1" target="_blank" class="btn-movie-test-play" title="Test Play on HackyMax Player">
+                    <i class="fa-solid fa-play"></i> <span>Test Play</span>
                   </a>
                 </div>
                 <div class="movie-meta-tags">
@@ -1393,8 +1474,13 @@
 
               <div id="subStatusContainer_${m.id}">
                 ${m.hasSubtitle ? `
-                  <div class="sub-status-pill live">
-                    <i class="fa-solid fa-circle-check"></i> Subtitle Active (Catalog)
+                  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px;">
+                    <div class="sub-status-pill live">
+                      <i class="fa-solid fa-circle-check"></i> Subtitle Active (Catalog)
+                    </div>
+                    <a href="/?m=${m.id}&play=1" target="_blank" class="btn-test-play-badge" title="Test Play with subtitle in HackyMax Player">
+                      <i class="fa-solid fa-play"></i> <span>Test Play</span>
+                    </a>
                   </div>
                 ` : `
                   <div class="sub-status-pill missing">
@@ -1416,9 +1502,14 @@
 
             <div class="candidates-list" id="candidatesList_${m.id}">
               ${m.hasSubtitle ? `
-                <div style="font-size:0.75rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;">
-                  <i class="fa-solid fa-link" style="color:var(--green);"></i>
-                  <span>Live on Stream: ${m.existingSub?.source || 'R2'} (${m.existingSub?.format || 'srt'})</span>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(46,204,113,0.08);border:1px solid rgba(46,204,113,0.3);border-radius:8px;padding:8px 10px;">
+                  <div style="font-size:0.75rem;color:var(--text);display:flex;align-items:center;gap:6px;">
+                    <i class="fa-solid fa-circle-check" style="color:var(--green);"></i>
+                    <span>Live on Stream: <strong>${m.existingSub?.source || 'R2'}</strong> (${m.existingSub?.format || 'srt'})</span>
+                  </div>
+                  <a href="/?m=${m.id}&play=1" target="_blank" class="btn-test-play-badge" title="Test Play with subtitle in HackyMax Player">
+                    <i class="fa-solid fa-play"></i> <span>Test Play</span>
+                  </a>
                 </div>
               ` : `
                 <div style="font-size:0.75rem;color:var(--text-muted);">
@@ -1555,6 +1646,9 @@
             <button type="button" class="btn-add-r2" id="btnAddR2_${tmdbId}_${idx}" onclick="saveCandidateToR2(${tmdbId}, ${idx})">
               <i class="fa-solid fa-cloud-arrow-up"></i> <span>1-Click Upload</span>
             </button>
+            <a href="/?m=${tmdbId}&play=1" target="_blank" class="btn-test-play-cand" id="btnTestPlay_${tmdbId}_${idx}" title="Test Play on HackyMax Player">
+              <i class="fa-solid fa-play"></i> <span>Test Play</span>
+            </a>
             <button type="button" class="btn-cand-tool" onclick="previewCandidate(${tmdbId}, ${idx})" title="Preview Cues">
               <i class="fa-solid fa-eye"></i>
             </button>
@@ -1612,6 +1706,11 @@
           btn.innerHTML = '<i class="fa-solid fa-check-double"></i> <span>Live on Stream</span>';
         }
 
+        const testBtn = document.getElementById(`btnTestPlay_${tmdbId}_${candIndex}`);
+        if (testBtn) {
+          testBtn.classList.add('highlight-pulse');
+        }
+
         delete userSelectedSubtitles[tmdbId];
         updateSelectedCandidateCards(tmdbId);
         updateBatchCommitButton();
@@ -1622,8 +1721,13 @@
         const statusContainer = document.getElementById(`subStatusContainer_${tmdbId}`);
         if (statusContainer) {
           statusContainer.innerHTML = `
-            <div class="sub-status-pill live">
-              <i class="fa-solid fa-circle-check"></i> Subtitle Active (Saved to R2)
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px;">
+              <div class="sub-status-pill live">
+                <i class="fa-solid fa-circle-check"></i> Subtitle Active (Saved to R2)
+              </div>
+              <a href="/?m=${tmdbId}&play=1" target="_blank" class="btn-test-play-badge" title="Test Play with subtitle in HackyMax Player">
+                <i class="fa-solid fa-play"></i> <span>Test Play</span>
+              </a>
             </div>
           `;
         }
