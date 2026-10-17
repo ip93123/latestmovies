@@ -775,12 +775,6 @@
       color: #E67E22;
     }
 
-    .source-cineru {
-      background: rgba(231, 76, 60, 0.15);
-      border: 1px solid #E74C3C;
-      color: #E74C3C;
-    }
-
     .candidate-meta {
       font-size: 0.72rem;
       color: var(--text-muted);
@@ -1725,7 +1719,7 @@
               <i class="fa-solid fa-ban" style="color:#E74C3C;"></i>
               <span>No sub on Baiscope, Zoom, Subz.</span>
             </div>
-            ${queryTitle ? `<a href="https://cineru.lk/?s=${encodeURIComponent(queryTitle)}" target="_blank" rel="noopener" style="color:#E74C3C;font-size:0.72rem;font-weight:700;text-decoration:none;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Check Cineru</a>` : ''}
+            ${queryTitle ? `<a href="https://baiscopelk.com/?s=${encodeURIComponent(queryTitle)}" target="_blank" rel="noopener" style="color:#2ECC71;font-size:0.72rem;font-weight:700;text-decoration:none;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Baiscope</a> <a href="https://zoom.lk/?s=${encodeURIComponent(queryTitle)}" target="_blank" rel="noopener" style="color:#3B82F6;font-size:0.72rem;font-weight:700;text-decoration:none;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Zoom</a>` : ''}
           </div>
         `;
         return;
@@ -1735,12 +1729,9 @@
       results.forEach((item, idx) => {
         const isBaiscope = (item.source || '').includes('baiscope');
         const isZoom = (item.source || '').includes('zoom');
-        const isSubz = (item.source || '').includes('subz');
-        const isCineru = (item.source || '').includes('cineru');
-
         const badgeClass = isBaiscope
           ? 'source-baiscope'
-          : (isZoom ? 'source-zoom' : (isSubz ? 'source-subz' : 'source-cineru'));
+          : (isZoom ? 'source-zoom' : 'source-subz');
 
         const lineCount = item.srt?.lineCount || 0;
         const sizeStr = formatBytes(item.srt?.sizeBytes || item.srt?.content?.length || 0);

@@ -1477,16 +1477,6 @@
       font-weight: 700;
     }
 
-    .source-tag-cineru {
-      background: rgba(231, 76, 60, 0.15);
-      border: 1px solid rgba(231, 76, 60, 0.4);
-      color: #E74C3C;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 0.72rem;
-      font-weight: 700;
-    }
-
     /* Multi-Source Subtitle Selector */
     .multi-source-box {
       background: rgba(10, 15, 26, 0.88);
@@ -1583,12 +1573,6 @@
       background: rgba(230, 126, 34, 0.18);
       border: 1px solid #E67E22;
       color: #E67E22;
-    }
-
-    .source-badge-cineru {
-      background: rgba(231, 76, 60, 0.18);
-      border: 1px solid #E74C3C;
-      color: #E74C3C;
     }
 
     .source-card-title {
@@ -2232,8 +2216,9 @@
             </button>
             <div style="display:flex;align-items:center;gap:10px;font-size:0.75rem;color:var(--text-muted);flex-wrap:wrap;">
               <span>Direct Browser Search:</span>
-              <a id="quickCineruLink" href="https://cineru.lk" target="_blank" rel="noopener" style="color:#E74C3C;text-decoration:none;font-weight:700;display:inline-flex;align-items:center;gap:4px;" title="Open on Cineru.lk (Bypasses Cloudflare)"><i class="fa-solid fa-arrow-up-right-from-square"></i> Cineru.lk</a>
               <a id="quickBaiscopeLink" href="https://baiscopelk.com" target="_blank" rel="noopener" style="color:#2ECC71;text-decoration:none;font-weight:700;display:inline-flex;align-items:center;gap:4px;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Baiscope.lk</a>
+              <a id="quickZoomLink" href="https://zoom.lk" target="_blank" rel="noopener" style="color:#3B82F6;text-decoration:none;font-weight:700;display:inline-flex;align-items:center;gap:4px;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Zoom.lk</a>
+              <a id="quickSubzLink" href="https://subz.lk" target="_blank" rel="noopener" style="color:#F59E0B;text-decoration:none;font-weight:700;display:inline-flex;align-items:center;gap:4px;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Subz.lk</a>
             </div>
           </div>
         </div>
@@ -2281,28 +2266,7 @@
                 Searched Baiscope.lk, Zoom.lk and Subz.lk, but no matching Sinhala subtitle was returned by automated cloud search.
               </div>
 
-              <!-- Cineru Direct Browser Action Card (Cloudflare Bypass) -->
-              <div id="cineruDirectBox" style="margin-top:14px;padding:14px 18px;background:linear-gradient(135deg, rgba(231,76,60,0.14), rgba(18,24,38,0.95));border:1.5px solid rgba(231,76,60,0.45);border-radius:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-shadow:0 4px 16px rgba(0,0,0,0.3);">
-                <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:260px;">
-                  <div style="width:38px;height:38px;border-radius:50%;background:rgba(231,76,60,0.2);border:1px solid #E74C3C;display:flex;align-items:center;justify-content:center;color:#E74C3C;font-size:1.1rem;flex-shrink:0;">
-                    <i class="fa-solid fa-shield-halved"></i>
-                  </div>
-                  <div>
-                    <div style="font-weight:800;color:#fff;font-size:0.9rem;display:flex;align-items:center;gap:6px;">
-                      <span>Check Cineru.lk Directly in Browser</span>
-                      <span style="font-size:0.68rem;padding:2px 6px;border-radius:4px;background:#E74C3C;color:#fff;font-weight:700;">CF PROTECTED</span>
-                    </div>
-                    <div style="font-size:0.78rem;color:#cbd5e1;margin-top:3px;line-height:1.4;">
-                      Cineru.lk blocks automated cloud scrapers with Cloudflare Turnstile, but loads normally in your browser. Open the post, download the <strong>.zip</strong> or <strong>.srt</strong>, and drop it below!
-                    </div>
-                  </div>
-                </div>
-                <a id="btnOpenCineruDirect" href="https://cineru.lk" target="_blank" rel="noopener" class="btn-gold" style="padding:9px 18px;font-size:0.85rem;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#E74C3C,#C0392B);border-color:#E74C3C;color:#fff;box-shadow:0 0 15px rgba(231,76,60,0.35);">
-                  <i class="fa-solid fa-arrow-up-right-from-square"></i> <span id="btnOpenCineruText">Open on Cineru.lk</span>
-                </a>
-              </div>
-
-              <div class="no-subs-tip" style="margin-top:12px;">
+              <div class="no-subs-tip" style="margin-top:14px;">
                 <i class="fa-regular fa-lightbulb"></i> Have your own .srt or .zip file? Drag &amp; drop or upload it below to link it!
               </div>
             </div>
@@ -2738,10 +2702,12 @@
 
       // Update direct search links for the selected title
       const titleName = selectedTitle.title || selectedTitle.name || '';
-      const quickCineru = document.getElementById('quickCineruLink');
       const quickBaiscope = document.getElementById('quickBaiscopeLink');
-      if (quickCineru && titleName) quickCineru.href = `https://cineru.lk/?s=${encodeURIComponent(titleName)}`;
+      const quickZoom = document.getElementById('quickZoomLink');
+      const quickSubz = document.getElementById('quickSubzLink');
       if (quickBaiscope && titleName) quickBaiscope.href = `https://baiscopelk.com/?s=${encodeURIComponent(titleName)}`;
+      if (quickZoom && titleName) quickZoom.href = `https://zoom.lk/?s=${encodeURIComponent(titleName)}`;
+      if (quickSubz && titleName) quickSubz.href = `https://subz.lk/?s=${encodeURIComponent(titleName)}`;
 
       // Automatically check status and auto-fetch web subtitles
       checkSubtitleStatus(true);
@@ -3388,14 +3354,6 @@
             if (noSubsMsg) {
               noSubsMsg.innerHTML = `Automated search completed for <strong>"${escapeJs(titleName)}"</strong>${releaseYear ? ` (${releaseYear})` : ''} across Baiscope, Zoom &amp; Subz.`;
             }
-            const cineruLink = document.getElementById('btnOpenCineruDirect');
-            const cineruText = document.getElementById('btnOpenCineruText');
-            if (cineruLink) {
-              cineruLink.href = `https://cineru.lk/?s=${encodeURIComponent(titleName)}`;
-            }
-            if (cineruText) {
-              cineruText.textContent = `Open "${titleName}" on Cineru.lk`;
-            }
             noSubsBox.style.display = 'block';
             noSubsBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
           }
@@ -3435,15 +3393,14 @@
         const isBaiscope = (item.source || '').includes('baiscope');
         const isZoom = (item.source || '').includes('zoom');
         const isSubz = (item.source || '').includes('subz');
-        const isCineru = (item.source || '').includes('cineru');
 
         const badgeClass = isBaiscope
           ? 'source-badge-baiscope'
-          : (isZoom ? 'source-badge-zoom' : (isSubz ? 'source-badge-subz' : 'source-badge-cineru'));
+          : (isZoom ? 'source-badge-zoom' : 'source-badge-subz');
 
         const badgeIcon = isBaiscope
           ? 'fa-film'
-          : (isZoom ? 'fa-video' : (isSubz ? 'fa-closed-captioning' : 'fa-clapperboard'));
+          : (isZoom ? 'fa-video' : 'fa-closed-captioning');
 
         const lineCount = item.srt?.lineCount || 0;
         const sizeFormatted = formatBytes(item.srt?.sizeBytes || (item.srt?.content ? item.srt.content.length : 0));
@@ -3553,11 +3510,9 @@
       if (sourceBadge) {
         const isBaiscope = (item.source || '').includes('baiscope');
         const isZoom = (item.source || '').includes('zoom');
-        const isSubz = (item.source || '').includes('subz');
-        const isCineru = (item.source || '').includes('cineru');
         sourceBadge.className = isBaiscope
           ? 'source-tag-baiscope'
-          : (isZoom ? 'source-tag-zoom' : (isSubz ? 'source-tag-subz' : 'source-tag-cineru'));
+          : (isZoom ? 'source-tag-zoom' : 'source-tag-subz');
         sourceBadge.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${item.source}`;
         sourceBadge.style.display = 'inline-flex';
       }
