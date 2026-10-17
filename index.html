@@ -7188,6 +7188,410 @@
       transform: scale(1.06);
       box-shadow: 0 0 16px rgba(168, 85, 247, 0.5) !important;
     }
+    .wp-chat-toggle-btn {
+      background: rgba(168, 85, 247, 0.2) !important;
+      border: 1px solid rgba(168, 85, 247, 0.5) !important;
+      color: #c084fc !important;
+      transition: all 0.2s ease !important;
+      position: relative;
+    }
+    .wp-chat-toggle-btn:hover {
+      background: rgba(168, 85, 247, 0.35) !important;
+      border-color: #a855f7 !important;
+      color: #fff !important;
+      transform: scale(1.06);
+      box-shadow: 0 0 16px rgba(168, 85, 247, 0.5) !important;
+    }
+    .wp-chat-toggle-btn.has-unread {
+      animation: wpChatPulse 1.8s infinite;
+    }
+    @keyframes wpChatPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.6); }
+      50% { box-shadow: 0 0 0 8px rgba(168, 85, 247, 0); }
+    }
+    .wp-chat-unread-dot {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      width: 9px;
+      height: 9px;
+      background: #ef4444;
+      border: 1.5px solid #0d1117;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #ef4444;
+    }
+
+    /* Unsupported server button disable rule */
+    .floating-btn.wp-disabled,
+    .topbar-wp-btn.wp-disabled,
+    #maxWatchPartyBtn.wp-disabled {
+      opacity: 0.35 !important;
+      filter: grayscale(1) !important;
+      pointer-events: none !important;
+      cursor: not-allowed !important;
+    }
+
+    /* ── Watch Party Modern Glass Chat System ── */
+    #wpChatContainer {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 360px;
+      max-width: calc(100vw - 32px);
+      height: 480px;
+      max-height: calc(100vh - 100px);
+      background: rgba(12, 16, 28, 0.78);
+      backdrop-filter: blur(24px) saturate(190%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 35px rgba(168, 85, 247, 0.18);
+      z-index: 2147483647 !important;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform: translateY(120%) scale(0.94);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease;
+      font-family: 'Inter', sans-serif;
+    }
+    #wpChatContainer.open {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    @media (max-width: 600px) {
+      #wpChatContainer {
+        bottom: 0;
+        right: 0;
+        left: 0;
+        width: 100%;
+        max-width: 100%;
+        height: 62vh;
+        max-height: 80vh;
+        border-radius: 20px 20px 0 0;
+        border-bottom: none;
+      }
+    }
+    .wp-chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      user-select: none;
+    }
+    .wp-chat-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .wp-chat-icon-badge {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #7C3AED, #C084FC);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(168, 85, 247, 0.4);
+    }
+    .wp-chat-title {
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: #fff;
+      letter-spacing: 0.3px;
+    }
+    .wp-chat-role-pill {
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .wp-chat-role-pill.host {
+      background: rgba(168, 85, 247, 0.2);
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      color: #c084fc;
+    }
+    .wp-chat-role-pill.guest {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      color: #4ade80;
+    }
+    .wp-chat-close-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.6);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82rem;
+      transition: all 0.2s;
+    }
+    .wp-chat-close-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+    .wp-chat-messages {
+      flex: 1;
+      padding: 12px 14px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+    }
+    .wp-chat-messages::-webkit-scrollbar {
+      width: 4px;
+    }
+    .wp-chat-messages::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 4px;
+    }
+    .wp-chat-empty {
+      margin: auto;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.78rem;
+      line-height: 1.5;
+    }
+    .wp-chat-empty span {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .wp-msg-item {
+      display: flex;
+      flex-direction: column;
+      max-width: 86%;
+      animation: wpMsgFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @keyframes wpMsgFadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .wp-msg-item.self {
+      align-self: flex-end;
+      align-items: flex-end;
+    }
+    .wp-msg-item.other {
+      align-self: flex-start;
+      align-items: flex-start;
+    }
+    .wp-msg-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 3px;
+      font-size: 0.68rem;
+    }
+    .wp-msg-sender {
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    .wp-msg-sender.host {
+      color: #c084fc;
+    }
+    .wp-msg-sender.guest {
+      color: #38bdf8;
+    }
+    .wp-msg-time {
+      color: rgba(255, 255, 255, 0.35);
+      font-size: 0.62rem;
+    }
+    .wp-msg-bubble {
+      padding: 8px 12px;
+      border-radius: 14px;
+      font-size: 0.82rem;
+      line-height: 1.45;
+      color: #fff;
+      word-break: break-word;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    }
+    .wp-msg-item.self .wp-msg-bubble {
+      background: linear-gradient(135deg, rgba(147, 51, 234, 0.5), rgba(79, 70, 229, 0.6));
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      border-top-right-radius: 4px;
+    }
+    .wp-msg-item.other .wp-msg-bubble {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-top-left-radius: 4px;
+    }
+    /* Quick Emoji Reactions Bar */
+    .wp-chat-quick-emojis {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .wp-chat-quick-emojis::-webkit-scrollbar {
+      display: none;
+    }
+    .wp-quick-emoji-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      padding: 4px 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .wp-quick-emoji-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: scale(1.18);
+    }
+    /* Input footer */
+    .wp-chat-footer {
+      padding: 10px 12px 12px 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+      position: relative;
+    }
+    .wp-chat-input-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      padding: 4px 6px 4px 12px;
+      transition: all 0.2s;
+    }
+    .wp-chat-input-row:focus-within {
+      border-color: rgba(168, 85, 247, 0.6);
+      box-shadow: 0 0 16px rgba(168, 85, 247, 0.25);
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .wp-chat-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 0.82rem;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+    }
+    .wp-chat-input::placeholder {
+      color: rgba(255, 255, 255, 0.35);
+    }
+    .wp-chat-btn-icon {
+      background: transparent;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 50%;
+      transition: transform 0.15s;
+      line-height: 1;
+    }
+    .wp-chat-btn-icon:hover {
+      transform: scale(1.15);
+    }
+    .wp-chat-send-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7C3AED, #A855F7);
+      border: none;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.78rem;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(168, 85, 247, 0.4);
+    }
+    .wp-chat-send-btn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 4px 14px rgba(168, 85, 247, 0.6);
+    }
+    .wp-chat-send-btn:active {
+      transform: scale(0.94);
+    }
+    /* Expanded Emoji Tray */
+    .wp-chat-emoji-tray {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 12px;
+      right: 12px;
+      background: rgba(14, 18, 32, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 14px;
+      padding: 10px;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      max-height: 180px;
+      overflow-y: auto;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
+      z-index: 10;
+      animation: wpMsgFadeIn 0.2s ease both;
+    }
+    .wp-chat-emoji-tray.open {
+      display: grid;
+    }
+    .wp-tray-emoji-btn {
+      background: transparent;
+      border: none;
+      font-size: 1.25rem;
+      padding: 4px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      line-height: 1;
+    }
+    .wp-tray-emoji-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: scale(1.22);
+    }
+    /* Floating Peek Toast when chat is closed */
+    #wpChatPeekToast {
+      position: fixed;
+      bottom: 84px;
+      right: 24px;
+      max-width: 320px;
+      background: rgba(14, 18, 32, 0.9);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(168, 85, 247, 0.2);
+      border-radius: 14px;
+      padding: 9px 14px;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      z-index: 2147483646 !important;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      animation: wpMsgFadeIn 0.25s ease both;
+      transition: all 0.2s ease;
+    }
+    #wpChatPeekToast:hover {
+      transform: translateY(-2px);
+      border-color: rgba(168, 85, 247, 0.7);
+    }
+
     .wp-hud-quick-btn {
       background: rgba(168, 85, 247, 0.25);
       border: 1px solid rgba(168, 85, 247, 0.5);
@@ -11107,9 +11511,10 @@
 
         <span class="floating-divider" id="floatingBarDivider"></span>
 
-        <!-- Watch Party Host Play/Pause Control (Host Only) -->
-        <button class="floating-btn wp-host-playpause-btn" id="wpHostPlayPauseBtn" title="Pause / Resume Watch Party for everyone" style="display:none;" onclick="event.stopPropagation(); window._toggleHostPlayback();">
-          <i class="fa-solid fa-pause" id="wpHostPlayPauseIcon"></i>
+        <!-- Watch Party Chat Toggle Button (Host & Guests) -->
+        <button class="floating-btn wp-chat-toggle-btn" id="wpChatToggleBtn" title="Watch Party Chat" style="display:none;" onclick="event.stopPropagation(); window.toggleWatchPartyChat();">
+          <i class="fa-solid fa-comments" id="wpChatToggleIcon"></i>
+          <span class="wp-chat-unread-dot" id="wpChatUnreadDot" style="display:none;"></span>
         </button>
 
         <!-- Watch Party button (Round Icon Only) -->
@@ -19301,6 +19706,7 @@
       } else {
         bar.innerHTML = '';
       }
+      if (typeof updateWatchPartyButtonAvailability === 'function') updateWatchPartyButtonAvailability(_activeServerIndex);
       const wasAlreadyOpen = overlay.classList.contains('open');
       overlay.classList.add('open');
       overlay.classList.remove('idle-fs');
@@ -19399,6 +19805,7 @@
         const idx = allBtns.indexOf(btn);
         if (idx >= 0) _activeServerIndex = idx;
       }
+      if (typeof updateWatchPartyButtonAvailability === 'function') updateWatchPartyButtonAvailability(_activeServerIndex);
       const frame  = document.getElementById('playerFrame');
       const loader = document.getElementById('playerLoading');
       const isTvDevice = (window.DEVICE && window.DEVICE.isTV) || _tvMode || document.body.classList.contains('tv-mode') || document.body.classList.contains('device-tv');
@@ -21347,12 +21754,214 @@
       hostConn:     null,
       code:         null,
       isHost:       false,
+      myDisplayName: 'Host',
       guestNames:   [],
       _clockOffset: 0,
       _rtt:         0,
       _lastHardSeek: 0,
       _pingTimer:   null,
     };
+
+    /* ── Unsupported Server Protection ──────────────────────── */
+    const WP_SUPPORTED_SERVERS = new Set([0, 1, 3, 4, 6, 7, 8]); // HackyMax, Nebula, Nova, Vortex, Spark, Sonic, Bolt
+    window.WP_SUPPORTED_SERVERS = WP_SUPPORTED_SERVERS;
+
+    function updateWatchPartyButtonAvailability(serverIndex) {
+      const sIdx = (typeof serverIndex === 'number') ? serverIndex : (typeof _activeServerIndex === 'number' ? _activeServerIndex : 0);
+      const isSupported = !!window._maxMode || WP_SUPPORTED_SERVERS.has(sIdx);
+      const wpBtns = [
+        document.getElementById('topbarWatchPartyBtn'),
+        document.getElementById('maxWatchPartyBtn')
+      ];
+      wpBtns.forEach(btn => {
+        if (!btn) return;
+        if (isSupported) {
+          btn.classList.remove('wp-disabled');
+          btn.removeAttribute('disabled');
+          btn.style.opacity = '1';
+          btn.style.pointerEvents = 'auto';
+          btn.style.filter = 'none';
+          btn.title = 'Watch Party — Watch together with friends';
+        } else {
+          btn.classList.add('wp-disabled');
+          btn.setAttribute('disabled', 'true');
+          btn.style.opacity = '0.35';
+          btn.style.pointerEvents = 'none';
+          btn.style.filter = 'grayscale(1)';
+          btn.title = 'Watch Party is not supported on this server. Switch to HackyMax, Nebula, Nova, or Vortex to use Watch Party.';
+        }
+      });
+    }
+    window.updateWatchPartyButtonAvailability = updateWatchPartyButtonAvailability;
+
+    /* ── Watch Party Glass Chat System State & Actions ───────── */
+    let _wpChatMessages = [];
+    let _wpUnreadCount = 0;
+    let _wpChatPeekTimer = null;
+
+    function toggleWatchPartyChat(forceState) {
+      const container = document.getElementById('wpChatContainer');
+      if (!container) return;
+      const isCurrentlyOpen = container.classList.contains('open');
+      const willOpen = typeof forceState === 'boolean' ? forceState : !isCurrentlyOpen;
+
+      if (willOpen) {
+        const fsElem = document.fullscreenElement || document.webkitFullscreenElement;
+        const playerOverlay = document.getElementById('playerOverlay');
+        if (fsElem && container.parentElement !== fsElem) {
+          fsElem.appendChild(container);
+        } else if (playerOverlay && playerOverlay.classList.contains('open') && container.parentElement !== playerOverlay) {
+          playerOverlay.appendChild(container);
+        }
+
+        container.classList.add('open');
+        _wpUnreadCount = 0;
+        _updateChatBadge();
+        const peekToast = document.getElementById('wpChatPeekToast');
+        if (peekToast) peekToast.style.display = 'none';
+
+        setTimeout(() => {
+          const inp = document.getElementById('wpChatInput');
+          if (inp) inp.focus();
+          _scrollChatToBottom();
+        }, 100);
+      } else {
+        container.classList.remove('open');
+        const tray = document.getElementById('wpChatEmojiTray');
+        if (tray) tray.classList.remove('open');
+      }
+    }
+    window.toggleWatchPartyChat = toggleWatchPartyChat;
+    window.closeWatchPartyChat = () => toggleWatchPartyChat(false);
+
+    function toggleWpEmojiTray() {
+      const tray = document.getElementById('wpChatEmojiTray');
+      if (tray) tray.classList.toggle('open');
+    }
+    window.toggleWpEmojiTray = toggleWpEmojiTray;
+
+    function insertWpEmoji(emoji) {
+      const inp = document.getElementById('wpChatInput');
+      if (!inp) return;
+      inp.value += emoji;
+      inp.focus();
+    }
+    window.insertWpEmoji = insertWpEmoji;
+
+    function _scrollChatToBottom() {
+      const list = document.getElementById('wpChatMessages');
+      if (list) list.scrollTop = list.scrollHeight;
+    }
+
+    function _updateChatBadge() {
+      const dot = document.getElementById('wpChatUnreadDot');
+      const btn = document.getElementById('wpChatToggleBtn');
+      if (!dot || !btn) return;
+      if (_wpUnreadCount > 0) {
+        dot.style.display = 'block';
+        btn.classList.add('has-unread');
+      } else {
+        dot.style.display = 'none';
+        btn.classList.remove('has-unread');
+      }
+    }
+
+    function _escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function _appendChatMessage(msg, isSelf) {
+      if (!msg) return;
+      _wpChatMessages.push(msg);
+      const list = document.getElementById('wpChatMessages');
+      const empty = document.getElementById('wpChatEmpty');
+      if (empty) empty.style.display = 'none';
+
+      if (list) {
+        const isHostSender = !!msg.isHost || (msg.sender && String(msg.sender).toLowerCase().includes('host'));
+        const roleClass = isHostSender ? 'host' : 'guest';
+        const roleIcon = isHostSender ? '👑 ' : '👤 ';
+        const timeStr = new Date(msg.ts || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        const item = document.createElement('div');
+        item.className = `wp-msg-item ${isSelf ? 'self' : 'other'}`;
+        item.innerHTML = `
+          <div class="wp-msg-meta">
+            <span class="wp-msg-sender ${roleClass}">${roleIcon}${_escapeHtml(msg.sender || (isHostSender ? 'Host' : 'Guest'))}</span>
+            <span class="wp-msg-time">${timeStr}</span>
+          </div>
+          <div class="wp-msg-bubble">${_escapeHtml(msg.text)}</div>
+        `;
+        list.appendChild(item);
+        _scrollChatToBottom();
+      }
+
+      const container = document.getElementById('wpChatContainer');
+      if (!isSelf && (!container || !container.classList.contains('open'))) {
+        _wpUnreadCount++;
+        _updateChatBadge();
+
+        const peekToast = document.getElementById('wpChatPeekToast');
+        const peekSender = document.getElementById('wpChatPeekSender');
+        const peekText = document.getElementById('wpChatPeekText');
+        if (peekToast && peekSender && peekText) {
+          const fsElem = document.fullscreenElement || document.webkitFullscreenElement;
+          const playerOverlay = document.getElementById('playerOverlay');
+          if (fsElem && peekToast.parentElement !== fsElem) {
+            fsElem.appendChild(peekToast);
+          } else if (playerOverlay && playerOverlay.classList.contains('open') && peekToast.parentElement !== playerOverlay) {
+            playerOverlay.appendChild(peekToast);
+          }
+
+          peekSender.textContent = (msg.isHost ? '👑 ' : '👤 ') + (msg.sender || 'Friend');
+          peekSender.style.color = msg.isHost ? '#c084fc' : '#38bdf8';
+          peekText.textContent = msg.text;
+          peekToast.style.display = 'flex';
+
+          clearTimeout(_wpChatPeekTimer);
+          _wpChatPeekTimer = setTimeout(() => {
+            peekToast.style.display = 'none';
+          }, 4500);
+        }
+      }
+    }
+
+    function submitWatchPartyChat(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const inp = document.getElementById('wpChatInput');
+      if (!inp) return;
+      const text = (inp.value || '').trim();
+      if (!text) return;
+
+      const myName = WP.isHost ? 'Host' : (WP.myDisplayName || 'Guest 1');
+      const msg = {
+        type: 'wp-chat',
+        id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+        sender: myName,
+        isHost: WP.isHost,
+        text: text,
+        ts: Date.now()
+      };
+
+      inp.value = '';
+      const tray = document.getElementById('wpChatEmojiTray');
+      if (tray) tray.classList.remove('open');
+
+      _appendChatMessage(msg, true);
+
+      if (WP.isHost) {
+        _broadcast(msg);
+      } else if (WP.hostConn && WP.hostConn.open) {
+        try { WP.hostConn.send(msg); } catch (_) {}
+      }
+    }
+    window.submitWatchPartyChat = submitWatchPartyChat;
 
     function _vid() { return document.getElementById('maxVideo'); }
 
@@ -21524,14 +22133,35 @@
         return;
       }
 
+      // Handle Chat Message
+      if (data.type === 'wp-chat') {
+        _appendChatMessage(data, false);
+        return;
+      }
+
+      // Handle Assigned Guest Name from Host
+      if (data.type === 'wp-assign-name') {
+        WP.myDisplayName = data.name || 'Guest 1';
+        const roleBadge = document.getElementById('wpChatMyRoleBadge');
+        if (roleBadge) {
+          roleBadge.textContent = `${WP.myDisplayName} (You)`;
+          roleBadge.className = 'wp-chat-role-pill guest';
+        }
+        return;
+      }
+
       // Handle server switch broadcast from Host
       if (data.type === 'switch-server') {
         const btns = document.querySelectorAll('.player-server-btn');
         const targetIdx = typeof data.serverIndex === 'number' ? data.serverIndex : 0;
+        _activeServerIndex = targetIdx;
         if (btns && btns[targetIdx]) {
           btns[targetIdx].click();
         }
-        _wpToast(`🔄 Host switched to ${data.serverName || ('Server ' + (targetIdx + 1))}`);
+        if (typeof updateWatchPartyButtonAvailability === 'function') {
+          updateWatchPartyButtonAvailability(_activeServerIndex);
+        }
+        _wpToast(`🔀 Host switched to ${data.serverName || ('Server ' + (targetIdx + 1))}`);
         return;
       }
 
@@ -21995,6 +22625,10 @@
         if (wpHudQuickBtn) wpHudQuickBtn.style.display = 'none';
       }
 
+      // Update Watch Party chat button visibility (both host and guests)
+      const wpChatBtn = document.getElementById('wpChatToggleBtn');
+      if (wpChatBtn) wpChatBtn.style.display = WP.code ? 'inline-flex' : 'none';
+
       // Update active dots safely
       const topbarDot = document.getElementById('topbarWpActiveDot');
       if (topbarDot) topbarDot.style.display = 'inline-block';
@@ -22065,12 +22699,17 @@
       WP.peer.on('connection', conn => {
         conn.on('open', () => {
           WP.conns.push(conn);
+          const guestNumber = WP.conns.length;
+          const assignedName = `Guest ${guestNumber}`;
+          try {
+            conn.send({ type: 'wp-assign-name', name: assignedName, guestNumber: guestNumber });
+          } catch (_) {}
           _startHostHeartbeat();
           conn.send(_hostGetState());
           _broadcastMeta();
           _refreshGuestList();
           _refreshHud(WP.conns.length + 1);
-          _wpToast('👤 A friend joined your Watch Party!');
+          _wpToast(`👤 ${assignedName} joined your Watch Party!`);
         });
         conn.on('data', data => {
           if (!data) return;
@@ -22080,6 +22719,13 @@
             try {
               conn.send({ type: 'wp-pong', t0: data.t0, tHost: Date.now() });
             } catch (_) {}
+          } else if (data.type === 'wp-chat') {
+            _appendChatMessage(data, false);
+            WP.conns.forEach(c => {
+              if (c !== conn && c.open) {
+                try { c.send(data); } catch (_) {}
+              }
+            });
           }
         });
         conn.on('close', () => {
@@ -22205,6 +22851,16 @@
       if (wpHostPlayBtn) wpHostPlayBtn.style.display = 'none';
       const wpHudQuickBtn = document.getElementById('wpHudQuickPlayBtn');
       if (wpHudQuickBtn) wpHudQuickBtn.style.display = 'none';
+      const wpChatBtn = document.getElementById('wpChatToggleBtn');
+      if (wpChatBtn) wpChatBtn.style.display = 'none';
+      if (typeof window.closeWatchPartyChat === 'function') window.closeWatchPartyChat();
+      _wpChatMessages = [];
+      _wpUnreadCount = 0;
+      _updateChatBadge();
+      const chatMsgs = document.getElementById('wpChatMessages');
+      if (chatMsgs) {
+        chatMsgs.innerHTML = `<div class="wp-chat-empty" id="wpChatEmpty"><span>🍿</span>No messages yet.<br>Chat with friends while watching!</div>`;
+      }
 
       document.getElementById('wpRoomCode').textContent = '------';
       document.getElementById('wpShareUrl').textContent  = '';
@@ -22396,6 +23052,9 @@
               u.searchParams.set('m', currentId);
             }
           }
+          if (typeof _activeServerIndex === 'number') {
+            u.searchParams.set('server', _activeServerIndex);
+          }
           if (engine) {
             u.searchParams.set('engine', engine);
           }
@@ -22404,6 +23063,13 @@
         })();
 
         try { history.replaceState(null, '', shareUrl); } catch (_) {}
+
+        WP.myDisplayName = 'Host';
+        const myChatBadge = document.getElementById('wpChatMyRoleBadge');
+        if (myChatBadge) {
+          myChatBadge.textContent = 'Host (You)';
+          myChatBadge.className = 'wp-chat-role-pill host';
+        }
 
         document.getElementById('wpRoomCode').textContent   = code;
         document.getElementById('wpShareUrl').textContent   = shareUrl;
@@ -22440,6 +23106,10 @@
 
     /* ── Watch party player button click ─────────────────────── */
     async function _onWpClick() {
+      if (typeof _activeServerIndex === 'number' && !window._maxMode && typeof WP_SUPPORTED_SERVERS !== 'undefined' && !WP_SUPPORTED_SERVERS.has(_activeServerIndex)) {
+        _wpToast('⚠️ Watch Party is not supported on this server. Please switch to HackyMax, Nebula, Nova, or Vortex.');
+        return;
+      }
       if (WP.code) {
         window.openWatchPartyModal('host');
         return;
@@ -22588,6 +23258,14 @@
         } catch (_) {}
       }
 
+      const serverParam = params.get('server');
+      if (serverParam !== null) {
+        _activeServerIndex = parseInt(serverParam, 10) || 0;
+      }
+      if (typeof updateWatchPartyButtonAvailability === 'function') {
+        updateWatchPartyButtonAvailability(_activeServerIndex);
+      }
+
       const mParam = params.get('m');
       const tvParam = params.get('s');
       const engParam = params.get('engine');
@@ -22623,6 +23301,8 @@
         shareClean.hash = '';
         if (mParam) shareClean.searchParams.set('m', mParam);
         if (tvParam) shareClean.searchParams.set('s', tvParam);
+        if (serverParam !== null) shareClean.searchParams.set('server', serverParam);
+        else if (typeof _activeServerIndex === 'number') shareClean.searchParams.set('server', _activeServerIndex);
         shareClean.searchParams.set('party', WP.code);
         document.getElementById('wpShareUrl').textContent   = shareClean.toString();
 
@@ -22844,6 +23524,83 @@
         <span id="wpGuestLockMsg">Host paused</span>
       </div>
       <span class="wp-guest-lock-sub">Playback is synced · Will resume when Host plays</span>
+    </div>
+  </div>
+
+  <!-- Watch Party Modern Glass Chat System -->
+  <div id="wpChatContainer">
+    <div class="wp-chat-header">
+      <div class="wp-chat-title-group">
+        <div class="wp-chat-icon-badge"><i class="fa-solid fa-comments"></i></div>
+        <div class="wp-chat-title">Watch Party Chat</div>
+        <span class="wp-chat-role-pill host" id="wpChatMyRoleBadge">Host</span>
+      </div>
+      <button class="wp-chat-close-btn" id="wpChatCloseBtn" onclick="window.toggleWatchPartyChat(false)" title="Close Chat">✕</button>
+    </div>
+
+    <div class="wp-chat-messages" id="wpChatMessages">
+      <div class="wp-chat-empty" id="wpChatEmpty">
+        <span>🍿</span>
+        No messages yet.<br>Chat with friends while watching!
+      </div>
+    </div>
+
+    <!-- Quick Emoji Bar -->
+    <div class="wp-chat-quick-emojis">
+      <button type="button" class="wp-quick-emoji-btn" onclick="window.insertWpEmoji('❤️')">❤️</button>
+      <button type="button" class="wp-quick-emoji-btn" onclick="window.insertWpEmoji('😂')">😂</button>
+      <button type="button" class="wp-quick-emoji-btn" onclick="window.insertWpEmoji('🔥')">🔥</button>
+      <button type="button" class="wp-quick-emoji-btn" onclick="window.insertWpEmoji('😮')">😮</button>
+      <button type="button" class="wp-quick-emoji-btn" onclick="window.insertWpEmoji('👏')">👏</button>
+      <button type="button" class="wp-quick-emoji-btn" onclick="window.insertWpEmoji('🍿')">🍿</button>
+      <button type="button" class="wp-quick-emoji-btn" onclick="window.insertWpEmoji('🎬')">🎬</button>
+      <button type="button" class="wp-quick-emoji-btn" onclick="window.insertWpEmoji('🚀')">🚀</button>
+      <button type="button" class="wp-quick-emoji-btn" onclick="window.insertWpEmoji('💯')">💯</button>
+      <button type="button" class="wp-quick-emoji-btn" onclick="window.insertWpEmoji('👀')">👀</button>
+      <button type="button" class="wp-quick-emoji-btn" onclick="window.insertWpEmoji('😢')">😢</button>
+      <button type="button" class="wp-quick-emoji-btn" onclick="window.insertWpEmoji('🎉')">🎉</button>
+    </div>
+
+    <!-- Chat Footer & Input Form -->
+    <form class="wp-chat-footer" id="wpChatForm" onsubmit="window.submitWatchPartyChat(event)">
+      <!-- Expanded Emoji Tray -->
+      <div class="wp-chat-emoji-tray" id="wpChatEmojiTray">
+        <button type="button" class="wp-tray-emoji-btn" onclick="window.insertWpEmoji('😀')">😀</button>
+        <button type="button" class="wp-tray-emoji-btn" onclick="window.insertWpEmoji('😂')">😂</button>
+        <button type="button" class="wp-tray-emoji-btn" onclick="window.insertWpEmoji('🤣')">🤣</button>
+        <button type="button" class="wp-tray-emoji-btn" onclick="window.insertWpEmoji('😍')">😍</button>
+        <button type="button" class="wp-tray-emoji-btn" onclick="window.insertWpEmoji('😎')">😎</button>
+        <button type="button" class="wp-tray-emoji-btn" onclick="window.insertWpEmoji('🥳')">🥳</button>
+        <button type="button" class="wp-tray-emoji-btn" onclick="window.insertWpEmoji('😱')">😱</button>
+        <button type="button" class="wp-tray-emoji-btn" onclick="window.insertWpEmoji('😭')">😭</button>
+        <button type="button" class="wp-tray-emoji-btn" onclick="window.insertWpEmoji('🥺')">🥺</button>
+        <button type="button" class="wp-tray-emoji-btn" onclick="window.insertWpEmoji('🔥')">🔥</button>
+        <button type="button" class="wp-tray-emoji-btn" onclick="window.insertWpEmoji('❤️')">❤️</button>
+        <button type="button" class="wp-tray-emoji-btn" onclick="window.insertWpEmoji('👍')">👍</button>
+        <button type="button" class="wp-tray-emoji-btn" onclick="window.insertWpEmoji('👎')">👎</button>
+        <button type="button" class="wp-tray-emoji-btn" onclick="window.insertWpEmoji('👏')">👏</button>
+        <button type="button" class="wp-tray-emoji-btn" onclick="window.insertWpEmoji('🙌')">🙌</button>
+        <button type="button" class="wp-tray-emoji-btn" onclick="window.insertWpEmoji('🍿')">🍿</button>
+        <button type="button" class="wp-tray-emoji-btn" onclick="window.insertWpEmoji('🎬')">🎬</button>
+        <button type="button" class="wp-tray-emoji-btn" onclick="window.insertWpEmoji('👀')">👀</button>
+        <button type="button" class="wp-tray-emoji-btn" onclick="window.insertWpEmoji('💯')">💯</button>
+        <button type="button" class="wp-tray-emoji-btn" onclick="window.insertWpEmoji('✨')">✨</button>
+        <button type="button" class="wp-tray-emoji-btn" onclick="window.insertWpEmoji('🎉')">🎉</button>
+      </div>
+
+      <div class="wp-chat-input-row">
+        <input type="text" id="wpChatInput" class="wp-chat-input" placeholder="Type a message..." maxlength="300" autocomplete="off">
+        <button type="button" id="wpChatEmojiBtn" class="wp-chat-btn-icon" onclick="window.toggleWpEmojiTray()" title="Emojis">😊</button>
+        <button type="submit" id="wpChatSendBtn" class="wp-chat-send-btn" title="Send message"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Floating Peek Toast for incoming chat message while chat is minimized -->
+  <div id="wpChatPeekToast" onclick="window.toggleWatchPartyChat(true)">
+    <div style="font-size:1.1rem;flex-shrink:0;">💬</div>
+    <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">
+      <strong id="wpChatPeekSender" style="color:#c084fc;">Host</strong>: <span id="wpChatPeekText" style="color:rgba(255,255,255,0.9);">Message</span>
     </div>
   </div>
 
