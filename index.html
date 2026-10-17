@@ -2581,16 +2581,16 @@
     ═══════════════════════════════════════════════════════════ */
     .top10-section {
       background: transparent;
-      padding: 2.5rem 0 2.8rem 0;
+      padding-top: 2.5rem;
+      padding-bottom: 2.8rem;
       position: relative;
-      overflow: hidden;
     }
     .top10-header-wrap {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 1.5rem;
-      padding: 0 2rem;
+      padding: 0;
       position: relative;
       z-index: 2;
     }
@@ -2644,7 +2644,7 @@
     }
     .top10-scroll-wrapper {
       position: relative;
-      padding: 0 2rem;
+      padding: 0;
       overflow: visible;
     }
     .top10-row {
@@ -2658,8 +2658,8 @@
       -webkit-overflow-scrolling: touch;
       touch-action: pan-x pan-y;
       overscroll-behavior-x: contain;
-      padding: 1.2rem 1.2rem 2.2rem 1.2rem;
-      margin: 0 -1.2rem;
+      padding: 1.2rem 0.2rem 2.2rem 0.2rem;
+      margin: 0;
       position: relative;
       z-index: 1;
     }
@@ -2965,10 +2965,11 @@
     /* ── Responsive Mobile & TV Optimizations ── */
     @media (max-width: 768px) {
       .top10-section {
-        padding: 2rem 0 2.4rem 0;
+        padding-top: 2rem;
+        padding-bottom: 2.4rem;
       }
       .top10-header-wrap {
-        padding: 0 1rem;
+        padding: 0;
         margin-bottom: 0.8rem;
       }
       .top10-header-title {
@@ -2979,7 +2980,7 @@
         padding: 3px 9px;
       }
       .top10-scroll-wrapper {
-        padding: 0 0.8rem;
+        padding: 0;
         overflow: visible;
       }
       .top10-scroll-btn {
@@ -4169,8 +4170,8 @@
       overflow-x: auto;
       overflow-y: visible;
       gap: 1.15rem;
-      padding: 1.2rem 1.4rem 1.8rem 1.4rem;
-      margin: -0.8rem -1.4rem -1.2rem -1.4rem;
+      padding: 0.8rem 0.2rem 1.6rem 0.2rem;
+      margin: 0;
       scrollbar-width: none;
       scroll-behavior: smooth;
       -webkit-overflow-scrolling: touch;
@@ -4600,8 +4601,8 @@
       }
 
       .category-cards-row {
-        padding: 0.8rem 1rem 1.4rem 1rem;
-        margin: -0.5rem -1rem -0.8rem -1rem;
+        padding: 0.8rem 0.2rem 1.4rem 0.2rem;
+        margin: 0;
         gap: 0.8rem;
         scroll-snap-type: x proximity;
       }
@@ -10069,7 +10070,7 @@
     }
     .device-mobile .category-card-native { font-size: 1.2rem; }
     .device-mobile .category-card-sub { font-size: .78rem; }
-    .device-mobile .category-cards-row { padding: 0.8rem 1rem 1.4rem 1rem; margin: -0.5rem -1rem -0.8rem -1rem; gap: .85rem; }
+    .device-mobile .category-cards-row { padding: 0.8rem 0.2rem 1.4rem 0.2rem; margin: 0; gap: .85rem; }
 
     /* ── 8. Stop heavy animations on mobile */
     /* Kill pulsing NEW EPISODE badge */
@@ -12319,7 +12320,7 @@
   </section>
 
   <!-- CATEGORIES SECTION (POPULAR LANGUAGES & POPULAR GENRES) -->
-  <section id="categories" style="background:transparent;padding:1.5rem 0 2.5rem 0;">
+  <section id="categories" style="background:transparent;padding-top:2.5rem;padding-bottom:3rem;">
     <!-- Popular Languages -->
     <div style="margin-bottom:2.5rem;">
       <div class="section-header">
