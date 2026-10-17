@@ -923,17 +923,17 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 28px;
-      height: 27px;
+      width: 35px;
+      height: 34px;
       flex-shrink: 0;
-      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.7));
+      filter: drop-shadow(0 2px 7px rgba(0, 0, 0, 0.75));
       transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), filter 0.22s ease;
       user-select: none;
       vertical-align: middle;
     }
     .card-rt-badge.rt-fresh:hover .rt-tomato-wrap {
-      transform: scale(1.15);
-      filter: drop-shadow(0 3px 10px rgba(246, 26, 17, 0.6));
+      transform: scale(1.14);
+      filter: drop-shadow(0 3px 12px rgba(246, 26, 17, 0.65));
     }
     .rt-tomato-wrap .rt-tomato-img {
       width: 100%;
@@ -944,20 +944,20 @@
     }
     .rt-tomato-wrap .rt-tomato-val {
       position: absolute;
-      top: 60%;
+      top: 59%;
       left: 50%;
       transform: translate(-50%, -50%);
       color: #ffffff;
-      font-size: 0.60rem;
+      font-size: 0.62rem;
       font-weight: 900;
       font-family: 'Outfit', sans-serif;
-      letter-spacing: -0.2px;
+      letter-spacing: -0.3px;
       line-height: 1;
-      padding: 1px 3.5px;
-      background: rgba(0, 0, 0, 0.42);
-      border-radius: 4px;
+      padding: 1px 4px;
+      background: rgba(0, 0, 0, 0.52);
+      border-radius: 999px;
       box-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
-      text-shadow: 0 1px 2px #000000, 0 0 3px #000000;
+      text-shadow: 0 1px 2px #000000;
       pointer-events: none;
       white-space: nowrap;
     }
@@ -1016,11 +1016,13 @@
         padding: 0;
       }
       .rt-tomato-wrap {
-        width: 23px;
-        height: 22px;
+        width: 30px;
+        height: 29px;
       }
       .rt-tomato-wrap .rt-tomato-val {
-        font-size: 0.49rem;
+        font-size: 0.54rem;
+        padding: 1px 3px;
+        top: 59%;
       }
       .card-rt-badge .rt-val {
         font-size: 0.63rem;
@@ -1047,11 +1049,13 @@
         padding: 0;
       }
       .rt-tomato-wrap {
-        width: 21px;
-        height: 20px;
+        width: 27px;
+        height: 26px;
       }
       .rt-tomato-wrap .rt-tomato-val {
-        font-size: 0.45rem;
+        font-size: 0.49rem;
+        padding: 1px 2.5px;
+        top: 59%;
       }
       .card-rt-badge .rt-val {
         font-size: 0.58rem;
@@ -1115,14 +1119,15 @@
     body.device-tv .rt-tomato-wrap,
     .tv-mode .rt-tomato-wrap,
     .device-tv .rt-tomato-wrap {
-      width: 28px !important;
-      height: 27px !important;
+      width: 38px !important;
+      height: 37px !important;
     }
     body.tv-mode .rt-tomato-wrap .rt-tomato-val,
     body.device-tv .rt-tomato-wrap .rt-tomato-val,
     .tv-mode .rt-tomato-wrap .rt-tomato-val,
     .device-tv .rt-tomato-wrap .rt-tomato-val {
-      font-size: 0.60rem !important;
+      font-size: 0.68rem !important;
+      top: 59% !important;
     }
     body.tv-mode .card-rt-badge.rt-rotten,
     body.device-tv .card-rt-badge.rt-rotten,
@@ -2916,11 +2921,12 @@
       box-shadow: none;
     }
     .top10-top-badges .card-rt-badge.rt-fresh .rt-tomato-wrap {
-      width: 26px;
-      height: 25px;
+      width: 33px;
+      height: 32px;
     }
     .top10-top-badges .card-rt-badge.rt-fresh .rt-tomato-val {
-      font-size: 0.56rem;
+      font-size: 0.58rem;
+      top: 59%;
     }
 
     /* Type Tag (Movie / TV) in Top 10 meta row */
@@ -3072,11 +3078,12 @@
         font-size: 0.30rem;
       }
       .top10-top-badges .card-rt-badge.rt-fresh .rt-tomato-wrap {
-        width: 22px;
-        height: 21px;
+        width: 27px;
+        height: 26px;
       }
       .top10-top-badges .card-rt-badge.rt-fresh .rt-tomato-val {
-        font-size: 0.48rem;
+        font-size: 0.49rem;
+        top: 59%;
       }
       .top10-title {
         font-size: 0.78rem;
@@ -3164,12 +3171,13 @@
     }
     body.tv-mode .top10-top-badges .card-rt-badge.rt-fresh .rt-tomato-wrap,
     body.device-tv .top10-top-badges .card-rt-badge.rt-fresh .rt-tomato-wrap {
-      width: 32px !important;
-      height: 31px !important;
+      width: 38px !important;
+      height: 37px !important;
     }
     body.tv-mode .top10-top-badges .card-rt-badge.rt-fresh .rt-tomato-val,
     body.device-tv .top10-top-badges .card-rt-badge.rt-fresh .rt-tomato-val {
-      font-size: 0.65rem !important;
+      font-size: 0.68rem !important;
+      top: 59% !important;
     }
     body.tv-mode .top10-title,
     body.device-tv .top10-title {
